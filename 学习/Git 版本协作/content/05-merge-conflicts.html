@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>合并与冲突解决 · Git 版本协作</title>
+<meta name="description" content="Git 版本协作学习页 —— 合并与冲突解决：快进合并 vs 三方合并、冲突成因与标记、标准解决三步、合并策略与工具。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 gitGraph / flowchart 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f5f2eb;--paper-2:#fdfcf8;--ink:#211d16;--ink-soft:#4e4838;--muted:#8a8069;
+    --line:#e7e0cf;--line-2:#d6cdb6;
+    --orange:#c8442e;--orange-soft:#f9ece6;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#376a8f;--blue-soft:#e9f1f7;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#20221c;--code-ink:#e7e4cf;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(33,29,22,.04),0 12px 32px -20px rgba(33,29,22,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(200,68,46,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,242,235,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262a21;font-family:var(--font-mono);font-size:11px;color:#a9a689;border-bottom:1px solid #34382b}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #edd5c9;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#b13a27}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(33,29,22,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Git 版本协作 · <b id="navTitle">知识点标题</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">GIT · 协作</span></span>
+    <h1 id="pageTitle">合并与冲突解决</h1>
+    <p class="lead" id="pageLead">学会辨析 <b>快进合并（fast-forward merge）</b>与<b>三方合并（three-way merge）</b>，理解<b>为什么</b>只在「两边都改了同一处」时才产生冲突，并掌握<b>编辑 → add → commit</b> 的标准解决三步——以及回退的 <b>--abort</b> 与续跑的 <b>--continue</b>。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能说出快进合并与三方合并各自在什么条件下发生，并判断一条命令会走哪种。</li>
+      <li>能一句话点破冲突成因：<b>三方合并的两边都对同一文件的同一处做了修改</b>。</li>
+      <li>能读懂 <span class="mono">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span> / <span class="mono">=======</span> / <span class="mono">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span> 三个标记，并分清哪边是 ours、哪边是 theirs。</li>
+      <li>能按「编辑文件 → git add → git commit」三步解决一个真实冲突，并在需要时用 <b>--abort</b> 回退、用 <b>--continue</b> 继续。</li>
+      <li>能选择合适策略（<b>--no-commit</b>、ours/theirs、mergetool），并避免把未解决的标记提交进版本库。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">会用命令行；会创建/切换/合并分支（见上一节 <span class="mono">04-branches.html</span>）；理解「提交 commit」与「工作区 / 暂存区 / 版本库」三层模型；知道什么是「共同祖先 merge base」。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>合并的两种形态，与冲突到底从哪来</h2>
+  </section>
+
+  <section class="topic" id="merge-type">
+    <h3><span class="kno">小节</span>快进合并 vs 三方合并<span class="pt">先分清两种合并，才能理解冲突</span></h3>
+    <p>当你对 <span class="mono">feature</span> 分支执行 <span class="mono">git merge</span> 时，Git 的走向只有两种：<b>快进（fast-forward）</b>或<b>三方合并（three-way merge）</b>。它们由「目标分支有没有比共同祖先前进一步」决定。</p>
+    <ul>
+      <li><b>快进合并 Fast-forward</b>：目标分支 <span class="mono">main</span> 自共同祖先之后<b>没有产生新提交</b>，Git 只是把指针从 <span class="mono">main</span> 直接<b>往前平移到</b> <span class="mono">feature</span> 的顶端。因为没有任何分叉，所以<b>不可能产生冲突</b>，也不生成新的合并提交。</li>
+      <li><b>三方合并 Three-way merge（也叫 merge commit）</b>：两个分支<b>都从共同祖先各自前进了</b>，历史出现分叉。Git 以「合并基础 merge base」为参照，同时对比两边变化，尝试自动合并，必要时生成一个新的合并提交（merge commit）。<b>冲突只会出现在这种情况里。</b></li>
+    </ul>
+
+    <div class="gitgraph">
+      <div class="mermaid">
+gitGraph
+   commit id: "A"
+   commit id: "B"
+   branch feature
+   checkout feature
+   commit id: "C"
+   commit id: "D"
+   checkout main
+   merge feature id: "快进合并"
+      </div>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted)">图 1 · 快进合并：main 没有新提交，指针从 A 直接平移到 D，不产生合并提交。</p>
+
+    <div class="gitgraph">
+      <div class="mermaid">
+gitGraph
+   commit id: "A"
+   branch feature
+   checkout feature
+   commit id: "B"
+   checkout main
+   commit id: "C"
+   merge feature id: "三方合并"
+      </div>
+    </div>
+    <p style="text-align:center;font-size:13px;color:var(--muted)">图 2 · 三方合并：main 与 feature 都从 A 各自前进，需要合并提交来衔接两组修改——冲突的温床。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>git checkout main
+git merge feature        # 若无分叉 → fast-forward；若有分叉且可自动合并 → merge commit；否则 → 冲突
+
+# 强制生成合并提交（即使可快进也走三方合并，保留分支历史）
+git merge --no-ff feature</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>快速判断口诀：</b>「只有两边<b>都在共同祖先之后改过</b>，Git 才需要动用三方合并；也<b>只有三方合并</b>这一种还可能遇到冲突。快进永远不会冲突。」</p></div>
+  </section>
+
+  <section class="topic" id="conflict-appear">
+    <h3><span class="kno">小节</span>冲突的成因与冲突标记含义<span class="pt">两边都改了同一处，Git 无法替你决定</span></h3>
+    <p>三方合并时，Git 以<b>合并基础（merge base，即共同祖先）</b>为起点，把 <span class="mono">ours</span>（你现在所在的 HEAD 分支）与 <span class="mono">theirs</span>（被合并进来的分支）各自产生的<b>差异</b>叠加起来。只要两边改的是<b>不同文件</b>或<b>同一文件的不同部分</b>，Git 都能自动合并。</p>
+    <ul>
+      <li><b>冲突（conflict）只在一种情形发生</b>：两个分支都<b>修改了同一个文件里相同的行</b>（或一方修改、另一方删除了该文件）。Git 不知道该保留哪份，只好把决定权交回给你。</li>
+      <li>一旦冲突，Git 会<b>暂停合并</b>，修改<b>工作区里的文件</b>并写入<b>冲突标记</b>，等你手动处理后再次提交。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 合并产生冲突时的终端输出
+$ git merge feature
+Auto-merging src/app.js
+CONFLICT (content): Merge conflict in src/app.js
+Automatic merge failed; fix conflicts and then commit the result.</code></pre>
+    </div>
+
+    <p>发生冲突后，打开那个文件会看到如下的<b>冲突标记 conflict markers</b>：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>src/app.js</div>
+      <pre><code>function greet(name) {
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+  console.log("你好，" + name);
+=======
+  console.log("Hello, " + name);
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature
+}</code></pre>
+    </div>
+
+    <p><b>每个标记的含义：</b></p>
+    <table class="tbl">
+      <tr><th>标记</th><th>含义</th><th>说明</th></tr>
+      <tr><td class="mono">&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</td><td>ours · 当前分支这侧</td><td>从该行到 <span class="mono">=======</span> 之间，是你<b>现在的分支</b>（HEAD）保留的内容。</td></tr>
+      <tr><td class="mono">=======</td><td>分界线</td><td>把上方的 ours 与下方的 theirs 隔开。</td></tr>
+      <tr><td class="mono">&gt;&gt;&gt;&gt;&gt;&gt;&gt; feature</td><td>theirs · 待合并分支这侧</td><td>从 <span class="mono">=======</span> 到该行之间，是<b>被合并进来的分支</b>（这里叫 feature）的内容。</td></tr>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>不要直接提交：</b>文件里残留 <span class="mono">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span>、<span class="mono">=======</span>、<span class="mono">&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span> 就提交，等于把「未决定的冲突」当成最终代码写进了版本库。解决的第一步永远是<b>把标记删掉、留下最终想要的代码</b>。</p></div>
+    <div class="callout warn"><span class="i">i</span><p><b>更容易看清冲突：</b>用 <span class="mono">git status</span> 会列出「<span class="mono">both modified</span>」的文件；用 <span class="mono">git diff</span> 可查看差异；也可以让编辑器或 <span class="mono">git mergetool</span> 高亮两边内容。</p></div>
+  </section>
+
+  <section class="topic" id="resolve">
+    <h3><span class="kno">小节</span>解决冲突的标准流程：编辑 → add → commit<span class="pt">三步收尾，外加 abort / continue</span></h3>
+    <p>解决冲突只有三步：<b>① 编辑文件消除标记 → ② git add 暂存 → ③ git commit 提交</b>。整个过程仍是普通的 Git 提交流程，只是多了一步「人类做决定」。</p>
+    <ol>
+      <li><b>编辑（edit the file）</b>：打开冲突文件，删掉三个标记，保留你真正想要的那一段代码（可以是 ours、theirs，或手动合成一份更好的）。对每个冲突文件都这么做。</li>
+      <li><b>暂存（git add）</b>：把处理完的文件加入暂存区，告诉 Git「这个文件我已解决」。用 <span class="mono">git add &lt;file&gt;</span>。</li>
+      <li><b>提交（git commit）</b>：所有冲突都解决并 add 后，执行 <span class="mono">git commit</span>。它会带上 Git 生成的合并提交信息。</li>
+    </ol>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>git status                       # 查看哪些文件冲突（both modified）
+git add src/app.js               # 步骤②：把解决好的文件标记为已解决
+git commit                       # 步骤③：完成合并，生成合并提交
+
+# 或者用 --continue 直接继续（等价于跳过手动 commit 的第二问）
+git commit --no-edit             # 若想直接用默认的合并提交信息</code></pre>
+    </div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># ===== 后悔药：放弃这次合并 =====
+git merge --abort                # 回到合并开始前的状态，丢弃所有冲突改动
+
+# ===== 解决后，用 --continue 继续 =====
+git add src/app.js
+git merge --continue             # 打开编辑器让你确认合并提交信息，然后提交</code></pre>
+    </div>
+
+    <p><b>两条「终止/续跑」命令的对照：</b></p>
+    <table class="tbl">
+      <tr><th>命令</th><th>作用</th><th>什么时候用</th></tr>
+      <tr><td class="mono">git merge --abort</td><td>彻底放弃本次合并，把工作区、暂存区还原到合并前</td><td>想反悔、冲突太多、先退回再说。</td></tr>
+      <tr><td class="mono">git merge --continue</td><td>确认所有冲突已解决且已 add，继续完成合并并提交</td><td>全部加完 <span class="mono">git add</span> 后，用它代替手打 <span class="mono">git commit</span>。</td></tr>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>一条铁律：</b><span class="mono">git add</span> 是「<b>我已解决这个文件</b>」的确认，<span class="mono">git commit</span> 是「<b>这次合并完成</b>」的收尾。只要还有任何文件没 add，<span class="mono">git commit</span> 就不会以合并提交终结。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>小心：</b>合并进行中（包括冲突中）不要乱切换分支、不要 <span class="mono">git reset --hard</span>，否则可能丢掉尚未合并的工作区改动。拿不准就先 <span class="mono">git merge --abort</span>。</p></div>
+  </section>
+
+  <section class="topic" id="merge-tools">
+    <h3><span class="kno">小节</span>合并策略与常用工具<span class="pt">--no-commit、ours/theirs、mergetool</span></h3>
+    <p>合并并不是只有「冲突就手动改」一种玩法。根据场景，可以调整合并<b>如何执行</b>（策略）与<b>要不要立刻提交</b>，还能借用冲突标记里的 <span class="mono">ours</span>/<span class="mono">theirs</span> 直接选取一侧，或调用可视化工具。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>git merge --no-commit feature      # 合并但不自动提交，便于先检查再 commit
+git merge --no-ff feature          # 强制走三方合并、生成合并提交（即使能快进）
+git merge -s ours feature          # 合并策略：无脑保留当前分支内容，丢弃对方改动
+git merge -s recursive -X ours feature    # -X 偏好：遇冲突时直接选 ours 這侧
+git mergetool                       # 打开可视化工具逐文件解决冲突</code></pre>
+    </div>
+
+    <p><b>常用策略与偏好速查：</b></p>
+    <table class="tbl">
+      <tr><th>语法</th><th>作用</th><th>典型场景</th></tr>
+      <tr><td class="mono">--no-commit</td><td>只把合并结果放到工作区/暂存区，不生成提交</td><td>想 review 完改动再提交。</td></tr>
+      <tr><td class="mono">--no-ff</td><td>禁止快进，强制产生一个合并提交</td><td>想保留特性分支的完整历史形状。</td></tr>
+      <tr><td class="mono">-s ours</td><td>整个合并结果直接采用当前分支，丢弃对方</td><td>确定以本分支为准（如已先合过对方）。</td></tr>
+      <tr><td class="mono">-X ours / -X theirs</td><td>仅对<b>发生冲突的部分</b>自动选择某一侧，其余仍自动合并</td><td>小冲突想省事，「选我 / 选它」。</td></tr>
+      <tr><td class="mono">mergetool</td><td>调用图形化/三方对比工具逐文件解决</td><td>冲突复杂、想看左右并排对比。</td></tr>
+    </table>
+
+    <p>注意 <span class="mono">-s ours</span> 与 <span class="mono">-X ours</span> 的区别：前者是<b>整份合并结果都取自己</b>，后者是<b>只在冲突点选自己、其余照常自动合并</b>。<span class="mono">--ours</span>/<span class="mono">--theirs</span> 作为 <span class="mono">git checkout</span> 的修饰符则是「<b>在工作区直接取某一侧的版本</b>」——例如想整个文件都要对方的版本：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>git checkout --ours src/app.js     # 整个文件用当前分支（HEAD）版本
+git checkout --theirs src/app.js   # 整个文件用被合并分支版本
+git add src/app.js                 # 选完仍要 add + commit 才完成合并</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">i</span><p><b>界外提示：</b>合并策略与 <span class="mono">ours/theirs</span> 是「<b>偷懒选项</b>」，适合确信该取哪侧时用；一旦两边都写了关键代码，粗暴选一边会<b>默默丢弃别人的工作</b>。复杂冲突仍建议打开文件逐段人工合成。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>切勿把冲突带上线：</b>项目很常见的一道 CI 红线就是「禁止提交带 <span class="mono">&lt;&lt;&lt;&lt;&lt;&lt;&lt;</span> 标记的文件」。解决到 0 个冲突、删干净所有标记，再 <span class="mono">git add</span>、<span class="mono">git commit</span>。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e7e0cf" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#c8442e" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>故意制造一次冲突：新建两个分支，分别改动 <span class="mono">README.md</span> 的<b>同一行</b>，然后合并。观察冲突标记，练习用「编辑 → add → commit」解决，并用 <span class="mono">git log --graph</span> 确认产生了合并提交。</li>
+      <li>重现一次 <span class="mono">git merge --abort</span>：制造冲突后先 abort，确认工作区回到合并前状态，再重新合并解决一次。</li>
+      <li>对比 <span class="mono">-s ours</span> 与 <span class="mono">-X ours</span>：用同一个冲突场景各试一次，说明「整份取自己」与「只在冲突点取自己」的结果差异。</li>
+      <li>用 <span class="mono">git merge --no-commit</span> 合并一个<b>不会冲突</b>的分支，先查看暂存区改动，再手动 <span class="mono">git commit</span>，体会它与默认自动提交的不同。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="05-merge-conflicts" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Git 版本协作」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "05-merge-conflicts",           // 本页知识点 id（= 大纲里的 id）
+  title: "合并与冲突解决",
+  eyebrow: "GIT · 协作",
+  prev: "04-branches.html",           // 上一节文件名
+  next: "06-remotes.html",            // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"你在 main 分支提交了两个新提交之后，想把一个『从旧提交拉出的 feature 分支』合并进来，而这个 feature 也前进了一两个提交。Git 会走哪种合并？",
+    opts:["快进合并（fast-forward），不产生合并提交","三方合并（three-way merge），产生合并提交","一定产生冲突","直接报错拒绝合并"],
+    ans:1,
+    exp:"因为 main 和 feature 都从共同祖先各自前进了，发生分叉，Git 需要三方合并（merge commit）来衔接两组修改。此场景<b>可能</b>冲突，但不是必然；「一定冲突」「直接报错」都是错的。"
+  },
+  {
+    type:"quiz",
+    q:"以下关于“冲突解决前要先知道的成因”的说法，哪句最准确？",
+    opts:["只要合并两个分支就一定会冲突","只有三方合并、且两边都改了同一处（同一文件的同一行）时才可能冲突","快进合并也会产生冲突","冲突指的是网络连接失败"],
+    ans:1,
+    exp:"冲突只在「三方合并」这种分叉场景中出现，且必须两边都改到了同一文件的同一行（或一改一删）。快进合并无双分叉、无交集，永远不会冲突。"
+  },
+  {
+    type:"quiz",
+    q:"打开冲突文件看到下面内容，其中 `&gt;&gt;&gt;&gt;&gt;&gt;&gt; login` 这一行下方（即 1-2 行）属于哪一侧？\n\n&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD\n  欢迎回来\n=======\n  Welcome back\n&gt;&gt;&gt;&gt;&gt;&gt;&gt; login",
+    opts:["ours（当前 HEAD 分支）","theirs（被合并进来的 login 分支）","都不会保留","这一行是注释"],
+    ans:0,
+    exp:"`&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD` 到 `=======` 之间是 ours，即当前分支内容“欢迎回来”；`=======` 之后到 `&gt;&gt;&gt;&gt;&gt;&gt;&gt; login` 之间才是 theirs（login 分支）的内容“Welcome back”。"
+  },
+  {
+    type:"quiz",
+    q:"发生冲突后，你手动改好了文件并删掉了所有 `&lt;&lt;&lt;&lt;&lt;&lt;&lt;`/`=======`/`&gt;&gt;&gt;&gt;&gt;&gt;&gt;` 标记。下面哪组命令能正确收尾这次合并？",
+    opts:["git commit → git merge --continue","git add 文件 → git commit","git merge --abort → git checkout main","只在文件里改好即可，什么都不用执行"],
+    ans:1,
+    exp:"标准三步：编辑文件删除标记 → `git add <file>` 暂存 → `git commit` 生成合并提交。`--continue` 也要先 add 才能继续；`--abort` 是放弃而非完成。"
+  },
+  {
+    type:"quiz",
+    q:"你刚执行 `git merge feature` 触发冲突，但突然想先把这次合并全部作废、回到合并前的干净状态。最合适的是？",
+    opts:["git mergetool","git merge --continue","git merge --abort","手动删除冲突标记后 git commit"],
+    ans:2,
+    exp:"`git merge --abort` 会放弃本次合并并把工作区/暂存区还原到合并前。`--continue` 是继续完成，`mergetool` 是解决工具，删除标记后 commit 则是「完成」而非「作废」。"
+  },
+  {
+    type:"quiz",
+    q:"关于 `-s ours` 与 `-X ours` 的区别，正确描述是？",
+    opts:["两者完全等价","`-s ours` 只在冲突点选自己；`-X ours` 整份合并都取自己","`-s ours` 整份合并结果都采用当前分支，丢弃对方；`-X ours` 只在冲突点选自己","`-X ours` 会强制快进合并"],
+    ans:2,
+    exp:"`-s ours`（策略 ours）把<b>整份结果</b>指向当前分支，相当于整体丢弃对方；`-X ours`（recursive 策略的偏好参数）只在<b>发生冲突的那部分</b>自动选 ours，其余照常自动合并。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：请说明合并冲突产生的根本原因，并解释 `&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD`、`=======`、`&gt;&gt;&gt;&gt;&gt;&gt;&gt; branch` 三个标记的分别含义，再说出解决的标准三步与 `--abort`/`--continue` 各自用途。",
+    opts:["我能完整讲清成因、三标记含义、三步流程与 abort/continue","我能说清成因与三标记，但 abort/continue 说得不全","我只能大概说说，细节掌握不牢"],
+    ans:0,
+    exp:"参考表述：冲突成因——三方合并时两边都改了同一处（同一文件同一行）以致 Git 无法取舍。标记：`&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD`（ours/当前分支）→`=======`（分界）→`&gt;&gt;&gt;&gt;&gt;&gt;&gt; branch`（theirs/待合并分支）。标准三步：编辑文件删标记→`git add`→`git commit`。`--abort` 放弃回退；`--continue` 在解决并 add 后继续完成合并。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:git-version-collab:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Git 版本协作";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

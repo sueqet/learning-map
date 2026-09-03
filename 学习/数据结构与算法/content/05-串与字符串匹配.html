@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>串与字符串匹配 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 串与字符串匹配：学习目标、知识点讲解、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 05 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">串与字符串匹配</h1>
+    <p class="lead" id="pageLead">从串的底层存储、朴素匹配到 <b>KMP</b> 与<b>字符串哈希</b>，掌握模式匹配的核心思想与线性时间算法——这是笔试与面试的高频考点。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能说出串（String）的定义、串长、子串、子串位置等基本术语，并区分定长顺序存储、堆分配存储与块链存储。</li>
+      <li>学完后你能实现朴素字符串匹配，并分析它的最坏时间复杂度为 O(n·m)。</li>
+      <li>学完后你能手工推导任意模式串的<b>前缀函数 next 数组</b>（如 <span class="mono">"ababaca"</span>→<span class="mono">[0,0,1,2,3,0,1]</span>），并据此实现 KMP 算法。</li>
+      <li>学完后你能用 next 数组找到模式串的<b>所有出现位置</b>，并判断一个串的<b>最小循环节</b>（LeetCode 459）。</li>
+      <li>学完后你能用滚动哈希（Rabin-Karp）在 <b>O(1)</b> 内求任意子串哈希，并理解单哈希可能碰撞、用双哈希降低碰撞风险。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">会一门编程语言（文中以 Python 为主、C++ 思路交叉说明）；熟悉数组 / 列表、循环、切片与字符串基本操作；对「时间复杂度、最坏 / 平均情形」有基本认识；了解「两个字符串逐字符比较」的朴素思路。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区 —— 锚点 id 与「知识点清单」保持一致：
+       str-basic / str-naive / str-kmp / str-kmpapp / str-hash / str-tips
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">05</span>串的存储与朴素匹配<br>（串的基本概念 → 逐字符比对）</h2>
+  </section>
+
+  <!-- 知识点 1：串的基本概念与存储 -->
+  <section class="topic" id="str-basic">
+    <h3><span class="kno">知识点</span>串的基本概念与存储<span class="pt">str-basic · 基础</span></h3>
+    <p><strong>串（String）</strong>是由零个或多个字符组成的<strong>有限序列</strong>，记作 <span class="mono">S = 'a₁a₂…aₙ'</span>。它和数组、链表一样是基础线性结构，但操作对象是「字符」，且绝大多数实用场景下我们要做的是<strong>查找子串、比较与变换</strong>，而不是插入删除，因此它衍生出一套独立的算法体系（匹配、哈希、回文等）。</p>
+    <ul>
+      <li><b>串长</b>：串中字符的个数；<b>空串</b>串长为 0；<b>空格串</b>只含空格字符（串长不为 0，容易与空串混淆）。</li>
+      <li><b>子串（substring）</b>：串中任意连续字符组成的子序列；<b>主串</b>是包含子串的原始串。</li>
+      <li><b>子串位置</b>：子串在主串中第一次出现时，子串首字符在主串中的下标（有的教材从 1 开始，代码里从 0 开始）。</li>
+      <li><b>模式匹配（pattern matching）</b>：在主串中查找一个子串（又称<strong>模式串 pattern</strong>）的所有 / 首次出现位置，是本模块的核心问题。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>string_basics.py</div>
+      <pre><code># 串的存储：Python 的 str 是「不可变」的连续数组，内部按 Unicode 编码存放
+s = "数据结构"          # 串（String），len = 4
+n = len(s)              # 串长：4
+sub = s[1:3]            # 子串 substring（切片 [1,3)：取下标 1,2）→ "据结"
+pos = s.find("据")      # 子串首次出现位置：1；找不到返回 -1
+print(s[0], sub, pos)   # 数 据结 1
+
+# 三种常见存储结构（理解即可，代码角度不太需要手写）：
+# 1) 定长顺序存储：固定长度数组，超长会截断，适合长度已知的场合
+# 2) 堆分配存储：动态申请内存（C 的 malloc / C++ 的 string），长度可变 —— 最常用
+# 3) 块链存储：以「块」为结点的链表，适合频繁插入删除，但定位第 i 个字符是 O(n)</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>易错点：</b>空串（""，长度为 0）≠ 空格串（" "，长度为 1）；子串是<b>连续</b>的一段，「子序列」不要求连续，两者别混。做题时注意题目说的下标是从 0 还是从 1 开始。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>串是「以字符为元素的线性表」，但它的主要操作是<strong>求子串 / 匹配</strong>，所以复杂度分析要围绕「比较了多少次字符」来展开。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">求串长</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">定位子串</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">存储方式</div><div class="v">连续 / 堆 / 块链</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 2：朴素匹配算法 -->
+  <section class="topic" id="str-naive">
+    <h3><span class="kno">知识点</span>朴素匹配算法<span class="pt">str-naive · 基础</span></h3>
+    <p><strong>朴素匹配（Brute-Force / Naive）</strong>是最直观的思路：从主串的每个位置 <span class="mono">i</span> 出发，与模式串逐字符比较；一旦失配，主串指针回退到 <span class="mono">i+1</span>，模式串指针回到 0，重新开始。实现极简单，但最坏情况下会做 O(n·m) 次字符比较。</p>
+    <ul>
+      <li>适合模式串很短、或主串与模式串匹配容易成功的场景；在大多数随机文本上平均接近 O(n+m)。</li>
+      <li>它的「笨」在于失配后信息被浪费：已经比过的字符没被利用，主串指针也不断回退。</li>
+      <li>它是理解 KMP 的跳板——KMP 正是解决了「失配后怎么少比较」的问题。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>naive_match.py</div>
+      <pre><code>def naive_contains(text, pat):
+    """朴素模式匹配：在主串 text 中找模式串 pat，返回首次出现下标，找不到返回 -1"""
+    n, m = len(text), len(pat)
+    if m == 0:
+        return 0                    # 空模式串视为出现在最前面
+    for i in range(n - m + 1):      # 枚举主串中的候选起点（最多 n-m+1 个）
+        j = 0
+        while j &lt; m and text[i + j] == pat[j]:   # 逐字符比对直到失配或模式匹配完
+            j += 1
+        if j == m:                  # 模式串全部匹配成功
+            return i
+    return -1
+
+print(naive_contains("abababaca", "ababaca"))   # 输出 2
+print(naive_contains("hello", "xyz"))           # 输出 -1</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>最坏情形（必考）：</b>当主串与模式串高度相似时，如 <span class="mono">text="aaaa…a"</span>、<span class="mono">pat="aaa…ab"</span>，每次都要比到模式的最后一个字符才失配，总共约 n·m 次比较，故最坏<span class="mono">O(n·m)</span>。别误写成 O(n)。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>朴素匹配的代价来自「每次失配后主串指针回退 <span class="mono">i+1</span>、模式指针归零」。若能让模式串<strong>「聪明地滑动」</strong>而不是从头再来，就能把复杂度降到线性——这就是下一节 KMP 的动机。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">最坏时间</div><div class="v">O(n·m)</div></div>
+      <div class="cx"><div class="k">平均时间</div><div class="v">O(n+m)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 进阶</div>
+    <h2><span class="num">05</span>KMP 算法与字符串哈希<br>（线性匹配 → 概率性匹配）</h2>
+  </section>
+
+  <!-- 知识点 3：KMP 算法与 next 数组 -->
+  <section class="topic" id="str-kmp">
+    <h3><span class="kno">重点</span>KMP 算法与 next（前缀函数）数组<span class="pt">str-kmp · 高频考点</span></h3>
+    <p><strong>KMP 算法</strong>（Knuth–Morris–Pratt，1977）把朴素匹配的"每次从头再来"优化为"<strong>按已匹配信息滑动</strong>"。核心是：失配时<strong>主串指针不回退</strong>，只把模式串向右滑动到「已经匹配好的最长相等真前缀」之后——靠提前算好的 <span class="mono">next</span>（也叫<strong>前缀函数 prefix function</strong>，记为 π）数组来指导回退。</p>
+
+    <p><strong>next 的定义（前缀函数）：</strong><span class="mono">π[i] = p[0..i]</span> 的最长相等<strong>真前缀</strong>（不等于整串本身）的长度。它刻画了「模式串失配处的前缀里，有多长一部分和串的开头相同」。下面以 <span class="mono">p = "ababaca"</span> 手工推导：</p>
+
+    <table class="tbl">
+      <thead><tr><th>下标 i</th><th>字符</th><th>前缀 p[0..i]</th><th>最长相等真前缀</th><th>next[i]</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">0</td><td class="mono">a</td><td class="mono">a</td><td class="mono">—（无真前缀）</td><td class="mono">0</td></tr>
+        <tr><td class="mono">1</td><td class="mono">b</td><td class="mono">ab</td><td class="mono">—</td><td class="mono">0</td></tr>
+        <tr><td class="mono">2</td><td class="mono">a</td><td class="mono">aba</td><td class="mono">a</td><td class="mono">1</td></tr>
+        <tr><td class="mono">3</td><td class="mono">b</td><td class="mono">abab</td><td class="mono">ab</td><td class="mono">2</td></tr>
+        <tr><td class="mono">4</td><td class="mono">a</td><td class="mono">ababa</td><td class="mono">aba</td><td class="mono">3</td></tr>
+        <tr><td class="mono">5</td><td class="mono">c</td><td class="mono">ababac</td><td class="mono">—</td><td class="mono">0</td></tr>
+        <tr><td class="mono">6</td><td class="mono">a</td><td class="mono">ababaca</td><td class="mono">a</td><td class="mono">1</td></tr>
+      </tbody>
+    </table>
+
+    <p><strong>如何求 next：</strong>用递推。设求到 <span class="mono">i</span> 时当前最长真前缀长度为 <span class="mono">k</span>。若 <span class="mono">p[i]==p[k]</span>，则 <span class="mono">k+1</span>；否则回退到 <span class="mono">k = next[k-1]</span>（次长的真前缀）继续尝试，直到 <span class="mono">k=0</span> 或匹配成功。这一步就是"用已经算好的 next 往回找"。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>kmp.py</div>
+      <pre><code>def get_next(p):
+    """前缀函数：next[i] = p[0..i] 的最长相等真前缀长度（kmp_next）"""
+    m = len(p)
+    nxt = [0] * m
+    k = 0                        # 已匹配的最长真前缀长度
+    for i in range(1, m):
+        while k &gt; 0 and p[i] != p[k]:
+            k = nxt[k - 1]       # 失配：顺着 next 回退到次长真前缀
+        if p[i] == p[k]:
+            k += 1
+        nxt[i] = k
+    return nxt
+
+def kmp_search(text, pat):
+    """返回 pat 在 text 中首次出现的下标；找不到返回 -1"""
+    n, m = len(text), len(pat)
+    if m == 0:
+        return 0
+    nxt = get_next(pat)
+    j = 0                        # 模式串当前已匹配长度
+    for i in range(n):           # 主串指针只前进，绝不回退
+        while j &gt; 0 and text[i] != pat[j]:
+            j = nxt[j - 1]       # 失配回溯：跳过不可能的可能
+        if text[i] == pat[j]:
+            j += 1
+        if j == m:               # 匹配成功
+            return i - m + 1
+    return -1
+
+pat = "ababaca"
+print("next 数组:", get_next(pat))                       # [0, 0, 1, 2, 3, 0, 1]
+print("匹配位置:", kmp_search("abababaca", pat))        # 2</code></pre>
+    </div>
+
+    <p><strong>用 "ababaca" 在 "abababaca" 里走一遍匹配：</strong>先比 <span class="mono">text[0..4]=ababa</span> 与模式第 0..4 位全部相等，主串指针到 <span class="mono">i=5</span>；此时 <span class="mono">text[5]=b</span>、<span class="mono">pat[5]=c</span> 失配，按 <span class="mono">j=next[4]=3</span> 回退（把模式串右滑 2 格），从 <span class="mono">pat[3]=b</span> 继续比对；<span class="mono">text[5]=b</span> 正好匹配，之后 <span class="mono">text[6..8]=aca</span> 与 <span class="mono">pat[4..6]</span> 全部相等，最终命中下标 2。整个过程主串只扫了一遍。</p>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>易错点：</b>① 有的教材把 next 定义成 <span class="mono">next[0]=-1</span>（严蔚敏《数据结构》那种"失配时 j 移到 next[j]"的约定），与本文"前缀函数 next[i] 记长度、失配时 j 移到 next[j-1]"的写法不同，<b>考试要先看清题目用的是哪种约定</b>。② 回退是 <span class="mono">j = nxt[j-1]</span>（不是 <span class="mono">nxt[j]</span>），下标别写错。③ 求 next 是用 <b>模式串自身匹配自身</b>，与主串无关。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>KMP 的两条"不回退"——<b>主串指针绝不回退</b>，模式串的回退由 next 精确指导。由于每个字符最多被比较两次（匹配顺利时 +1，失败时被 next 跳过），总复杂度 <span class="mono">O(n+m)</span>。对应 <strong>LeetCode 28「找出字符串中第一个匹配项的下标」</strong>。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">预处理</div><div class="v">O(m)</div></div>
+      <div class="cx"><div class="k">匹配</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">总时间</div><div class="v">O(n+m)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(m)</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 4：KMP 的应用与变体 -->
+  <section class="topic" id="str-kmpapp">
+    <h3><span class="kno">知识点</span>KMP 的应用与变体<span class="pt">str-kmpapp · 进阶</span></h3>
+    <p>KMP 不止能找"首次出现"。只要在匹配成功后<strong>不回零、而是按 next 回退</strong>继续，就能不重扫主串地找到<strong>所有出现位置（含重叠）</strong>；此外，前缀函数还能揭示字符串的<strong>周期性</strong>，用于判断/求出最小循环节。</p>
+    <ul>
+      <li><b>所有出现位置：</b>匹配成功（<span class="mono">j == m</span>）后记录起点，再令 <span class="mono">j = nxt[m-1]</span> 继续，即可捕捉重叠出现。</li>
+      <li><b>最小循环节（period）：</b>对串 <span class="mono">s</span>，令 <span class="mono">unit = n - π[n-1]</span>。若 <span class="mono">n % unit == 0</span>，则 <span class="mono">s[:unit]</span> 就是最小重复单元；否则 <span class="mono">s</span> 不是某个单位串的完全重复。</li>
+      <li><b>字符串周期性（KMP 的著名应用）：</b>正是利用"最长相等真前缀"与"剩余部分是循环节长度"的关系。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>kmp_apps.py</div>
+      <pre><code>def get_next(p):
+    m = len(p); nxt = [0] * m; k = 0
+    for i in range(1, m):
+        while k &gt; 0 and p[i] != p[k]:
+            k = nxt[k - 1]
+        if p[i] == p[k]:
+            k += 1
+        nxt[i] = k
+    return nxt
+
+def kmp_all(text, pat):
+    """找出所有出现位置（含重叠）"""
+    n, m = len(text), len(pat)
+    if m == 0:
+        return list(range(n + 1))
+    nxt, j, res = get_next(pat), 0, []
+    for i in range(n):
+        while j &gt; 0 and text[i] != pat[j]:
+            j = nxt[j - 1]
+        if text[i] == pat[j]:
+            j += 1
+        if j == m:
+            res.append(i - m + 1)   # 记录起点
+            j = nxt[m - 1]          # 关键：回溯到最长真前缀，继续找（可重叠）
+    return res
+
+def min_period(s):
+    """若 s 可由某单位串重复构成，返回最小循环节；否则返回 None"""
+    n = len(s)
+    nxt = get_next(s)
+    unit = n - nxt[n - 1]
+    return s[:unit] if n % unit == 0 else None
+
+print(kmp_all("abababaca", "ababaca"))   # [2]
+print(kmp_all("aaaaa", "aa"))            # [0, 1, 2, 3]（重叠出现全部找到）
+print(min_period("ababab"))              # ab
+print(min_period("ababaca"))             # None（无法完全重复）</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>对应题目：</b>KMP 求最小循环节 → <strong>LeetCode 459「重复的子字符串」</strong>（<span class="mono">n % (n - π[n-1]) == 0</span>）；找所有出现位置 → 常出现在面试手写题。记住公式：<span class="mono">unit = n - π[n-1]</span>，且必须满足 <span class="mono">n % unit == 0</span>。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>易错点：</b>「循环节」公式必须判整除；否则像 <span class="mono">"ababcababcx"</span> 这种即使 <span class="mono">π</span> 很大也不算循环串。找所有位置时成功后要 <span class="mono">j = nxt[m-1]</span> 而不是清零，否则会漏掉重叠出现。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">找所有出现</div><div class="v">O(n+m)</div></div>
+      <div class="cx"><div class="k">判循环节</div><div class="v">O(m)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(m)</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 5：字符串哈希 -->
+  <section class="topic" id="str-hash">
+    <h3><span class="kno">知识点</span>字符串哈希（滚动哈希 / 双哈希）<span class="pt">str-hash · 概率性算法</span></h3>
+    <p><strong>字符串哈希</strong>把字符串看成一个大整数再取模，从而把"比较两个串是否相等"变成"比较两个数是否相等"。最常用的是<strong>多项式哈希（滚动哈希，Rabin–Karp 思想）</strong>：令 <span class="mono">hash(s) = Σ ord(s[i])·BASE^i mod MOD</span>。预处理前缀哈希后，任意子串 <span class="mono">s[l..r)</span> 的哈希可在 <b>O(1)</b> 内得到，配合<strong>双哈希</strong>可显著降低碰撞。</p>
+    <ul>
+      <li><b>前缀哈希：</b><span class="mono">h[i] = s[0..i-1]</span> 的哈希值；<span class="mono">h[i+1] = (h[i]·BASE + ord(s[i])) % MOD</span>。</li>
+      <li><b>子串哈希：</b><span class="mono">hash(l,r) = (h[r] − h[l]·BASE^(r−l)) % MOD</span>（是 O(1) 的关键）。</li>
+      <li><b>BASE 的选取：</b>常用 <span class="mono">131 / 13331</span>（比字符集大即可，经典经验值），MOD 用大质数如 <span class="mono">10^9+7 / 10^9+9</span>。</li>
+      <li><b>双哈希：</b>用两个不同 (BASE, MOD)，两个哈希都相等才认为相等，把碰撞概率压到约 <span class="mono">1/MOD²</span>。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>string_hash.py</div>
+      <pre><code>BASE = 131
+MOD = 10**9 + 7
+
+def build_prefix(s):
+    """h[i] = s[0..i-1] 的哈希；pw[i] = BASE^i"""
+    h = [0] * (len(s) + 1)
+    pw = [1] * (len(s) + 1)
+    for i, ch in enumerate(s):
+        h[i + 1] = (h[i] * BASE + ord(ch)) % MOD
+        pw[i + 1] = (pw[i] * BASE) % MOD
+    return h, pw
+
+def sub_hash(h, pw, l, r):
+    """子串 s[l..r) 的哈希值，O(1)"""
+    return (h[r] - h[l] * pw[r - l]) % MOD
+
+s = "abababaca"
+h, pw = build_prefix(s)
+# 比较 "abab" 与 "abac" 是否相等：比较区间哈希即可
+print(sub_hash(h, pw, 0, 4) == sub_hash(h, pw, 2, 6))   # "abab" vs "abab" -> True
+
+# 双哈希：用两套 (BASE, MOD)，都相等才判定相等，碰撞率 ≈ 1/MOD^2
+BASE2, MOD2 = 13331, 10**9 + 9
+h2, pw2 = build_prefix(s)   # 用同样的 build_prefix 换个模数即可
+equal = (sub_hash(h, pw, 0, 4) == sub_hash(h, pw, 2, 6)
+         and sub_hash(h2, pw2, 0, 4) == sub_hash(h2, pw2, 2, 6))</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>易错点：</b>① 取模后可能出现<strong>哈希碰撞</strong>（两串不同但哈希值相同），<b>单哈希不能保证判等</b>，严谨做法是双哈希或直接比对。② <span class="mono">(h[r] − h[l]·pw[r−l])</span> 减法后要加 <span class="mono">MOD</span> 再取模，避免负数。③ 子串哈希是"末尾对齐"的，区间必须写成 <span class="mono">[l, r)</span> 半开半闭。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>多项式哈希的本质是「把串看作 BASE 进制整数」。一旦能 O(1) 求任意子串哈希，判断回文、比较子串、滑动窗口匹配等都能大幅提速。<b>Rabin-Karp</b> 就靠它把平均匹配降到 O(n+m)。物化此类题：<b>LeetCode 187「重复的 DNA 序列」</b>、<b>LeetCode 1044「最长重复子串」</b>。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">预处理</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">子串哈希</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">风险</div><div class="v">碰撞（双哈希可缓解）</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 6：常用字符串处理技巧 -->
+  <section class="topic" id="str-tips">
+    <h3><span class="kno">知识点</span>常用字符串处理技巧<span class="pt">str-tips · 综合</span></h3>
+    <p>面试里字符串题往往不是"纯匹配"，而是<strong>各种技巧的组合</strong>。掌握下面几类范式，很多题就能秒拼出来：</p>
+    <ul>
+      <li><b>双指针 / 左右指针：</b>比对称性、去空格、原地反转常用。</li>
+      <li><b>中心扩展（中心扩散）：</b>求<b>最长回文子串</b>，枚举每个（奇/偶）中心向两边扩展，O(n²)，好写且必考。</li>
+      <li><b>哈希计数（Counter）：</b>判断<b>变位词（anagram）</b>、统计字符频次（LeetCode 242、49）。</li>
+      <li><b>滑动窗口 + 计数：</b>求"包含某字符集的最短子串"等（LeetCode 76）。</li>
+      <li><b>KMP / 哈希思想移植：</b>模式匹配类、重复模式、公共前后缀都能用前面两节的方法。</li>
+      <li><b>反转 + 处理：</b>先整体反转、再逐段反转，是很多"反转"题的套路。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>string_tips.py</div>
+      <pre><code># 1) 中心扩展求最长回文子串（LeetCode 5）
+def longest_palindrome(s):
+    n = len(s)
+    best = ""
+    for c in range(n):
+        for l, r in ((c, c), (c, c + 1)):        # 奇数中心 / 偶数中心
+            while l &gt;= 0 and r &lt; n and s[l] == s[r]:
+                l -= 1; r += 1
+            if r - l - 1 &gt; len(best):
+                best = s[l + 1:r]
+    return best
+print(longest_palindrome("babad"))   # "bab" 或 "aba"
+
+# 2) 变位词判断：排序 vs 计数（LeetCode 242）
+from collections import Counter
+def is_anagram(a, b):
+    return Counter(a) == Counter(b)   # 若长度不同，先判断再计数
+print(is_anagram("anagram", "nagaram"))   # True</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>易错点：</b>回文要<strong>同时考虑奇数长度和偶数长度</strong>两个中心（只写一个会漏掉 <span class="mono">"abba"</span> 这类偶数回文）；用 Counter 判变位词前先比对长度，能省一次统计；切片和 <span class="mono">s[0]</span> 访问在 Python 里是 O(1)（C 层优化），但每次拼接字符串应尽量用列表 + <span class="mono">"".join()</span>。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>拿到字符串题先想三件事——<b>要不要用哈希</b>（判等/计数）、<b>能不能用双指针/滑动窗口</b>（区间性质）、<b>是否涉及模式匹配或重复结构</b>（用 KMP/哈希）。多想一层，往往就从暴力升级成面试官想要的解法。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">中心扩展</div><div class="v">O(n²)</div></div>
+      <div class="cx"><div class="k">哈希计数</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">滑动窗口</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">视方法而定</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>尝试用「<b>双指针 + 反向扫描</b>」做 <b>LeetCode 5「最长回文子串」</b>，再用「中心扩展」对比，体会两种写法的边界差异。</li>
+      <li>实现一个 <b>Rabin-Karp</b> 匹配器：先用滚动哈希快速排除候选，命中哈希后再做字符级严格比较；思考为什么"哈希相等后仍要严格比较"。</li>
+      <li>用 KMP 的 next 数组实现 <b>LeetCode 214「最短回文串」</b>：在 <span class="mono">s + "#" + s[::-1]</span> 上求前缀函数，判断需要补多长的字符。</li>
+      <li>深入思考：为什么 <b>Z 函数</b>（Z-algorithm）与 KMP 前缀函数本质等价？能否在 O(n) 内用 Z 函数完成 KMP 能做的全部任务？</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "string",                 // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "串与字符串匹配",             // 模块标题
+  eyebrow: "MODULE 05 · 数据结构与算法",
+  prev: "04-栈与队列.html",                    // 前一节文件名
+  next: "06-二分查找.html",                    // 下一节文件名
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"KMP 算法（含预处理）的最坏时间复杂度是？",
+    opts:["O(n·m)","O(n+m)","O(n log m)","O(m²)"],
+    ans:1,
+    exp:"KMP 预处理前缀函数 O(m)，匹配时主串指针不回退、每个字符最多被比较两次，总时间 O(n+m)。O(n·m) 是朴素匹配的最坏复杂度。"
+  },
+  {
+    type:"quiz",
+    q:"对模式串 \"ababaca\"，其前缀函数 next 数组为？",
+    opts:["[0, 0, 1, 2, 3, 0, 1]","[0, 1, 2, 3, 4, 5, 6]","[-1, 0, 0, 1, 2, 0, 1]","[1, 1, 2, 3, 4, 1, 2]"],
+    ans:0,
+    exp:"按 π[i]=p[0..i] 的最长相等真前缀长度：a→0, ab→0, aba→1, abab→2, ababa→3, ababac→0, ababaca→1，故为 [0,0,1,2,3,0,1]。选项 3 是把 next[0] 记成 -1 的另一种教材约定，含义不同。"
+  },
+  {
+    type:"quiz",
+    q:"最坏情形（如 text=\"aaaa…a\"，pat=\"aaa…ab\"）下，朴素匹配要做约多少次字符比较？",
+    opts:["O(n+m)","O(n·m)","O(m)","O(n log m)"],
+    ans:1,
+    exp:"每次起点都要比到模式串最后一个字符才失配，起点有 n-m+1 个，故最坏 O(n·m)。这是朴素匹配的致命伤，也正因此才有 KMP 的 O(n+m)。"
+  },
+  {
+    type:"interview",
+    q:"关于 KMP 的失配回溯，下列说法正确的是？",
+    opts:["失配时总是把模式串从头（j=0）开始重新比较","失配时按 next 把 j 回退，主串指针 i 不回退","失配时主串指针也要回退到失配位置再继续","前缀函数只依赖主串的字符"],
+    ans:1,
+    exp:"KMP 的灵魂就是主串指针不回退，而 j 回退到 next[j-1]（已匹配部分的最长相等真前缀末尾），从而避免重复比较。前缀函数只与模式串自身有关，与主串无关，故 D 错。"
+  },
+  {
+    type:"quiz",
+    q:"关于字符串哈希（滚动哈希 / 多项式哈希），下列说法错误的是？",
+    opts:["可 O(1) 求任意子串的哈希值","本质是把字符串看成一个 BASE 进制的大整数","单哈希可能因碰撞而把不同串误判为相同","只要取了大质数 MOD，哈希值一定与字符串一一对应（绝不会碰撞）"],
+    ans:3,
+    exp:"哈希一定存在碰撞，大质数只是把碰撞概率降低，并不能保证一一对应（鸽巢原理）。因此严谨做法要双哈希或哈希命中后再做严格比较。A、B、C 均正确。"
+  },
+  {
+    type:"quiz",
+    q:"对串 s=\"ababab\"，其最小循环节（重复单元）长度为？",
+    opts:["3","2","1","6"],
+    ans:1,
+    exp:"s=\"ababab\"，n=6，π[5]=4（最长相等真前缀 \"abab\"），unit = n − π[5] = 6 − 4 = 2，且 6 % 2 == 0，故最小循环节为 \"ab\"（长 2）。"
+  },
+  {
+    type:"interview",
+    q:"用 KMP 找模式串在文本中的「所有出现位置（含重叠）」时，匹配成功后应怎么做？",
+    opts:["记录起点后把 j 清零，继续从当前主串位置重新匹配","记录起点后令 j = next[m-1]，主串继续前进以捕捉重叠出现","匹配成功后就结束整个搜索","把主串也回退到起点+1 处重新开始"],
+    ans:1,
+    exp:"想找重叠出现（如 \"aaaaa\" 里找 \"aa\" 得 [0,1,2,3]），成功后必须 j=next[m-1]（回退到最长相等真前缀）而不清零，主串指针不回退。清零会漏掉重叠。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

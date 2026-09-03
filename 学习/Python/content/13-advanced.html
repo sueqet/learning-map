@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>迭代器、生成器与装饰器 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 迭代器、生成器与装饰器：透传 for 的迭代协议、用 yield 写出惰性求值的生成器与管道、用闭包与 @装饰器为函数加上缓存、计时等能力。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--muted);white-space:nowrap}
+  .topic h3 .pt{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--muted);white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">迭代器、生成器与装饰器</b></span>
+    <div class="pager"><a id="prevLink" href="12-oop.html">← 上一节</a><a id="nextLink" href="14-lc-array.html">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 进阶</span></span>
+    <h1 id="pageTitle">迭代器、生成器与<span class="accent">装饰器</span></h1>
+    <p class="lead" id="pageLead">迭代、惰性与「函数套函数」是 Python 从「会写」迈向「写好」的三个招牌特性：学会<b>迭代协议</b>看穿 for 的循环本质，用<b>yield 生成器</b>写出省内存、可流式处理的管道代码，再用<b>装饰器</b>给函数优雅地加上缓存、计时、日志等能力。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能讲清楚 <code class="mono">for</code> 循环内部如何借助 <code class="mono">__iter__</code> / <code class="mono">__next__</code> 的迭代协议工作，并准确区分「可迭代对象」与「迭代器」。</li>
+      <li>学完后，你能用 <code class="mono">yield</code> 写出惰性求值的生成器函数与生成器表达式，并解释它为何比一次性构建列表更省内存。</li>
+      <li>学完后，你能用 <code class="mono">send</code> / <code class="mono">yield from</code> 写状态机与可组合的生成器「管道」。</li>
+      <li>学完后，你能说出闭包的原理（函数是一等公民、嵌套函数、<code class="mono">nonlocal</code>），并理解装饰器对它的依赖。</li>
+      <li>学完后，你能用 <code class="mono">@装饰器</code> 语法配合 <code class="mono">functools.wraps</code>、<code class="mono">*args/**kwargs</code> 编写可复用的装饰器（如计时、日志、带参数）。</li>
+      <li>学完后，你能用 <code class="mono">functools.lru_cache</code> 对递归做记忆化，把指数级算法降为线性。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">先掌握 <b>函数</b>（定义、参数、返回值、作用域）、<b>列表/元组推导式</b> 与 <b>for 循环</b> 即可。若能先建立「在 Python 里函数本身也是一种对象、可以被传递与返回」的直觉，学闭包和装饰器会顺畅很多。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">13</span>从迭代协议到装饰器<br>理解 Python 的「惰性」与「函数即对象」</h2>
+  </section>
+
+  <section class="topic" id="iteration-protocol">
+    <h3><span class="kno">小节</span>迭代协议：for 循环背后的秘密<span class="pt">__iter__ · __next__ · StopIteration</span></h3>
+    <p>你每天都在用 <code class="mono">for</code>，但它其实是个「协议」：任何对象只要实现 <code class="mono">__iter__()</code> 方法，就能被 <code class="mono">for</code> 遍历。理解这层协议，才能明白为什么列表、字符串、字典、<code class="mono">range</code>、生成器都能被统一的循环处理，也能让你写出自己「可被 for」的类。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code># for 的写法
+nums = [1, 2, 3]
+for n in nums:
+    print(n)
+
+# for 的本质：先拿迭代器，再逐个 next()
+nums = [1, 2, 3]
+it = iter(nums)          # 调 __iter__() 返回迭代器
+print(next(it))          # 1  -> 调 __next__()
+print(next(it))          # 2
+print(next(it))          # 3
+# print(next(it))        # StopIteration 异常（for 内部捕获后结束循环）
+
+# 自定义一个可迭代类
+class CountDown:
+    def __init__(self, start):
+        self.n = start
+    def __iter__(self):
+        return self                 # 返回自身（自己既是可迭代对象也是迭代器）
+    def __next__(self):
+        if self.n <= 0:
+            raise StopIteration     # 没有更多元素时抛异常
+        self.n -= 1
+        return self.n + 1
+
+for x in CountDown(3):
+    print(x)            # 3  2  1</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>概念</th><th>定义</th><th>关键方法</th><th>典型对象</th></tr>
+      <tr><td><b>可迭代对象</b><br>(iterable)</td><td>能用 <code class="mono">for</code> / <code class="mono">iter()</code> 使用的对象</td><td><code class="mono">__iter__()</code></td><td><code class="mono">list / str / dict / set / range</code>、自定义类</td></tr>
+      <tr><td><b>迭代器</b><br>(iterator)</td><td>存有「当前进度」、每次 <code class="mono">next()</code> 吐出下一个的对象</td><td><code class="mono">__iter__()</code> + <code class="mono">__next__()</code></td><td>迭代器对象、生成器、<code class="mono">enumerate</code>、<code class="mono">zip</code>、<code class="mono">map/filter</code></td></tr>
+    </table>
+    <div class="mermaid">
+flowchart TD
+    A[for x in obj] --> B[it = iter obj]
+    B --> C{还有下一个?}
+    C -- 有 --> D[x = next it]
+    D --> E[执行循环体]
+    E --> C
+    C -- 没有 --> F[捕获 StopIteration]
+    F --> G[结束 for]
+</div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>for 循环本质是「<code class="mono">iter()</code> 拿迭代器 → 反复 <code class="mono">next()</code> → 捕获 <code class="mono">StopIteration</code> 结束」。迭代器是<b>一次性/有状态</b>的，遍历完就「耗尽」了。</p></div>
+  </section>
+
+  <section class="topic" id="generators">
+    <h3><span class="kno">小节</span>生成器：用 yield 写惰性代码<span class="pt">yield · 生成器表达式 · 内存</span></h3>
+    <p>只要函数里出现 <code class="mono">yield</code>，它就变成<b>生成器函数</b>。调用它不会立即执行函数体，而是返回一个生成器对象；只有当 <code class="mono">next()</code> 或 <code class="mono">for</code> 触发时，才「执行到下一个 <code class="mono">yield</code> 并暂停」。这就是<b>惰性求值</b>——需要多少算多少，因此特别适合大文件、无限序列和流式处理。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code># 生成器函数：yield 送出值并暂停
+def count_up(n):
+    i = 0
+    while i &lt; n:
+        yield i          # 每次 yield 送出 i 并暂停在这里
+        i += 1
+
+g = count_up(3)
+print(type(g))           # &lt;class 'generator'>
+print(next(g))           # 0
+print(next(g))           # 1
+print(next(g))           # 2
+# print(next(g))         # StopIteration
+
+for x in count_up(5):    # for 里自动结束
+    print(x)
+
+# 生成器表达式：惰性的「圆括号推导式」
+squares = (x * x for x in range(10))
+print(next(squares))     # 0
+print(next(squares))     # 1
+
+# 大文件逐行读：内存只占一行，而不是整个文件
+def read_lines(path):
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            yield line.rstrip()</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>特性</th><th>列表推导式 <code class="mono">[...]</code></th><th>生成器表达式 <code class="mono">(...)</code></th></tr>
+      <tr><td>运行时机</td><td>立即算出<b>全部</b>元素</td><td><b>惰性</b>，每取一个才算一个</td></tr>
+      <tr><td>返回类型</td><td><code class="mono">list</code></td><td><code class="mono">generator</code></td></tr>
+      <tr><td>内存占用</td><td>随元素数量增长</td><td>恒定（与元素总数无关）</td></tr>
+      <tr><td>能否多次遍历</td><td>可以</td><td>只能遍历<b>一次</b>（耗尽即结束）</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>数据量很大、或可以「流式」逐段处理时——逐行读大文件、无限序列、网络流——优先用生成器，因为它<b>随用随算、几乎不占内存</b>。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>生成器只能被<b>迭代一次</b>。要复用，就重新调用生成器函数，或用 <code class="mono">tuple(...)</code> / <code class="mono">list(...)</code> 把它<b>物化</b>成一次性可复用容器。</p></div>
+  </section>
+
+  <section class="topic" id="gen-advanced">
+    <h3><span class="kno">小节</span>生成器进阶：send 与 yield from<span class="pt">send · yield from · 管道</span></h3>
+    <p>生成器不仅能「吐出」值，还能「接收」值。用 <code class="mono">send()</code> 向生成器内部传参，用 <code class="mono">yield from</code> 把子生成器委托出去，就能写出协作式状态机和可组合的<b>数据管道</b>——这是处理大数据、构建流式处理链的利器。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code># send()：向生成器内部传值，并推进到下一个 yield
+def echo():
+    while True:
+        received = yield
+        if received is None:
+            continue
+        yield received.upper()
+
+g = echo()
+next(g)                   # 先推进到第一个 yield（received 为 None）
+print(g.send("hello"))    # HELLO
+print(g.send("world"))    # WORLD
+
+# yield from：把子生成器「委托」出去，简化嵌套
+def chain(*iters):
+    for it in iters:
+        yield from it
+
+print(list(chain([1, 2], (3, 4), "ab")))   # [1, 2, 3, 4, 'a', 'b']
+
+# 管道：多个生成器首尾相接，惰性链式处理
+def numbers():
+    for n in range(20):
+        yield n
+
+def evens(iterable):
+    for n in iterable:
+        if n % 2 == 0:
+            yield n
+
+def double(iterable):
+    for n in iterable:
+        yield n * 2
+
+print(list(double(evens(numbers()))))
+# [0, 4, 8, 12, 16, 20, 24, 28, 32, 36]</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><code class="mono">yield from</code> 相当于把内层生成器的每个值逐个转发出去，写嵌套生成器最简洁；<code class="mono">send()</code> 让生成器既能「吐出」又能「接收」，适合状态机和协作式任务。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>对一个<b>刚启动</b>的生成器直接 <code class="mono">send(值)</code> 会抛 <code class="mono">TypeError: can't send non-None value to a just-started generator</code>。规范做法是先 <code class="mono">next(g)</code> 或 <code class="mono">g.send(None)</code> 推进到第一个 yield。</p></div>
+  </section>
+
+  <section class="topic" id="closures">
+    <h3><span class="kno">小节</span>闭包：装饰器的地基<span class="pt">一等公民 · nonlocal · 函数返回函数</span></h3>
+    <p>在 Python 里，函数也是<b>对象</b>（一等公民）：可以赋值给变量、作为参数传入、作为返回值返回。当内层函数「记住」了外层作用域的变量，这种组合就叫<b>闭包</b>。装饰器本质上就是「函数返回函数 + 闭包捕获」。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code># 函数是一等公民
+def outer(msg):
+    def inner():
+        return msg + "!"
+    return inner          # 返回的是函数对象，不是调用结果
+
+greet = outer("Hi")       # greet 现在是一个函数
+print(greet())            # Hi!
+
+# 闭包：内层函数「记住」了外层变量 msg
+def make_counter():
+    count = 0
+    def add():
+        nonlocal count    # 修改外层（非全局）变量必须 nonlocal
+        count += 1
+        return count
+    return add
+
+c = make_counter()
+print(c())                # 1
+print(c())                # 2</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>即使外部函数已经返回，内层函数仍能访问它创建时所在作用域的变量，并可通过 <code class="mono">nonlocal</code> 修改它们。这正是「装饰器用闭包保存上下文」的前提。</p></div>
+  </section>
+
+  <section class="topic" id="decorators">
+    <h3><span class="kno">小节</span>装饰器：给函数「加料」<span class="pt">@语法 · *args/**kwargs · functools.wraps</span></h3>
+    <p>装饰器是一个<b>接收函数、返回新函数</b>的高阶函数。在定义前加 <code class="mono">@装饰器</code> 只是 <code class="mono">f = 装饰器(f)</code> 的语法糖，用来在不改动原函数代码的前提下，为其<b>附加</b>日志、计时、权限校验等能力。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>import functools
+
+# 装饰器：接收函数 func，返回包装后的 wrapper
+def logger(func):
+    @functools.wraps(func)          # 保留原函数的 __name__ / __doc__ 等
+    def wrapper(*args, **kwargs):   # 必须透传参数
+        print(f"调用 {func.__name__}，参数 {args} {kwargs}")
+        result = func(*args, **kwargs)
+        print(f"{func.__name__} 返回 {result}")
+        return result
+    return wrapper
+
+@logger            # 等价于 add = logger(add)
+def add(a, b):
+    """两数相加。"""
+    return a + b
+
+print(add(3, 5))
+# 调用 add，参数 (3, 5) {}
+# add 返回 8
+# 8
+
+print(add.__name__)   # add（若没有 @wraps，会变成 wrapper）</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>无糖写法</th><th>糖写法（两者完全等价）</th></tr>
+      <tr><td><code class="mono">def add(a, b): ...<br>add = logger(add)</code></td><td><code class="mono">@logger<br>def add(a, b): ...</code></td></tr>
+    </table>
+    <div class="mermaid">
+flowchart LR
+    A[原始函数 f] --> B[deco1 包裹得 g]
+    B --> C[deco2 包裹得 h]
+    C --> D[h 供调用]
+</div>
+    <p>多个装饰器<span style="white-space:normal">自下而上</span>逐个包裹：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>@deco1
+@deco2
+def f(): ...
+# 等价于 f = deco1(deco2(f))   -> 离函数最近的 deco2 先执行</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><code class="mono">@decorator</code> 不过是 <code class="mono">f = decorator(f)</code> 的语法糖。装饰器返回的是<b>包装函数</b>，所以要透传 <code class="mono">*args, **kwargs</code> 并 <b>返回原函数的返回值</b>，否则被装饰函数行为会「走样」。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>忘了 <code class="mono">@functools.wraps(func)</code>，被装饰函数的 <code class="mono">__name__</code>、<code class="mono">__doc__</code> 会被包装函数覆盖，调试和生成文档时会看到一堆 <code class="mono">wrapper</code>。</p></div>
+  </section>
+
+  <section class="topic" id="decorator-advanced">
+    <h3><span class="kno">小节</span>装饰器进阶与 functools.lru_cache<span class="pt">带参装饰器 · 记忆化 · 时间换空间</span></h3>
+    <p>装饰器还可以<b>带参数</b>（再多套一层函数），从而让同一个装饰器有不同的配置；而标准库 <code class="mono">functools.lru_cache</code> 本身就是一种神奇的装饰器，它会<b>缓存</b>函数参数与结果，避免重复计算——对递归函数尤其有效。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>import functools
+import time
+
+# 带参数装饰器：比普通装饰器再套一层
+def timer(label="耗时"):
+    def deco(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            start = time.perf_counter()
+            result = func(*args, **kwargs)
+            print(f"[{label}] {func.__name__}: {time.perf_counter() - start:.4f}s")
+            return result
+        return wrapper
+    return deco
+
+@timer(label="斐波那契")
+def fib(n):
+    return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
+
+# 记忆化：lru_cache 缓存函数结果，避免重复递归
+@functools.lru_cache(maxsize=None)
+def fib_cached(n):
+    return n if n &lt; 2 else fib_cached(n - 1) + fib_cached(n - 2)
+
+print(fib_cached(30))                 # 832040  快：每个 n 只算一次
+print(fib_cached.cache_info())        # CacheInfo(hits=..., misses=31, maxsize=None, currsize=31)</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>版本</th><th>时间复杂度</th><th>说明</th></tr>
+      <tr><td>朴素递归斐波那契</td><td>O(2<sup>n</sup>)</td><td>大量重复计算子问题</td></tr>
+      <tr><td>+ <code class="mono">@functools.lru_cache</code></td><td>O(n)</td><td>每个 n 只算一次并缓存，之后直接命中</td></tr>
+      <tr><td>迭代（循环）</td><td>O(n)</td><td>可用循环替代，同样线性</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><code class="mono">lru_cache</code> 是「<b>空间换时间</b>」的典型：用内存缓存结果，把指数级的重复递归降到线性。它只对<b>纯函数</b>（相同输入永远相同输出）安全。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>提醒：</b>被 <code class="mono">lru_cache</code> 修饰的函数，参数必须<b>可哈希</b>（list、dict 不行）。若想自动清理、无上限缓存，Python 3.9+ 还提供了更简洁的 <code class="mono">@functools.cache</code>。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>写一个生成器，实现<b>无限斐波那契</b>（不写结束条件），再用 <code class="mono">itertools.islice</code> 取前 10 项，并尝试改用 <code class="mono">yield from</code> 重新组织。</li>
+      <li>实现一个 <code class="mono">@timer</code> 装饰器（含 <code class="mono">*args/**kwargs</code> 与 <code class="mono">functools.wraps</code>），并让它支持<b>可选传参</b>：<code class="mono">@timer(label="my")</code> 与 <code class="mono">@timer</code> 两种用法都能工作。</li>
+      <li>用生成器搭一条<b>数据处理管道</b>：读入一个日志文件，逐行去掉空行与首尾空白，再过滤掉含 <code class="mono">DEBUG</code> 的行，最后统计单词数量——全程惰性、不一次性读入内存。</li>
+      <li>思考题：为什么装饰器要加 <code class="mono">@functools.wraps</code>？去掉它之后 <code class="mono">__name__</code>、<code class="mono">__doc__</code> 会怎样？请动手写两个装饰器验证，并解释「多个装饰器自下而上包裹」的顺序。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="13-advanced" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="12-oop.html"><span class="d">上一节</span><span class="t">面向对象</span></a>
+      <a class="card nxt" id="footNext" href="14-lc-array.html"><span class="d">下一节</span><span class="t">算法 · 数组与字符串</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "13-advanced",                 // 本页知识点 id（= 大纲里的 id）
+  title: "迭代器、生成器与装饰器",
+  eyebrow: "PYTHON · 进阶",
+  prev: "12-oop.html",               // 上一节文件名
+  next: "14-lc-array.html",          // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"用 for x in nums: 遍历一个列表时，Python 内部实际发生了什么？",
+    opts:["先调用 iter(nums) 拿到迭代器，再反复 next() 调用它的 __next__()，当抛出 StopIteration 时结束循环","for 只能用于列表，不能用于迭代器或生成器","for 会先调用 next(nums) 再调用 iter(nums)","for 会把整个可迭代对象一次性复制进内存"],
+    ans:0,
+    exp:"for 循环是迭代协议的封装：iter(obj) 得到迭代器，然后反复调用 next() 触发 __next__()，直到抛出 StopIteration 被 for 内部捕获而结束。B 错——for 对生成器/迭代器同样适用；C 顺序反了；D 错，for 本身并不复制，是惰性的。"
+  },
+  {
+    type:"quiz",
+    q:"关于「可迭代对象」与「迭代器」，下列哪项说法正确？",
+    opts:["两者是同一概念，没有区别","一个对象同时实现 __iter__ 和 __next__，它既是可迭代对象又是迭代器","可迭代对象必须实现 __next__，迭代器必须实现 __iter__","只有 list 和 dict 是可迭代对象，range 不是"],
+    ans:1,
+    exp:"只要实现了 __iter__ 就能被 for 遍历，就是可迭代对象；若同时实现 __next__，它自己也是一个迭代器（如自定义 CountDown、生成器）。A 错，二者有别；C 说反了——可迭代对象只需 __iter__；D 错，range、str、set、字典键都是可迭代对象。"
+  },
+  {
+    type:"quiz",
+    q:"关于生成器表达式与列表推导式，下列哪项正确？",
+    opts:["两者都立即把全部元素算出来","生成器表达式是惰性的，一次只产生一个元素、更省内存；列表推导式立即创建完整列表","生成器可以反复迭代很多次","生成器表达式不能用于 for 循环"],
+    ans:1,
+    exp:"生成器表达式 (x for x in ...) 是惰性求值，每取一个才算一个，内存占用与元素总数无关；列表推导式 [...] 会立即创建完整的 list。A 错，列表推导式才立即算全；C 错，生成器只能遍历一次；D 错，生成器完全可用于 for。"
+  },
+  {
+    type:"quiz",
+    q:"一个函数里只要出现 yield，它就变成了生成器函数。关于它的说法，正确的是？",
+    opts:["调用它时函数体会立即执行，并把所有结果一次性返回","调用它返回一个生成器对象，函数体惰性执行，直到遇到 next()/for 才真正运行","yield 与 return 的作用完全一样","生成器函数里不能使用 return"],
+    ans:1,
+    exp:"含 yield 的函数叫生成器函数，调用它不会立即执行函数体，而是返回一个生成器对象；只有 next()/for 触发时才执行到下一个 yield 并暂停。A 错；C 错——yield 是「产出并暂停」，return 是「结束并返回值」；D 错，生成器里可以用 return 提前结束（只负责终止，不带值或带一个值结束）。"
+  },
+  {
+    type:"quiz",
+    q:"对一个已经迭代到末尾的生成器再次调用 next(gen)，会发生什么？",
+    opts:["返回 None","返回 0","抛出 StopIteration 异常","重新从开头生成"],
+    ans:2,
+    exp:"生成器是「单程」的：每次 next() 推进一次，最末尾再调用 __next__() 会抛出 StopIteration。for 或 list() 就是通过捕获该异常判断结束的。A、B 错——耗尽后不会再产出值；D 错——不会自动重启。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪种写法与 @decorator 装饰一个函数 f 完全等价？",
+    opts:["f = decorator(f)","f = f(decorator)","decorator = f","f = decorator()"],
+    ans:0,
+    exp:"@decorator 是语法糖，展开后就是 f = decorator(f)：把函数 f 当作参数传给装饰器，再用返回的新函数替换 f。B 把参数搞反；C 是赋值给装饰器本身；D 直接调用装饰器（若 decorator 无参数会报错或语义不对）。"
+  },
+  {
+    type:"quiz",
+    q:"为函数加上 @functools.lru_cache 的主要作用是？",
+    opts:["让装饰器支持传入参数","缓存函数的参数与返回值（记忆化），避免重复计算","让函数变成惰性生成器","把函数变为可调用对象"],
+    ans:1,
+    exp:"lru_cache 是一个「记忆化」装饰器：以参数为键缓存函数结果，相同参数直接命中、不再重算。这对递归尤其有效，能把 O(2^n) 的朴素递归降为 O(n)。A 描述的是带参数装饰器；C 错；D 错——函数本就是可调用对象。"
+  },
+  {
+    type:"interview",
+    q:"[面试延伸] 生成器逐行读大文件为什么比一次性 read() 更省内存？它与 @functools.lru_cache 加速递归斐波那契的原理，分别体现了什么？",
+    opts:["生成器惰性求值、用一次算一次，逐行读时内存只占一行；@lru_cache 缓存中间结果、避免重复递归，把 O(2^n) 降为 O(n)","生成器会把整个文件先读进内存再吐出，所以更省内存；缓存对递归毫无帮助","生成器省内存是因为它把文件压缩了；lru_cache 只是让装饰器语法更好看","逐行读并不能省内存，因为文件本就在内存里；lru_cache 只是把结果打印出来"],
+    ans:0,
+    exp:"生成器是惰性求值：yield 让代码在需要时才执行到下一行并暂停，因此逐行读文件时内存里始终只有当前一行，复杂度与文件大小无关；@lru_cache 则是「空间换时间」，缓存已算过的 (n, 结果)，避免递归树中大量重复的子问题，把朴素递归的指数级时间降到线性。二者分别体现了「惰性」（按需计算）与「记忆化」（结果复用）两个核心思想。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

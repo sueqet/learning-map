@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动态规划 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 动态规划：两大前提、解题工序、一维 DP、子序列与背包、区间/树形 DP、记忆化与优化、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">动态规划</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 15 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">动态规划</h1>
+    <p class="lead" id="pageLead">从「爬楼梯」到「背包问题」，动态规划用「记住重复出现的子问题」这一招，把指数级搜索变成高效递推——这是笔试与面试中权重最高、也最考验基本功的题型。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能判断一个最优化问题是否具备<strong>最优子结构</strong>与<strong>重叠子问题</strong>，从而确定是否该用 DP 求解。</li>
+      <li>学完后你能用「定义状态 → 找转移方程 → 定边界 → 定遍历顺序」四步工序，独立写出爬楼梯、打家劫舍、最大子序和的转移方程与可运行代码。</li>
+      <li>学完后你能写出 LIS（最长上升子序列）的 <span class="mono" style="color:var(--green)">O(n log n)</span> 贪心+二分解法，以及 LCS（最长公共子序列）的二维 DP，并说清「子序列 ≠ 子数组/子串」。</li>
+      <li>学完后你能解释<strong>0-1 背包内层为何要倒序</strong>，并写出 0-1 / 完全 / 分组背包以及凑零钱（LC 322）的滚动数组代码。</li>
+      <li>学完后你能用记忆化搜索与自底向上两种方式实现同一 DP，并说明区间 DP、树形 DP、单调队列/斜率优化各自适用的场景。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要会一门编程语言（推荐 Python 或 C++）；理解递归与「函数调用栈」；熟悉时间复杂度与 O 记号；了解基本的最优化概念（最大/最小值）；建议先掌握「递归」与「贪心算法」两节——贪心里提到的「局部最优 vs 全局最优」正是理解 DP 为什么和贪心不同的入口。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区：8 个知识点
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">15.1</span>动态规划：两大前提与解题工序</h2>
+  </section>
+
+  <!-- 知识点 1 -->
+  <section class="topic" id="dp-basic">
+    <h3><span class="kno">知识点</span>动态规划思想（最优子结构与重叠子问题）<span class="pt">dp-basic · 概念与思想</span></h3>
+    <p><strong>动态规划（Dynamic Programming，DP）</strong>是一种把原问题拆分成互相<strong>重叠</strong>的子问题，取「记录已经算过的东西」来避免重复计算，从而高效求解最优化问题的方法。它有两个公认的前提，也是判断「能不能用 DP」的试金石：</p>
+    <ul>
+      <li><strong>最优子结构（Optimal Substructure）</strong>：原问题的最优解能由它的<strong>子问题</strong>的最优解组合/递推得到。也就是说，子问题取到最优，才能拼出整体最优。</li>
+      <li><strong>重叠子问题（Overlapping Subproblems）</strong>：递归求解时，同一个子问题会被<strong>多次</strong>求解。只有子问题重叠，才值得把结果存下来复用；若不重叠，就退化为分治（Divide &amp; Conquer），记忆化没有意义。</li>
+    </ul>
+    <p>第三点常被忽略却同样重要：<strong>无后效性（No Aftereffect）</strong>——状态一旦确定，后续决策只依赖「当前状态」本身，不受之前是怎么走到这里的路径影响。这是你定义状态时必须满足的性质。</p>
+
+    <table class="tbl">
+      <tr><th>方法</th><th>子问题关系</th><th>是否记录</th><th>典型例子</th></tr>
+      <tr><td>分治 Divide &amp; Conquer</td><td>互不相交</td><td>不需要</td><td>归并排序、快速排序、二分查找</td></tr>
+      <tr><td>贪心 Greedy</td><td>只做局部最优，可回溯到更少</td><td>不需要（不回头）</td><td>找零、区间调度、最小生成树</td></tr>
+      <tr><td><b>动态规划 DP</b></td><td><b>互相重叠 + 最优子结构</b></td><td><b>一定要记录</b></td><td>爬楼梯、背包、最长子序列</td></tr>
+    </table>
+
+    <p>用斐波那契最能看出「重叠子问题」到底重叠在哪：朴素递归会反复计算 fib(2)、fib(3) 等，而记忆化或递推只算一次。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>fib.py · 三种写法对比</div>
+      <pre><code># 1) 朴素递归：大量重复计算（可见重叠子问题）
+def fib_naive(n):
+    if n &lt; 2:
+        return n
+    return fib_naive(n-1) + fib_naive(n-2)   # 同一个 n 会被算很多次
+
+# 2) 记忆化搜索（自顶向下）：用缓存挡住重复计算
+from functools import lru_cache
+@lru_cache(None)
+def fib_memo(n):
+    if n &lt; 2:
+        return n
+    return fib_memo(n-1) + fib_memo(n-2)
+
+# 3) 自底向上 DP（递推 + 空间优化）：从边界一点点往上推
+def fib_dp(n):
+    if n &lt; 2:
+        return n
+    a, b = 0, 1
+    for _ in range(2, n+1):
+        a, b = b, a + b
+    return b</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>拿到题先问两件事——①「大问题的最优解能不能由子问题最优解拼出来」→ 判断<strong>最优子结构</strong>；②「递归会不会反复求解同一个子问题」→ 判断<strong>重叠子问题</strong>。两个都成立，才值得 DP。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>子问题<strong>互不重叠</strong>的分治（归并、快排、二分）不是 DP，记忆化帮不上忙；子问题<strong>不满足最优子结构</strong>（比如某些需要全局最优、局部最优拼不出全局最优的问题）也不能用 DP。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>易错：</b>状态定义必须满足<strong>无后效性</strong>——不能把「未来才知道的信息」塞进状态，否则转移方程无法只依据前面已算好的状态来写。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">朴素递归</div><div class="v">O(2^n)</div></div>
+      <div class="cx"><div class="k">记忆化</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1) 滚动</div></div>
+      <div class="cx"><div class="k">判据</div><div class="v">两前提+无后效</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 2 -->
+  <section class="topic" id="dp-state">
+    <h3><span class="kno">知识点</span>状态定义、转移方程与边界/遍历顺序<span class="pt">dp-state · 固定四步工序</span></h3>
+    <p>动态规划真正的难点不在「会用递推」，而在<strong>写出对的状态</strong>。这里给你一套可复用的固定思考工序，几乎可以套用到所有 DP 题：</p>
+    <ol>
+      <li><strong>定义状态</strong>：明确 <span class="mono" style="color:var(--green)">dp[i]</span>（或二维 <span class="mono" style="color:var(--green)">dp[i][j]</span>）<em>表示什么</em>。状态是「已经算好的、确定性的量」，必须无后效。</li>
+      <li><strong>找转移方程</strong>：写出「由哪些已知状态推出 <span class="mono" style="color:var(--green)">dp[i]</span>」的等式，这是整道题的灵魂。</li>
+      <li><strong>定边界（初始化）</strong>：确定 <span class="mono" style="color:var(--green)">dp[0]</span>、<span class="mono" style="color:var(--green)">dp[1]</span>、<span class="mono" style="color:var(--green)">dp[0][0]</span> 等初始值，并处理越界（下标 <span class="mono">i-1</span>/<span class="mono">j-1</span>）。</li>
+      <li><strong>确定遍历顺序</strong>：从前往后 / 从后往前 / 外层组内层容量，保证在计算某状态时，它依赖的状态<strong>已经算好</strong>。（背包问题这里的顺序会直接改变答案！）</li>
+    </ol>
+
+    <p>下面用「爬楼梯」把四步演示一遍，并给出一个<strong>通用可运行的 DP 模板骨架</strong>：</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>climb_stairs.py · 通用 DP 模板</div>
+      <pre><code># 问题：每次可走 1 阶或 2 阶，问走上 n 阶有多少种不同走法 (LC 70)
+def climb_stairs(n):
+    # 1) 定义状态：dp[i] = 走到第 i 阶的方法数
+    # 2) 转移方程：dp[i] = dp[i-1] + dp[i-2]（最后一步从 i-1 或 i-2 来）
+    # 3) 边界：dp[1]=1, dp[2]=2
+    # 4) 遍历顺序：从小到大（自底向上）
+    if n &lt; 3:
+        return n
+    dp = [0]*(n+1)
+    dp[1], dp[2] = 1, 2
+    for i in range(3, n+1):
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]
+
+# 模板骨架（通用）：四个注释位就是你的思考流程
+def dp_template(...):
+    # 1) 状态定义
+    dp = [[...] for _ in range(...)]
+    # 2) 边界初始化
+    ...
+    # 3) 遍历顺序 + 转移方程
+    for i in ...:
+        for j in ...:
+            dp[i][j] = ...   # 只依赖已经算好的更小状态
+    # 4) 返回答案（有时要取 max/min，或 dp[-1]）
+    return ...</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「状态定义」决定其他三步，是 DP 的<strong>唯一难点</strong>。常见套路是问自己：<em>「到一个位置/区间，我只需要记住哪个最小的信息，就能继续往下推？」</em> 记住的越少、越干净，转移就越简单。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>边界与越界是最常见的 bug 来源——例如用 <span class="mono">dp[i-1]</span>、<span class="mono">dp[i-2]</span>、<span class="mono">dp[i+1][j]</span> 时，下标会不会走出数组？遍历顺序决定了「依赖是否已算好」，顺序写反会直接得到错误答案（区间 DP、背包尤其容易踩雷）。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(状态数×转移)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(状态数)</div></div>
+      <div class="cx"><div class="k">关键</div><div class="v">状态/边界/顺序</div></div>
+      <div class="cx"><div class="k">模板</div><div class="v">四步工序</div></div>
+    </div>
+  </section>
+
+  <!-- 章节 2 -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">15.2</span>一维 DP 与子序列问题</h2>
+  </section>
+
+  <!-- 知识点 3 -->
+  <section class="topic" id="dp-1d">
+    <h3><span class="kno">知识点</span>一维 DP（爬楼梯、打家劫舍、最大子序和）<span class="pt">dp-1d · 递推形状</span></h3>
+    <p>一维 DP 是入门必背的三道经典题，它们的转移只有两种形状：<strong>「累加型」</strong>（斐波那契式 <span class="mono" style="color:var(--green)">f(n)=f(n-1)+f(n-2)</span>）和<strong>「选/不选型」</strong>（<span class="mono" style="color:var(--green)">max(dp[i-1], dp[i-2]+w[i])</span>）。</p>
+    <ul>
+      <li><strong>爬楼梯（LC 70）</strong>：最后一步要么从 <span class="mono">i-1</span> 跨 1 阶、要么从 <span class="mono">i-2</span> 跨 2 阶，故 <span class="mono" style="color:var(--green)">dp[i]=dp[i-1]+dp[i-2]</span>。</li>
+      <li><strong>打家劫舍（LC 198）</strong>：不能偷相邻两家。偷第 <span class="mono">i</span> 家则与 <span class="mono">i-1</span> 冲突，只能加 <span class="mono">dp[i-2]</span>；不偷则继承 <span class="mono">dp[i-1]</span>，故 <span class="mono" style="color:var(--green)">dp[i]=max(dp[i-1], dp[i-2]+nums[i])</span>。</li>
+      <li><strong>最大子序和（LC 53）</strong>：状态必须是「<strong>以 i 结尾</strong>」的最大连续子数组和，因为要保证连续性。转移 <span class="mono" style="color:var(--green)">dp[i]=max(nums[i], dp[i-1]+nums[i])</span>，答案为所有 <span class="mono">dp[i]</span> 的最大值。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>dp_1d.py</div>
+      <pre><code># 打家劫舍 LC 198
+def rob(nums):
+    n = len(nums)
+    if n == 0: return 0
+    if n == 1: return nums[0]
+    dp = [0]*n
+    dp[0], dp[1] = nums[0], max(nums[0], nums[1])
+    for i in range(2, n):
+        # 选 i 家：dp[i-2]+nums[i]；不选 i 家：dp[i-1]
+        dp[i] = max(dp[i-1], dp[i-2] + nums[i])
+    return dp[-1]
+
+# 最大子序和 LC 53（状态必须“以 i 结尾”才能无后效地转移）
+def max_subarray(nums):
+    cur = best = nums[0]          # cur = 以当前位结尾的最大和
+    for x in nums[1:]:
+        cur = max(x, cur + x)     # 要么重新开始，要么接在 cur 后面
+        best = max(best, cur)
+    return best</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>一维 DP 就记两种递推形状——<strong>「累加型」</strong>（爬楼梯、斐波那契，结果相加）与<strong>「选/不选型」</strong>（打家劫舍、股票买卖，取 max/min），绝大多数一维题都能归类到其中之一。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>最大子序和的<strong>状态定义</strong>必须是「以 i 结尾」，而不能是「前 i 个元素中的最大和」——否则当前元素必须被接进来，状态无法用上一状态无后效地转移。这是 LC 53 最常见的写错点。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>优化：</b>这三种题的 <span class="mono">dp[i]</span> 只依赖前 1～2 个状态，可用<strong>滚动数组</strong>把空间压到 <span class="mono">O(1)</span>（详见「DP 常见优化」）。</p></div>
+
+    <table class="tbl">
+      <tr><th>题目</th><th>状态定义</th><th>转移方程</th><th>复杂度</th></tr>
+      <tr><td>爬楼梯 LC 70</td><td><span class="mono">dp[i]</span>=走法数</td><td><span class="mono">dp[i-1]+dp[i-2]</span></td><td><span class="mono">O(n)/O(1)</span></td></tr>
+      <tr><td>打家劫舍 LC 198</td><td><span class="mono">dp[i]</span>=前 i 家最大</td><td><span class="mono">max(dp[i-1],dp[i-2]+w)</span></td><td><span class="mono">O(n)/O(1)</span></td></tr>
+      <tr><td>最大子序和 LC 53</td><td>以 i 结尾的最大和</td><td><span class="mono">max(x, cur+x)</span></td><td><span class="mono">O(n)/O(1)</span></td></tr>
+    </table>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1) 滚动</div></div>
+      <div class="cx"><div class="k">模板</div><div class="v">累加 / 选不选</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 4 -->
+  <section class="topic" id="dp-subseq">
+    <h3><span class="kno">知识点</span>子序列问题（LIS / LCS）<span class="pt">dp-subseq · 平台级系列</span></h3>
+    <p>子序列问题几乎必考。先分清概念：<strong>子序列（subsequence）</strong>是从原序列中挑出若干元素、保持相对顺序、但<em>可以不相邻</em>；而<strong>子数组/子串（subarray/substring）</strong>要求<em>必须连续</em>。</p>
+    <ul>
+      <li><strong>LIS（Longest Increasing Subsequence，最长上升子序列，LC 300）</strong>：普通 DP 是 <span class="mono" style="color:var(--green)">dp[i]=max(dp[j]+1)</span>（<span class="mono">j&lt;i</span> 且 <span class="mono">nums[j]&lt;nums[i]</span>），<span class="mono">O(n²)</span>；更优的是<strong>贪心+二分</strong>，维护一个「每个长度的最小结尾」数组 <span class="mono">tails</span>，做到 <span class="mono" style="color:var(--green)">O(n log n)</span>。</li>
+      <li><strong>LCS（Longest Common Subsequence，最长公共子序列，LC 1143）</strong>：二维 DP，<span class="mono">dp[i][j]</span> 表示 s1 前 i 个与 s2 前 j 个的 LCS 长度。字符相等则 +1，否则取左边或上边的较大者。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>lis_lcs.py</div>
+      <pre><code># LIS 贪心 + 二分 · O(n log n)  LC 300
+import bisect
+def length_of_lis(nums):
+    tails = []           # tails[k] = 长度为 k+1 的上升子序列的最小结尾
+    for x in nums:
+        i = bisect.bisect_left(tails, x)   # 找第一个 >= x 的位置
+        if i == len(tails):
+            tails.append(x)                # 比所有结尾都大，形成更长序列
+        else:
+            tails[i] = x                   # 用更小的结尾替换，降低后续接上的难度
+    return len(tails)
+
+# LCS · 二维 DP · O(m*n)  LC 1143
+def lcs(s1, s2):
+    m, n = len(s1), len(s2)
+    dp = [[0]*(n+1) for _ in range(m+1)]   # 多开一行/列当边界
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if s1[i-1] == s2[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+    return dp[m][n]</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>LIS 的贪心+二分核心就是「让每个长度的结尾尽量小」，这样后面更容易接上更大的数。注意 <span class="mono">tails</span> 只给出<strong>长度</strong>，要还原出真实序列还需额外记录每个位置的前驱。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>「子序列」可以跳着选（不相邻），「子数组/子串」必须连续。判断「严格上升」时用 <span class="mono">bisect_left</span> 找「第一个 ≥ x」；若是「非严格上升（可相等）」，要用 <span class="mono">bisect_right</span>。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>提示：</b>LCS 的状态转移在字符不等时取 <span class="mono">max(上, 左)</span>，这保证了「少一个字符」也能继承最长公共部分——理解这一点就能把 LCS 和「最长公共子串」（要求连续，转移只在相等时 +1）区分开。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">LIS 二分</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">LIS DP</div><div class="v">O(n²)</div></div>
+      <div class="cx"><div class="k">LCS</div><div class="v">O(m·n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n) / O(m·n)</div></div>
+    </div>
+  </section>
+
+  <!-- 章节 3 -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">15.3</span>背包问题</h2>
+  </section>
+
+  <!-- 知识点 5 -->
+  <section class="topic" id="dp-knapsack">
+    <h3><span class="kno">知识点</span>背包问题（0-1 / 完全 / 分组）<span class="pt">dp-knapsack · 面试必考</span></h3>
+    <p>背包是 DP 里最经典的「选/不选 + 容量」模型，也是面试重点。核心是<strong>给一个容量 W，从若干物品里选，使价值最大（或数量最少）</strong>。三种变体，唯一区别是「每个物品能用几次」：</p>
+    <ul>
+      <li><strong>0-1 背包</strong>：每个物品<strong>最多选一次</strong>。一维滚动为 <span class="mono" style="color:var(--green)">dp[j]=max(dp[j], dp[j-w[i]]+v[i])</span>，内层容量<strong>倒序</strong>。</li>
+      <li><strong>完全背包</strong>：每个物品<strong>可以无限次选</strong>。一维滚动内层容量<strong>正序</strong>。凑零钱（LC 322）就是「求最小数量」的完全背包。</li>
+      <li><strong>分组背包</strong>：物品分成若干组，<strong>每组最多选一个</strong>。遍历顺序：先组 → 再容量（倒序）→ 再组内物品。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>knapsack.py · 三种背包一维写法</div>
+      <pre><code># 0-1 背包 · 一维滚动 · O(N*W)
+def knapsack_01(v, w, W):
+    dp = [0]*(W+1)
+    for i in range(len(v)):
+        for j in range(W, w[i]-1, -1):   # 内层【倒序】：保证每个物品最多选一次
+            dp[j] = max(dp[j], dp[j-w[i]] + v[i])
+    return dp[W]
+
+# 完全背包 · 内层【正序】：允许同一物品被反复放入
+def knapsack_complete(v, w, W):
+    dp = [0]*(W+1)
+    for i in range(len(v)):
+        for j in range(w[i], W+1):       # 内层【正序】
+            dp[j] = max(dp[j], dp[j-w[i]] + v[i])
+    return dp[W]
+
+# 凑零钱 LC 322 · 完全背包求“最少硬币数”
+def coin_change(coins, amount):
+    INF = float('inf')
+    dp = [INF]*(amount+1)
+    dp[0] = 0
+    for c in coins:
+        for x in range(c, amount+1):     # 正序：硬币可重复使用（完全背包）
+            dp[x] = min(dp[x], dp[x-c] + 1)
+    return dp[amount] if dp[amount] != INF else -1</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>为什么 0-1 背包内层要倒序？</b> 一维 <span class="mono">dp[j]</span> 依赖的是「本轮还没被当前物品更新过」的 <span class="mono">dp[j-w[i]]</span>。若内层<strong>正序</strong>，<span class="mono">dp[j-w[i]]</span> 可能已在<strong>同一轮</strong>被当前物品填过（即已放进这个物品），再用它去推 <span class="mono">dp[j]</span> 就会把<strong>同一个物品再放一次</strong>，退化成「完全背包」。<strong>倒序</strong>时，<span class="mono">dp[j-w[i]]</span> 仍是<strong>上一轮</strong>（未放当前物品）的值，每个物品于是最多只被选一次。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>一个口诀：<strong>0-1 背包内层倒序、完全背包内层正序、分组背包「先组后容量再物品（容量倒序）」</strong>。方向一旦反了，0-1 就变完全背包，答案直接错。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>延伸：</b>「能不能恰好装满容量 / 恰好凑出金额」类问题（如分割等和子集 LC 416、目标和 LC 494）用 <span class="mono">bool</span> 型 <span class="mono">dp</span> 判断可达性；注意 0-1 背包内层同样要倒序。</p></div>
+
+    <table class="tbl">
+      <tr><th>变体</th><th>每个物品</th><th>内层方向</th><th>代表题</th></tr>
+      <tr><td>0-1 背包</td><td>最多 1 次</td><td><span class="mono">倒序</span></td><td>LC 416 / 494、经典背包</td></tr>
+      <tr><td>完全背包</td><td>无限次</td><td><span class="mono">正序</span></td><td>LC 322 / 518</td></tr>
+      <tr><td>分组背包</td><td>每组最多 1 个</td><td>先组后容量(倒序)</td><td>分组背包、混合背包</td></tr>
+    </table>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(N·W)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(W) 一维</div></div>
+      <div class="cx"><div class="k">分类</div><div class="v">0-1/完全/分组</div></div>
+      <div class="cx"><div class="k">方向</div><div class="v">倒序/正序</div></div>
+    </div>
+  </section>
+
+  <!-- 章节 4 -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">15.4</span>进阶：区间 DP、树形 DP 与优化</h2>
+  </section>
+
+  <!-- 知识点 6 -->
+  <section class="topic" id="dp-advanced">
+    <h3><span class="kno">知识点</span>区间 DP 与树形 DP 简介<span class="pt">dp-advanced · 走进结构化状态</span></h3>
+    <p>当一维/背包这类「线性流程」不够用，DP 状态会走向<strong>区间</strong>或<strong>树结构</strong>。</p>
+    <ul>
+      <li><strong>区间 DP</strong>：状态是 <span class="mono" style="color:var(--green)">dp[i][j]</span>，表示区间 <span class="mono">[i, j]</span> 上的最优值。转移时枚举<strong>分割点 k</strong>：<span class="mono" style="color:var(--green)">dp[i][j] = min/max(dp[i][k] + dp[k+1][j] + 合并代价)</span>。典型：矩阵链乘、最长回文子序列（LC 516）、石子合并（洛谷 P1880）。遍历顺序是<strong>按区间长度从小到大</strong>（先填小区间）。</li>
+      <li><strong>树形 DP</strong>：在树上做 DP，用<strong>后序遍历（DFS）</strong>先算子树再传回父节点。状态常带「选/不选当前节点」两维。典型：打家劫舍 III（LC 337）、树的最大独立集、树的直径。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>interval_tree_dp.py</div>
+      <pre><code># 最长回文子序列 LC 516 · 区间 DP
+def longest_palindrome_subseq(s):
+    n = len(s)
+    dp = [[0]*n for _ in range(n)]
+    for i in range(n):
+        dp[i][i] = 1                      # 单个字符回文长度为 1
+    for length in range(2, n+1):          # 按区间长度从小到大
+        for i in range(n-length+1):
+            j = i + length - 1
+            if s[i] == s[j]:              # 两端相等 -> 两端都加入回文
+                dp[i][j] = dp[i+1][j-1] + 2
+            else:                         # 否则继承去掉一端的最优
+                dp[i][j] = max(dp[i+1][j], dp[i][j-1])
+    return dp[0][n-1]
+
+# 打家劫舍 III LC 337 · 树形 DP（后序 DFS）
+def rob_tree(root):
+    def dfs(u):
+        if not u:
+            return (0, 0)
+        l0, l1 = dfs(u.left)              # 先算子节点（后序遍历）
+        r0, r1 = dfs(u.right)
+        not_rob = max(l0, l1) + max(r0, r1)  # 不选 u：子节点可自由选择
+        rob     = u.val + l0 + r0            # 选 u：子节点必须不选
+        return (not_rob, rob)                # 返回 (本节点不选, 本节点选)
+    return max(dfs(root))</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>区间 DP 的复杂度一般是 <span class="mono">O(n²)</span> 个状态 × <span class="mono">O(n)</span> 的合并 = <span class="mono">O(n³)</span>；树形 DP 则是「每个节点算一次、汇总子树」，典型 <span class="mono">O(n)</span>（乘上状态的维度）。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>区间 DP 必须<strong>按区间长度从小到大</strong>，否则在填 <span class="mono">dp[i][j]</span> 时，它依赖的更小区间（<span class="mono">dp[i+1][j-1]</span>、<span class="mono">dp[i+1][j]</span>、<span class="mono">dp[i][j-1]</span>）可能还没算好，得到错误结果。树形 DP 则要保证<strong>子节点先于父节点</strong>被计算（后序 DFS）。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>提示：</b>区间 DP 的「分割点枚举」其实和「矩阵链乘 / 最佳二叉搜索树」是同一套结构；树形 DP 的「选/不选」和打家劫舍一维版的思路一脉相承，只是搬到了树上。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">区间 DP</div><div class="v">O(n³)</div></div>
+      <div class="cx"><div class="k">树形 DP</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">顺序</div><div class="v">长度增 / 后序</div></div>
+      <div class="cx"><div class="k">代表题</div><div class="v">LC 516 / 337</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 7 -->
+  <section class="topic" id="dp-memo">
+    <h3><span class="kno">知识点</span>记忆化搜索<span class="pt">dp-memo · 自顶向下</span></h3>
+    <p><strong>记忆化搜索（Memoization Search / Top-down DP）</strong>用递归把递推关系自然写出来，再借助一张表（哈希表/数组，Python 常用 <span class="mono">@lru_cache</span>，C++ 用 <span class="mono">map</span>/<span class="mono">vector</span>）记录「状态 → 结果」，避免重复计算。它与自底向上的 <span class="mono">dp</span> 表对应<strong>同一棵状态树</strong>，只是方向相反、复杂度相同。</p>
+    <ul>
+      <li><strong>何时更合适</strong>：状态转移不是简单线性的顺序（如<strong>图上依赖、博弈、需要回溯路径</strong>的问题），自底向上难以确定遍历顺序，用递归更直观、更不易写错。</li>
+      <li><strong>代价</strong>：递归有函数调用开销；层数过深在 Python 可能<strong>栈溢出</strong>（必要时 <span class="mono">sys.setrecursionlimit</span> 或改用自底向上）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>memo.py · 凑零钱的自顶向下写法</div>
+      <pre><code># 记忆化搜索：凑零钱 LC 322 的“自顶向下”版本
+from functools import lru_cache
+
+def coin_change(coins, amount):
+    @lru_cache(None)
+    def dfs(rem):
+        if rem == 0:
+            return 0                    # 已经凑满
+        best = float('inf')
+        for c in coins:
+            if rem &gt;= c:
+                best = min(best, dfs(rem - c) + 1)
+        return best
+
+    ans = dfs(amount)
+    return ans if ans != float('inf') else -1
+
+# 何时用记忆化 vs 自底向上：
+#   - 依赖关系复杂、遍历顺序难定、需回溯/博弈  -> 记忆化（递归更直观）
+#   - 依赖顺序清晰、想省空间、要滚动数组        -> 自底向上（递推更可控）</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>记忆化搜索 = <strong>递归 + 记录</strong>。只要状态转移是对的、并且缓存了「已算过的状态」，它和自底向上 DP 就是<strong>同一个算法</strong>，连复杂度都一样，二者是同一枚硬币的两面。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>记忆化搜索<strong>必须真的缓存</strong>（<span class="mono">@lru_cache</span>、字典、数组），否则重叠子问题会被反复递归，退化成指数级。<span class="mono">@lru_cache</span> 适合「状态参数都可哈希」的题；如果状态维度多、参数不可哈希，得用显式 <span class="mono">dict</span> 或数组。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>提示：</b>很多面试官会问「记忆化搜索和递推 dp 的区别」。答案要点：同一状态树、方向相反、复杂度相同；记忆化贴近人类思考、适合依赖复杂的场景；自底向上循环控制顺序、能做滚动数组省空间、无栈溢出风险。</p></div>
+
+    <table class="tbl">
+      <tr><th>维度</th><th>记忆化搜索（自顶向下）</th><th>自底向上递推</th></tr>
+      <tr><td>实现</td><td>递归 + 缓存</td><td>循环 + dp 表</td></tr>
+      <tr><td>状态树</td><td>同</td><td>同</td></tr>
+      <tr><td>顺序难定</td><td>更自然</td><td>需手工设计</td></tr>
+      <tr><td>空间优化</td><td>较难滚动</td><td>易滚动数组</td></tr>
+      <tr><td>栈溢出</td><td>可能</td><td>不会</td></tr>
+    </table>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">与自底向上同</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(状态数)+栈</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">依赖复杂/博弈</div></div>
+      <div class="cx"><div class="k">工具</div><div class="v">lru_cache/dict</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 8 -->
+  <section class="topic" id="dp-opt">
+    <h3><span class="kno">知识点</span>DP 常见优化（滚动数组、单调队列等）<span class="pt">dp-opt · 从能过到优雅</span></h3>
+    <p>笔试/面试的进阶点在于「时间/空间超了怎么办」。优化前先看清<strong>瓶颈在时间还是空间</strong>，再按需选择：</p>
+    <ul>
+      <li><strong>滚动数组（空间优化）</strong>：一维 DP 只依赖前面少数几个状态时，用几个变量或「取模」滚动，把 <span class="mono">O(n)</span> 压到 <span class="mono">O(1)</span>，把二维压到一维。背包的<strong>一维滚动</strong>就是这个原理。</li>
+      <li><strong>单调队列优化</strong>：当转移是「在一定窗口内取最值」时，用<strong>单调队列</strong>（队列中元素单调递减/递增，队头是最值）把 <span class="mono">O(n)</span> 的转移降为<span class="mono">均摊 O(1)</span>。典型：滑动窗口最大值（LC 239）、限制窗口长度的最值 DP。</li>
+      <li><strong>斜率优化（Convex Hull Trick）</strong>：当转移形如 <span class="mono">dp[i]=max(dp[j] + a[i]·b[j])</span>（斜率形式）且满足决策单调性时，用<strong>凸包</strong>维护若干条直线，可把 <span class="mono">O(n²)</span> 降到 <span class="mono">O(n log n)</span> 或 <span class="mono">O(n)</span>。</li>
+      <li><strong>四边形不等式（Knuth 优化）</strong>：区间 DP 满足四边形不等式时，决策点单调，可把 <span class="mono">O(n³)</span> 降到 <span class="mono">O(n²)</span>。典型：石子合并、矩阵链乘。</li>
+      <li><strong>状态压缩 DP（Bitmask）</strong>：当物品数 <span class="mono">n</span> 很小（如 ≤ 20）但组合很多时，用二进制位表示集合。典型：旅行商（TSP）、子集枚举。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>opt.py · 滚动数组 + 单调队列</div>
+      <pre><code># 滚动数组：把 O(n) 空间压到 O(1)  （爬楼梯 / 打家劫舍）
+def climb_stairs(n):
+    if n &lt; 3:
+        return n
+    a, b = 1, 2
+    for _ in range(3, n+1):
+        a, b = b, a + b        # 只保留最近两个状态
+    return b
+
+# 单调队列：滑动窗口最大值 LC 239 · O(n)
+from collections import deque
+def max_sliding_window(nums, k):
+    dq = deque()               # 存下标，队头永远是当前窗口的最大值
+    res = []
+    for i, x in enumerate(nums):
+        while dq and nums[dq[-1]] &lt;= x:   # 维护队内单调递减
+            dq.pop()
+        dq.append(i)
+        if dq[0] &lt;= i - k:                 # 移出窗口
+            dq.popleft()
+        if i &gt;= k - 1:
+            res.append(nums[dq[0]])
+    return res</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>优化三板斧——① 空间是瓶颈 → <strong>滚动数组</strong>；② 转移是「在滑动窗口里取最值」 → <strong>单调队列</strong>；③ 转移满足<strong>决策单调性</strong>（斜率形式） → <strong>斜率优化 / 四边形不等式</strong>。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>提示：</b>别为炫技而优化。先用朴素 DP 把题做对（面试通常更看重「状态定义对不对、能不能解释清楚」），再在确认时间/空间是瓶颈时，说明你<strong>知道</strong>能用滚动数组/单调队列/斜率优化把复杂度降到多少，并把瓶颈点讲明白。</p></div>
+
+    <table class="tbl">
+      <tr><th>优化</th><th>适用条件</th><th>复杂度变化</th></tr>
+      <tr><td>滚动数组</td><td>只依赖最近若干状态</td><td><span class="mono">O(n)→O(1)</span> 空间</td></tr>
+      <tr><td>单调队列</td><td>窗口内取最值的转移</td><td>转移 <span class="mono">O(n)→O(1)</span></td></tr>
+      <tr><td>斜率优化</td><td>斜率形式 + 决策单调</td><td><span class="mono">O(n²)→O(n log n)</span></td></tr>
+      <tr><td>四边形不等式</td><td>区间 DP 满足四边形不等式</td><td><span class="mono">O(n³)→O(n²)</span></td></tr>
+    </table>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">滚动数组</div><div class="v">空间 O(1)</div></div>
+      <div class="cx"><div class="k">单调队列</div><div class="v">均摊 O(1)</div></div>
+      <div class="cx"><div class="k">斜率优化</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">适用判据</div><div class="v">看瓶颈/单调</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><strong>区间 DP</strong>：把「最长回文子序列（LC 516）」改成「最长回文子串（LC 5）」，体会「子序列可跳 / 子串必须连续」在转移上的差异，并注意回文子串状态只在其两端相等时才 <span class="mono">+2</span>。</li>
+      <li><strong>0-1 背包变体</strong>：做「分割等和子集（LC 416）」——判断能否恰好装满 <span class="mono">sum/2</span>，用 <span class="mono">bool</span> 型 <span class="mono">dp</span> 并确认内层<strong>倒序</strong>；再加练「目标和（LC 494）」体会「计数型 DP」。</li>
+      <li><strong>状态机 DP</strong>：做股票买卖系列（LC 121 / 122 / 123），体会「持有 / 未持有」两维状态与打家劫舍「选/不选」的相通之处，进阶可挑战含冷却期/手续费版（LC 309 / 714）。</li>
+      <li><strong>单调队列优化</strong>：做「滑动窗口最大值（LC 239）」后再挑战「长度受限的最大子序和」，理解为什么单调队列能把窗口最值降到 <span class="mono">O(1)</span>；有余力再了解「斜率优化（洛谷 P3195 / P1880）」。推荐来源：LeetCode、洛谷、代码随想录。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "dp",                 // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "动态规划",          // ex: 绪论与算法复杂度分析
+  eyebrow: "MODULE 15 · 数据结构与算法",
+  prev: "14-贪心算法.html",   // 前一节文件名
+  next: "16-回溯算法.html",   // 下一节文件名
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"动态规划能高效求解的问题，通常需要同时满足哪两个前提？",
+    opts:["最优子结构 + 重叠子问题","贪心选择性质 + 无后效性","分治递归 + 单调性","局部最优 + 子问题互不重叠"],
+    ans:0,
+    exp:"动态规划的两大前提是：① 最优子结构——原问题最优解可由子问题最优解组合得到；② 重叠子问题——同一子问题被多次求解，才值得用记忆化/递推表去记录。贪心选择性质是贪心算法的前提；单调性是单调队列/斜率优化才需要的条件，并非 DP 本身的必备前提。"
+  },
+  {
+    type:"quiz",
+    q:"跳上 n 阶楼梯，每次可走 1 阶或 2 阶（LC 70）。若 dp[i] 表示「跳到第 i 阶的方法数」，正确的转移方程是？",
+    opts:["dp[i] = dp[i-1] + dp[i-2]","dp[i] = max(dp[i-1], dp[i-2])","dp[i] = dp[i-1] + 1","dp[i] = dp[i-2] + 2"],
+    ans:0,
+    exp:"最后一步要么从第 i-1 阶跨 1 阶上来、要么从第 i-2 阶跨 2 阶上来，两种走法互不重叠，所以方法数相加：dp[i]=dp[i-1]+dp[i-2]。边界 dp[1]=1、dp[2]=2。取 max 的是「打家劫舍」式（选/不选）；+1 或 +2 都无法正确累加走法数。"
+  },
+  {
+    type:"quiz",
+    q:"求最大连续子数组和（LC 53）。若 dp[i] 表示「以 nums[i] 结尾」的最大子数组和，正确的转移是？",
+    opts:["dp[i] = max(dp[i-1], 0) + nums[i]","dp[i] = max(nums[i], dp[i-1] + nums[i])","dp[i] = dp[i-1] + nums[i]","dp[i] = max(dp[i-1], nums[i])"],
+    ans:1,
+    exp:"状态必须以 i 结尾才能无后效地转移。因为 nums[i] 一定要被取，所以要么「重新开始」单独成段（取 nums[i]），要么「接在 dp[i-1] 后面」（dp[i-1]+nums[i]），答案为所有 dp[i] 的 max。选项 A 的 max(dp[i-1],0) 会让结果不再以 i 结尾、破坏连续性；这是本题最常见的易错点。"
+  },
+  {
+    type:"quiz",
+    q:"0-1 背包用一维滚动数组 dp 时，内层容量循环为什么必须「从大到小（倒序）」？",
+    opts:["倒序能让内存更连续、读写更快","保证每个物品最多被选一次，避免同一轮重复放同一个物品","倒序能自动记录选择方案","正序会越界，只能用倒序"],
+    ans:1,
+    exp:"一维 dp[j] 依赖本轮的 dp[j-w[i]]。若内层正序，dp[j-w[i]] 可能已在这一轮被当前物品更新过（相当于已放进这个物品），用它再推 dp[j] 就会「把同一个物品再放一次」，退化成完全背包。倒序时 dp[j-w[i]] 仍是上一轮（未放当前物品）的值，于是每个物品最多被选一次。"
+  },
+  {
+    type:"quiz",
+    q:"最长上升子序列（LC 300）用「贪心 + 二分」可做到 O(n log n)，它维护的 tails 数组表示什么？",
+    opts:["当前遍历到的上升子序列本身","长度为 k+1 的上升子序列的最小结尾元素 tails[k]","把所有元素升序排序后的结果","每个位置结尾的最长上升子序列长度"],
+    ans:1,
+    exp:"贪心的关键是让每个长度的「结尾尽量小」，这样后面更容易接上更大的数。tails[k] 记录长度为 k+1 的上升子序列的最小结尾；由于它单调递增，可二分，最终 len(tails) 即 LIS 长度。但注意它只给出长度、不一定能还原出真实序列。选项 D 是 O(n²) 版 dp[i] 的定义。"
+  },
+  {
+    type:"quiz",
+    q:"完全背包（每个物品可无限取）与 0-1 背包在一维滚动写法上的关键差异是？",
+    opts:["完全背包内层容量循环要倒序，0-1 背包要正序","完全背包内层容量循环要正序，0-1 背包要倒序","完全背包不需要容量循环","0-1 背包用 min，完全背包用 max"],
+    ans:1,
+    exp:"0-1 背包内层倒序，保证每个物品至多选一次；完全背包内层正序，同一物品可以在这一轮被反复更新（相当于无限取）。方向一旦写反，0-1 背包就退化成完全背包。凑零钱（LC 322）就是完全背包的「求最小数量」版本。"
+  },
+  {
+    type:"quiz",
+    q:"区间 DP（如最长回文子序列 LC 516）的状态 dp[i][j] 表示区间 [i, j] 上的最优值，正确的遍历顺序是？",
+    opts:["按 i 从 0 到 n 递增、再按 j 从 0 到 n 递增","按区间长度从小到大，先填小区间，再填大区间","按 j 从大到小、i 从大到小","任意顺序都可以，因为转移只依赖相邻状态"],
+    ans:1,
+    exp:"区间 DP 转移 dp[i][j] 依赖更短的区间（dp[i+1][j-1]、dp[i+1][j]、dp[i][j-1]）。按「区间长度从小到大」能保证计算 dp[i][j] 时所有依赖的更小区间都已填好。若简单按 i/j 双层递增，会访问到尚未计算的状态（尤其是 dp[i+1][...]），结果错误。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：同一道 DP 题，用「记忆化搜索（自顶向下）」与「自底向上递推 dp 表」有何异同？各自合适什么场景？",
+    opts:["完全相同，没有区别","对应同一状态树、方向相反；递归直观但可能栈溢出，递推更可控；遍历顺序难定时优先记忆化","记忆化搜索一定更高效，应始终使用","自底向上无法解决记忆化能解决的问题"],
+    ans:1,
+    exp:"两者对应同一组状态与转移，只是实现方向相反，复杂度相同。记忆化用「递归 + 缓存」（Python 用 @lru_cache，C++ 用 map/数组），代码贴近人类思考、适合依赖关系复杂/遍历顺序难定（如图、博弈、需回溯）的场景，但递归层数深可能栈溢出、有函数调用开销。自底向上用显式循环，顺序可控、易做滚动数组省空间、无栈溢出风险，是工程与竞赛更常用的写法。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

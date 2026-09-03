@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【请替换：知识点标题】 · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— 【替换】：学习目标、内容讲解、练习考核。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">知识点标题</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · 系统</span></span>
+    <h1 id="pageTitle">知识点标题</h1>
+    <p class="lead" id="pageLead">一句话引言：这个知识点让你学会什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <!-- TODO(目标): 3–6 条可验证目标，用「学完后你能…」 -->
+      <li>目标占位：学完后，你能…（可验证的结果描述）。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">前置知识占位：例如「会用终端、了解文件、知道进程/文件描述符」。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       TODO(正文): 每个知识点创建一个 <section class="topic"> 块。
+       建议用 <div class="codewrap"> 展示命令，
+       用 <table class="tbl"> 做命令/概念对照，
+       必要时用 <div class="mermaid"> 画 flowchart / 时序图，
+       用 callout key/danger/warn 标注要点与易错点。
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>小节标题<br>（示例结构，请按此模式扩展）</h2>
+  </section>
+
+  <section class="topic" id="sample-anchor">
+    <h3><span class="kno">小节</span>小节标题<span class="pt">示例块 · 请按此结构逐个填写</span></h3>
+    <p>用一段话讲清这一小节的核心思想，为什么学它、用在什么场景。</p>
+    <ul><li>要点 1：一句话关键结论。</li><li>要点 2：与其它概念的关联。</li></ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 示例命令：替换为真实 Linux 命令并注释
+ls --version   # 检查当前 shell / 命令是否可用</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>一两句最需记住的结论。</p></div>
+  </section>
+
+  <!-- TODO(正文): 在此复制上面的示例块，替换为真实小节。 -->
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <!-- TODO(挑战): 2–4 条需要独立思考的延伸题 / 练习 -->
+      <li>挑战占位：给出一条需要动手或思考的延伸任务。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="__ID__" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "__ID__",                 // 本页知识点 id（= 大纲里的 id），如 "01-terminal-basics"
+  title: "知识点标题",
+  eyebrow: "LINUX · 系统",
+  prev: "",                     // 上一节文件名，如 "01-terminal-basics.html"；首页留 ""
+  next: "",                     // 下一节文件名；最后一节留 ""
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"示例题干：下面哪项是正确的？",
+    opts:["选项 A","选项 B","选项 C","选项 D"],
+    ans:1,
+    exp:"解析：说明为什么，并点出其它选项错在哪。"
+  },
+  // TODO(题目): 4–8 道题；至少 1 道 type:"interview"（面试延伸）。
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

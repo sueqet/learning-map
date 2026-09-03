@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算法 · 哈希表与查找 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 算法 · 哈希表与查找：空间换时间思想、哈希表原理；力扣 1 两数之和、49 字母异位词分组、128 最长连续序列、3 无重复字符的最长子串（含可运行代码与复杂度讲解）。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">算法 · 哈希表与查找</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 数据结构与算法</span></span>
+    <h1 id="pageTitle">算法 · 哈希表与查找</h1>
+    <p class="lead" id="pageLead">哈希表用<b>空间换时间</b>：一点点额外的内存，换来几乎恒定时间的查找与去重。这一节你会真正理解「为什么需要快速找/去重/统计时，第一反应是字典或集合」，并用它拿下<b>力扣 1 两数之和、49 字母异位词分组、128 最长连续序列、3 无重复字符的最长子串</b>。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能说清哈希表「<b>空间换时间</b>」的核心思想，并解释为什么平均查找是 <b>O(1)</b>、什么情况会退化。</li>
+      <li>学完后，你能用「<b>一遍遍历 + 字典</b>」在 O(n) 内解决【力扣 1 · 两数之和】，并说出字典里存「值 → 下标」而非只存值的原因。</li>
+      <li>学完后，你能用「<b>排序/计数签名 + 字典分组</b>」解决【力扣 49 · 字母异位词分组】，并比较两种签名做法的复杂度。</li>
+      <li>学完后，你能用「<b>集合去重 + 只从每段起点向后延伸</b>」解决【力扣 128 · 最长连续序列】，保证整体 O(n)。</li>
+      <li>学完后，你能用「<b>滑动窗口 + 字典</b>（记录字符最近出现位置）」解决【力扣 3 · 无重复字符的最长子串】，并说明左边界为何能直接跳跃。</li>
+      <li>学完后，你能快速识别「看到计数/去重/快速找就想到哈希表」，并判断它<b>何时可用、何时应换用排序或有序结构</b>。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">建议先掌握第 07 节「字典与集合」与第 14 节「算法 · 数组与字符串」（双指针、滑动窗口）。能看懂<b>时间/空间复杂度</b>的 O 记号，熟悉 for 循环、<code>enumerate</code>、列表推导式，以及 <code>defaultdict</code>/<code>Counter</code> 的基本用法。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>哈希表：空间换时间<br>（先把「找」变成 O(1)，再谈套路）</h2>
+  </section>
+
+  <section class="topic" id="hash-basics">
+    <h3><span class="kno">原理</span>为什么哈希表快<span class="pt">从 O(n) 到平均 O(1)</span></h3>
+    <p>在列表里找一个值，可能要把整个数组扫一遍，是 <b>O(n)</b>。哈希表（Python 里的 <code>dict</code> 与 <code>set</code>）则把<b>键</b>交给 <code>hash()</code> 算出一个位置，直接跳到那个槽位去取——于是「找 / 去重 / 判断是否存在」变成了<b>平均 O(1)</b>。它用一份额外的表（哈希/映射）换来了速度，这就是<b>空间换时间</b>。</p>
+    <ul>
+      <li><b>找一处地址</b>：<code>key → hash(key) → 槽位索引</code>，一步定位。</li>
+      <li><b>冲突</b>：不同键可能落到同一槽位，用<b>开放寻址 / 拉链</b>解决；极端冲突时复杂度会退化到 <b>O(n)</b>。</li>
+      <li><b>键必须可哈希</b>：即<b>不可变</b>对象（int / str / tuple / frozenset）；<code>list</code>、<code>dict</code>、<code>set</code> 不能当键。</li>
+      <li>哈希表<b>无序</b>：Python 3.7+ 的 <code>dict</code> 只是「保持插入顺序」，它并不按 key 排序。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 直觉示范：两种"统计字符频次"的做法
+text = "banana"
+
+# 1) 朴素：对每个字符再扫一遍 —— 本质是 O(n^2)
+def count_slow(t):
+    res = []
+    for ch in sorted(set(t)):
+        res.append((ch, t.count(ch)))
+    return res
+
+# 2) 哈希表：一遍遍历，一边计数一边查 —— 平均 O(n)
+def count_fast(t):
+    freq = {}
+    for ch in t:
+        freq[ch] = freq.get(ch, 0) + 1   # O(1) 查找 + 修改
+    return freq
+
+print(count_fast(text))   # {'b':1, 'a':3, 'n':2}
+# 从 collections import Counter 也能一行搞定：Counter(text)</code></pre>
+    </div>
+    <div class="gitgraph">
+      <div class="mermaid">
+        flowchart LR
+          K["键 key<br/>如 'name'"] --> H["hash(key)"]
+          H --> I["对表长取模<br/>得到槽位索引"]
+          I --> P["检查该槽位"]
+          P --> F{"该位置键相等？"}
+          F -- 是 --> V["直接返回 ✔ 平均 O(1)"]
+          F -- 否 --> C["处理冲突<br/>开放寻址 / 拉链"]
+          C --> V
+      </div>
+    </div>
+    <table class="tbl">
+      <tr><th>操作</th><th>list（线性）</th><th>dict / set（哈希）</th></tr>
+      <tr><td>按值查找 <code>x in arr</code></td><td class="mono">O(n)</td><td class="mono">O(1)（按键）</td></tr>
+      <tr><td>判断存在 / 去重</td><td class="mono">O(n)</td><td class="mono">O(1)（平均）</td></tr>
+      <tr><td>确定一个键对应的值</td><td class="mono">需先找到下标</td><td class="mono">O(1)（平均）</td></tr>
+      <tr><td>额外空间</td><td class="mono">O(1)（原地）</td><td class="mono">O(n)</td></tr>
+      <tr><td>有序 / 顺序遍历</td><td class="mono">支持</td><td class="mono">不保证有序（dict 保插入序）</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>看到「<b>找、去重、计数、判断存在、配对</b>」这类问题，就想到把数据放进 <code>set</code>/<code>dict</code>，用 O(1) 的查找换掉双层循环或全表扫描。代价是 O(n) 的额外空间，以及「键必须可哈希」这条硬约束。</p></div>
+  </section>
+
+  <section class="topic" id="lc-two-sum">
+    <h3><span class="kno">力扣 1</span>两数之和<span class="pt">一遍遍历 + 字典</span></h3>
+    <p><b>【力扣题号 1 · Two Sum】</b>给定整数数组 <code>nums</code> 和目标值 <code>target</code>，返回和为 <code>target</code> 的两个数的<b>下标</b>。暴力两层循环是 O(n²)；最优做法是<b>一遍遍历</b>，用字典记录「已经看过的值 → 下标」。</p>
+    <ul>
+      <li>对当前数 <code>x</code>，算它的<b>补数</b> <code>need = target - x</code>。</li>
+      <li>若 <code>need</code> 已在字典里，说明之前遇到过它，直接返回 <code>[字典[need], 当前下标]</code>。</li>
+      <li>否则把 <code>x</code> 和它的下标写进字典，供后面的数来配对。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def twoSum(nums, target):
+    seen = {}                       # 值 -> 下标
+    for i, x in enumerate(nums):
+        need = target - x           # 还差多少
+        if need in seen:            # 之前出现过
+            return [seen[need], i]
+        seen[x] = i                 # 记下当前值的位置
+    return []
+
+print(twoSum([2, 7, 11, 15], 9))    # [0, 1]（2 + 7 = 9）
+print(twoSum([3, 2, 4], 6))         # [1, 2]
+print(twoSum([3, 3], 6))            # [0, 1]（两个相同值也能处理）
+
+# 复杂度：时间 O(n)（一次遍历，每步 O(1)）；空间 O(n)（哈希表存已见值）</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>字典存的是<b>「值 → 下标」</b>的映射——这样既能 O(1) 查到补数是否出现过，又能立刻拿到它的下标拼成答案。若只记录值不记录下标，就无法同时返回两个下标。</p></div>
+    <div class="callout warn"><span class="i">⚠</span><p><b>注意：</b>要理解「B 依靠 A」的方向。我们是<b>向后借</b>：当前 <code>x</code> 去找「前面已经见过的补数」，而不是等以后的人来找它。这样一次循环就够了。若先存当前值再查补数，会错误地匹配到自身。</p></div>
+  </section>
+
+  <section class="topic" id="lc-group-anagrams">
+    <h3><span class="kno">力扣 49</span>字母异位词分组<span class="pt">排序签名 / 计数签名 + 字典分组</span></h3>
+    <p><b>【力扣题号 49 · Group Anagrams】</b>把由<b>相同字母重新排列</b>产生的词（异位词）分到同一组。关键是把「判断两个词是否异位」变成一个<b>统一签名</b>，把同签名的词放入同一组。</p>
+    <ul>
+      <li><b>签名法 1（排序）</b>：把每个词的字母排序，如 <code>"eat"</code>/<code>"tea"</code>/<code>"ate"</code> → <code>"aet"</code>。排序后相同即异位，作为字典键。</li>
+      <li><b>签名法 2（计数）</b>：统计 26 个小写字母各自出现次数，组装成元组 <code>(e:1,a:1,t:1,...)</code> 作键，不必排序。</li>
+      <li>两种都借助哈希表<b>按签名分组</b>，把「两两比较复杂度」降下来。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">from collections import defaultdict
+
+def groupAnagrams(strs):
+    groups = defaultdict(list)
+    for w in strs:
+        key = "".join(sorted(w))    # 排序后的"签名"
+        groups[key].append(w)
+    return list(groups.values())
+
+print(groupAnagrams(["eat","tea","tan","ate","nat","bat"]))
+# [['eat','tea','ate'], ['tan','nat'], ['bat']]
+
+# 复杂度：时间 O(n·k·log k)（k 为单词平均长度，主要耗在排序每个词）；
+# 空间 O(n·k)（分组结果 + 哈希表）。</code></pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def groupAnagrams_count(strs):
+    groups = defaultdict(list)
+    for w in strs:
+        cnt = [0] * 26
+        for ch in w:
+            cnt[ord(ch) - ord('a')] += 1
+        key = tuple(cnt)            # 26 个计数的元组作为签名
+        groups[key].append(w)
+    return list(groups.values())
+
+# 复杂度：时间 O(n·k)（不再排序，改为线性统计）；空间 O(n·k)。</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>异位词问题的本质是「找一种<b>与顺序无关</b>的表示方式」。排序签名最直观（O(n·k·log k)），计数签名更优（O(n·k)）。哈希表在这里的作用是<b>把「判断异位」</b>从昂贵的比较中解放出来，用签名 O(1) 归组。</p></div>
+  </section>
+
+  <section class="topic" id="lc-longest-consecutive">
+    <h3><span class="kno">力扣 128</span>最长连续序列<span class="pt">集合去重 + 只从起点延伸</span></h3>
+    <p><b>【力扣题号 128 · Longest Consecutive Sequence】</b>在一个<b>未排序</b>数组中找出最长连续序列的长度（如 <code>[100,4,200,1,3,2]</code> 中最长连续的是 <code>1,2,3,4</code>，长度 4）。朴素做法要先排序再扫，是 O(n log n)。用哈希表可做到<b> O(n)</b>。</p>
+    <ul>
+      <li>先把所有数放进 <code>set</code>，得到 <b>O(1) 的成员判断</b>与去重。</li>
+      <li>只对「连续段的<b>起点</b>」开始向后延伸：若 <code>x - 1 not in set</code>，说明 <code>x</code> 是一段连续序列的最小值，才进入 <code>while</code> 找 <code>x+1, x+2, ...</code>。</li>
+      <li>这样每个元素最多被访问一次，整体仍是 <b>O(n)</b>，不会重复统计。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def longestConsecutive(nums):
+    numset = set(nums)              # 去重 + O(1) 判断
+    best = 0
+    for x in numset:
+        if x - 1 in numset:         # 不是连续段起点，跳过
+            continue
+        length = 1
+        while x + length in numset: # 从起点向后延伸
+            length += 1
+        best = max(best, length)
+    return best
+
+print(longestConsecutive([100,4,200,1,3,2]))  # 4（1,2,3,4）
+print(longestConsecutive([0,3,7,2,5,8,4,6,0,1]))  # 9
+
+# 复杂度：时间 O(n)（每个数最多作为某段的一段被访问一次）；空间 O(n)（set）。</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>关键不是「排序」，而是「<b>如何让每段只算一次</b>」。用 <code>x-1 in set</code> 判定「是否为起点」，确保了每段只在它的最小值处被完整统计，从而避免 O(n²) 的重复扫描。</p></div>
+  </section>
+
+  <section class="topic" id="lc-longest-substring">
+    <h3><span class="kno">力扣 3</span>无重复字符的最长子串<span class="pt">滑动窗口 + 字典记录位置</span></h3>
+    <p><b>【力扣题号 3 · Longest Substring Without Repeating Characters】</b>给定字符串 <code>s</code>，找出<b>不含重复字符</b>的最长子串长度。用「<b>滑动窗口</b>」维护一个无重复的窗口，配合<b>字典记录每个字符最近一次出现的位置</b>。</p>
+    <ul>
+      <li><code>left</code> 为窗口左边界，<code>right</code> 用 <code>enumerate</code> 右移。</li>
+      <li>若当前字符 <code>ch</code> 之前在窗口内出现过，就把 <code>left</code> 跳到 <code>ch</code> 上一次位置的<b>后一位</b>。</li>
+      <li>窗口长度 = <code>right - left + 1</code>，取最大即可。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def lengthOfLongestSubstring(s):
+    seen = {}        # 字符 -> 最近一次出现的下标
+    left = 0
+    best = 0
+    for right, ch in enumerate(s):
+        if ch in seen and seen[ch] >= left:
+            left = seen[ch] + 1     # 左边界直接跳到重复字符之后
+        seen[ch] = right
+        best = max(best, right - left + 1)
+    return best
+
+print(lengthOfLongestSubstring("abcabcbb"))  # 3（"abc"）
+print(lengthOfLongestSubstring("pwwkew"))    # 3（"wke" / "kew"）
+print(lengthOfLongestSubstring("bbbbb"))     # 1
+
+# 复杂度：时间 O(n)（每个字符最多被左右边界各处理一次）；空间 O(字符集大小)（字典）。</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>滑动窗口 + 哈希表的经典组合：<b>哈希表让「判断字符是否重复」瞬间完成，并能记住它的位置、让左边界立刻跳跃</b>，而不是一格一格地回退重扫。这比纯滑动窗口（重复时逐个右移）更进一步。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>比较要用「是否在窗口内」，即 <code>seen[ch] &gt;= left</code>。若只写 <code>ch in seen</code>，会错误地把「窗口外已丢弃的旧位置」也当成重复，导致左边界被拉回，结果偏小。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>两数之和的双指针版：</b>给定一个<b>升序</b>数组，用「双指针」以 O(1) 额外空间解两数之和，并与「一遍遍历 + 字典」的 O(n) 空间版对比：各需要什么前提？分别适合什么场景？</li>
+      <li><b>最长连续序列手工推演：</b>对 <code>[100,4,200,1,3,2]</code>，用「建 set → 只从每段起点向后延伸」逐步写出过程，验证返回 4；再思考：如果数组中<b>包含重复元素</b>，这个算法还正确吗？为什么 set 已经帮你处理了重复。</li>
+      <li><b>无重复子串推演：</b>对 <code>"pwwkew"</code> 手动走一遍滑动窗口，记录每一步的 <code>left</code>、<code>right</code> 与 <code>best</code>，并解释为什么当碰到重复的 <code>w</code> 时左边界能直接跳到其上一次出现位置的后一位，而不必一格一格右移。</li>
+      <li><b>思考：签名比较。</b>力扣 49 用「排序签名」是 O(n·k·log k)，用「计数元组签名」是 O(n·k)。请分别写出两类想法的关键代码，并说明哈希表把「判断两个词是否异位」从「可能 O(k log k) 比较」降为「O(k) 构造签名、O(1) 查组」的代价是什么。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="15-lc-hash" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "15-lc-hash",             // 本页知识点 id（= 大纲里的 id），如 "01-terminal-basics"
+  title: "算法 · 哈希表与查找",
+  eyebrow: "PYTHON · 数据结构与算法",
+  prev: "14-lc-array.html",     // 上一节文件名，如 "01-terminal-basics.html"；首页留 ""
+  next: "16-lc-stack-queue.html",  // 下一节文件名；最后一节留 ""
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"用「一遍遍历 + 字典」解【力扣 1 · 两数之和】的核心思想是：",
+    opts:["先把数组排序，再用双指针从两端逼近","对当前数 x 算补数 target - x，并检查补数是否已在字典中出现","先把数组转成集合，再去重暴力双循环","用递归回溯枚举所有下标组合"],
+    ans:1,
+    exp:"对当前数 x，只需算 need = target - x，再查 need 是否已出现在字典里。若在，说明之前遇到过它，直接返回 [字典[need], 当前下标]。整个过程 O(n)，无需排序。"
+  },
+  {
+    type:"quiz",
+    q:"用「一遍遍历 + 字典」解两数之和时，字典里保存的是：",
+    opts:["只保存元素的值，不保存位置","「值 → 下标」的映射","只保存下标，不保存值","保存布尔值，标记该数是否遍历过"],
+    ans:1,
+    exp:"字典必须保存「值 → 下标」，这样既能用 O(1) 查到补数是否出现过，又能立刻拿到它的下标拼成答案。若只存值，无法同时返回两个下标。"
+  },
+  {
+    type:"quiz",
+    q:"【力扣 49 · 字母异位词分组】中，哪种做法能把 'eat' 与 'tea' 归到同一组？",
+    opts:["用单词长度作为分组键","把每个单词的字母排序后作为分组键，如 'eat'→'aet'","用单词的首字母作为分组键","用单词在数组中出现的下标作为分组键"],
+    ans:1,
+    exp:"异位词排序后结果相同：'eat'/'tea'/'ate' 都会变成 'aet'。以排序结果为键，就能把异位词放到同一组。也可用 26 个字母的计数元组做签名，复杂度更优。"
+  },
+  {
+    type:"quiz",
+    q:"【力扣 128 · 最长连续序列】为什么用 set，并且只对「连续段的起点」开始向后延伸？",
+    opts:["因为 set 能保序，可直接用下标访问","set 去重后可 O(1) 判断成员，且只对 x-1 不在集合里的 x 才开始找 x+1,...，保证每段只算一次","用 set 只是为了能排序输出","因为 set 里每个元素的值和下标是一致的"],
+    ans:1,
+    exp:"set 去重并将「判断一个数是否存在」降到 O(1)。若 x-1 不在集合里，说明 x 是某段连续序列的最小值（起点），才进入 while 向后延伸。这样每个数最多被访问一次，整体 O(n)。"
+  },
+  {
+    type:"quiz",
+    q:"【力扣 3 · 无重复字符的最长子串】中，滑动窗口常用哪个结构维护「当前窗口」，以判断重复并更新左边界？",
+    opts:["列表 list，用 in 判断并逐个删除","集合 set 或 字典 dict（记录字符最近出现的位置）","栈 stack","队列 queue"],
+    ans:1,
+    exp:"用 dict 记录「字符 → 最近一次出现的下标」，重复时把 left 跳到该字符之前位置的后一位。若只用 set 能判重，但无法拿到「上次位置」去让左边界直接跳跃。"
+  },
+  {
+    type:"quiz",
+    q:"关于哈希表「空间换时间」，下列说法最准确的是：",
+    opts:["哈希表用额外内存（哈希/字典）换取平均 O(1) 的查找","哈希表不占用额外内存","哈希表一定比排序法快","哈希表的键可以是任意可变对象"],
+    ans:0,
+    exp:"哈希表用 O(n) 的额外空间（存储键值映射），换来平均 O(1) 的查找/插入/去重。键必须可哈希（不可变对象），且最坏冲突时可能退化到 O(n)，平均仍是 O(1)。"
+  },
+  {
+    type:"interview",
+    q:"面试：什么情况下哈希表「用不了」或不是最佳选择？",
+    opts:["数据规模很大、但需要按顺序输出时，哈希表仍是最佳","当键不可哈希（如 list/dict 当键）、需要有序遍历、要求严格的最坏 O(log n) 保证、或内存极受限时，应改用排序或平衡搜索树等有序结构","哈希表在任何输入下都保持 O(1) 最坏时间，因此永远最优","哈希表一旦建立就不可遍历"],
+    ans:1,
+    exp:"哈希表的代价是：键需可哈希、无序、平均 O(1) 但最坏 O(n)（冲突）、且占用 O(n) 额外空间。因此当需要有序输出、键不可哈希、要求有保证的最坏对数复杂度、或内存极其受限时，应改用排序、平衡二叉搜索树（有序字典）等。能说出这些「边界」才说明真正理解了「空间换时间」。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错点记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

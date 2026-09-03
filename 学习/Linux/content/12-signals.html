@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>信号与 kill · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— 信号与 kill：理解内核如何异步通知进程，掌握 SIGHUP/SIGINT/SIGQUIT/SIGTERM/SIGKILL，以及用 kill/killall/pkill 优雅或强制终止进程、重载配置。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">信号与 kill</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · PROCESS</span></span>
+    <h1 id="pageTitle">信号与 kill</h1>
+    <p class="lead" id="pageLead">信号是<b>内核向进程发出的异步通知</b>。学完本节，你会分清常见的 <b>1/2/3/15/9</b> 号信号，会用 <code class="mono">kill / killall / pkill</code> 优雅或强制地控制进程，并且知道<b>为什么先发 SIGTERM、再发 SIGKILL</b>。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能说出「信号」的定义，以及它是如何异步通知进程的。</li>
+      <li>学完后，你能背出 SIGHUP / SIGINT / SIGQUIT / SIGTERM / SIGKILL 的<b>编号</b>与<b>默认行为</b>。</li>
+      <li>学完后，你能用 <code class="mono">kill / killall / pkill</code> 按 PID 或进程名发送任意信号。</li>
+      <li>学完后，你能解释 SIGTERM 与 SIGKILL 的差异，并写出「先优雅、后强制」的终止流程。</li>
+      <li>学完后，你能区分 SIGINT（Ctrl+C）与 SIGQUIT（Ctrl+\）的来源和用途差别。</li>
+      <li>学完后，你能用 SIGHUP 重载守护进程配置（如 nginx / sshd）。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">建议先学 <b>11 节「进程状态与优先级」</b>：会用 <code class="mono">ps / top</code> 找出进程的 <b>PID</b>，并理解进程本身（R/S/D/Z 等状态）的概念。本节聚焦「如何主动通知一个正在运行的进程」。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>信号（Signal）<br>内核向进程发出的异步通知</h2>
+  </section>
+
+  <section class="topic" id="signal-what">
+    <h3><span class="kno">01</span>信号是什么<span class="pt">异步 · 事件通知 · 内核 → 进程</span></h3>
+    <p>进程平时总在自顾自地执行。但主机上经常发生一些<b>外部事件</b>——你按了 Ctrl+C、防火墙上有个连接断开、系统要关机、某个守护进程的配置文件被改动了。内核需要一种方式<b>打断</b>正在运行的进程，让它知道「有件事发生了」。这一机制就是<b>信号（signal）</b>。</p>
+    <p>信号是<b>内核向进程发送的异步通知</b>：
+      <ul>
+        <li><b>异步</b>：进程不需要主动轮询，信号可以随时到达并打断当前执行流。</li>
+        <li><b>内核发起</b>：多数信号由内核产生（如异常、Ctrl+C 对应的按键）；也可由<b>另一个进程</b>通过 <code class="mono">kill</code> 发送给目标进程。</li>
+        <li><b>编号 + 名称</b>：每个信号有一个数字编号和一个 <code class="mono">SIGxxx</code> 名称（编号因平台有细微差异，但常用的一批一致）。</li>
+      </ul>
+    </p>
+    <p>进程收到信号后，按该信号的<b>默认行为</b>去处理（多数是「终止」）；关键的是——部分信号允许进程<b>捕获</b>并自定义处理，另一些则<b>无法捕获或忽略</b>。</p>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>信号是「内核 / 其它进程 → 目标进程」的<b>单向异步通知</b>。它不携带业务数据，只表达「发生了某类事件」。
+
+“进程收到信号”时，绝大多数情况该进程会<b>退出</b>。</p></div>
+  </section>
+
+  <section class="topic" id="signal-table">
+    <h3><span class="kno">02</span>五个常用信号速查<span class="pt">编号 · 默认行为 · 能否捕获</span></h3>
+    <p>先记住这一张表——它是本节的核心。第 4 部分会逐个展开。</p>
+    <table class="tbl">
+      <thead>
+        <tr><th>信号</th><th>编号</th><th>默认行为</th><th>能否被捕获/忽略</th><th>典型用途</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">SIGHUP</td><td>1</td><td>终止</td><td>能</td><td>重新加载配置（守护进程约定）</td></tr>
+        <tr><td class="mono">SIGINT</td><td>2</td><td>终止</td><td>能</td><td>Ctrl+C，请求用户中断</td></tr>
+        <tr><td class="mono">SIGQUIT</td><td>3</td><td>终止 + core dump</td><td>能</td><td>Ctrl+\，退出并生成 core dump</td></tr>
+        <tr><td class="mono">SIGTERM</td><td>15</td><td>终止</td><td>能</td><td>请求程序<b>优雅退出</b>，可做清理</td></tr>
+        <tr><td class="mono">SIGKILL</td><td>9</td><td>强制终止</td><td><b>不能</b></td><td>强制立即杀死进程，内核直接终止</td></tr>
+      </tbody>
+    </table>
+    <p>查看当前系统全部支持哪些信号，用 <code class="mono">kill -l</code>（小写 L，列出信号列表）：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>kill -l              # 列出所有信号名
+# 输出示例（每行若干）：
+#  1) SIGHUP      2) SIGINT      3) SIGQUIT     4) SIGILL     5) SIGTRAP
+#  6) SIGABRT     7) SIGBUS      8) SIGFPE      9) SIGKILL   10) SIGUSR1
+# 15) SIGTERM   ...
+
+kill -l 9          # 用编号查名称
+# SIGKILL
+
+kill -l SIGTERM    # 用名称查编号
+# 15</code></pre>
+    </div>
+    <div class="callout warn"><span class="i">⚠</span><p><b>易错点：</b><code class="mono">kill -l</code> 里的 <code class="mono">-l</code> 是「<b>列</b>表（list）」；而 <code class="mono">kill &lt;PID&gt;</code> 里不带选项才是发送 <code class="mono">SIGTERM</code>。别把「列出信号」和「默认发 15 号信号」搞混。</p></div>
+  </section>
+
+  <section class="topic" id="signal-send">
+    <h3><span class="kno">03</span>如何发出信号<span class="pt">kill · killall · pkill</span></h3>
+    <p>要给某个进程发信号，最常用的是 <code class="mono">kill</code>。<code class="mono">kill</code> 的语法是 <code class="mono">kill [-信号] &lt;PID&gt;</code>：<b>不带信号默认发 SIGTERM(15)</b>。也可以用 <code class="mono">-s</code> 指定名称，或直接写编号。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 先找到进程的 PID
+ps aux | grep nginx
+pgrep nginx            # 输出若干 PID
+
+# 按 PID 发信号（默认 SIGTERM）
+kill -15 &lt;PID&gt;          # 发送 SIGTERM（默认，优雅退出）
+kill -9 &lt;PID&gt;           # 发送 SIGKILL（强制杀死）
+kill -1 &lt;PID&gt;           # 发送 SIGHUP（重载配置）
+kill -s SIGTERM &lt;PID&gt;   # 等价写法：用 -s + 信号名
+
+# 按进程名发信号
+killall nginx          # 按进程名发送 SIGTERM
+pkill -9 nginx         # 按进程名发送 SIGKILL</code></pre>
+    </div>
+    <p>三者都用于「向进程发信号」，区别主要在<b>如何定位目标</b>：
+    <table class="tbl">
+      <thead>
+        <tr><th>工具</th><th>定位方式</th><th>默认信号</th><th>典型场景</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">kill</td><td>按 <b>PID</b></td><td>SIGTERM</td><td>精确指挥某一个已知进程</td></tr>
+        <tr><td class="mono">killall</td><td>按<b>进程名</b>（精确匹配完整名字）</td><td>SIGTERM</td><td>一次结束所有同名进程</td></tr>
+        <tr><td class="mono">pkill</td><td>按<b>进程名 / 正则</b>匹配</td><td>SIGTERM</td><td>更灵活地按模式批量匹配</td></tr>
+      </tbody>
+    </table>
+    </p>
+    <p><b>最佳实践</b>：先发 SIGTERM 给进程清理机会，等几秒无响应再发 SIGKILL：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>kill -15 &lt;PID&gt; &amp;&amp; sleep 5 &amp;&amp; kill -9 &lt;PID&gt;</code></pre>
+    </div>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+  A([找到 PID / 进程名]) --> B[发送 SIGTERM 15]
+  B --> C{进程在 5 秒内退出?}
+  C -->|是| D([优雅结束 ✓<br>已释放连接/刷写缓冲])
+  C -->|否 / 假死| E[发送 SIGKILL 9<br>由内核直接终止]
+      </div>
+    </div>
+  </section>
+
+  <section class="topic" id="signal-detail">
+    <h3><span class="kno">04</span>逐个讲：五个常用信号<span class="pt">TERM / KILL / INT / QUIT / HUP</span></h3>
+
+    <p><b>SIGTERM（15）—— 优雅退出</b></p>
+    <ul>
+      <li>最常用的<b>关闭</b>信号，给程序机会做清理：关闭网络连接、刷写缓冲区、保存状态等。</li>
+      <li><code class="mono">kill &lt;PID&gt;</code> 不带参数默认就是发 SIGTERM。</li>
+    </ul>
+
+    <p><b>SIGKILL（9）—— 强制终止</b></p>
+    <ul>
+      <li>由<b>内核直接终止</b>，程序没有任何机会执行清理代码。</li>
+      <li>无法被捕获、阻塞或忽略——哪怕进程想「赖着不走」也没用。</li>
+      <li>适用于程序<b>假死</b>、无法响应 SIGTERM 的情况。</li>
+    </ul>
+
+    <p><b>SIGINT（2）—— 中断</b></p>
+    <ul>
+      <li>来源于键盘 <code class="mono">Ctrl+C</code>，表示用户要打断当前任务。</li>
+      <li>与 SIGTERM 语义相近，区别在<b>来源</b>：SIGINT 是<b>用户交互</b>触发，SIGTERM 是<b>程序 / 系统管理</b>触发。</li>
+    </ul>
+
+    <p><b>SIGQUIT（3）—— 退出并 core dump</b></p>
+    <ul>
+      <li>来源于键盘 <code class="mono">Ctrl+\</code>（注意不是 Ctrl+C）。</li>
+      <li>终止进程并生成 <b>core dump</b> 文件（进程崩溃现场），用于事后调试。</li>
+      <li>程序假死时可用此信号拿到崩溃现场（下一节「core dump 调试」展开）。</li>
+    </ul>
+
+    <p><b>SIGHUP（1）—— 重载配置</b></p>
+    <ul>
+      <li>原始含义：<b>终端断开 / 挂断</b>（hanging up）。当控制终端关闭时，内核会给进程发 SIGHUP。</li>
+      <li>守护进程把它<b>约定</b>为「重新加载配置」的信号——这是<b>社区约定，非系统强制</b>。</li>
+      <li>常见支持程序：<b>nginx、sshd、rsyslog</b> 等。</li>
+    </ul>
+
+    <div class="callout key"><span class="i">★</span><p><b>一句话区分：</b>想<b>优雅</b>关进程发 <code class="mono">SIGTERM</code>；进程<b>死了不响应</b>才用 <code class="mono">SIGKILL</code>；<b>用户在终端按</b> <code class="mono">Ctrl+C</code> 是 <code class="mono">SIGINT</code>；想<b>拿崩溃现场</b>用 <code class="mono">SIGQUIT</code>；想让守护进程<b>重载配置</b>发 <code class="mono">SIGHUP</code>。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>永远<b>不要</b>一上来就 <code class="mono">kill -9</code>。<code class="mono">SIGKILL</code> 不给程序保存现场、关闭连接、刷缓冲的机会，可能导致数据丢失或文件损坏；况且它<b>无法被捕获</b>，所以没有任何「安全下车的通道」。多数运维规范顺序是：<code class="mono">kill</code> → 等几秒 → <code class="mono">kill -9</code>。</p></div>
+  </section>
+
+  <section class="topic" id="signal-reload">
+    <h3><span class="kno">05</span>实战：用 SIGHUP 重载配置<span class="pt">nginx / sshd 守护进程</span></h3>
+    <p>很多服务（nginx、sshd）改完配置后<b>不需要重启</b>整只进程，而是「重载」。直接 <code class="mono">kill -1</code> 给守护进程发 <code class="mono">SIGHUP</code>，它就会重新读取配置文件，而不中断现有连接。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 改动 nginx.conf 后（不必停机）：
+kill -1 $(cat /var/run/nginx.pid)   # 重载 nginx 配置（SIGHUP）
+
+# 更稳妥：先检查配置语法再重载
+nginx -t                            # 语法检查
+kill -HUP $(cat /var/run/nginx.pid) # -HUP 等价于 -1
+
+# sshd 也可用 signal 重载（保留现有连接）
+kill -1 $(cat /var/run/sshd.pid)   # 或 systemctl reload sshd</code></pre>
+    </div>
+    <p>对服务而言，<code class="mono">systemctl reload</code> 本质上也是发 <code class="mono">SIGHUP</code>（或由单元文件指定的信号）。用信号重载比「停掉再启动」更平滑——<b>连接不断、无停机时间</b>。</p>
+    <div class="callout key"><span class="i">★</span><p><b>要点：</b><code class="mono">SIGHUP</code> 的「重载配置」是<b>程序的约定</b>，不是内核硬性规定。一个进程是否响应 <code class="mono">SIGHUP</code> 做重载，取决于它自己有没有写这个处理逻辑。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>写一条命令，先对某个进程发送 SIGTERM，等待 3 秒后检查它是否还活着，若仍在运行再发送 SIGKILL（提示：结合 <code class="mono">kill -0</code> 判断进程是否存在）。</li>
+      <li>修改 nginx 的某个监听端口后，不重启、仅用 <code class="mono">kill -1</code> 让配置生效，并用 <code class="mono">ss -lntp</code> 验证新端口已监听。</li>
+      <li>对比 <code class="mono">killall</code> 与 <code class="mono">pkill</code>：分别用二者结束一组同名进程，理解它们的<b>名称匹配</b>策略差异（完整名 vs 正则/子串）。</li>
+      <li>思考题：为什么设计一个「无法被捕获、无法忽略」的 <code class="mono">SIGKILL</code> 是必要的？如果所有信号都能被忽略，系统会面临什么问题？</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="12-signals" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">进程状态与优先级</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">core dump 调试</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "12-signals",                 // 本页知识点 id（= 大纲里的 id）
+  title: "信号与 kill",
+  eyebrow: "LINUX · PROCESS",
+  prev: "11-processes.html",        // 上一节文件名
+  next: "13-core-dump.html",        // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"信号（signal）本质上是内核向进程发送的哪种信息？",
+    opts:["同步的负载数据","异步的事件通知","统一的一块内存","一段可执行代码"],
+    ans:1,
+    exp:"信号是内核（或其它进程）向目标进程发送的【异步通知】，只表达“发生了某类事件”，不携带业务数据。它可以在任意时刻打断进程并触发默认或自定义处理。"
+  },
+  {
+    type:"quiz",
+    q:"执行不带任何参数的 `kill <PID>`，默认发送的是哪个信号？",
+    opts:["SIGKILL(9)","SIGHUP(1)","SIGINT(2)","SIGTERM(15)"],
+    ans:3,
+    exp:"`kill` 不带信号参数时默认发送 SIGTERM(15)，也就是“请优雅退出”。想要强制终止才需要显式写 `kill -9`。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪个信号【无法】被进程捕获、阻塞或忽略？",
+    opts:["SIGTERM(15)","SIGINT(2)","SIGKILL(9)","SIGHUP(1)"],
+    ans:2,
+    exp:"SIGKILL(9) 由内核直接终止进程，无法被捕获、阻塞或忽略——这是它的设计目的，用来对付“假死、怎么都不退出”的进程。其余三个信号都可被进程捕获或忽略。"
+  },
+  {
+    type:"quiz",
+    q:"在终端按下 Ctrl+C，进程收到的是哪个信号？",
+    opts:["SIGINT(2)","SIGQUIT(3)","SIGTERM(15)","SIGHUP(1)"],
+    ans:0,
+    exp:"Ctrl+C 触发 SIGINT(2)，表示“用户请求中断”。注意区分：Ctrl+\\ 触发的才是 SIGQUIT(3)，它会终止进程并生成 core dump。"
+  },
+  {
+    type:"quiz",
+    q:"按“优雅地停止一个进程”的最佳实践，下列顺序哪项正确？",
+    opts:["直接 kill -9","先 kill -15，等几秒无响应再 kill -9","直接 kill -1","先 kill -1 再 kill -3"],
+    ans:1,
+    exp:"规范的“停止”流程是：先发 SIGTERM(15) 让程序有机会清理（关连接、刷缓冲、存状态）；若几秒后仍未退出，再发 SIGKILL(9) 强制终止。直接 kill -9 会剥夺清理机会，可能导致数据丢失。"
+  },
+  {
+    type:"quiz",
+    q:"Nginx 修改配置文件后，想【不重启、不断连接】地让新配置生效，更合适的做法是？",
+    opts:["kill -0 nginx","kill -9 nginx","kill -1 nginx","kill -3 nginx"],
+    ans:2,
+    exp:"给守护进程发送 SIGHUP(1) 是业界约定：nginx/sshd/rsyslog 收到后重新加载配置而不中断现有连接。`kill -1` 等价于 `kill -HUP`。kill -9 是强制终止，kill -3 是生成 core dump，都不对。"
+  },
+  {
+    type:"interview",
+    q:"面试题：`kill -9` 通常被视作“最后手段”。请说明：① 它与 SIGTERM 的本质差别；② 为什么一般不建议一上来就用 kill -9？",
+    opts:["没有本质差别，只是编号不同","kill -9 由内核直接终止且无法被捕获，不给程序任何清理机会，可能导致数据丢失；SIGTERM 可被捕获并允许程序善后。所以应先 SIGTERM 再 SIGKILL","kill -9 更慢，SIGTERM 更快","kill -9 只能杀普通进程，SIGTERM 能杀所有进程"],
+    ans:1,
+    exp:"SIGKILL(9) 由内核直接终止进程，且无法被捕获/忽略/阻塞，程序没有任何机会执行清理代码（关闭连接、刷写缓冲区、保存状态），容易造成数据丢失或文件损坏；SIGTERM(15) 可被捕获，允许程序优雅善后。因此最佳实践是先发 SIGTERM，等待片刻无响应再用 SIGKILL。"
+  },
+  {
+    type:"interview",
+    q:"面试题：为什么系统必须保留一个【无法被捕获、无法被忽略】的 SIGKILL？如果所有信号都能被忽略会怎样？",
+    opts:["不需要，所有信号都能被忽略更安全","为了让用户随心所欲杀掉任何进程","用来对付假死、失控、无法响应的进程；若所有信号都可被忽略，用户和系统就永远无法清理“赖着不走”的失控进程，会严重影响系统可用性","SIGKILL 只是为了给程序员提供运行速度更快的信号"],
+    ans:2,
+    exp:"SIGKILL 的设计目的就是提供一个“绝杀”手段：当进程假死、死循环、无法响应 SIGTERM 时，内核仍能强制回收它。若所有信号都能被忽略，那么失控进程将无法被任何信号终止，可能持续占用资源、导致系统不可用。这是“可用性”与“数据安全”的权衡。"
+  }
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

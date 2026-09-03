@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绪论与算法复杂度分析 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 绪论与算法复杂度分析：学习目标、知识点讲解、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 01 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">绪论与算法复杂度分析</h1>
+    <p class="lead" id="pageLead">本章是整门课的<strong>总纲</strong>：先弄清「什么是好算法」，再学会用<strong>大 O 记号</strong>度量算法的<strong>时间与空间复杂度</strong>，为后面每一个数据结构与算法打下分析基础。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能说出算法的五大特性，并<strong>判断</strong>一段描述是否构成一个「算法」。</li>
+      <li>学完后你能准确地<strong>分析</strong>一段代码的时间复杂度，用<strong>大 O 记号</strong>表示。</li>
+      <li>学完后你能运用<strong>加法/乘法法则</strong>及循环估算技巧，快速写出常见代码的复杂度。</li>
+      <li>学完后你能<strong>区分</strong>时间与空间复杂度，指出原地算法（in-place）与递归栈开销的区别。</li>
+      <li>学完后你能按增长率对常见复杂度阶<strong>排序</strong>，并用<strong>主定理</strong>解简单递归式。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">会一门编程语言（建议 <code>Python</code> 或 <code>C++</code>），熟悉<strong>变量、循环、函数、递归</strong>；了解基本的数学记号（对数 <span class="mono">log</span>、多项式比较）。不需要任何前置数据结构知识。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>绪论与算法复杂度分析<br>算法是什么 · 时间与大 O</h2>
+  </section>
+
+  <!-- 知识点 1：算法的基本概念与特性 -->
+  <section class="topic" id="intro-basics">
+    <h3><span class="kno">知识点</span>算法的基本概念与特性<span class="pt">intro-basics</span></h3>
+    <p><strong>算法（Algorithm）</strong>是对特定问题求解步骤的<em>有穷、确定、可行</em>的指令序列，它不依赖具体语言，是「怎么做的思想」；而<strong>程序（Program）</strong>是「数据结构 + 算法 + 语言实现」。同一个算法可以用 Python、C++ 或伪代码写出。</p>
+    <p>任何算法都必须满足<strong>五大特性</strong>（国内严蔚敏版教材）：</p>
+    <ul>
+      <li><b>有穷性：</b>算法必须在有限步之后结束，不能无限循环。</li>
+      <li><b>确定性：</b>每条指令含义唯一，对同样的输入总是得到同样的输出。</li>
+      <li><b>可行性：</b>每一步都能通过有限的基本运算实现（现实中可执行）。</li>
+      <li><b>输入：</b>可以有 0 个或多个输入。</li>
+      <li><b>输出：</b>至少有 1 个输出，否则算法没有意义。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>is_leap.py</div>
+      <pre><code># 判断闰年：一个满足"有穷、确定、可行"的算法
+# 输入: 年份; 输出: 是否为闰年(bool)
+def is_leap(year: int) -> bool:
+    if year % 400 == 0:      # 能被400整除 -> 闰年
+        return True
+    if year % 100 == 0:      # 能被100整除但不能被400整除 -> 平年
+        return False
+    if year % 4 == 0:        # 能被4整除但不能被100整除 -> 闰年
+        return True
+    return False
+
+print(is_leap(2024))   # True
+print(is_leap(1900))   # False (整百要能被400整除)</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「好算法」的评价标准是<strong>正确性、可读性、健壮性</strong>与<strong>效率</strong>。本章重点研究「效率」，即用复杂度来衡量。注意：算法 ≠ 程序，算法是思想，程序是把思想落到具体语言。</p></div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>「有穷性」强调<strong>必然</strong>在有限步结束，而不仅是「在现实可接受时间内」。一个理论上有穷、但需要几亿年的算法，仍满足有穷性，只是效率极差——这正是我们需要复杂度分析的原因。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">—</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">—</div></div>
+      <div class="cx"><div class="k">本节</div><div class="v">概念</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 2：时间复杂度的定义与分析 -->
+  <section class="topic" id="intro-time">
+    <h3><span class="kno">知识点</span>时间复杂度的定义与分析<span class="pt">intro-time</span></h3>
+    <p>时间不直接等于「运行秒数」（那取决于机器），而是指算法中<strong>基本操作（basic operation）的执行次数</strong>随输入规模 <span class="mono">n</span> 变化的<strong>增长趋势</strong>。我们关注的是当 <span class="mono">n→∞</span> 时开销的量级，于是引入了记号。</p>
+    <p><strong>大 O 记号（Big-O Notation）</strong>给出的是算法运行时间的<strong>渐进上界</strong><em>（asymptotic upper bound）</em>：存在常数 <span class="mono">c</span> 与 <span class="mono">n₀</span>，使得对所有 <span class="mono">n≥n₀</span> 都有 <span class="mono">T(n) ≤ c·f(n)</span>，记作 <span class="mono">T(n)=O(f(n))</span>。它忽略常数与低阶项，只关心「最高阶项」及其量级。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>sum.py</div>
+      <pre><code># 同一问题(求 1..n 的和)，两种算法时间开销天差地别
+def sum_loop(n: int) -> int:
+    # 循环 n 次，每次做一次加法 -> 基本操作次数 ≈ n
+    # 时间随 n 线性增长 -> O(n)
+    s = 0
+    for i in range(1, n + 1):   # 执行 n 次
+        s += i
+    return s
+
+def sum_formula(n: int) -> int:
+    # 用等差数列求和公式 -> 只做常数次运算
+    # 与 n 无关 -> O(1)
+    return n * (n + 1) // 2
+
+# 比较: n 越大，差距越悬殊。n=10^9 时 sum_loop 要跑很久, sum_formula 瞬间完成</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>复杂度看的是<strong>「增长的量级」</strong>而非具体次数。常数、低阶项、系数一律忽略：<span class="mono">3n²+5n+100 = O(n²)</span>。<strong>最坏/平均/最好</strong>三种情况都要会区分，分析时若无特别说明默认看<strong>最坏情况</strong>。</p></div>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>易错点：</b>不要用「机器运行时间」当复杂度；也不要把 <span class="mono">O(n)</span> 理解成「正好 n 步」。另外，<span class="mono">O(n²)</span> 表示<strong>上界</strong>，一个 <span class="mono">O(n)</span> 的算法当然也是 <span class="mono">O(n²)</span>，但我们总取「最紧」的界来描述。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">典型</div><div class="v">求和</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 3：复杂度的计算与技巧 -->
+  <section class="topic" id="intro-calc">
+    <h3><span class="kno">知识点</span>复杂度的计算与技巧<span class="pt">intro-calc</span></h3>
+    <p>手算复杂度无需逐条数语句，掌握两条法则 + 一个「看最深层循环」的直觉即可：</p>
+    <ul>
+      <li><b>加法法则（顺序）：</b>前后两段先后执行，总开销取<strong>较大</strong>的一阶。若段 A 为 <span class="mono">O(f)</span>、段 B 为 <span class="mono">O(g)</span>，则整体 <span class="mono">O(max(f,g))</span>。</li>
+      <li><b>乘法法则（嵌套）：</b>循环嵌套，总次数 = 外层次数 × 内层次数。若外层 <span class="mono">O(f)</span>、内层 <span class="mono">O(g)</span>,则整体 <span class="mono">O(f·g)</span>。</li>
+      <li><b>对数型循环：</b>每轮把规模<strong>折半/除以 k</strong> 的循环，次数为 <span class="mono">log_k(n)</span> → <span class="mono">O(log n)</span>，与底数无关（都相差常数倍）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>calc.py</div>
+      <pre><code># 估算技巧演示: 找"最深层循环"看它执行多少次
+def f(n: int) -> int:
+    s = 0
+    for i in range(n):          # O(n)
+        s += i
+    for i in range(n):          # O(n^2) (嵌套)  <- 取较大者
+        for j in range(n):
+            s += i * j
+    return s                   # 整体 O(n^2) —— 加法法则
+
+def h(n: int) -> int:
+    # 对数型循环: 每轮 n 折半, 总共约 log2(n) 轮 -> O(log n)
+    cnt = 0
+    while n > 1:
+        n //= 2
+        cnt += 1
+    return cnt
+
+def g(n: int) -> int:
+    # 外层 log n 次, 内层 n 次 -> 乘法法则 O(n log n)
+    cnt = 0; i = 1
+    while i < n:
+        for j in range(n):
+            cnt += 1
+        i *= 2
+    return cnt</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>两种场景极易混淆——<strong>「外层折半、内层满 n」</strong>是 <span class="mono">O(n log n)</span>；而<strong>「外层满 n、内层折半」</strong>外层每次内层都重新从 n 开始，是 <span class="mono">O(n log n)</span> 的另一种写法。真正要警惕的是把「内层也随外层的 i 缩」误判成嵌套——那种 <span class="mono">1+2+…+n</span> 的三角循环是 <span class="mono">O(n²)</span>，不是 <span class="mono">O(n)</span>。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>面试速算：</b>看到 <span class="mono">for+for</span> 全量嵌套想 <span class="mono">O(n²)</span>；看到 <span class="mono">while n/=2</span> 想 <span class="mono">O(log n)</span>；看到 <span class="mono">递归分治</span>想用主定理。LeetCode 里二分查找、归并排序、双层枚举（如两数之和暴力版）分别是这三类的代表。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n²)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">技巧</div><div class="v">最深循环</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Performance · 度量的另一面</div>
+    <h2><span class="num">01</span>空间复杂度 · 增长率 · 递归分析</h2>
+  </section>
+
+  <!-- 知识点 4：空间复杂度 -->
+  <section class="topic" id="intro-space">
+    <h3><span class="kno">知识点</span>空间复杂度<span class="pt">intro-space</span></h3>
+    <p><strong>空间复杂度（Space Complexity）</strong>衡量算法运行时所需的<strong>额外存储</strong>（即辅助空间，auxiliary space），不包括输入本身占据的空间。同样用大 O 表示：只用一个或常数个临时变量的算法是 <span class="mono">O(1)</span>，称为<strong>原地算法（in-place）</strong>。</p>
+    <p>特别注意：<strong>递归</strong>的额外空间等于<strong>调用栈（call stack）的最大深度</strong>。深度为 <span class="mono">n</span> 的递归，即使用 O(1) 的临时变量，总空间亦是 <span class="mono">O(n)</span>。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>space.py</div>
+      <pre><code>def sum_in_place(a) -> int:
+    # 只用一个累加器 s -> 额外空间 O(1), 原地算法
+    s = 0
+    for x in a:
+        s += x
+    return s
+
+def duplicate(a) -> list:
+    # 新列表长度随输入增长 -> 额外空间 O(n)
+    return a[:]                    # 复制一份, 需要 n 个新单元
+
+def depth(n) -> int:
+    # 递归深度 n -> 调用栈需要 n 层 -> 空间 O(n)
+    if n <= 0:
+        return 0
+    return 1 + depth(n - 1)</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>易错点：</b>「用空间换时间」是常见策略（如哈希表、DP 记忆化）。但不要把输入本身的空间算进额外空间——分析时问的是「<em>除了存放输入，我还额外用了多少</em>」。某些题目要求 <span class="mono">O(1)</span> 空间即指<strong>除输入外只用常数个变量</strong>。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">原地/递归</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 5：增长率与常见复杂度阶 -->
+  <section class="topic" id="intro-growth">
+    <h3><span class="kno">知识点</span>增长率与常见复杂度阶<span class="pt">intro-growth</span></h3>
+    <p>不同复杂度阶在 <span class="mono">n</span> 增大时的<strong>增长率</strong>差异巨大，这就是「为什么快排/归并比冒泡强」的根本原因。务必记住从小到大的顺序。</p>
+
+    <table class="tbl">
+      <thead>
+        <tr><th>复杂度阶</th><th>名字</th><th>典型算法</th><th>n=10⁶ 时约</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="mono">O(1)</td><td>常数级</td><td>数组下标访问、哈希查找（均摊）</td><td>1 步</td></tr>
+        <tr><td class="mono">O(log n)</td><td>对数级</td><td>二分查找</td><td>≈20 步</td></tr>
+        <tr><td class="mono">O(n)</td><td>线性</td><td>遍历求最大值</td><td>10⁶ 步</td></tr>
+        <tr><td class="mono">O(n log n)</td><td>线性对数</td><td>归并排序、快排（平均）</td><td>≈2×10⁷ 步</td></tr>
+        <tr><td class="mono">O(n²)</td><td>平方</td><td>冒泡/选择/插入、暴力两数之和</td><td>10¹² 步</td></tr>
+        <tr><td class="mono">O(2ⁿ)</td><td>指数</td><td>暴力枚举子集</td><td>几乎不可计算</td></tr>
+        <tr><td class="mono">O(n!)</td><td>阶乘</td><td>全排列暴力</td><td>几乎不可计算</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>growth.py</div>
+      <pre><code># 直观感受增长率: 打印各阶在给定 n 下大约多少次基本操作
+import math
+n = 10_000_000                       # 规模: 一千万
+orders = [
+    ("O(1)      ", 1),
+    ("O(log n)  ", int(math.log2(n))),
+    ("O(n)      ", n),
+    ("O(n log n)", int(n * math.log2(n))),
+    ("O(n^2)    ", n * n),           # 注意: 一千万的平方极其巨大
+]
+for name, cnt in orders:
+    # 假设一次基本操作约 1 纳秒, 换算成秒, 感受量级差
+    print(f"{name} 约 {cnt:>22,} 次操作 ≈ {cnt * 1e-9:>12.1f} 秒")</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>完整的渐进记号有三个——<strong>大 O</strong>（上界）、<strong>大 Ω</strong>（下界）、<strong>大 Θ</strong>（紧确界，既是上界又是下界）。面试常考排序：<span class="mono">O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n²) &lt; O(2ⁿ) &lt; O(n!)</span>。</p></div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b><span class="mono">O(n log n)</span> 与 <span class="mono">O(n²)</span> 很大，但 <span class="mono">O(2ⁿ)</span> 与 <span class="mono">O(n!)</span> 是真正「不可承受」的。见到要求 <span class="mono">n≤10⁵</span>、时间 1s 的题，几乎必须 <span class="mono">O(n log n)</span> 或更低；<span class="mono">O(n²)</span> 在 <span class="mono">n=10⁵</span> 时会超时。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">递增</div><div class="v">O(1)→O(n!)</div></div>
+      <div class="cx"><div class="k">实用上限</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">典型</div><div class="v">排序</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 6：递归式分析与主定理（选学） -->
+  <section class="topic" id="intro-recurrence">
+    <h3><span class="kno">知识点</span>递归式分析与主定理（选学）<span class="pt">intro-recurrence</span></h3>
+    <p>分治算法的时间可写成<strong>递归式（recurrence）</strong>：把问题拆成 <span class="mono">a</span> 个规模为 <span class="mono">n/b</span> 的子问题，再把结果合并需要 <span class="mono">f(n)</span> 的成本，即 <span class="mono">T(n) = a·T(n/b) + f(n)</span>。</p>
+    <p><strong>主定理（Master Theorem）</strong>给出快速结论。记 <span class="mono">c = log_b(a)</span>，比较 <span class="mono">n^c</span> 与 <span class="mono">f(n)</span>：</p>
+    <table class="tbl">
+      <thead><tr><th>情形</th><th>条件</th><th>结果 T(n)</th></tr></thead>
+      <tbody>
+        <tr><td>情形 1</td><td class="mono">f(n) = O(n^c) 且更小</td><td class="mono">Θ(n^c)</td></tr>
+        <tr><td>情形 2</td><td class="mono">f(n) = Θ(n^c)</td><td class="mono">Θ(n^c · log n)</td></tr>
+        <tr><td>情形 3</td><td class="mono">f(n) = Ω(n^c) 且更大</td><td class="mono">Θ(f(n))</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>recurrence.py</div>
+      <pre><code># 归并排序: T(n) = 2·T(n/2) + O(n)
+#   a=2, b=2, f(n)=n;  n^(log_b a) = n^(log_2 2) = n
+#   与 f(n)=n 相等 -> 情形2 -> T(n) = O(n log n)
+def merge_sort(a):
+    if len(a) &lt;= 1:
+        return a
+    mid = len(a) // 2
+    left  = merge_sort(a[:mid])   # 子问题1: 规模 n/2
+    right = merge_sort(a[mid:])   # 子问题2: 规模 n/2
+    # 合并两个有序序列 -> O(n)
+    i = j = 0; res = []
+    while i &lt; len(left) and j &lt; len(right):
+        if left[i] &lt;= right[j]:
+            res.append(left[i]); i += 1
+        else:
+            res.append(right[j]); j += 1
+    return res + left[i:] + right[j:]
+
+# 再如二分查找: T(n) = T(n/2) + O(1)
+#   a=1, b=2, n^(log_2 1) = 1, 与 f(n)=1 相等 -> O(log n)</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>先算 <span class="mono">n^(log_b a)</span>（即「子问题本身」的成本），再和合并成本 <span class="mono">f(n)</span> 比较——谁大听谁的，相等就多乘一个 <span class="mono">log n</span>。</p></div>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>易错点：</b>主定理只适用于<strong>形式规范</strong>的递归式（每层均匀拆分、固定的 a 与 b）。遇到非均匀递归（如 <span class="mono">T(n)=T(n-1)+O(1)</span> 这种线性递归）或 <span class="mono">f(n)</span> 不是多项式时，用<strong>递归树法</strong>或<strong>代入法</strong>更稳妥。面试中 <span class="mono">T(n)=T(n-1)+O(1)</span> 等于 <span class="mono">O(n)</span>，千万别乱套主定理。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">方法</div><div class="v">主定理</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>分析下面代码的时间复杂度，并说明为什么它是 <span class="mono">O(n log n)</span> 而不是 <span class="mono">O(n²)</span>：外层 <span class="mono">while i&lt;n</span> 每轮把 <span class="mono">i*=2</span>（折半/倍增），内层 <span class="mono">for j in range(n)</span>。<em>来源：常见笔试题。</em></li>
+      <li>用<strong>主定理</strong>分析 Strassen 矩阵乘法的递归式 <span class="mono">T(n)=7T(n/2)+O(n²)</span>，解释它为何能突破普通矩阵乘法的 <span class="mono">O(n³)</span>。</li>
+      <li>思考「用空间换时间」：为什么用哈希表把两数之和从 <span class="mono">O(n²)</span> 优化到 <span class="mono">O(n)</span> 要付出 <span class="mono">O(n)</span> 的空间？结合时间/空间复杂度说明取舍。<em>LeetCode 1. 两数之和。</em></li>
+      <li>动手实现归并排序并比较它与冒泡排序在 <span class="mono">n=10⁴</span> 时的耗时差距，体会 <span class="mono">O(n log n)</span> 与 <span class="mono">O(n²)</span> 的实际差异。<em>推荐：LeetCode 912. 排序数组。</em></li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "intro",                 // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "绪论与算法复杂度分析",   // ex: 绪论与算法复杂度分析
+  eyebrow: "MODULE 01 · 数据结构与算法",
+  prev: "",                    // 前一节文件名，如 "01-绪论与算法分析.html"；首页留 ""
+  next: "02-数组与顺序表.html", // 下一节文件名；最后一节留 ""
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"下列哪一项<strong>不是</strong>算法必须满足的特性（严蔚敏版五大特性）？",
+    opts:["有穷性","确定性","可行性","并行性"],
+    ans:3,
+    exp:"解析：算法五大特性是「有穷性、确定性、可行性、输入、输出」。「并行性」并不是算法必须满足的特性——算法可以是串行的，并行只是一种执行方式，不属于定义上的必然要求。"
+  },
+  {
+    type:"quiz",
+    q:"用等差数列求和公式 s = n·(n+1)//2 计算 1+2+…+n，其时间复杂度是？",
+    opts:["O(1)","O(n)","O(log n)","O(n²)"],
+    ans:0,
+    exp:"解析：公式只做常数次加减乘除，基本操作次数与 n 无关，所以是 O(1)。对比逐个累加的循环是 O(n)——这就是「同一个问题、不同算法、天壤之别」的典型例子。"
+  },
+  {
+    type:"quiz",
+    q:"下面代码的时间复杂度是？\nfor i in range(n):\n    for j in range(n):\n        op()",
+    opts:["O(n)","O(n log n)","O(n²)","O(2ⁿ)"],
+    ans:2,
+    exp:"解析：两层循环都遍历 n 次，执行次数为 n×n = n²，按乘法法则为 O(n²)。这是最简单的全量双层嵌套，代表冒泡/选择/插入排序以及两数之和的暴力做法。"
+  },
+  {
+    type:"quiz",
+    q:"下面代码的时间复杂度是？\nwhile n &gt; 1:\n    n //= 2",
+    opts:["O(1)","O(n)","O(log n)","O(n²)"],
+    ans:2,
+    exp:"解析：每轮把 n 折半，从 n 降到 1 需要大约 log₂(n) 轮，因此是 O(log n)，代表二分查找这类对数复杂度循环。注意要看清循环变量「每轮除以常数」而不是每次减 1。"
+  },
+  {
+    type:"quiz",
+    q:"对数组求和时只用一个累加变量 s（不改动输入），其<strong>额外</strong>空间复杂度是？",
+    opts:["O(1)","O(n)","O(log n)","O(n²)"],
+    ans:0,
+    exp:"解析：只用了常数个临时变量，且没有复制输入，属于原地算法（in-place），额外空间为 O(1)。若新建一个等长列表去复制数据，才会是 O(n)。分析空间复杂度时不算输入本身。"
+  },
+  {
+    type:"quiz",
+    q:"归并排序的递归式 T(n) = 2·T(n/2) + O(n)，由主定理可得其时间复杂度是？",
+    opts:["O(n)","O(n log n)","O(n²)","O(log n)"],
+    ans:1,
+    exp:"解析：a=2，b=2，n^(log_b a) = n^(log_2 2) = n，与合并成本 f(n)=n 相等，落入主定理情形 2，故 T(n) = O(n log n)。这是 O(n log n) 排序的典型代表。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：用主定理分析 T(n) = 2·T(n/2) + O(n²)，其时间复杂度是？",
+    opts:["O(n log n)","O(n²)","O(n² log n)","O(n)"],
+    ans:1,
+    exp:"解析：a=2，b=2，n^(log_b a) = n。合并成本 f(n)=n² 比 n 的量级<strong>更大</strong>，落入主定理情形 3，因此 T(n) = Θ(f(n)) = O(n²)。关键在于比较 n^(log_b a) 与 f(n) 谁大谁小，这里 f(n) 是主导项。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：下面代码的时间复杂度是？\ni = 1\nwhile i &lt; n:\n    for j in range(n):\n        op()\n    i *= 2",
+    opts:["O(n)","O(n log n)","O(log n)","O(n²)"],
+    ans:1,
+    exp:"解析：外层每轮 i 乘 2，共 log₂(n) 轮；内层每次完整循环 n 次。由乘法法则，总次数 = log₂(n) × n = O(n log n)。易错点：把它误判成 O(n²)，但只要看清外层是「倍增」而非「线性递增」，就应归为 O(n log n)。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

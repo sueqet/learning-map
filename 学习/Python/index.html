@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python 学习大纲（可交互）</title>
+<meta name="description" content="Python 学习大纲：21 个循序渐进的知识点，可打勾记录进度（浏览器本地保存），点击标题进入对应详细学习页（含学习目标、讲解、可运行代码示例、练习考核）。覆盖语法、核心数据结构、面向对象、异常/文件、生成器与装饰器，以及带力扣题号的数据结构与算法、NumPy/Pandas 与 requests/FastAPI。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;
+    --radius:14px;--maxw:1000px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1200px 600px at 90% -8%, rgba(31,125,77,.07), transparent 60%),radial-gradient(900px 520px at -6% 6%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:70;background:rgba(242,246,242,.9);backdrop-filter:blur(11px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15.5px;color:var(--ink);white-space:nowrap;letter-spacing:-.01em}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+  .topnav .prog{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .topnav .prog b{color:var(--green)}
+  .topnav .reset{margin-left:auto;cursor:pointer;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-soft);padding:6px 13px;border-radius:999px;font-size:12.5px;transition:.15s}
+  .topnav .reset:hover{color:var(--red);border-color:var(--red)}
+
+  .hero{padding:56px 0 18px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-140px;top:-120px;width:360px;height:360px;border-radius:50%;border:1px solid var(--line-2);opacity:.5}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(34px,5.6vw,56px);line-height:1.1;margin:20px 0 8px;letter-spacing:-.02em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:7px;height:11px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:clamp(15px,1.8vw,18px);color:var(--ink-soft);max-width:760px;margin:0 0 22px}
+  .hero p.lead b{color:var(--ink)}
+
+  .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px}
+  .stat{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 22px;min-width:120px;box-shadow:var(--shadow)}
+  .stat .num{font-family:var(--font-mono);font-size:30px;font-weight:700;line-height:1;color:var(--orange)}
+  .stat .num.small{font-size:22px}
+  .stat .lab{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+  .allprog{margin:26px 0 8px;background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow)}
+  .allprog .head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .allprog .title{font-size:16px;font-weight:800}
+  .allprog .pct{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--green)}
+  .allprog .bar{height:12px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:12px}
+  .allprog .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#4aa06f);border-radius:999px;transition:width .4s ease}
+  .allprog .tip{font-size:12.5px;color:var(--muted);margin-top:10px}
+
+  .sec{margin-top:34px}
+  .sec .sh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .sec .sh .tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:4px 11px;border-radius:999px;color:#fff}
+  .sec .sh h2{font-family:var(--font-display);font-weight:900;font-size:clamp(20px,3vw,26px);margin:0;letter-spacing:-.01em}
+  .sec .sh .dn{font-size:13px;color:var(--muted)}
+  .sec .desc{color:var(--ink-soft);max-width:760px;margin:4px 0 0;font-size:14.5px}
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:10px 18px;border-radius:12px;background:linear-gradient(90deg,var(--green-soft),var(--orange-soft));border:1px solid var(--line-2);color:var(--ink);font-weight:700;font-size:14px;box-shadow:var(--shadow);transition:.15s}
+  .cta:hover{text-decoration:none;transform:translateY(-1px);border-color:var(--green);box-shadow:0 16px 32px -22px rgba(44,122,80,.5)}
+
+  .list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+  .row{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;padding:15px 18px;transition:transform .16s ease,box-shadow .16s ease}
+  .row:hover{transform:translateY(-2px);box-shadow:0 18px 36px -24px rgba(29,33,28,.5)}
+  .row .no{flex:none;width:36px;height:36px;border-radius:9px;background:var(--orange-soft);color:var(--orange);font-family:var(--font-mono);font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
+  .row label{display:flex;align-items:center;gap:12px;cursor:pointer;flex:1;min-width:0}
+  .row input{width:20px;height:20px;accent-color:var(--green);flex:none;cursor:pointer}
+  .row .body{flex:1;min-width:0}
+  .row .body a.t{font-size:17px;font-weight:800;color:var(--ink);display:inline-block}
+  .row .body a.t:hover{color:var(--orange);text-decoration:none}
+  .row .body a.t.done{color:var(--muted);text-decoration:line-through}
+  .row .body .d{font-size:13px;color:var(--ink-soft);margin-top:2px}
+  .row .meta{flex:none;display:flex;gap:8px;align-items:center}
+  .row .dif{font-family:var(--font-mono);font-size:11px;padding:3px 9px;border-radius:999px}
+  .row .dur{font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:3px 8px;border-radius:999px;border:1px solid var(--line)}
+  .row .go{flex:none;font-family:var(--font-mono);font-size:12.5px;color:var(--orange);padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:#fff;transition:.12s;white-space:nowrap}
+  .row .go:hover{border-color:var(--orange);background:var(--orange-soft);text-decoration:none}
+  .dif.入门{background:var(--green-soft);color:var(--green)}
+  .dif.进阶{background:var(--orange-soft);color:var(--orange)}
+  .dif.高级{background:#eee1f2;color:#7a4a8a}
+
+  .footer{margin-top:44px;border-top:1px solid var(--line);padding:32px 0 60px;font-size:13.5px;color:var(--ink-soft)}
+  .footer .cols{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}
+  .footer .b{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .footer h4{margin:0 0 10px;font-size:16px;font-weight:800}
+  .footer ul{margin:0;padding-left:18px}
+  .footer li{margin:4px 0;font-size:13.5px}
+  .footer code{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--orange)}
+  @media (max-width:720px){.footer .cols{grid-template-columns:1fr}.row .meta{display:none}}
+
+  .totop{position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line-2);background:var(--ink);color:var(--paper);font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:.25s;box-shadow:var(--shadow);z-index:60}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{background:var(--orange);transform:translateY(-2px)}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span>Python 学习</span>
+    <span class="prog">进度 <b id="navDone">0</b>/<b id="navTotal">21</b></span>
+    <button class="reset" id="resetBtn">重置进度</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>PYTHON LEARNING MAP · 学习大纲</span>
+    <h1>Python 编程<br><span class="accent">学习地图</span></h1>
+    <p class="lead">从<b>语法与核心数据结构</b>打牢，再到<b>面向对象、异常、文件、生成器与装饰器</b>；随后是覆盖技术岗面试的<b>数据结构与算法（每节配力扣题号与可运行代码）</b>，最后按方向补上<b>数据分析（NumPy/Pandas）</b> 与 <b>脚本/接口（requests · FastAPI）</b>。共 21 个循序渐进的知识点，每个都有<b>详解页</b>（学习目标、讲解、代码示例与自测）；学会一个就<b>打勾</b>，进度自动保存到本机浏览器。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">21</div><div class="lab">知识点</div></div>
+      <div class="stat"><div class="num" id="nDone">0</div><div class="lab">已学会</div></div>
+      <div class="stat"><div class="num small" id="nPct">0%</div><div class="lab">完成率</div></div>
+    </div>
+    <div class="allprog">
+      <div class="head"><span class="title">整体学习进度</span><span class="pct" id="bigPct">0%</span></div>
+      <div class="bar"><span id="bigBar" style="width:0%"></span></div>
+      <div class="tip" id="progTip">勾选知识点即可记录进度；在详解页里也能一键「我已学会」，互相同步。</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="sec">
+    <div class="sh"><span class="tag" style="background:#2564a0">Python · 编程</span><h2>学习路径</h2><span class="dn">共 21 个知识点 · 从语感到就业技能</span></div>
+    <p class="desc">建议按顺序学：先把<b>语法与三大核心数据结构</b>打牢，再学<b>函数、异常、文件、模块</b>与<b>面向对象、生成器/装饰器</b>；随后是面试必考的<b>数据结构与算法（每节配力扣题号与可运行代码）</b>；最后按方向补<b>数据分析（NumPy/Pandas）</b> 或 <b>脚本/接口（requests · FastAPI）</b>。每一节都动手敲代码、做完自测题再打勾。</p>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<div class="wrap">
+  <div class="footer">
+    <div class="cols">
+      <div class="b">
+        <h4>📖 使用说明</h4>
+        <ul>
+          <li>点击知识点后的<b>「去学习 →」</b>或标题，进入对应详解页。</li>
+          <li>勾选左侧方框即标记<b>学会</b>，进度保存在<b>本机浏览器</b>（localStorage），刷新/关闭不丢。</li>
+          <li>详解页末尾有「本节考核」，做完可回到大纲在 <b>index.html</b> 打勾。</li>
+          <li>建议每个知识点都动手敲一遍命令，再做题巩固。</li>
+        </ul>
+      </div>
+      <div class="b">
+        <h4>🗂 维护</h4>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin:0 0 10px">本文件为 <b>index.html</b>，详细页统一放在 <code>content/</code> 目录（<code>NN-slug.html</code>）。新增知识点：在下方 <code>MODULES</code> 数组加一项，并新建对应的 <code>content/NN-slug.html</code>（可复制 <code>content/_template.html</code>）。</p>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">进度 key：<code>learn:python:done</code>，大纲与所有详解页共用同一个 key，互相同步。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MODULES = [
+  { id:"01-python-env", no:"01", diff:"入门", dur:"~30min", file:"01-python-env.html",
+    t:"Python 环境与运行", d:"解释器、交互式、写脚本、print/input、注释与环境搭建。", groups:["A"] },
+  { id:"02-basics", no:"02", diff:"入门", dur:"~40min", file:"02-basics.html",
+    t:"变量与数据类型", d:"int/float/bool/None/str、动态类型、类型转换、可变/不可变、id。", groups:["A"] },
+  { id:"03-operators", no:"03", diff:"入门", dur:"~35min", file:"03-operators.html",
+    t:"运算符与表达式", d:"算术/比较/逻辑/位/三元、优先级、赋值与 in/is 的坑。", groups:["A"] },
+  { id:"04-control-flow", no:"04", diff:"入门", dur:"~45min", file:"04-control-flow.html",
+    t:"程序控制流", d:"if/elif/else、for/while、break/continue、range/enumerate/zip。", groups:["A"] },
+  { id:"05-string", no:"05", diff:"入门", dur:"~45min", file:"05-string.html",
+    t:"字符串处理", d:"索引/切片、常用方法、format 与 f-string、编码与 in 判断。", groups:["A"] },
+  { id:"06-list-tuple", no:"06", diff:"入门", dur:"~50min", file:"06-list-tuple.html",
+    t:"列表与元组", d:"增删改查/切片/排序/推导式/解包/深浅拷贝、元组不可变。", groups:["B"] },
+  { id:"07-dict-set", no:"07", diff:"入门", dur:"~45min", file:"07-dict-set.html",
+    t:"字典与集合", d:"键值操作/常用方法/推导式/哈希、集合交并差、默认字典。", groups:["B"] },
+  { id:"08-function", no:"08", diff:"入门", dur:"~50min", file:"08-function.html",
+    t:"函数", d:"定义/参数与返回值/默认值/*args/**kwargs、作用域、lambda、递归。", groups:["B"] },
+  { id:"09-exception", no:"09", diff:"进阶", dur:"~40min", file:"09-exception.html",
+    t:"异常与错误处理", d:"try/except/else/finally、raise、常见异常、自定义异常、避免吞异常。", groups:["C"] },
+  { id:"10-file", no:"10", diff:"进阶", dur:"~45min", file:"10-file.html",
+    t:"文件与路径", d:"open/with、读与写、编码、os 与 pathlib、json 读写。", groups:["C"] },
+  { id:"11-module", no:"11", diff:"进阶", dur:"~40min", file:"11-module.html",
+    t:"模块、包与标准库", d:"import/from、包与 __name__、os/sys/datetime/random/collections。", groups:["C"] },
+  { id:"12-oop", no:"12", diff:"进阶", dur:"~60min", file:"12-oop.html",
+    t:"面向对象", d:"类与对象、继承、魔术方法、@property、类方法/静态方法、多态。", groups:["C"] },
+  { id:"13-advanced", no:"13", diff:"进阶", dur:"~55min", file:"13-advanced.html",
+    t:"迭代器、生成器与装饰器", d:"迭代协议、yield/生成器、闭包、@装饰器、functools.lru_cache。", groups:["C"] },
+  { id:"14-lc-array", no:"14", diff:"进阶", dur:"~50min", file:"14-lc-array.html",
+    t:"算法 · 数组与字符串", d:"双指针/滑动窗口；力扣 27/88/283/209/15 等，含可运行代码。", groups:["D"] },
+  { id:"15-lc-hash", no:"15", diff:"进阶", dur:"~50min", file:"15-lc-hash.html",
+    t:"算法 · 哈希表与查找", d:"空间换时间；力扣 1 两数之和、49 分组、128 最长连续、3 无重复子串。", groups:["D"] },
+  { id:"16-lc-stack-queue", no:"16", diff:"进阶", dur:"~50min", file:"16-lc-stack-queue.html",
+    t:"算法 · 栈与队列", d:"单调栈/队列；力扣 20 有效括号、155 最小栈、232、239 滑动窗口最大。", groups:["D"] },
+  { id:"17-lc-linkedlist", no:"17", diff:"进阶", dur:"~50min", file:"17-lc-linkedlist.html",
+    t:"算法 · 链表", d:"虚拟头节点/快慢指针；力扣 206 反转、21 合并、141 环、19 删除倒数、146。", groups:["D"] },
+  { id:"18-lc-dp", no:"18", diff:"高级", dur:"~60min", file:"18-lc-dp.html",
+    t:"算法 · 动态规划入门", d:"状态与转移、一维/二维；力扣 70 爬楼梯、198 打家劫舍、322、300。", groups:["D"] },
+  { id:"19-lc-sort-binary", no:"19", diff:"高级", dur:"~50min", file:"19-lc-sort-binary.html",
+    t:"算法 · 排序与二分", d:"快排归并、二分边界；力扣 704、215 第K大、33 旋转数组、56 合并区间。", groups:["D"] },
+  { id:"20-datasci", no:"20", diff:"进阶", dur:"~55min", file:"20-datasci.html",
+    t:"NumPy 与 Pandas 入门", d:"ndarray、Series/DataFrame、读写数据、筛选分组聚合、缺失值。", groups:["E"] },
+  { id:"21-script-http", no:"21", diff:"进阶", dur:"~50min", file:"21-script-http.html",
+    t:"脚本、requests 与 FastAPI", d:"脚本自动化、requests 请求、类型注解、FastAPI 极简接口、虚拟环境。", groups:["E"] },
+];
+
+const GROUPS = [
+  { tag:"#2564a0", name:"第 1 部分 · 语言基础", ids:["01-python-env","02-basics","03-operators","04-control-flow","05-string"], note:"打地基：跑起来、写对变量、控制流程、处理字符串。" },
+  { tag:"#376a8f", name:"第 2 部分 · 核心数据结构", ids:["06-list-tuple","07-dict-set","08-function"], note:"三大容器 + 函数，是写一切程序的骨架。" },
+  { tag:"#7a4a8a", name:"第 3 部分 · 进阶语言特性", ids:["09-exception","10-file","11-module","12-oop","13-advanced"], note:"异常、文件、面向对象、生成器与装饰器——从「会写」到「写好」。" },
+  { tag:"#b8392a", name:"第 4 部分 · 数据结构与算法（力扣）", ids:["14-lc-array","15-lc-hash","16-lc-stack-queue","17-lc-linkedlist","18-lc-dp","19-lc-sort-binary"], note:"技术岗笔试/面试必考，每节配题号与可运行代码，边学边刷。" },
+  { tag:"#c8891f", name:"第 5 部分 · 数据科学与工程化", ids:["20-datasci","21-script-http"], note:"按方向二选一深入：数据分析（Pandas）或 后端/自动化（requests · FastAPI）。" },
+];
+
+/* ---- 跨页进度同步（与详解页共用同一 key） ---- */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); sync(); }
+
+function sync(){
+  const a=getDone(); const total=MODULES.length; const n=a.length;
+  const pct=Math.round(n/total*100);
+  document.getElementById("nDone").textContent=n;
+  document.getElementById("nPct").textContent=pct+"%";
+  document.getElementById("bigPct").textContent=pct+"%";
+  document.getElementById("bigBar").style.width=pct+"%";
+  document.getElementById("navDone").textContent=n;
+  document.getElementById("progTip").textContent = pct>=100
+    ? "🎉 全部完成！可以系统地回顾易错命令、动手做实验，进阶网络与安全。"
+    : `已学会 ${n} 个知识点。建议按顺序推进，每个知识点都动手敲一遍命令再打勾。`;
+  document.querySelectorAll('input[data-done]').forEach(ch=>{ ch.checked = getDone().indexOf(ch.dataset.done)>=0; });
+  document.querySelectorAll('a.t[data-id]').forEach(a=>{ a.classList.toggle('done', getDone().indexOf(a.dataset.id)>=0); });
+}
+
+function render(){
+  const list=document.getElementById("list");
+  const byId={}; MODULES.forEach(m=>byId[m.id]=m);
+  let html="";
+  GROUPS.forEach((g,gi)=>{
+    const items=g.ids.map(id=>byId[id]).filter(Boolean);
+    html+=`<div style="margin:26px 0 4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <span style="background:${g.tag};color:#fff;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;padding:4px 11px;border-radius:999px">${g.name}</span>
+      <span style="font-size:13px;color:var(--muted)">${g.note}</span></div>`;
+    items.forEach(m=>{
+      html+=`<div class="row">
+        <span class="no">${m.no}</span>
+        <label><input type="checkbox" data-done="${m.id}" onchange="toggle('${m.id}')">
+          <span class="body">
+            <a class="t" data-id="${m.id}" href="content/${m.file}">${m.t}</a>
+            <div class="d">${m.d}</div>
+          </span>
+        </label>
+        <span class="meta"><span class="dif ${m.diff}">${m.diff}</span><span class="dur">${m.dur}</span></span>
+        <a class="go" href="content/${m.file}">去学习 →</a>
+      </div>`;
+    });
+  });
+  list.innerHTML=html;
+  sync();
+}
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(confirm("确定要清空所有已打勾的进度吗？此操作不可撤销。")){ setDone([]); sync(); }
+});
+
+// 回到顶部
+const toTop=document.createElement("button"); toTop.className="totop"; toTop.textContent="↑"; toTop.setAttribute("aria-label","回到顶部"); document.body.appendChild(toTop);
+const tog=()=>toTop.classList.toggle("show", window.scrollY>600);
+window.addEventListener("scroll", tog); tog();
+toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算法 · 链表 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 算法 · 链表：用 ListNode 表示链表、虚拟头节点、原链表反转（206）、合并有序链表（21）、环形链表与快慢指针（141）、删除倒数第 N 个节点（19）、LRU 缓存（146）。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">算法 · 链表</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 数据结构与算法</span></span>
+    <h1 id="pageTitle">算法 · 链表</h1>
+    <p class="lead" id="pageLead">上一节你用<b>数组</b>把栈和队列玩得很溜；这一节换一种「靠<b>指针</b>串起来」的结构——<b>链表</b>。它没有 Python 内置写法，却是力扣最简单也最常考的题型：<b>反转、合并、查环、删倒数第 N 个</b>，靠的都是<b>虚拟头节点 + 快慢指针</b>这对黄金搭档。学会它，你就拿到了「原地操作」类算法题的第一块拼图。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能在 Python 里用 <code class="mono">class ListNode</code> 表示一个<b>单链表节点</b>，并用「虚拟头节点」把一串值构建成链表、用 <code class="mono">while cur:</code> 遍历/打印出来。</li>
+      <li>学完后，你能说清<b>数组 vs 链表</b>在随机访问、增删、内存布局上的差异，并解释为什么「在头部插入/删除」链表是 <code class="mono">O(1)</code>、数组却是 <code class="mono">O(n)</code>。</li>
+      <li>学完后，你能手写<b>反转链表（力扣 206）</b>：迭代版用 <code class="mono">prev / cur / nxt</code> 三个指针，递归版理解「先反转后半段再回头指」的递推关系，并说出两者的复杂度。</li>
+      <li>学完后，你能用「虚拟头节点 + 双指针」<b>合并两个有序链表（力扣 21）</b>，且不会漏接剩余的那一段节点。</li>
+      <li>学完后，你能用<b>快慢指针</b>判断链表是否有环（力扣 141）、找到链表中间节点，并解释这样做的空间复杂度为什么是 <code class="mono">O(1)</code>。</li>
+      <li>学完后，你能用「快指针先走 <code class="mono">n+1</code> 步」<b>删除倒数第 N 个节点（力扣 19）</b>，并理解 <b>LRU 缓存（力扣 146）</b>为什么需要「哈希表 + 双向链表」的配合。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">已学过 Python 的<b>函数、类与 <code class="mono">is</code> / 引用</b>（明白 <code class="mono">b = a</code> 只是引用别名、修改共享对象两边一起变），以及上一节「算法 · 栈与队列」的<b>指针 / 遍历</b>思维；如果你熟悉<b>递归</b>，看反转链表的递归版会更快上手。能读懂 <code class="mono">class ListNode</code> 和 <code class="mono">while cur:</code> 即可。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>链表：用「引用」连接的序列<br>（虚拟头节点 + 快慢指针，五大力扣常考题型）</h2>
+  </section>
+
+  <section class="topic" id="llist-basics">
+    <h3><span class="kno">基础</span>表示链表与虚拟头节点<span class="pt">ListNode · dummy · 数组 vs 链表</span></h3>
+    <p><b>链表（Linked List）</b>是由一个个<b>节点（node）</b>串起来的线性结构：每个节点存一份<b>数据</b>和一个指向下一个节点的<b>指针</b>。Python 没有内置类型，但为了方便刷题，力扣会默认给你 <code class="mono">ListNode</code>。它的好处是：<b>插入 / 删除节点只需改动指针，不需要像数组那样搬移整个区间</b>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 力扣默认提供的链表节点定义
+class ListNode:
+    def __init__(self, val=0, next=None):
+        self.val = val
+        self.next = next
+
+# 用「虚拟头节点」把一串值构建成链表
+def build(vals):
+    dummy = ListNode()        # 虚拟头：真正返回的是 dummy.next
+    cur = dummy
+    for v in vals:
+        cur.next = ListNode(v)
+        cur = cur.next
+    return dummy.next
+
+# 遍历 / 打印
+def to_list(head):
+    res = []
+    while head:               # while cur: 就是「还有节点就继续」
+        res.append(head.val)
+        head = head.next
+    return res
+
+head = build([1, 2, 3])
+print(to_list(head))          # [1, 2, 3]
+print(head.val)               # 1（返回的是第一个真实节点）</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>维度</th><th>数组（Python list）</th><th>链表</th></tr>
+      <tr><td>内存</td><td><b>连续</b>，需要一整块</td><td><b>零散</b>，靠指针链接</td></tr>
+      <tr><td>随机访问 <code class="mono">a[i]</code></td><td><b>O(1)</b></td><td>O(n)，必须从头遍历</td></tr>
+      <tr><td>头部插入 / 删除</td><td>O(n)，要搬移元素</td><td><b>O(1)</b>，只改指针</td></tr>
+      <tr><td>找第 <code class="mono">i</code> 个</td><td>O(1)</td><td>O(n)</td></tr>
+      <tr><td>Python 支持</td><td>内置 <code class="mono">list</code></td><td>需自己写 <code class="mono">ListNode</code></td></tr>
+      <tr><td>适合场景</td><td>频繁随机读、缓存友好</td><td>频繁增删、栈/队列/哈希桶</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><b>虚拟头节点（dummy）</b>是链表题的万能技巧——先造一个 <code class="mono">dummy</code>，让 <code class="mono">dummy.next</code> 指向真实头节点。这样「操作头节点」和「操作中间节点」的代码完全统一，<b>省去对「空链表 / 头节点」的特判</b>，结尾直接返回 <code class="mono">dummy.next</code> 即可。</p></div>
+    <div class="callout danger"><span class="i">✕</span><p><b>高频错误：</b>把 <code class="mono">cur.next</code> 改挂了又不备份。链表题里「<b>先保存后继、再改指针、最后整体右移</b>」的三步必须记牢（<code class="mono">nxt = cur.next</code> → <code class="mono">cur.next = ...</code> → <code class="mono">cur = nxt</code>）；否则一旦 <code class="mono">cur.next</code> 被改掉，原来的后继就找不回来了。</p></div>
+  </section>
+
+  <section class="topic" id="lc-206-reverse">
+    <h3><span class="kno">核心</span>【力扣 206】反转链表<span class="pt">Reverse Linked List · 迭代 / 递归</span></h3>
+    <p>「反转」是链表最经典的入门题，也是你理解「<b>指针重新指向</b>」的入口。核心思想：从头到尾跑一遍，把每个节点的 <code class="mono">next</code> 从「指向下一个」改为「<b>指向它前面的节点</b>」，于是链表就被反过来了。</p>
+    <div class="gitgraph">
+<pre class="mermaid">
+flowchart LR
+  subgraph 反转前
+    A["1"] --> B["2"] --> C["3"] --> D["None"]
+  end
+  subgraph 反转后
+    D2["None"] --> C2["3"] --> B2["2"] --> A2["1"]
+  end</pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 迭代版：prev 保存「已反转部分的头」，cur 指向「待处理节点」
+def reverseList(head):
+    prev = None
+    cur = head
+    while cur:
+        nxt = cur.next    # ① 先保存下一个，否则等下被覆盖
+        cur.next = prev   # ② 把当前节点的 next 指回前面（反转）
+        prev = cur        # ③ prev 前进到当前节点
+        cur = nxt         # ④ cur 前进到原来的下一个
+    return prev           # 循环结束，prev 就是新的头
+
+# 递归版：先反转后半段，再让 head 的"下一个"回头指向 head
+def reverseListRec(head):
+    if head is None or head.next is None:
+        return head                   # 递归出口：空链或只剩一个
+    new_head = reverseListRec(head.next)
+    head.next.next = head             # 让后面的节点指回 head
+    head.next = None                  # 断开，避免成环
+    return new_head</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>迭代版的关键是<b>三个引用</b> <code class="mono">prev / cur / nxt</code> 的彼此推进——缺一不可。递归版则抓住「<code class="mono">head.next.next = head</code> 把下一个节点指回自己」，再用 <code class="mono">head.next = None</code> 断开旧连接。两版复杂度都是 <b>时间 O(n)、迭代空间 O(1)</b>；递归版额外用 <b>O(n) 递归栈</b>。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>递归版最后<strong>一定要</strong>写 <code class="mono">head.next = None</code>，否则反转后的链表会成环（旧头节点的 <code class="mono">next</code> 仍指向原第二个节点）。另外迭代版返回的是 <code class="mono">prev</code> 而非 <code class="mono">cur</code>——<code class="mono">cur</code> 结束时已经走到 <code class="mono">None</code> 了。</p></div>
+  </section>
+
+  <section class="topic" id="lc-21-merge">
+    <h3><span class="kno">进阶</span>【力扣 21】合并两个有序链表<span class="pt">Merge Two Sorted Lists · 虚拟头 + 双指针</span></h3>
+    <p>两个链表都已<strong>升序</strong>，把它们合成一个升序链表。思路和归并排序的「合并」一致：两个指针各指向两个链表的头，<b>谁小接谁</b>；接完把指针往后挪；哪边先空，就把另一边<b>整段接上</b>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def mergeTwoLists(l1, l2):
+    dummy = ListNode()          # 虚拟头，避免对第一个节点特判
+    cur = dummy
+    while l1 and l2:            # 两个都还有节点才比较
+        if l1.val <= l2.val:
+            cur.next = l1       # 接更小的那个
+            l1 = l1.next
+        else:
+            cur.next = l2
+            l2 = l2.next
+        cur = cur.next          # 新链表的指针前进
+    cur.next = l1 or l2         # 接上剩余的那一段（很关键！）
+    return dummy.next</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>结尾的 <code class="mono">cur.next = l1 or l2</code> 一石二鸟：<code class="mono">l1 or l2</code> 在 Python 里返回「<b>那个不为 None 的对象</b>」，于是既能接上剩余整段，又能优雅处理「其中一个已是空链表」的情况。时间复杂度 <b>O(m+n)</b>、空间 <b>O(1)</b>。</p></div>
+    <div class="callout danger"><span class="i">✕</span><p><b>高频错误：</b>比较时用 <code class="mono">l1.val &lt; l2.val</code> 却忘了处理相等，或漏写「接剩余段」，导致合并结果丢节点/少一段。另外别去 <b>new 新节点</b>——合并应该<b>复用已有节点</b>、只改指针，否则空间变成 O(m+n) 且破坏原链表。</p></div>
+  </section>
+
+  <section class="topic" id="lc-141-cycle">
+    <h3><span class="kno">进阶</span>【力扣 141】环形链表 · 快慢指针<span class="pt">Linked List Cycle · Floyd 判圈</span></h3>
+    <p><b>快慢指针</b>是链表最实用的技巧：让<strong>慢指针 <code class="mono">slow</code> 每次走 1 步、快指针 <code class="mono">fast</code> 每次走 2 步</strong>。若有环，快指针「追」慢指针、必然相遇；若无环，快指针先走到尽头。它只用 <b>O(1)</b> 空间就能判环（不像用集合存节点要 O(n)）。</p>
+    <div class="gitgraph">
+<pre class="mermaid">
+flowchart TD
+  A["从 head 出发"] --> S["slow 走 1 步"]
+  A --> F["fast 走 2 步"]
+  S --> Q{"fast 或 fast.next 为空?"}
+  F --> Q
+  Q -- "是（到末尾）" --> R["无环，返回 False"]
+  Q -- "否" --> C{"slow == fast ?"}
+  C -- "是" --> H["有环，返回 True"]
+  C -- "否" --> S</pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def hasCycle(head):
+    slow = fast = head
+    while fast and fast.next:      # 确保 fast 能走两步
+        slow = slow.next           # 慢指针走 1 步
+        fast = fast.next.next      # 快指针走 2 步
+        if slow is fast:           # 相遇 = 有环
+            return True
+    return False                    # 走到末尾 = 无环
+
+# 顺带：找链表中点（也是快慢指针，slow 恰好停在中间）
+def middleNode(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    return slow
+
+# 进阶：找环的入口节点（力扣 142）
+def detectCycle(head):
+    slow = fast = head
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        if slow is fast:           # 相遇后，另起一个指针从 head 出发
+            p = head
+            while p is not slow:   # 两边各走 1 步，相遇处即环入口
+                p = p.next
+                slow = slow.next
+            return p
+    return None</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>while 条件写成 <code class="mono">while fast and fast.next</code>，是为了保证 <code class="mono">fast.next.next</code> 这一取不会越界/报错。<b>判环用相遇；找环入口用「同速再走」</b>（把其中一个指针放回 <code class="mono">head</code>，二者各走 1 步，相遇点就是入口）。复杂度：时间 O(n)、空间 O(1)。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>相遇后不要忘记「把 <code class="mono">fast</code>（或新指针）放回 <code class="mono">head</code>，再同步走 1 步」这一步——很多人只会判环，却不知如何定位入口。另外，找中点时（无环链表）<code class="mono">slow</code> 在 <b>偶数长度</b>时落在靠中间偏右的那个节点，面试时最好主动说明。</p></div>
+  </section>
+
+  <section class="topic" id="lc-19-remove">
+    <h3><span class="kno">进阶</span>【力扣 19】删除倒数第 N 个节点<span class="pt">Remove Nth Node From End · 快指针先走 N+1</span></h3>
+    <p>只遍历一遍，却要删除「倒数第 N 个」节点。做法：让<b>快指针先走 <code class="mono">n+1</code> 步</b>，此时快慢指针之间恰好隔 <code class="mono">n</code> 个节点；然后两个指针<b>同步前进</b>，快指针走到末尾（<code class="mono">None</code>）时，慢指针正好停在「倒数第 N 个」节点的<b>前一个</b>——删掉它的下一个即可。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def removeNthFromEnd(head, n):
+    dummy = ListNode(0, head)     # 虚拟头，让删除"头节点"也能统一处理
+    slow = fast = dummy
+    # 快指针先走 n+1 步，让 slow 与 fast 间隔 n 个节点
+    for _ in range(n + 1):
+        fast = fast.next
+    while fast:                    # 快指针没到末尾就同步走
+        slow = slow.next
+        fast = fast.next
+    slow.next = slow.next.next    # 跳过"倒数第 N 个"节点
+    return dummy.next              # 返回真实头（可能被删过、也可能是原头）</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>虚拟头在这里<strong>必不可少</strong>——若 <code class="mono">n</code> 恰好等于链表长度（要删的是头节点），没有 dummy 就无法统一返回新头。时间 O(n)、空间 O(1)。</p></div>
+    <div class="callout danger"><span class="i">✕</span><p><b>高频错误：</b>快指针只走 <code class="mono">n</code> 步而非 <code class="mono">n+1</code> 步，会把 slow 落在「倒数第 N 个」本身而不是它的前一个，导致删错或报 <code class="mono">AttributeError</code>。牢记：<b>删除某节点 = 操作它的前驱节点</b>，所以 fast 要多走 1 步。</p></div>
+  </section>
+
+  <section class="topic" id="lc-146-lru">
+    <h3><span class="kno">综合</span>【力扣 146】LRU 缓存<span class="pt">LRU Cache · 哈希表 + 双向链表</span></h3>
+    <p>LRU（最近最少使用）缓存是<b>链表与哈希表结合</b>的经典难题，也是面试官最爱的「设计题」之一。要求 <code class="mono">get</code> 和 <code class="mono">put</code> 都 <b>O(1)</b>：哈希表负责 O(1) 定位节点，<b>双向链表</b>负责 O(1) 的「移到头部 / 删尾」。头部 = 最近使用，尾部 = 最久未使用。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">class DLinkedNode:
+    def __init__(self, key=0, value=0):
+        self.key, self.value = key, value
+        self.prev = self.next = None
+
+class LRUCache:
+    def __init__(self, capacity):
+        self.cap = capacity
+        self.cache = {}                 # key -> 节点（O(1) 定位）
+        self.head = DLinkedNode()       # 伪头/伪尾，避免判空
+        self.tail = DLinkedNode()
+        self.head.next, self.tail.prev = self.tail, self.head
+        self.size = 0
+
+    def _remove(self, node):            # 摘下节点
+        node.prev.next = node.next
+        node.next.prev = node.prev
+
+    def _add_head(self, node):          # 插到头部（最近使用）
+        node.prev, node.next = self.head, self.head.next
+        self.head.next.prev = node
+        self.head.next = node
+
+    def _move_to_head(self, node):
+        self._remove(node)
+        self._add_head(node)
+
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        node = self.cache[key]
+        self._move_to_head(node)        # 被访问过 → 提到头部
+        return node.value
+
+    def put(self, key, value):
+        if key in self.cache:
+            node = self.cache[key]
+            node.value = value          # 更新值并提到头部
+            self._move_to_head(node)
+        else:
+            node = DLinkedNode(key, value)
+            self.cache[key] = node
+            self._add_head(node)
+            self.size += 1
+            if self.size > self.cap:    # 超容量：删最久未用（尾部）
+                removed = self.tail.prev
+                self._remove(removed)
+                del self.cache[removed.key]
+                self.size -= 1</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>为什么是<b>双向</b>链表？因为「删除尾节点」需要 O(1) 拿到尾节点的<b>前驱</b>并接好指针——单向链表做不到。用伪头/伪尾（<code class="mono">self.head</code> / <code class="mono">self.tail</code>）能让首尾操作不加特判。两操作均为<b>均摊 O(1)</b>，空间 O(capacity)。</p></div>
+    <p>想省手写链表，也可用 <code class="mono">from collections import OrderedDict</code>，它内部就是「哈希表 + 双向链表」，用 <code class="mono">move_to_end</code> + <code class="mono">popitem(last=False)</code> 即可（面试常作为「偷懒写法」提及）。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">from collections import OrderedDict
+
+class LRUCacheOD:
+    def __init__(self, capacity):
+        self.cap = capacity
+        self.cache = OrderedDict()
+    def get(self, key):
+        if key not in self.cache:
+            return -1
+        self.cache.move_to_end(key)     # 访问过 → 移到队尾（最新）
+        return self.cache[key]
+    def put(self, key, value):
+        if key in self.cache:
+            self.cache.move_to_end(key)
+        self.cache[key] = value
+        if len(self.cache) > self.cap:
+            self.cache.popitem(last=False)   # 删最旧（队首）</code></pre>
+    </div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#2564a0" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>找中间节点（力扣 876）</b>：用快慢指针实现 <code class="mono">middleNode(head)</code>，返回链表的中点。先处理「偶数长度时返回靠右（偏后）的那个」，再思考如何改一下让它返回「靠左的那个」。</li>
+      <li><b>判断两链表是否相交（力扣 160）</b>：只遍历一次，用「先统计两链表长度、把较长的先走差值、再同步走」找出相交点；再进阶尝试「双指针走到头互相接上对方」的写法。</li>
+      <li><b>两数相加（力扣 2）</b>：两链表按位相加（逆序存储），处理进位 <code class="mono">carry</code>，用虚拟头节点构建结果链表。想想如果链表极长，如何避免 <code class="mono">int</code> 溢出/大数转换。</li>
+      <li><b>手写 LRU（力扣 146）</b>：不用 <code class="mono">OrderedDict</code>，完整用「哈希表 + 双向链表」实现 <code class="mono">get / put</code>。并口头回答：为什么必须用<b>双向</b>链表而不是单向？</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="17-lc-linkedlist" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="16-lc-stack-queue.html"><span class="d">上一节</span><span class="t" id="footPrevT">算法 · 栈与队列</span></a>
+      <a class="card nxt" id="footNext" href="18-lc-dp.html"><span class="d">下一节</span><span class="t" id="footNextT">算法 · 动态规划入门</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "17-lc-linkedlist",       // 本页知识点 id（= 大纲里的 id）
+  title: "算法 · 链表",
+  eyebrow: "PYTHON · 数据结构与算法",
+  prev: "16-lc-stack-queue.html",  // 上一节文件名
+  next: "18-lc-dp.html",           // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于「虚拟头节点（dummy）」的说法，下面哪项是不正确的？",
+    opts:["它让「对头节点操作」与「对中间节点操作」写成相同代码","它能省去对空链表/头节点的特判","它要求每次操作后都返回 dummy","删除倒数第 N 节点（力扣 19）里，它为删除头节点提供了统一返回"],
+    ans:2,
+    exp:"dummy 本身只是一个占位节点，dummy.next 才是真实头节点。它不能直接作为结果返回——正确写法是返回 dummy.next。A、B、D 都是它带来的好处（dummy 极大地简化了头节点的增删操作）。"
+  },
+  {
+    type:"quiz",
+    q:"在数组（Python list）与链表的对比中，下面哪项描述是「正确」的？",
+    opts:["链表随机访问 a[i] 是 O(1)","数组在头部插入/删除是 O(1)","链表在头部插入/删除只需要改指针，是 O(1)","链表在内存里一定是连续一块"],
+    ans:2,
+    exp:"链表靠指针链接、节点零散，头部增删只需改动指针（O(1)）；数组随机访问是 O(1)、而链表随机访问要 O(n)；数组在头部增删需搬移整个区间（O(n)）；链表内存并不连续。"
+  },
+  {
+    type:"quiz",
+    q:"执行「迭代反转链表」时，关于返回值与遍历，正确的是？",
+    opts:["循环结束后返回 cur","循环结束后返回 prev","循环结束后返回 head.next","用 while cur.next 作为循环条件"],
+    ans:1,
+    exp:"反转结束时，cur 已经走到 None，而 prev 恰好指向新的头节点，所以返回 prev。循环条件是 while cur（而非 while cur.next，否则会丢最后一个节点的反转）。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪种写法是「反转链表」正确的一步核心代码？",
+    opts:["cur.next = prev; prev = cur; cur = cur.next","nxt = cur.next; cur.next = prev; prev = cur; cur = nxt","cur.next = cur; prev = cur","prev = cur; cur.next = prev"],
+    ans:1,
+    exp:"必须先备份后继（nxt = cur.next），再改指针（cur.next = prev），最后整体右移（prev = cur; cur = nxt）。选项 B 的三步顺序完全正确；A 在没有备份的情况下直接 cur = cur.next 会因 cur.next 已被改而丢失后继。"
+  },
+  {
+    type:"quiz",
+    q:"用快慢指针判断链表是否有环（力扣 141），下面哪段 while 条件是正确的？",
+    opts:["while fast:","while slow:","while fast and fast.next:","while fast.next and fast.next.next:"],
+    ans:2,
+    exp:"要让 fast 走两步（fast.next.next），就必须保证 fast 和 fast.next 都不为 None。写 while fast and fast.next 最安全；只写 while fast 或 while slow 会导致 fast.next 取不到（对长度 0/1 的链表报错）。"
+  },
+  {
+    type:"quiz",
+    q:"删除「倒数第 N 个节点」（力扣 19）时，快指针应比慢指针多走几步？",
+    opts:["多走 n 步","多走 n-1 步","多走 n+1 步","多走 0 步（两者同步）"],
+    ans:2,
+    exp:"要删除倒数第 N 个节点，就必须操作「它的前一个节点」。让 fast 先走 n+1 步，使 slow 与 fast 之间隔 n 个节点；fast 到 None 时 slow 恰好停在目标节点的前驱。若只走 n 步，slow 会停在目标节点本身，删除会失败或报错。"
+  },
+  {
+    type:"quiz",
+    q:"合并两个有序链表（力扣 21）时，结尾「接剩余段」的正确写法是？",
+    opts:["cur.next = l1 if l1 else l2","cur.next = l1 and l2","cur = l1 or l2","while l1 or l2: 继续比较"],
+    ans:0,
+    exp:"用 cur.next = l1 if l1 else l2（等价于 cur.next = l1 or l2）把「非空的那一段」整体接上。B 的 and 会取到空链表，C 没接进结果链表，D 会导致比较逻辑混乱。接剩余段是合并题最容易漏的一步。"
+  },
+  {
+    type:"interview",
+    q:"面试官常问：请口头讲清「LRU 缓存（力扣 146）为什么用哈希表 + 双向链表，且必须是双向」，并说明 get/put 如何达到 O(1)。（面试延伸：建议先讲设计目标，再讲两种数据结构各自的分工。）",
+    opts:["（请在此思考并组织回答）","（面试延伸题：建议先答「为什么双向」，再说两个操作的流程）"],
+    ans:1,
+    exp:"参考方向——① 目标：get 与 put 都要 O(1)。② 哈希表负责 O(1) 找到 key 对应节点；链表负责 O(1) 的「移到头部」与「删除尾部」。链表在删除某节点时，需要 O(1) 拿到它的前驱来重新接好指针，只有双向链表能在 O(1) 内同时拿到 prev 和 next——单向链表要删尾/删中间得遍历（O(n)）。③ 头部=最近使用、尾部=最久未使用，超容量就删 tail.prev。能答出「双向是为 O(1) 拿到前驱、伪头伪尾避免判空」最加分。"
+  }
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错代码记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

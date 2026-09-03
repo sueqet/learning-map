@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>防火墙与 iptables · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— 防火墙与 iptables：用户空间工具与内核 netfilter、四张表、五条钩子链、规则匹配与 target、数据包完整流转路径、firewalld zone，学习目标、内容讲解、练习考核。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">防火墙与 iptables</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · 网络</span></span>
+    <h1 id="pageTitle">防火墙与 iptables</h1>
+    <p class="lead" id="pageLead">给服务器「把关」——决定哪些流量能进、哪些不能。理解 <b>netfilter</b> 框架里的<b>表、链、target</b>，才能真正看懂 <code>iptables</code> 与 <code>firewalld</code> 在做什么，而不是死记命令。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能区分「用户空间的 iptables 工具」与「内核的 netfilter 框架」，并说出规则实际在哪个层面生效。</li>
+      <li>学完后，你能说出一张 iptables 规则的组织层次是<b>表 → 链 → 规则</b>，并列出 4 张表各自的职责。</li>
+      <li>学完后，你能列出 5 条钩子链（PREROUTING/INPUT/FORWARD/OUTPUT/POSTROUTING）及各自的触发时机。</li>
+      <li>学完后，你能解释规则<b>从上到下</b>匹配、各种 target（ACCEPT/DROP/REJECT/DNAT/SNAT/MASQUERADE/LOG）的行为，以及「遍历完未命中后执行默认策略」。</li>
+      <li>学完后，你能画出数据包从网卡进入到离开的完整路径，并指出 DNAT 与 SNAT/MASQUERADE 分别在哪个链生效。</li>
+      <li>学完后，你能说出 iptables 与 firewalld 的关系，并用 <code>firewall-cmd</code> 查看/设置 zone 与放行服务。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">会用终端执行简单命令；已经了解第 16 节「网络配置与包处理流程」中网卡收/发包会经过 netfilter 的拦截点，并对 IP 地址、端口有基本认识即可。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>内核 netfilter：规则真正生效的地方</h2>
+  </section>
+
+  <section class="topic" id="what-is-iptables">
+    <h3><span class="kno">01</span>什么是 iptables：用户空间工具 + 内核 netfilter</h3>
+    <p>一条 iptables 规则不会「自己」干活。你可以把 <b>iptables</b> 看成用户空间里敲命令的<b>前台工具</b>，它把规则写到内核的 <b>netfilter</b> 框架里；真正执行规则的是内核。每个网络包经过内核时，netfilter 会在固定的 <b>hook 点</b>（也就是下面的「链」）按顺序检查规则，决定放行、丢弃还是改写。</p>
+    <ul>
+      <li><b>用户空间</b>：<code>iptables</code> 命令、规则文件，方便人操作，但它本身不拦包。</li>
+      <li><b>内核空间</b>：<b>netfilter</b> 框架按 hook 点检查每一个包，规则在这里真正生效。</li>
+      <li>两者协同：工具负责「写规则」，内核负责「执行规则」。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 查看默认 filter 表里所有链的规则
+iptables -L
+
+# 查看 NAT 表（-t 用于选择表）
+iptables -t nat -L
+
+# 以「可再执行的语句」方式列出规则（等价于 iptables-save 的输入）
+iptables -S
+
+# 追加一条规则：允许源地址 10.0.0.5 的流量进入本机
+iptables -A INPUT -s 10.0.0.5 -j ACCEPT</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>iptables 是<b>工具</b>，netfilter 是<b>框架</b>；规则写进内核并由 netfilter 执行。firewalld、ufw 也只是基于这套机制的上层封装。</p></div>
+  </section>
+
+  <section class="topic" id="tables">
+    <h3><span class="kno">02</span>规则的组织方式：四张表（Table）</h3>
+    <p>iptables 把规则按<b>功能</b>分到 4 张表里，每张表管一类事情。运行规则时用 <code>-t</code> 先选表，再在表内找链；不写 <code>-t</code> 时默认操作 <code>filter</code> 表。</p>
+    <table class="tbl">
+      <tr><th>表</th><th>职责</th><th>常用链</th></tr>
+      <tr><td class="mono">filter</td><td>过滤包，决定放行还是拒绝（默认表）</td><td>INPUT / FORWARD / OUTPUT</td></tr>
+      <tr><td class="mono">nat</td><td>地址转换，修改源/目标 IP 和端口</td><td>PREROUTING / OUTPUT / POSTROUTING</td></tr>
+      <tr><td class="mono">mangle</td><td>修改包头字段（TTL、TOS 等），用于 QoS</td><td>全部 5 条链</td></tr>
+      <tr><td class="mono">raw</td><td>在连接跟踪之前处理，用于跳过连接跟踪</td><td>PREROUTING / OUTPUT</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 不写 -t 时默认操作 filter 表
+iptables -L filter
+
+# 显式指定 nat 表，看地址转换规则（-n 不反解域名，-v 显示计数）
+iptables -t nat -L -n -v
+
+# 在 filter 表 INPUT 链放行目标端口 80 的 TCP（HTTP）
+iptables -A INPUT -p tcp --dport 80 -j ACCEPT</code></pre>
+    </div>
+    <div class="callout warn"><span class="i">⚠</span><p><b>常见误区：</b>filter 表只做「过滤」，不做地址变换。把 DNAT/SNAT/MASQUERADE 写进 filter 表不会生效——它们是 <code>nat</code> 表的事。选错表是 iptables 初学最常见的错误之一。</p></div>
+  </section>
+
+  <section class="topic" id="chains">
+    <h3><span class="kno">03</span>规则挂载点：五条链（Chain）</h3>
+    <p>链是 netfilter 的 5 个 <b>hook 点</b>，也就是包经过内核时「可以检查」的固定位置。每条链上挂着一组<b>有序</b>的规则。</p>
+    <table class="tbl">
+      <tr><th>链</th><th>触发时机</th></tr>
+      <tr><td class="mono">PREROUTING</td><td>包刚进入网卡，尚未做路由决定之前</td></tr>
+      <tr><td class="mono">INPUT</td><td>包的目标是本机，交给本机进程之前</td></tr>
+      <tr><td class="mono">FORWARD</td><td>包需要转发到其它主机</td></tr>
+      <tr><td class="mono">OUTPUT</td><td>本机进程发出的包</td></tr>
+      <tr><td class="mono">POSTROUTING</td><td>包即将离开网卡，路由决定之后</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 只查看 INPUT 链的规则
+iptables -L INPUT
+
+# 在 INPUT 链末尾追加：放行目标端口 22 的 TCP（SSH）
+iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+
+# 在 INPUT 链的第 1 条插入：拒绝来自 10.1.1.99 的包
+iptables -I INPUT 1 -s 10.1.1.99 -j DROP
+
+# 精确删除上面那条（-D 时给出与添加时一致的条件）
+iptables -D INPUT -s 10.1.1.99 -j DROP</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>一句话记链：</b>接收看 <code>INPUT</code>，转发看 <code>FORWARD</code>，本机发出看 <code>OUTPUT</code>；路由决定之前是 <code>PREROUTING</code>，路由决定之后是 <code>POSTROUTING</code>。</p></div>
+  </section>
+
+  <section class="topic" id="targets">
+    <h3><span class="kno">04</span>规则怎么跑：匹配、Target 与默认策略</h3>
+    <p>包进入某条链后，<b>从上到下依次匹配</b>规则：命中第一条匹配的规则，就执行那条规则的 <b>target</b> 并停止——除非用 <code>LOG</code> 这类「只记日志、继续匹配」的 target。如果遍历完所有规则都没命中，就执行该链的<b>默认策略</b>（ACCEPT 或 DROP）。</p>
+    <table class="tbl">
+      <tr><th>Target</th><th>行为</th></tr>
+      <tr><td class="mono">ACCEPT</td><td>放行</td></tr>
+      <tr><td class="mono">DROP</td><td>丢弃，不响应，发送方等超时</td></tr>
+      <tr><td class="mono">REJECT</td><td>拒绝并返回错误消息，发送方立即知道被拒</td></tr>
+      <tr><td class="mono">DNAT</td><td>修改目标地址（目标 NAT，常做端口映射）</td></tr>
+      <tr><td class="mono">SNAT</td><td>修改源地址（源 NAT）</td></tr>
+      <tr><td class="mono">MASQUERADE</td><td>动态 SNAT，自动用出口网卡 IP 替换源 IP</td></tr>
+      <tr><td class="mono">LOG</td><td>记录日志，然后<b>继续</b>匹配后续规则</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 设置默认策略：先放行必要流量，再改成 DROP
+iptables -P INPUT DROP
+iptables -P FORWARD DROP
+iptables -P OUTPUT ACCEPT
+
+# REJECT 与 DROP 的差别
+iptables -A INPUT -p tcp --dport 8080 -j REJECT
+iptables -A INPUT -p icmp -j DROP
+
+# 只记日志、不拦截，继续走后面的规则
+iptables -A INPUT -p tcp --dport 80 -j LOG --log-prefix "WEB "</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">!</span><p><b>重要：</b>把 <code>INPUT</code> 默认策略设为 <code>DROP</code> 前，务必先放行 SSH（<code>--dport 22</code>）、回环接口（<code>-i lo</code>）等必要流量，否则很容易<b>把自己锁在服务器外</b>。对远程服务器操作防火墙时尤其要小心。</p></div>
+  </section>
+
+  <section class="topic" id="packet-flow">
+    <h3><span class="kno">05</span>数据包完整流转路径</h3>
+    <p>把前面的表、链、target 串起来，就得到数据包在内核里的完整旅程。重点记住两件事：<b>DNAT 在 PREROUTING</b>（路由决定前就改目标地址），<b>SNAT/MASQUERADE 在 POSTROUTING</b>（路由决定后、离开网卡前改源地址）。</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+        flowchart TB
+          A[网卡收包] --> B[PREROUTING<br/>nat表：DNAT在此修改目标地址]
+          B --> C{目标是本机还是转发?}
+          C -->|本机| D[INPUT<br/>filter表：决定是否放行给进程]
+          D --> E[进程]
+          C -->|转发| F[FORWARD<br/>filter表：决定是否允许转发]
+          F --> G[POSTROUTING<br/>nat表：SNAT/MASQUERADE在此修改源地址]
+          H[进程发包] --> I[OUTPUT<br/>filter/nat表]
+          I --> G
+          G --> J[网卡发出]
+      </div>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 目标 NAT：把外网访问本机 8080 的流量映射到内网主机 192.168.1.10 的 80 端口
+iptables -t nat -A PREROUTING -p tcp --dport 8080 -j DNAT --to-destination 192.168.1.10:80
+
+# 源 NAT：让内网主机以本机（出口网卡）IP 访问外网
+iptables -t nat -A POSTROUTING -s 192.168.1.0/24 -j MASQUERADE</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>三条典型路径：</b>发给本机的包走 <code>PREROUTING → INPUT → 进程</code>；需要转发的包走 <code>PREROUTING → FORWARD → POSTROUTING → 发出</code>；本机发出的包走 <code>OUTPUT → POSTROUTING → 发出</code>。所有路由决定都发生在 PREROUTING 之后、POSTROUTING 之前。</p></div>
+  </section>
+
+  <section class="topic" id="firewalld-zone">
+    <h3><span class="kno">06</span>iptables 与 firewalld：关系与 Zone</h3>
+    <p>两者都只是<b>管理内核 netfilter 规则的工具</b>，操作的是同一套机制。iptables 偏底层、用命令逐条直改；firewalld 是动态防火墙管理器，底层仍调用 iptables/nftables，用 <b>zone</b> 概念封装，支持动态修改、无需重启，规则用 <code>--permanent</code> 自动持久化。CentOS/RHEL 7+ 默认用 firewalld，Ubuntu 默认用 ufw（底层也是 iptables）。</p>
+    <table class="tbl">
+      <tr><th></th><th>iptables</th><th>firewalld</th></tr>
+      <tr><td>定位</td><td>底层工具，直接操作 netfilter 规则</td><td>动态防火墙管理器，底层仍调用 iptables/nftables</td></tr>
+      <tr><td>配置方式</td><td>命令行逐条添加规则</td><td>zone 概念，支持动态修改，无需重启</td></tr>
+      <tr><td>规则持久化</td><td>需手动保存（如 <code>iptables-save</code>）</td><td>自动持久化（<code>--permanent</code>）</td></tr>
+      <tr><td>适用场景</td><td>精细控制、脚本管理</td><td>日常服务器管理</td></tr>
+    </table>
+    <p><b>Zone</b>是一组预定义的规则集，按网络接口所处的<b>信任级别</b>来分配。</p>
+    <table class="tbl">
+      <tr><th>Zone</th><th>信任级别</th><th>说明</th></tr>
+      <tr><td class="mono">drop</td><td>最低</td><td>丢弃所有入站包，不响应</td></tr>
+      <tr><td class="mono">block</td><td>很低</td><td>拒绝所有入站包，返回拒绝消息</td></tr>
+      <tr><td class="mono">public</td><td>低</td><td>公共网络，仅允许指定服务（默认）</td></tr>
+      <tr><td class="mono">external</td><td>中</td><td>外部网络，启用 NAT 伪装</td></tr>
+      <tr><td class="mono">internal</td><td>较高</td><td>内部网络，比 public 宽松</td></tr>
+      <tr><td class="mono">trusted</td><td>最高</td><td>允许所有连接</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 查看当前默认 zone 的所有规则
+firewall-cmd --list-all
+
+# 查看默认 zone（通常为 public）
+firewall-cmd --get-default-zone
+
+# 放行 http 服务与 8080 端口，永久生效，然后重载落地
+firewall-cmd --add-service=http --permanent
+firewall-cmd --add-port=8080/tcp --permanent
+firewall-cmd --reload</code></pre>
+    </div>
+    <div class="callout warn"><span class="i">⚠</span><p><b>发行版差异：</b>CentOS/RHEL 7+ 默认用 <code>firewalld</code>，Ubuntu 默认用 <code>ufw</code>。同一台机器上同时用 iptables 与 firewalld 容易乱；日常管理只用一个。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>动手：在测试机上运行 <code>iptables -L -v</code> 查看默认 filter 表规则，再看 <code>iptables -t nat -L -n -v</code>，理解 <code>-t</code> 与链之间的对应关系，并用 <code>iptables -S</code> 比较两种列法。</li>
+      <li>动手：用 <code>firewall-cmd --list-all</code> 查看默认 zone，再用 <code>--get-default-zone</code> 与 <code>--set-default-zone=internal</code> 切换，观察信任级别差异。（在远程服务器上操作时小心把自己锁在门外。）</li>
+      <li>思考：为什么 DNAT 必须在 <code>PREROUTING</code> 生效、而 SNAT/MASQUERADE 必须在 <code>POSTROUTING</code> 生效？结合第 05 节的数据包流转路径说明理由。</li>
+      <li>挑战：用 <code>iptables</code> 开放 SSH 端口后，把规则做成「重启不丢」；再对比 <code>firewalld</code> 用 <code>--permanent</code> 加规则的差异，解释 iptables 为什么需要手动保存。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="17-firewall" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "17-firewall",          // 本页知识点 id（= 大纲里的 id）
+  title: "防火墙与 iptables",
+  eyebrow: "LINUX · 网络",
+  prev: "16-network.html",         // 上一节文件名
+  next: "18-ssh.html",             // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"iptables 是用户空间的命令行工具，它的规则实际由运行在内核中的哪个框架执行？",
+    opts:["iptables 自身","netfilter","firewalld","ufw"],
+    ans:1,
+    exp:"iptables 只是用户空间工具，真正的规则匹配在内核的 netfilter 框架中完成：每个包经过内核时，netfilter 在固定 hook 点（链）判断放行/丢弃/改写。firewalld 与 ufw 也只是基于 netfilter/iptables 的更高层管理工具。"
+  },
+  {
+    type:"quiz",
+    q:"iptables 中负责「过滤包、决定放行还是拒绝」的表是哪一张（也是默认表）？",
+    opts:["nat","mangle","filter","raw"],
+    ans:2,
+    exp:"filter 表负责过滤（默认表，不写 -t 就是对它操作）；nat 表做地址转换；mangle 表改包头字段；raw 表在连接跟踪之前处理、用于跳过跟踪。"
+  },
+  {
+    type:"quiz",
+    q:"某条规则的 target 为 DROP，当包命中它时会发生什么？",
+    opts:["放行该包","丢弃该包且不响应，发送方一直等待直到超时","丢弃并返回错误消息，发送方立即知道被拒","只记录日志，继续匹配后续规则"],
+    ans:1,
+    exp:"DROP 直接丢弃、不回应对方；REJECT 则返回错误消息（如 ICMP 拒绝），发送方立即知道被拒。这也是 DROP 常用于「伪装成主机不存在」的原因。"
+  },
+  {
+    type:"quiz",
+    q:"动态 NAT 中，哪个 target 会自动用出口网卡的 IP 替换源 IP（常用于家庭/代理上网）？",
+    opts:["DNAT","SNAT","MASQUERADE","LOG"],
+    ans:2,
+    exp:"SNAT 是静态源地址变换、需指定 IP；MASQUERADE 是动态 SNAT，自动取该出口网卡当前 IP，适合动态拨号场景。二者通常都在 POSTROUTING 链生效。"
+  },
+  {
+    type:"quiz",
+    q:"当一个网络包的目标是本机（发给本机服务）时，它会经过 netfilter 的哪条链？",
+    opts:["PREROUTING","INPUT","FORWARD","OUTPUT"],
+    ans:1,
+    exp:"包进网卡先过 PREROUTING；目标是本机就走 INPUT（filter 表决定是否放行给本机进程）；若需转发则走 FORWARD；本机进程发出的包走 OUTPUT。"
+  },
+  {
+    type:"quiz",
+    q:"DNAT（目标 NAT）通常应在哪条链上修改目标地址？",
+    opts:["OUTPUT","POSTROUTING","INPUT","PREROUTING"],
+    ans:3,
+    exp:"DNAT 要在包做路由/转发决定之前就改好目标地址，因此放在 PREROUTING；而 SNAT/MASQUERADE 在包即将离开网卡、路由决定之后改源地址，放在 POSTROUTING。"
+  },
+  {
+    type:"quiz",
+    q:"firewalld 中默认使用的 zone 是哪一项？",
+    opts:["drop","public","internal","trusted"],
+    ans:1,
+    exp:"firewalld 默认 zone 为 public（公共网络，仅放行指定服务）。drop 全丢、block 全拒、internal 更宽松、trusted 放行所有。"
+  },
+  {
+    type:"interview",
+    q:"（面试）请说明 iptables 与 firewalld 的关系，并解释为什么常说「两者操作的是同一套机制」；用 firewalld 新增一条永久规则后还需要做什么？",
+    opts:["两者完全不同，firewalld 是另一个独立的内核框架","两者只是管理 netfilter 规则的不同工具；firewalld 底层仍调用 iptables/nftables，配置需 --permanent，再 firewall-cmd --reload 生效","firewalld 与 iptables 互不相干，遵循各自的规则表","用 firewalld 添加的规则无需任何额外操作就立即永久生效"],
+    ans:1,
+    exp:"iptables 直接操作 netfilter 规则；firewalld 是动态防火墙管理器，底层仍基于 iptables/nftables，只是用 zone 概念做了封装，二者管理的是同一套机制。firewalld 加规则要带 --permanent，再 firewall-cmd --reload 把改动写入并生效。"
+  }
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

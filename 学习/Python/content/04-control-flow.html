@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>程序控制流 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 程序控制流：if/elif/else 条件分支、for/while 循环、range/enumerate/zip、break/continue 与循环 else，含可运行代码、对照表、示意图与考核练习。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">程序控制流</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 基础</span></span>
+    <h1 id="pageTitle"><span class="accent">程序控制流</span></h1>
+    <p class="lead" id="pageLead">让程序学会「<b>判断</b>」与「<b>重复</b>」：用条件分支和循环，把一段逻辑变成能自己决策、反复执行的能力——这是程序从「脚本」走向「算法」的分水岭。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能用 <span class="mono">if / elif / else</span> 写出按条件分流的程序，并理解「首个成立分支胜出、其余跳过」的执行顺序。</li>
+      <li>学完后，你能区分真假值（<span class="mono">falsy</span>），并用 <span class="mono">if not items:</span> 安全判断容器是否为空。</li>
+      <li>学完后，你能用 <span class="mono">for</span> 遍历字符串/列表，并用 <span class="mono">range(start, stop, step)</span> 生成可控的整数序列。</li>
+      <li>学完后，你能用 <span class="mono">break</span> 跳出、<span class="mono">continue</span> 跳过，并说清循环 <span class="mono">else</span> 只有在自然结束时才执行的独特含义。</li>
+      <li>学完后，你能写出不会失控的 <span class="mono">while</span> 循环，并规避死循环。</li>
+      <li>学完后，你能用 <span class="mono">enumerate</span> 同时拿下标与元素、用 <span class="mono">zip</span> 并行遍历多个序列，写出更简洁的循环。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">学本页前，你会写变量、调用 <span class="mono">print</span>，并了解运算符与表达式（尤其是比较与逻辑运算、<span class="mono">==</span> 与 <span class="mono">is</span> 的区别）。建议先学完「运算符与表达式」，或至少能熟练写出 <span class="mono">score >= 60</span> 这类判断式。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区：程序控制流
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>程序控制流<br>判断、重复与循环控制</h2>
+  </section>
+
+  <!-- 1. 条件分支 -->
+  <section class="topic" id="if-elif-else">
+    <h3><span class="kno">01</span>条件分支：<span class="mono">if / elif / else</span></h3>
+    <p>程序默认从上到下一行行执行，遇到 <b>if</b> 就开始「问路」：条件为真就走这个分支，否则问下一问。多个分支用 <b>elif</b>（else + if 的简写）串联，最后用 <b>else</b> 兜底。Python 用<b>缩进</b>而不是大括号来划分代码块，冒号 + 换行 + 缩进表示「这个块属于 if」。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>score = 87
+
+if score >= 90:
+    grade = "优秀"
+elif score >= 80:
+    grade = "良好"
+elif score >= 60:
+    grade = "及格"
+else:
+    grade = "不及格"
+
+print(grade)   # 良好</code></pre>
+    </div>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+    A[score &gt;= 90 ?] -->|是| B[grade = 优秀]
+    A -->|否| C[score &gt;= 80 ?]
+    C -->|是| D[grade = 良好]
+    C -->|否| E[score &gt;= 60 ?]
+    E -->|是| F[grade = 及格]
+    E -->|否| G[grade = 不及格]
+    B --> H[print grade]
+    D --> H
+    F --> H
+    G --> H
+      </div>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>条件从上到下依次判断，<b>命中第一个为真的分支就执行并跳出整个判断链</b>，后面的 <span class="mono">elif/else</span> 一概不看。所以判断顺序很关键：把「最严格/最靠前」的条件放上面。</p></div>
+    <div class="callout danger"><span class="i">⚠</span><p><b>易错点：</b>把多个独立的 <span class="mono">if</span> 当成 <span class="mono">elif</span> 用——多个 <span class="mono">if</span> 会<b>各自独立判断</b>，可能一次走多个分支；只有 <span class="mono">elif</span> 才保证「互斥、只走一个」。</p></div>
+  </section>
+
+  <!-- 2. 真值判断 -->
+  <section class="topic" id="truthiness">
+    <h3><span class="kno">02</span>真值判断：什么是「假值」</h3>
+    <p>在 <span class="mono">if</span>/<span class="mono">while</span> 里，条件表达式会被自动转成布尔值。Python 规定一批「<b>falsy（假值）</b>」：它们要么是 0，要么是空、None、False。除此之外一切都为真。</p>
+    <table class="tbl">
+      <thead><tr><th>类别</th><th>假值 (falsy)</th><th>真值 (truthy) 示例</th></tr></thead>
+      <tbody>
+        <tr><td>数值</td><td><span class="mono">0</span>、<span class="mono">0.0</span>、<span class="mono">0j</span></td><td><span class="mono">1</span>、<span class="mono">-3</span>、<span class="mono">0.5</span></td></tr>
+        <tr><td>字符串</td><td><span class="mono">""</span></td><td><span class="mono">"0"</span>、<span class="mono">" "</span>、<span class="mono">"abc"</span></td></tr>
+        <tr><td>容器</td><td><span class="mono">[]</span>、<span class="mono">()</span>、<span class="mono">{}</span>、<span class="mono">set()</span></td><td><span class="mono">[0]</span>、<span class="mono">(0,)</span>、<span class="mono">{"a":1}</span></td></tr>
+        <tr><td>其它</td><td><span class="mono">None</span>、<span class="mono">False</span></td><td><span class="mono">True</span>、任何对象</td></tr>
+      </tbody>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>def judge(name, value):
+    print(f"{name:8} -&gt; {'truthy' if value else 'falsy'}")
+
+judge("0", 0)            # falsy
+judge("''", "")          # falsy
+judge("[]", [])          # falsy
+judge("None", None)      # falsy
+judge("'0'", "0")        # truthy（非空字符串）
+judge("[0]", [0])        # truthy（非空列表）
+judge("0.0", 0.0)        # falsy</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>判断「容器是否为空」用 <span class="mono">if not items:</span> 就够了，不必写 <span class="mono">if len(items) == 0:</span>——两者等价，前者更 Pythonic。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>分清「假值」和「None」：</b><span class="mono">if x:</span> 判断的是 x 是否为假值（0、空、None、False 都算）；<span class="mono">if x is None:</span> 才专门判断 x 是否为 <span class="mono">None</span>。用 <span class="mono">if x:</span> 去判断 None 会在 x=0 或空容器时「误判为假」。</p></div>
+  </section>
+
+  <!-- 3. for 与 range -->
+  <section class="topic" id="for-range">
+    <h3><span class="kno">03</span><span class="mono">for</span> 循环与 <span class="mono">range()</span></h3>
+    <p><b>for</b> 用于「遍历一个可迭代对象」，逐个取出元素，直到取完。要「按次数」循环，常用内置 <b>range()</b> 生成整数序列；而要遍历已有数据，直接遍历它们本身即可。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code># range(stop)：0 起，到 stop-1
+for i in range(3):
+    print(i)               # 0 1 2
+
+# range(start, stop, step)
+for i in range(2, 10, 2):
+    print(i)               # 2 4 6 8
+
+# 遍历字符串
+for ch in "abc":
+    print(ch)              # a b c
+
+# 遍历列表
+for fruit in ["apple", "banana", "cherry"]:
+    print(fruit)</code></pre>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>调用</th><th>生成序列</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">range(5)</span></td><td><span class="mono">0,1,2,3,4</span></td><td>从 0 起，<b>不含</b>终点</td></tr>
+        <tr><td><span class="mono">range(2, 5)</span></td><td><span class="mono">2,3,4</span></td><td>start 起，<b>不含</b>stop</td></tr>
+        <tr><td><span class="mono">range(1, 10, 3)</span></td><td><span class="mono">1,4,7</span></td><td>每次加 step</td></tr>
+        <tr><td><span class="mono">range(5, 0, -1)</span></td><td><span class="mono">5,4,3,2,1</span></td><td>负数 step 可倒序</td></tr>
+      </tbody>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><span class="mono">range</span> 是<b>半开区间</b>——<span class="mono">range(5)</span> 是 <span class="mono">0..4</span>，永远<b>不含终点</b>。它返回的是惰性的 <span class="mono">range</span> 对象而不是列表，因此无论多大都不占内存。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>看到循环想「从几到几」往往会 +1 或 -1 出错。牢记「终点不含在内」：想要 1 到 5，写 <span class="mono">range(1, 6)</span>；想要下标到 len 个，就写 <span class="mono">range(len(a))</span>。</p></div>
+  </section>
+
+  <!-- 4. break / continue / 循环 else -->
+  <section class="topic" id="break-continue">
+    <h3><span class="kno">04</span>循环控制：<span class="mono">break</span>、<span class="mono">continue</span> 与循环 <span class="mono">else</span></h3>
+    <p>循环体内可以用控制语句改变流程：<b>break</b> 立刻跳出所在循环；<b>continue</b> 跳过本轮剩余代码、直接进入下一轮。三者里最容易被忽视的是<b>循环的 else</b>——它只在循环<b>自然结束</b>（没被 break 打断）时执行。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>for n in range(2, 10):
+    for i in range(2, n):
+        if n % i == 0:
+            print(f"{n} = {i} * {n // i}")
+            break               # 找到因子，跳出内层循环
+    else:
+        print(f"{n} 是质数")      # 只有内层没被 break 才执行</code></pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>for i in range(6):
+    if i % 2 == 0:
+        continue        # 跳过偶数，不执行下面
+    print(i)            # 1 3 5</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">⚠</span><p><b>易错点：</b>循环 <span class="mono">else</span> 与 <span class="mono">if</span> 的 <span class="mono">else</span> 语义不同。<span class="mono">if-else</span> 一定二选一；<span class="mono">for/while-else</span> 的 else 仅在<b>没有被 break</b> 打断时才运行——一旦 break，else 直接跳过。这是「判断循环是否提前退出」的经典写法。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>使用场景：</b>「在集合里找东西，找到就 break」最适合用循环 else 表达<b>是否找到</b>（找到→break→不进 else；没找到→自然结束→进 else）。</p></div>
+  </section>
+
+  <!-- 5. while -->
+  <section class="topic" id="while-loop">
+    <h3><span class="kno">05</span><span class="mono">while</span> 循环与循环安全</h3>
+    <p><b>for</b> 适合「知道要数多少次」；而"不知道什么时候停下来，只知道一个继续条件"的情形，用 <b>while</b>。每轮先判断条件，为真就执行一次循环体，然后回到条件继续判断。循环体里<b>必须让条件有朝一日变假</b>，否则就是死循环。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>n = 0
+while n &lt; 5:          # 条件
+    print(n)
+    n += 1            # 关键：让 n 慢慢逼近 5，否则死循环
+
+# 伪代码：直到用户输入 quit 才退出
+text = input("输入内容，quit 退出：")
+while text.strip().lower() != "quit":
+    print("你输入了：", text)
+    text = input("继续输入，quit 退出：")</code></pre>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>循环</th><th>适合场景</th><th>常见写法</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">for</span></td><td>已知范围 / 遍历容器 / 次数确定</td><td><span class="mono">for x in items:</span>、<span class="mono">range(...)</span></td></tr>
+        <tr><td><span class="mono">while</span></td><td>条件驱动、次数不定（用户输入、事件等待）</td><td><span class="mono">while cond:</span> + 内部更新</td></tr>
+      </tbody>
+    </table>
+    <div class="callout danger"><span class="i">⚠</span><p><b>易错点：</b><b>死循环</b>是 while 最常见的坑——忘了 <span class="mono">n += 1</span>，或条件永远为真。写 while 时先确保<b>循环体内一定会修改条件变量</b>；无法保证时，用 <span class="mono">break</span> 做兜底退出。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>提示：</b>能用 <span class="mono">for</span> 表达的场景尽量用 <span class="mono">for</span>，它更简洁、不易失控；<span class="mono">while</span> 留给「次数未知」的循环。</p></div>
+  </section>
+
+  <!-- 6. enumerate / zip -->
+  <section class="topic" id="enumerate-zip">
+    <h3><span class="kno">06</span>循环技巧：<span class="mono">enumerate()</span> 与 <span class="mono">zip()</span></h3>
+    <p>有时既要元素又要它的<b>下标</b>——手写 <span class="mono">i = 0; i += 1</span> 太累且易错。<b>enumerate</b> 直接返回「(下标, 元素)」对；要<b>并行遍历多个序列</b>，用 <b>zip</b> 把它们按位配对。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code>names = ["张", "李", "王"]
+for idx, name in enumerate(names, start=1):
+    print(idx, name)     # 1 张 / 2 李 / 3 王
+
+# 并行遍历两个序列
+a = [10, 20, 30]
+b = ["x", "y", "z"]
+for x, y in zip(a, b):
+    print(x, y)          # 10 x / 20 y / 30 z</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><span class="mono">enumerate(seq, start=1)</span> 返回惰性的「(下标, 元素)」配对迭代器，<span class="mono">start</span> 控制下标起点（默认 0）。<span class="mono">zip(a, b, ...)</span> 按最短序列停止——多出的元素被丢弃。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>若要和下标搭配，习惯用 <span class="mono">enumerate</span> 而非 <span class="mono">range(len(...))</span>——前者同时拿到下标和值，可读性更好。注意 <span class="mono">enumerate</span> 返回的是<b>元组</b>，可拆包成两个变量。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>写闰年判断：</b>用 <span class="mono">if/elif/else</span> 写一个函数 <span class="mono">is_leap(year)</span>，规则为「能被 400 整除，或（能被 4 整除且不能被 100 整除）」。</li>
+      <li><b>统计质数：</b>用 <span class="mono">for + range</span> 和循环 <span class="mono">else</span>，统计 1~50 之间共有多少个质数，并输出这些质数。</li>
+      <li><b>for + enumerate：</b>给定 <span class="mono">scores = [72, 88, 55, 91, 64]</span>，用 <span class="mono">enumerate</span> 输出每个元素的下标及「及格/不及格」。</li>
+      <li><b>while 输入循环：</b>写一个持续读取输入的循环，只有当用户输入 <span class="mono">quit</span>（忽略大小写/空格）才退出，并统计输入次数。说出为何这里用 <span class="mono">while</span> 而不用 <span class="mono">for</span>。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="04-control-flow" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">运算符与表达式</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">字符串处理</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "04-control-flow",        // 本页知识点 id（= 大纲里的 id）
+  title: "程序控制流",
+  eyebrow: "PYTHON · 基础",
+  prev: "03-operators.html",    // 上一节文件名
+  next: "05-string.html",       // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"下面代码输出什么？（score = 5）<br><span class='mono'>if score &gt; 3: print('A')<br>elif score &gt; 2: print('B')<br>else: print('C')</span>",
+    opts:["A","B","C","A B"],
+    ans:0,
+    exp:"解析：if 分支「score&gt;3」成立（5&gt;3 为真），Python 立即执行它并跳出整个判断链，elif/else 一律被跳过，所以只打印一次 \"A\"。"
+  },
+  {
+    type:"quiz",
+    q:"下列哪个值是「假值（falsy）」？",
+    opts:["\"0\"（字符串零）","[0]（含 0 的列表）","0.0（浮点零）","\" \"（一个空格的字符串）"],
+    ans:2,
+    exp:"解析：0、0.0、\"\"、[]、()、{}、None、False 都是假值。\"0\"、[0]、含空格或任何字符的字符串都是真值——只有「真的空/0/None/False」才是假。"
+  },
+  {
+    type:"quiz",
+    q:"range(2, 10, 3) 生成的序列是？",
+    opts:["2, 5, 8","2, 5, 8, 11","2, 4, 6, 8","3, 6, 9"],
+    ans:0,
+    exp:"解析：range(start=2, stop=10, step=3) 依次为 2、5、8；下一个是 11，已 >= stop=10，且范围是半开区间、不含终点，所以不含 11。"
+  },
+  {
+    type:"quiz",
+    q:"关于 break 和 continue，下列说法正确的是？",
+    opts:["break 跳过本轮剩余代码并进入下一轮","continue 直接结束整个循环","break 会立即跳出当前（最内层）循环","continue 只能用于 while 循环"],
+    ans:2,
+    exp:"解析：break 立即终止当前循环；continue 跳过本轮剩余代码进入下一轮，而不是结束循环。两者都可以用于 for 或 while。"
+  },
+  {
+    type:"quiz",
+    q:"对「循环的 else」，下面描述正确的是？",
+    opts:["循环自然结束（没被 break 打断）时才执行 else","循环的 else 永远不会执行","每一轮迭代都会执行一次 else","与 if 的 else 语义完全一样"],
+    ans:0,
+    exp:"解析：for/while 的 else 仅在循环正常跑完（未被 break）时执行一次；一旦 break，else 会被跳过。这与 if-else「必二选一」不同，容易记混。"
+  },
+  {
+    type:"quiz",
+    q:"下面代码输出什么？<br><span class='mono'>for i in range(3):<br>&nbsp;&nbsp;if i == 1: continue<br>&nbsp;&nbsp;print(i)</span>",
+    opts:["0 1 2","0 2","1","0"],
+    ans:1,
+    exp:"解析：i=0 时打印 0；i=1 时命中 continue，跳过 print；i=2 时打印 2。所以输出两行：0 和 2。"
+  },
+  {
+    type:"interview",
+    q:"「for i, ch in enumerate(\"abc\", start=1)」比起手工维护下标有什么优点？请说明 enumerate 返回的对象是什么、start 参数作用是什么。",
+    opts:["返回一个惰性迭代器，每项是「(下标, 元素)」元组；start 控制下标起点，避免手工计数","返回一个真实列表，修改它会反向影响原字符串","enumerate 会复制原序列，因此性能较差","enumerate 只能用于字符串，不能用于列表"],
+    ans:0,
+    exp:"解析：enumerate 返回惰性迭代器，每项是一个 (index, value) 元组，可拆包赋值；start=1 让下标从 1 开始（默认 0）。它避免了「range(len(x)) + x[i]」的手工计数，代码更简洁、不易越界。"
+  }
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

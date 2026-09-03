@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>网络配置与包处理流程 · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— 网络配置与包处理流程：nmcli 静态 IP、数据包收发路径、netfilter 拦截点、性能瓶颈排查。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">网络配置与包处理流程</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · Network</span></span>
+    <h1 id="pageTitle">网络配置与包处理流程</h1>
+    <p class="lead" id="pageLead">用 <b>nmcli</b> 把主机接到正确的网段，再顺着<b>数据包从进程到网卡、再从网卡回到进程</b>的路径，弄清 netfilter 到底在哪里拦截——这是理解网络、排查时延与丢包问题的一张「地图」。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能用 <span class="mono">nmcli</span> 查看连接与设备，并把一个接口配置成<b>静态 IP</b>（地址/网关/DNS）再应用，或随时<b>改回 DHCP</b>。</li>
+      <li>学完后，你能按顺序说明<b>发送流程</b>：Socket 缓冲区 → TCP/UDP → IP 查路由 → netfilter → 以太网帧 → TX Ring Buffer → 网卡 DMA。</li>
+      <li>学完后，你能按顺序说明<b>接收流程</b>：网卡 DMA → 硬中断 → 软中断 → 网络设备层 → netfilter → IP → 传输层按端口找 Socket → 进程。</li>
+      <li>学完后，你能指出 netfilter 的 5 个 hook 点，并说出 <b>DNAT</b>、<b>SNAT/MASQUERADE</b> 各发生在哪条链。</li>
+      <li>学完后，你能解读 <b>Ring Buffer / DMA / 硬中断(hi) / 软中断(si)</b>，并据 <span class="mono">top</span> 与 <span class="mono">netstat -s</span> 的现象定位网络性能瓶颈。</li>
+      <li>学完后，你能基于本节的流程图，解释两台主机<b>直连共享网络</b>时网关该指向哪台机器。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">你需要会基本终端操作，能看懂 <span class="mono">ip addr</span>、<span class="mono">ping</span> 等查看命令；若对 TCP/IP 分层（传输层/网络层/链路层）有基本印象，会更容易理解下文的收发路径。本节以 CentOS/RHEL/Rocky 系（NetworkManager）为例。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>先配置，再懂包<br>—— 网络配置与包在系统里如何走动</h2>
+  </section>
+
+  <section class="topic" id="net-nmcli">
+    <h3><span class="kno">01</span>用 nmcli 配置静态 IP</h3>
+    <p>NetworkManager 的命令行工具 <span class="mono">nmcli</span> 是 CentOS/RHEL/Rocky 等使用 NetworkManager 发行版上配置网络的主流方式。先<b>查看</b>连接与设备，再<b>修改</b>连接配置，最后<b>激活</b>生效。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · nmcli 配置静态 IP</div>
+      <pre><code># 1) 查看已建立的网络连接 与 设备状态
+nmcli connection show
+nmcli device status
+
+# 2) 把一个连接改为手动静态 IP（把 &lt;device-name&gt; 换成实际连接名，如 eth0）
+nmcli connection modify &lt;device-name&gt; \
+  connection.autoconnect yes \
+  ipv4.method manual \
+  ipv4.addresses 192.168.20.11/24 \
+  ipv4.gateway 192.168.20.1 \
+  ipv4.dns 192.168.20.1
+
+# 3) 应用配置
+nmcli connection up &lt;device-name&gt;
+
+# 4) 改回 DHCP（自动获取）
+nmcli connection modify &lt;device-name&gt; ipv4.method auto
+nmcli connection up &lt;device-name&gt;</code></pre>
+    </div>
+    <ul>
+      <li><span class="mono">ipv4.method manual</span>＝手动指定；<span class="mono">auto</span>＝DHCP 自动获取。</li>
+      <li><span class="mono">ipv4.addresses 192.168.20.11/24</span> 中的 <span class="mono">/24</span> 是 CIDR 掩码，必须与网关处于同一网段（这里网关为 <span class="mono">192.168.20.1</span>）。</li>
+      <li>改完必须 <span class="mono">nmcli connection up</span> 才会生效，方法 <span class="mono">auto</span> 与 <span class="mono">manual</span> 互斥。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>三要素<b>地址、网关、DNS</b> 缺一不可。地址与网关必须在<b>同一网段</b>（/24 表示前 24 位固定，最后一位不同）。<span class="mono">ipv4.method</span> 决定了是「手动」还是「自动」。</p></div>
+  </section>
+
+  <section class="topic" id="net-p2p">
+    <h3><span class="kno">02</span>两台主机直连共享网络</h3>
+    <p>适用场景：用<b>网线直连</b>两台电脑，借助其中一台已经连上 VPN 的主机，让另一台也能访问外网。<b>有 VPN 的主机</b>负责「共享」：在网络设置里把 VPN 网卡的流量共享给以太网网卡，并给出以太网的网段与网关地址；<b>另一台主机</b>则配静态 IP，<b>网关指向有 VPN 的那台主机</b>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 从机配置（网关指向 VPN 主机）</div>
+      <pre><code># 另一台主机（没有 VPN 的那台）：
+nmcli connection modify &lt;device-name&gt; \
+  connection.autoconnect yes \
+  ipv4.method manual \
+  ipv4.addresses 192.168.20.11/24 \
+  ipv4.gateway 192.168.20.1 \
+  ipv4.dns 192.168.20.1
+
+nmcli connection up &lt;device-name&gt;</code></pre>
+    </div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>在这里，<span class="mono">192.168.20.1</span> 并<b>不是</b>路由器，而是<b>那台有 VPN 的主机</b>自己配置在这条直连网线上的地址。数据包先走到它，再由它转发 / NAT 到 VPN 出口。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>两台主机要用<b>同一网段的地址</b>（如都是 <span class="mono">192.168.20.x/24</span>）；从机的<b>网关</b>必须指向VPN主机的直连地址。</p></div>
+  </section>
+
+  <section class="topic" id="net-send">
+    <h3><span class="kno">03</span>发送流程：进程 → 网卡</h3>
+    <p>应用程序调用 <span class="mono">write() / send()</span> 后，数据从<b>用户态</b>进入<b>内核态</b>，逐层「加头」，最终由网卡把比特流送上物理网络。</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+    A[进程<br/>write() / send() 系统调用] --> B[Socket 缓冲区<br/>用户态 → 内核态]
+    B --> C[传输层 TCP/UDP<br/>加 TCP/UDP 头: 源端口 / 目标端口 / 序列号]
+    C --> D[网络层 IP<br/>加 IP 头: 源 IP / 目标 IP / TTL<br/>查路由表决定从哪个网卡发出]
+    D --> E[netfilter<br/>OUTPUT 链 → POSTROUTING 链]
+    E --> F[网络设备层<br/>加以太网帧头 MAC 地址<br/>放入发送队列 TX Ring Buffer]
+    F --> G[网卡驱动 → 网卡硬件<br/>DMA 把数据从内存拷到网卡缓冲区]
+    G --> H[物理网络<br/>发出数据帧]
+      </div>
+    </div>
+    <ul>
+      <li><b>Socket 缓冲区</b>：每个 Socket 有发送、接收两个缓冲区，进程与内核之间<b>异步</b>交换数据；缓冲区满时 <span class="mono">send()</span> 会阻塞（或返回 <span class="mono">EAGAIN</span>）。</li>
+      <li><b>传输层</b>加 TCP/UDP 头（端口、序列号等）；<b>网络层</b>加 IP 头并通过<b>路由表</b>决定出网卡。</li>
+      <li><b>netfilter</b> 在 <span class="mono">OUTPUT → POSTROUTING</span> 之间可以<b>拦截 / 改写</b>（这是 iptables/firewalld 的地盘）。</li>
+      <li><b>网络设备层</b>加以太网帧头（源/目的 MAC），挂进 <b>TX Ring Buffer</b>；<b>DMA</b> 让网卡绕过 CPU 直接读内存。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>发送是<b>逐层加头</b>：传输层头 → IP 头 → 以太网帧头。数据先在 <span class="mono">OUTPUT</span> 链被检查一次，发出前又在 <span class="mono">POSTROUTING</span> 链被检查一次。</p></div>
+  </section>
+
+  <section class="topic" id="net-recv">
+    <h3><span class="kno">04</span>接收流程：网卡 → 进程</h3>
+    <p>发送要「加头」，接收则反过来逐层<b>剥头</b>。网卡收到数据帧后，用<b>硬中断</b>通知 CPU，真正干活的是<b>软中断</b>，最后数据被放到 Socket 接收缓冲区，等进程 <span class="mono">read()/recv()</span> 取走。</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+    A[物理网络收到数据帧] --> B[网卡硬件<br/>DMA 把数据帧写入 RX Ring Buffer<br/>触发硬件中断 hi 通知 CPU]
+    B --> C[网卡驱动<br/>硬中断只做最小登记<br/>随后触发软中断 si]
+    C --> D[软中断 ksoftirqd<br/>从 RX Ring Buffer 取出数据帧]
+    D --> E[网络设备层<br/>剥除以太网帧头<br/>识别上层协议 IP / ARP 等]
+    E --> F[netfilter<br/>PREROUTING 链 → INPUT 链]
+    F --> G[网络层 IP<br/>剥除 IP 头 校验目标 IP<br/>判断是本机处理还是转发]
+    G --> H[传输层 TCP/UDP<br/>剥除 TCP/UDP 头<br/>按目标端口找到对应 Socket<br/>写入 Socket 接收缓冲区]
+    H --> I[进程<br/>read() / recv() 读取数据]
+      </div>
+    </div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>硬中断（<span class="mono">hi</span>）<b>只做最少的事</b>——登记一下、触发软中断就撒手，把真正的协议处理交给软中断（<span class="mono">si</span>，由 <span class="mono">ksoftirqd</span> 跑）。这不是「多此一举」，而是为了避免长时间<b>屏蔽中断</b>导致丢包、妨碍其它设备。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><span class="mono">top</span> 里 <span class="mono">hi</span>、<span class="mono">si</span> 两个字段就来自这套「硬中断→软中断」机制：<span class="mono">hi</span> 高＝硬中断多，<span class="mono">si</span> 高＝软中断忙。</p></div>
+  </section>
+
+  <section class="topic" id="net-netfilter">
+    <h3><span class="kno">05</span>netfilter 的拦截点（iptables/firewalld 的地盘）</h3>
+    <p>iptables / firewalld 工作在内核的 <b>netfilter</b> 框架上，共有 5 个 hook 点：<span class="mono">PREROUTING</span>、<span class="mono">INPUT</span>、<span class="mono">FORWARD</span>、<span class="mono">OUTPUT</span>、<span class="mono">POSTROUTING</span>。理解一个包在哪个链上「被检查」，是配防火墙/做 NAT 的前提。</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+    RX[网卡收到包] --> PRE{PREROUTING 链<br/>DNAT 目标地址转换}
+    PRE -->|目标是本机| INP[INPUT 链] --> PROC[进程]
+    PRE -->|需要转发| FWD[FORWARD 链]
+    FWD --> POST1[POSTROUTING 链]
+    TXP[进程发包] --> OUT[OUTPUT 链]
+    OUT --> POST2[POSTROUTING 链<br/>SNAT / MASQUERADE 源地址转换]
+    POST1 --> SEND[发出]
+    POST2 --> SEND
+      </div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>钩子 / 链</th><th>作用</th><th>典型用途</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">PREROUTING</span></td><td>路由决策<b>之前</b>、最先检查收包</td><td><b>DNAT</b>（改目标地址，端口映射）</td></tr>
+        <tr><td><span class="mono">INPUT</span></td><td>目标是<b>本机</b>的入包</td><td>放行 / 拒绝访问本机服务的包</td></tr>
+        <tr><td><span class="mono">FORWARD</span></td><td>主机充当<b>路由器</b>转发的包</td><td>转发策略、路由器上的访问控制</td></tr>
+        <tr><td><span class="mono">OUTPUT</span></td><td><b>本机进程</b>发出的包</td><td>限制本机对外访问</td></tr>
+        <tr><td><span class="mono">POSTROUTING</span></td><td>发出<b>之前</b>、路由决策之后</td><td><b>SNAT / MASQUERADE</b>（改源地址、共享上网）</td></tr>
+      </tbody>
+    </table>
+    <div class="callout danger"><span class="i">✕</span><p><b>不要记反：</b><b>改目标地址（DNAT）在 PREROUTING</b>——包进来先改「要去哪」；<b>改源地址（SNAT / MASQUERADE）在 POSTROUTING</b>——包出去前把「从哪来」改成网关地址。<b>MASQUERADE</b> 是 SNAT 的「动态版」，常用于动态 IP（如家用上网共享），无需固定源地址。</p></div>
+  </section>
+
+  <section class="topic" id="net-perf">
+    <h3><span class="kno">06</span>关键机制与性能瓶颈排查</h3>
+    <p>收发路径上有几个反复出现的「要害」：相互共享内存的 <b>Ring Buffer</b>、绕过 CPU 的 <b>DMA</b>、分两步走的<b>硬/软中断</b>，以及进程与内核之间缓冲数据的 <b>Socket 缓冲区</b>。它们一旦超载，就会表现为延迟与丢包。</p>
+    <table class="tbl">
+      <thead><tr><th>现象</th><th>可能原因</th><th>方向</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">top</span> 中 <span class="mono">si</span> 占用高</td><td>收包量大，软中断处理繁忙</td><td>考虑网卡多队列 / RSS、绑核</td></tr>
+        <tr><td><span class="mono">top</span> 中 <span class="mono">hi</span> 占用高</td><td>硬中断过多</td><td>开启 <b>RSS / 网卡多队列</b>分散中断</td></tr>
+        <tr><td><span class="mono">netstat -s</span> 中大量丢包</td><td>Ring Buffer 满，或 Socket 缓冲区太小</td><td>调大 <span class="mono">ring buffer</span> / <span class="mono">socket buffer</span></td></tr>
+        <tr><td><span class="mono">wa</span> 占用高</td><td>与网络 I/O 等待有关（如 NFS）</td><td>定位是哪个存储/网络挂载卡住</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li><b>Ring Buffer（环形缓冲区）</b>：网卡与内核之间共享的环形内存区，收、发包都通过它传递，避免频繁分配内存。读写速度跟不上就会<b>满了丢包</b>。</li>
+      <li><b>DMA（直接内存访问）</b>：网卡<b>不经 CPU</b> 直接读写内存，大大降低 CPU 开销。</li>
+      <li><b>硬中断(hi) vs 软中断(si)</b>：网卡收包触发硬中断，硬中断只做最少工作，把实际处理甩给软中断，避免长时间屏蔽中断。</li>
+      <li><b>Socket 缓冲区</b>：每个 Socket 有发送和接收两个缓冲，进程与内核异步交接数据；满时 <span class="mono">send()</span> 阻塞或返回 <span class="mono">EAGAIN</span>。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>排查口诀：</b>先看 <span class="mono">top</span> 的 <span class="mono">hi/si</span>（谁在忙），再看 <span class="mono">netstat -s</span>（是否丢包），最后回到 Ring Buffer 与 Socket 缓冲是否太小。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>在虚拟机里用 <span class="mono">nmcli</span> 把某接口改成静态 IP（如 <span class="mono">192.168.100.5/24</span>、网关 <span class="mono">192.168.100.1</span>），再 <span class="mono">nmcli connection up</span> 生效；最后用 <span class="mono">ip addr</span> 与 <span class="mono">ping</span> 验证对端可达。</li>
+      <li>用 <span class="mono">ping</span> 与 <span class="mono">ip route</span> 观察：数据包从本机发往某服务器时走了哪条<b>路由</b>？把「路由表决定出网卡」落到实际命令上验证一次。</li>
+      <li>画一张「从浏览器访问 <span class="mono">example.com</span> 到页面显示」的<b>完整流程图</b>，标注每一层加的/剥的头、以及 netfilter 拦在哪；再画出响应包回来时走的路径并对照本节两张图。</li>
+      <li>思考并尝试：用 <span class="mono">top</span> 观察本地<b>收发大量数据</b>（如 <span class="mono">scp</span> 大文件）时 <span class="mono">hi</span>/<span class="mono">si</span> 的变化，说说它们分别代表网卡收发的哪一步，若 <span class="mono">si</span> 飙高你会怎么优化。</li>
+      <li>进阶：模拟两台主机<b>直连共享</b>——一台做 <span class="mono">iptables</span> NAT（MASQUERADE）转发，另一台网关指向它，验证「另一台能上网」的背后正是 <span class="mono">FORWARD</span> 与 <span class="mono">POSTROUTING</span> 在起作用。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="16-network" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "16-network",              // 本页知识点 id（= 大纲里的 id）
+  title: "网络配置与包处理流程",
+  eyebrow: "LINUX · Network",
+  prev: "15-packages.html",      // 上一节
+  next: "17-firewall.html",      // 下一节
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"用 nmcli 查看已建立的网络连接，应使用哪条命令？",
+    opts:["nmcli connection show","nmcli device status","ip addr show","systemctl status network"],
+    ans:0,
+    exp:"nmcli connection show 列出所有「连接」（connection，即配置对象）；nmcli device status 查看的是「设备」的物理状态。两者关注维度不同。"
+  },
+  {
+    type:"quiz",
+    q:"把某个接口改回「DHCP 自动获取」的正确做法是？",
+    opts:["ipv4.method auto","ipv4.method manual","ipv4.addresses auto","ipv4.gateway auto"],
+    ans:0,
+    exp:"ipv4.method 决定获取方式：manual=手动指定，auto=DHCP。改回 auto 后用 nmcli connection up 激活即可；addresses/gateway 都不是控制获取方式的项。"
+  },
+  {
+    type:"quiz",
+    q:"本机进程向外发包时，数据包在物理出网卡之前会依次经过 netfilter 的哪两条链？",
+    opts:["OUTPUT 链 → POSTROUTING 链","PREROUTING 链 → INPUT 链","PREROUTING 链 → FORWARD 链","INPUT 链 → OUTPUT 链"],
+    ans:0,
+    exp:"本机发包走 OUTPUT（发出前检查）→ POSTROUTING（发出前改源地址）。PREROUTING/INPUT 是收包方向；FORWARD 是转发方向。"
+  },
+  {
+    type:"quiz",
+    q:"netfilter 中，DNAT（目标地址转换，如端口映射）通常发生在哪条链？",
+    opts:["PREROUTING 链","POSTROUTING 链","FORWARD 链","OUTPUT 链"],
+    ans:0,
+    exp:"DNAT 改的是「目标地址」，要在包进入路由决策之前就改好，所以命中的是 PREROUTING 链；而 SNAT/MASQUERADE 改「源地址」发生在 POSTROUTING 链。别记反。"
+  },
+  {
+    type:"quiz",
+    q:"网卡收到数据帧后，通过 DMA 把数据写入哪里？",
+    opts:["RX Ring Buffer 环形缓冲区","Socket 接收缓冲区","进程的用户态内存","传输层的 TCP 缓冲区"],
+    ans:0,
+    exp:"网卡 DMA 先把数据帧写入内核的 RX Ring Buffer；随后软中断把它取出、逐层剥头，最后由协议栈写入 Socket 接收缓冲区供进程 read() 读取。两个「缓冲区」阶段不同。"
+  },
+  {
+    type:"quiz",
+    q:"top 里 si（软中断）占用高，通常说明什么？",
+    opts:["收包量大，软中断处理繁忙","硬中断过多","磁盘 I/O 等待（wa）","Ring Buffer 里的包全是坏包"],
+    ans:0,
+    exp:"si 高=软中断忙，常见于收包量大、协议栈处理不过来；hi 高才是硬中断过多（可考虑 RSS/网卡多队列）；wa 与盘/网络 I/O 等待有关。"
+  },
+  {
+    type:"interview",
+    q:"面试追问：为什么网卡收包要多此一举地分成「硬中断 + 软中断」两步，而不是用一个硬中断把协议处理一次做完？",
+    opts:["硬中断优先级高、应尽快返回，避免长时间屏蔽中断导致丢包或影响其它设备；真正的协议处理放到能被调度、能抢占的软中断上下文中完成","这样更慢，是内核的历史包袱没有更好的办法","硬中断只能处理 IP，剩下的必须交给软中断才能看 TCP","两步是为了方便在用户态抓包"],
+    ans:0,
+    exp:"硬中断会屏蔽同级甚至更高优先级中断，必须秒级返回；若在硬中断里做完整个协议栈，会长时间关中断，导致丢包、无法响应其它设备。所以硬中断只做「登记 + 触发软中断」，把重活交给软中断（ksoftirqd），这也是 top 里 hi/si 字段的由来。"
+  }
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>标签与版本发布 · Git 版本协作</title>
+<meta name="description" content="Git 版本协作学习页 —— 标签(tag)是什么、轻量标签 vs 附注标签、打/看/删/推送标签、按版本号规范发布。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 gitGraph / flowchart 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f5f2eb;--paper-2:#fdfcf8;--ink:#211d16;--ink-soft:#4e4838;--muted:#8a8069;
+    --line:#e7e0cf;--line-2:#d6cdb6;
+    --orange:#c8442e;--orange-soft:#f9ece6;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#376a8f;--blue-soft:#e9f1f7;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#20221c;--code-ink:#e7e4cf;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(33,29,22,.04),0 12px 32px -20px rgba(33,29,22,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(200,68,46,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,242,235,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262a21;font-family:var(--font-mono);font-size:11px;color:#a9a689;border-bottom:1px solid #34382b}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #edd5c9;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#b13a27}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(33,29,22,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Git 版本协作 · <b id="navTitle">标签与版本发布</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">GIT · 协作</span></span>
+    <h1 id="pageTitle">标签与版本发布</h1>
+    <p class="lead" id="pageLead">学会用 <b>tag</b> 把一个 <b>commit</b> 固定成可追溯的版本节点：打、看、删、推送标签，并按 <b>v1.0.0</b> 这样的版本号规范对外发布。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能说清 <code class="mono">tag</code> 是<b>绑定到某个 commit 的固定引用</b>，不会随着分支提交而移动。</li>
+      <li>学完后你能区分<b>轻量标签</b>与<b>附注标签</b>，并指出附注标签额外保存了 <code class="mono">tagger</code>、日期和消息。</li>
+      <li>学完后你能用 <code class="mono">git tag</code> 创建、查看、删除标签，并用 <code class="mono">git push --tags</code> 一次性推送。</li>
+      <li>学完后你能按版本号规范（如 <code class="mono">v1.0.0</code>）给发布节点打标签，并简要说明 semver 的含义。</li>
+      <li>学完后你能正确<b>删除并同步</b>远端标签，而不会误删分支或提交。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">会用命令行终端；理解 <code class="mono">commit</code> 与 <code class="mono">branch</code> 的概念；能完成一次常规的「改 → commit → push」流程。如果你还不熟悉分支，建议先学「分支与合并」。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">08</span>标签与版本发布</h2>
+  </section>
+
+  <section class="topic" id="tag-idea">
+    <h3><span class="kno">小节</span>标签是什么、为什么用于版本发布<span class="pt">tag 是固定引用</span></h3>
+    <p>在 Git 里，<b>tag（标签）</b>是绑定到<b>某一个具体 commit</b> 的引用。它与 branch 最大的不同在于：<b class="mono">branch</b> 会随着新提交自动向前移动，而 <b class="mono">tag</b> 一经创建就<b>固定不动</b>，始终指向你打标签那一刻的提交。正因为这种「钉死」的特性，tag 天然适合用来标记<b>版本发布</b>——当你对外发布 v1.0.0 时，希望别人能精确地拉取到「发布时的这一版代码」，而不是模糊的「最新代码」。</p>
+    <ul>
+      <li><b>可追溯（traceable）</b>：每个 tag 指向一个准确的 commit，用 <code class="mono">git checkout v1.0.0</code> 就能还原当时的代码。</li>
+      <li><b>不可变基线（immutable milestone）</b>：发布后不应再随意改动这个 tag，否则「v1.0.0」的含义就变了。</li>
+      <li><b>语义化</b>：配合版本号（如 <code class="mono">v1.0.0</code>），人类一眼就能读懂这是主版本、次版本还是补丁版本。</li>
+    </ul>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart LR
+  subgraph main["main 分支（随提交移动）"]
+    direction LR
+    A[commit A] --> B[commit B] --> C[commit C] --> D[commit D]
+  end
+  T1("v1.0.0（tag，固定不动）") -.-> C
+  style T1 fill:#e7f2ea,stroke:#2c7a50,stroke-width:2px
+      </div>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>tag 是<b>指向单个 commit 的固定引用</b>，是「版本发布」的锚点；branch 会移动，tag 不会。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易混点：</b>tag 和 branch 放在同一张大图上，一个在动、一个不动。把「分支」理解成不断前进的指针，把「标签」理解成钉在墙上的一枚图钉。</p></div>
+  </section>
+
+  <section class="topic" id="tag-annotated">
+    <h3><span class="kno">小节</span>轻量标签 vs 附注标签<span class="pt">-a / -m，含 tagger/日期</span></h3>
+    <p>Git 支持两种标签：<b>轻量标签（lightweight tag）</b>和<b>附注标签（annotated tag）</b>。轻量标签只是一个<b>指向 commit 的简单指针</b>（本质就是一个引用了 commit 的引用文件），除了名字外不携带任何额外信息，也没有独立对象；而附注标签则会在对象库里<b>新建一个完整的 tag 对象</b>，记录打标签的人（<code class="mono">tagger</code>）、时间戳和一条可选的消息（message）。</p>
+    <table class="tbl">
+      <thead><tr><th>对比项</th><th>轻量标签（lightweight）</th><th>附注标签（annotated）</th></tr></thead>
+      <tbody>
+        <tr><td><b>创建命令</b></td><td><code class="mono">git tag v1.0.0</code></td><td><code class="mono">git tag -a v1.0.0 -m "发布 v1.0.0"</code></td></tr>
+        <tr><td><b>存储对象</b></td><td>仅一个指向 commit 的引用</td><td>独立 tag 对象（含 tagger/date/message）</td></tr>
+        <tr><td><b>是否带签名</b></td><td>否</td><td>可用 <code class="mono">-s</code> 加 GPG 签名</td></tr>
+        <tr><td><b>适用场景</b></td><td>临时标记、个人快速标注</td><td><b>正式版本发布</b>、需要作者与日期信息</td></tr>
+        <tr><td><b>查看详细信息</b></td><td>仅地址</td><td><code class="mono">git show v1.0.0</code> 能看到作者与消息</td></tr>
+      </tbody>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 附注标签：推荐用于正式发布（含作者、时间、消息）
+git tag -a v1.0.0 -m "发布 v1.0.0：首个稳定版"
+
+# 查看某个附注标签的详细信息（能看到 tagger / 日期 / 消息）
+git show v1.0.0</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>正式版本发布请使用<b>附注标签</b>（<code class="mono">-a -m</code>），因为它记录了「是谁、在什么时候、为什么打这个标签」；这些信息对你追溯发布历史至关重要。</p></div>
+    <div class="callout danger"><span class="i">✖</span><p><b>易错点：</b>轻量标签没有独立的 tag 对象，因此 <code class="mono">git show v1.0.0</code> 只会展示它所指向的那个 <b>commit</b> 的改动，而<b>看不到</b>任何「标签作者 / 标签消息」。别把它当附注标签用。</p></div>
+  </section>
+
+  <section class="topic" id="tag-manage">
+    <h3><span class="kno">小节</span>打标签、查看、删除与推送<span class="pt">git push --tags</span></h3>
+    <p>掌握了概念后，实际只用到几条命令。最值得记住的一点是：<b>默认 <code class="mono">git push</code> 不会推送标签</b>，需要用 <code class="mono">git push --tags</code> 一次性把本地所有标签推上去（或用 <code class="mono">git push origin v1.0.0</code> 推送单个）。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 1) 打标签（默认打在当前 HEAD 指向的 commit 上）
+git tag v1.0.0                    # 轻量
+git tag -a v1.0.0 -m "发布 v1.0.0"  # 附注（推荐）
+
+# 2) 查看标签
+git tag                            # 列出所有标签
+git tag -n                         # 带一行消息列出
+git show v1.0.0                    # 看单个标签详情
+
+# 3) 推送标签到远端
+git push origin v1.0.0             # 推送单个标签
+git push --tags                    # 推送所有标签
+
+# 4) 删除标签（本地 + 远端）
+git tag -d v1.0.0                         # 删除本地标签
+git push origin :refs/tags/v1.0.0         # 删除远端标签
+git push origin --delete v1.0.0           # 等价写法</code></pre>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>操作</th><th>命令</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>创建标签</td><td><code class="mono">git tag v1.0.0</code></td><td>打在当前 commit 上</td></tr>
+        <tr><td>创建附注标签</td><td><code class="mono">git tag -a v1.0.0 -m "消息"</code></td><td>推荐</td></tr>
+        <tr><td>查看所有标签</td><td><code class="mono">git tag</code></td><td>按字典序列出</td></tr>
+        <tr><td>查看标签详情</td><td><code class="mono">git show v1.0.0</code></td><td>附注标签显示作者/日期/消息</td></tr>
+        <tr><td>推送全部标签</td><td><code class="mono">git push --tags</code></td><td><b>必须显式</b>，默认不推</td></tr>
+        <tr><td>推送单个标签</td><td><code class="mono">git push origin v1.0.0</code></td><td>精确推送</td></tr>
+        <tr><td>删除标签</td><td><code class="mono">git tag -d v1.0.0</code></td><td>只删本地</td></tr>
+        <tr><td>删除远端标签</td><td><code class="mono">git push origin --delete v1.0.0</code></td><td>同步远端</td></tr>
+      </tbody>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b><code class="mono">git tag -d</code> 只删除<b>本地</b>标签；若不执行远端的删除命令，远端仍会保留该标签，别人还能拉到。发布过的标签应避免删改。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>标签<b>不会随 <code class="mono">git push</code> 自动上传</b>。想共享标签，必须用 <code class="mono">git push --tags</code>（全推）或 <code class="mono">git push origin &lt;tagname&gt;</code>（单个推）。</p></div>
+  </section>
+
+  <section class="topic" id="versioning">
+    <h3><span class="kno">小节</span>版本号规范与最佳实践<span class="pt">v1.0.0 / semver</span></h3>
+    <p>给版本打标签时，人们习惯遵循<b>语义化版本（Semantic Versioning，semver）</b>：版本号形如 <code class="mono">主版本.次版本.修订号</code>（<code class="mono">MAJOR.MINOR.PATCH</code>）。每条规则都有明确含义，改动它的场景对应不同的升级级别。</p>
+    <table class="tbl">
+      <thead><tr><th>段位</th><th>示例</th><th>何时递增</th></tr></thead>
+      <tbody>
+        <tr><td><b>MAJOR（主版本）</b></td><td>从 <code class="mono">v1.0.0</code> 到 <code class="mono">v2.0.0</code></td><td>存在<b>不向下兼容</b>的接口/行为变更</td></tr>
+        <tr><td><b>MINOR（次版本）</b></td><td>从 <code class="mono">v1.2.0</code> 到 <code class="mono">v1.3.0</code></td><td>新增功能且<b>向后兼容</b></td></tr>
+        <tr><td><b>PATCH（修订号）</b></td><td>从 <code class="mono">v1.2.0</code> 到 <code class="mono">v1.2.1</code></td><td>仅修复 Bug、<b>不新增功能</b></td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li><b>前缀约定</b>：Git 标签常写作 <code class="mono">v1.0.0</code>（带 <code class="mono">v</code> 前缀），而语义化版本号本身是 <code class="mono">1.0.0</code>。团队里保持一致即可，<code class="mono">v</code> 前缀是社区最常见的习惯。</li>
+      <li><b>发布锚点</b>：在「发布候选」那一刻，把 tag 打到要发布的那个 commit 上，之后就不会再动。</li>
+      <li><b>为发布打附注标签</b>：用 <code class="mono">-a</code> 记录作者与发布说明，方便回溯「这个版本是谁、何时、为何发布」。</li>
+      <li><b>命名清晰</b>：避免自定义花哨标签（如 <code class="mono">great-release</code>），以语义化版本号为准，机器才好解析。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>语义化版本让升级级别「一看就懂」——主版本破坏性变更、次版本新增功能、修订号只修 Bug。打完标签再发布，别人才能精确复现你的版本。</p></div>
+    <div class="callout danger"><span class="i">✖</span><p><b>易错点：</b>不要在已发布的 tag 上继续 <code class="mono">commit</code> 或改标签——那会让「v1.0.0」这个稳定版本指向不同代码。需要修复就开新版本（如 <code class="mono">v1.0.1</code>）。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e7e0cf" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#c8442e" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>在本地一个已有提交历史的仓库里，为「最近一次提交」打一个附注标签 <code class="mono">-a v1.0.0 -m "..."</code>，再用 <code class="mono">git show</code> 验证能看到 tagger、日期与消息；也打一个轻量标签，对比 <code class="mono">git show</code> 的差异。</li>
+      <li>把本地所有标签推送到远端（<code class="mono">git push --tags</code>），然后在另一台机器上用 <code class="mono">git fetch --tags</code> 拉全，再 <code class="mono">git checkout v1.0.0</code> 回到发布时的代码，验证可复现。</li>
+      <li>模拟一次「误打标签后删除」：先创建一个标签，再本地删除它并同步删除远端，确认分支与提交都毫发无损。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="08-tags" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Git 版本协作」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "08-tags",                 // 本页知识点 id（= 大纲里的 id）
+  title: "标签与版本发布",
+  eyebrow: "GIT · 协作",
+  prev: "07-undo.html",          // 上一节文件名
+  next: "09-rebase.html",        // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于 tag 与 branch，下列哪种说法是正确的？",
+    opts:["tag 和 branch 都会随新提交自动向前移动","tag 是绑定到某个 commit 的固定引用，branch 会随提交移动","tag 只能指向 HEAD 所在的提交，不能指向历史提交","branch 一旦创建就永远固定不动"],
+    ans:1,
+    exp:"解析：tag 是「钉死」在某个 commit 上的引用，不会随新提交移动；而 branch 会随着新提交自动前进。tag 也允许通过 commit 哈希（git tag v1.0.0 <commit>）指向任意历史提交。"
+  },
+  {
+    type:"quiz",
+    q:"要创建一个既含作者(tagger)、又含日期和消息的正式版本标签，应使用哪条命令？",
+    opts:["git tag v1.0.0","git tag -a v1.0.0 -m \"发布 v1.0.0\"","git branch v1.0.0","git tag v1.0.0 -s 之后再 push"],
+    ans:1,
+    exp:"解析：附注标签用 -a 创建、-m 提供消息，会在对象库中生成完整 tag 对象（含 tagger/日期/消息）。轻量标签（git tag v1.0.0）只是一个指针，没有这些信息。"
+  },
+  {
+    type:"quiz",
+    q:"附注标签相比轻量标签，最主要的优势是？",
+    opts:["附注标签占用更少的存储空间","附注标签保存了打标签的人、日期和说明消息，便于追溯发布历史","附注标签会锁定整个分支","附注标签只能由管理员创建"],
+    ans:1,
+    exp:"解析：附注标签是独立的 tag 对象，保存 tagger、日期与消息；轻量标签仅是引用，git show 时看不到标签本身的信息。存储上附注标签反而多一个对象，并不省空间。"
+  },
+  {
+    type:"quiz",
+    q:"你刚在本地打了标签 v1.0.0，如何把它共享给其他协作者？",
+    opts:["什么都不用做，git push 会自动带标签上去","执行 git push --tags（或 git push origin v1.0.0）","执行 git status 就会同步","执行 git merge v1.0.0 即可"],
+    ans:1,
+    exp:"解析：默认 git push 不会推送标签，必须显式用 git push --tags 推全部，或用 git push origin v1.0.0 推单个。"
+  },
+  {
+    type:"quiz",
+    q:"要删除本地标签 v1.0.0 并同步删除远端同名标签，正确的做法是？",
+    opts:["git tag -d v1.0.0 即可，远端会自动删除","先 git tag -d v1.0.0，再 git push origin --delete v1.0.0","执行 git branch -D v1.0.0","执行 git reset --hard v1.0.0"],
+    ans:1,
+    exp:"解析：git tag -d 只删本地；要同步删除远端标签，还需 git push origin --delete v1.0.0（等价于 git push origin :refs/tags/v1.0.0）。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：如果项目遵循语义化版本 semver，从 v1.2.0 到 v1.3.0（只新增了向后兼容的功能、无破坏性变更）属于哪一级升级？为什么不建议在发布后原地修改已打好的 v1.0.0 标签？",
+    opts:["这属于 MAJOR 主版本升级；发布后改标签没有影响","这属于 MINOR 次版本升级；因为 tag 是固定引用，发布后改动会让「v1.0.0」指向不同代码，破坏版本含义与可复现性","这属于 PATCH 修订号升级；发布后随时可改标签","应保持版本号不变；tag 本来就不该对应 commit"],
+    ans:1,
+    exp:"解析：新增有向后兼容的功能属于 MINOR（次版本）升级。而 tag 是固定引用，发布后若原地改动，会让 v1.0.0 指向不同 commit，破坏版本的可追溯与可复现性；正确做法是开新版本（如 v1.0.1）。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪条语句能查看附注标签 v1.0.0 的作者、日期与说明消息？",
+    opts:["git log","git show v1.0.0","git push v1.0.0","git branch v1.0.0"],
+    ans:1,
+    exp:"解析：git show v1.0.0 会先显示该附注标签对象（tagger、日期、消息），再显示它指向的 commit 的改动。git log 看的是提交历史，不是标签对象。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:git-version-collab:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Git 版本协作";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

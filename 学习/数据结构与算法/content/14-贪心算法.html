@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>贪心算法 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 贪心算法（Greedy）：学习目标、知识点讲解、正确性证明、经典题型、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">贪心算法</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 14 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">贪心算法</h1>
+    <p class="lead" id="pageLead">从<b>「每步取当前最优」</b>出发，掌握贪心的思想与<b>为何局部最优能推出全局最优</b>，学会用交换论证/反证法证明正确性，并看清它<b>何时可靠、何时必须改用动态规划</b>。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能用一句话说清贪心算法的核心思想，并讲出它与「枚举所有解 / 回溯」的本质区别。</li>
+      <li>学完后你能判断一个问题是否具备<b>贪心选择性质</b>与<b>最优子结构</b>，并用<strong>交换论证</strong>或<strong>反证法</strong>给出（或理解）正确性证明。</li>
+      <li>学完后你能独立写出区间调度、分发饼干、跳跃游戏、加油站、哈夫曼、分数背包等经典贪心题的解，并标注它们的复杂度。</li>
+      <li>学完后你能讲清贪心与动态规划的差异，尤其是「分数背包可贪心而 0/1 背包不能」的原因。</li>
+      <li>学完后你能识别贪心会失效的反例，从而在贪心无法保证最优时果断改用动态规划或其它方法。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">会一门编程语言（能读 Python，能对照 C++ 思路）；掌握基础<strong>排序</strong>（快速排序 / 堆排序）；理解<strong>递归与分治</strong>，知道什么是<strong>子问题</strong>；了解数组、栈、<strong>最小堆（优先队列）</strong>与并查集等基础结构（哈夫曼要用到最小堆）；最好对<strong>复杂度分析</strong>有初步概念。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区（每个知识点一个 section.topic，锚点见学习大纲）
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>贪心的本质与正确性<br>「每步最优」为什么能通向「全局最优」</h2>
+  </section>
+
+  <!-- 知识点 1 -->
+  <section class="topic" id="greedy-basic">
+    <h3><span class="kno">知识点</span>贪心算法的基本思想与策略<span class="pt">greedy-basic</span></h3>
+    <p><strong>贪心算法（Greedy Algorithm）</strong>是一种在每一步决策中都「选择当前状态下看起来最优的那一个选项」，并且<strong>从此不再回头</strong>（不回溯、不撤销）的算法。它的核心猜想是：<em>如果每一步都做局部最优的选择，累积起来就可能是全局最优解</em>。正因为如此，贪心往往只需<strong>一次扫描 + 一次排序</strong>，是同类题中写法最短、最快的一种策略。</p>
+    <p>它和「枚举/回溯」式的暴力不同：枚举把每一种可能都试一遍，最坏情况是指数级；而贪心每一步都<strong>只走一条路</strong>，复杂度通常很低。代价是：贪心<strong>并不总是正确</strong>——只有当前问题同时满足下面两条性质时，局部最优才保证等于全局最优：</p>
+    <ul>
+      <li><b>贪心选择性质（Greedy-choice Property）：</b>存在一个全局最优解，它<em>第一步</em>就包含（或可以换成）贪心选择。也就是说，「先做这个当前最优的选择」不会把通往最优解的路堵死。</li>
+      <li><b>最优子结构（Optimal Substructure）：</b>做出这个选择之后，剩下的问题仍是<b>同类型</b>子问题，且原问题的最优解 <strong>=</strong> 这一次贪心选择 + 子问题的最优解。</li>
+    </ul>
+    <p>这两个性质正是「贪心为什么对」的理论根基——想在面试里说清「这题为什么用贪心」，本质上就是要论证它同时满足这两条（见下一个知识点「正确性证明」）。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>greedy-cookie.py</div>
+      <pre><code># LeetCode 455 分发饼干：一个最典型的贪心模板题
+def find_content_children(greed, size):
+    # 思路：胃口小的孩子先喂、尺寸小的饼干先用，避免把大饼干浪费在小胃口上
+    greed.sort()          # 孩子胃口，升序
+    size.sort()           # 饼干尺寸，升序
+    i = j = 0             # i 指向孩子，j 指向饼干
+    while i &lt; len(greed) and j &lt; len(size):
+        if size[j] &gt;= greed[i]:   # 当前最小饼干能满足当前最饿的孩子 ——— 局部最优
+            i += 1                # 这个孩子被满足
+        j += 1                    # 无论能否满足，这块饼干都用掉（贪心：不留大饼干等后面）
+    return i              # 被满足的孩子数，即全局最优
+
+print(find_content_children([1,2,3], [1,1]))   # 1
+print(find_content_children([1,2], [1,2,3]))   # 2</code></pre>
+    </div>
+    <p>为什么这么选？因为「用最合适的饼干去满足最合适的孩子」既是用掉当前价值最高的选择，又不会挤占其它孩子更可能吃到更大饼干的机会——这正是<strong>贪心选择性质</strong>的直观体现。</p>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>贪心 = <strong>每一步只做一次「当前最优」且永不后悔的决策</strong>。它的优势是快（常常 <span class="mono">O(n log n)</span> 甚至 <span class="mono">O(n)</span>），代价是有可能错——所以<strong>写题顺序永远是「先想贪心 → 立刻验证正确性」</strong>，而不是「一上来就背代码」。</p></div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>很多人把贪心等同于「排序后取第一个」。实际上贪心的选择<strong>次序和比较规则</strong>很有讲究——「按开始时间取最早」在区间调度里是错的，「按结束时间取最早」才对；「按单位价值取最大」在分数背包里对，在 0/1 背包里错。错误地把「排序算子」当作贪心的全部，是丢分主因。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">贪心选择+最优子结构</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 2 -->
+  <section class="topic" id="greedy-proof">
+    <h3><span class="kno">知识点</span>正确性证明：交换论证 / 反证法<span class="pt">greedy-proof</span></h3>
+    <p>贪心最容易踩的坑是「<strong>看起来对，其实不对</strong>」。真正的高手不靠直觉，而靠证明。要证明一个贪心算法正确，通常需要走三步（这也是算法导论 / 算法竞赛里经典的证明框架）：</p>
+    <ol>
+      <li><b>证明贪心选择性质：</b>存在一个全局最优解，它的第一步就是贪心选择（或可以把某个最优解「调整」成以贪心选择开头）。</li>
+      <li><b>证明最优子结构：</b>去掉第一步后，剩下的问题仍是同类型子问题，且其最优解和贪心解拼接起来就是原问题的最优解。</li>
+      <li><b>（归纳法收官）</b>由 1、2 归纳可知，每一步都做贪心选择最终得到全局最优。</li>
+    </ol>
+    <p>而「论证第 1 步」最常用的武器就是 <strong>交换论证（Exchange Argument）</strong>和 <strong>反证法</strong>：</p>
+    <ul>
+      <li><b>交换论证：</b>假设存在一个全局最优解，它<em>不</em>是贪心解。我们不断把最优解里的元素<strong>与「贪心想要的那个元素」做交换</strong>，交换后解<strong>不会变差</strong>。既然可以一步步把它们换成贪心解而结果不变差，说明<strong>贪心解同样是最优的</strong>——矛盾消解，命题得证。</li>
+      <li><b>反证法：</b>假设贪心解不是最优，那么必然存在某个更优的解。在这个更优解里找「第一个与贪心不同的决策」，通过分析这一步两种方案的差，推出与前提矛盾（例如「更优解里剩下的选择余地反而更小」），从而否定假设。</li>
+    </ul>
+
+    <p>以最经典的 <strong>区间调度</strong>（活动选择，最多选几个互不重叠的活动，LeetCode 435 思维同源）为例：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>interval-scheduling.py</div>
+      <pre><code># 区间调度：选出最多互不重叠的区间
+def max_non_overlapping(intervals):
+    # 贪心次序：按【结束时间最早】排序（这是灵魂，用开始/长度排都不保证最优）
+    intervals.sort(key=lambda x: x[1])
+    cnt, last_end = 0, float("-inf")
+    for s, e in intervals:
+        if s &gt;= last_end:          # 与上一个入选区间不重叠 → 选它
+            cnt += 1
+            last_end = e           # 更新当前最靠右的右端点
+    return cnt
+
+print(max_non_overlapping([[1,3],[2,5],[3,7],[4,9]]))  # 3：选 [1,3],[3,7],[4,9]</code></pre>
+    </div>
+    <p><b>为什么「按结束最早」是对的？（交换论证）</b>取任意一个最优解 <span class="mono">T</span>。贪心第一步选的是「结束时间最早的区间」<span class="mono">a</span>。如果 <span class="mono">T</span> 的第一个区间不是 <span class="mono">a</span>，设 <span class="mono">T</span> 里第一个（结束得最靠前）的区间是 <span class="mono">b</span>。因为 <span class="mono">a</span> 结束不晚于 <span class="mono">b</span>，把 <span class="mono">T</span> 中的 <span class="mono">b</span> 换成 <span class="mono">a</span>，不会让后续区间更难安排（后续区间的开始都 ≥ <span class="mono">b</span> 的结束 ≥ <span class="mono">a</span> 的结束），<strong>解的数量不变</strong>。于是我们得到一个新的、同样最优且「第一步就是贪心选择」的解。依此类推，贪心解 = 最优解。</p>
+
+    <div class="callout key"><span class="i">★</span><p><b>记法：</b>证明贪心正确 = <strong>贪心选择性质 + 最优子结构</strong>；常用手段 = <strong>交换论证</strong>（把一个最优解拿来做「无害交换」变成贪心解）或 <strong>反证法</strong>（假设贪心不是最优，导出矛盾）。面试里能画出「交换示意图 + 一句『交换后不会更差』」就足够打动面试官。</p></div>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>致命易错点：</b>「贪心看起来对」≠「贪心是对的」。很多题（如区间调度按开始时间、0/1 背包按价值）贪心都会给出错误答案。凡是贪心解法，<strong>都必须先证明或至少清楚地说明它为何满足贪心选择性质</strong>，否则面试里被追问「为什么贪心可行」就露怯了。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">证明工具</div><div class="v">交换/反证+归纳</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>经典贪心模型与动态规划对照<br>会做题，也要会「判题型」</h2>
+  </section>
+
+  <!-- 知识点 3 -->
+  <section class="topic" id="greedy-classic">
+    <h3><span class="kno">知识点</span>经典贪心问题：区间调度 · 分饼干 · 跳游戏 · 哈夫曼 · 分数背包<span class="pt">greedy-classic</span></h3>
+    <p>下面这张表把面试最高频的贪心题归了个类，<strong>每一行都要记住「贪心次序（排序键）」</strong>——这是所有贪心题的唯一难点。</p>
+    <table class="tbl">
+      <thead><tr><th>题目</th><th>贪心次序 / 关键选择</th><th>一句话理由</th></tr></thead>
+      <tbody>
+        <tr><td>分发饼干 <span class="mono">LC455</span></td><td>饼干升序、胃口升序，从小到大连吃</td><td>最小饼干先成全最小胃口，不浪费大饼干</td></tr>
+        <tr><td>跳跃游戏 <span class="mono">LC55/45</span></td><td>维护能到达的最远下标 <span class="mono">reach</span></td><td>在可达范围内贪心扩得最远，覆盖即到达</td></tr>
+        <tr><td>加油站 <span class="mono">LC134</span></td><td>从左往右累加油量，一旦负则重置起点</td><td>「中途断油」证明新起点必须在断点之后</td></tr>
+        <tr><td>区间调度</td><td>按<b>结束时间</b>最早排序，逐个取不重叠</td><td>同类题：<span class="mono">LC435/452/646</span></td></tr>
+        <tr><td>哈夫曼编码</td><td>每次合并<b>频率最小</b>的两个节点（最小堆）</td><td>让高频靠近根、低频放深，最小化加权路径长</td></tr>
+        <tr><td>分数背包</td><td>按<b>单位价值</b>（价值/重量）从大到小装</td><td>物品可分割，单位价值最高的先装满最划算</td></tr>
+        <tr><td>买卖股票 II <span class="mono">LC122</span></td><td>只要明天比今天高就今天买明天卖</td><td>把每个上涨段都吃到即最大收益</td></tr>
+        <tr><td>柠檬水找零 <span class="mono">LC860</span></td><td>优先用大额币（10 元）找零</td><td>保留 5 元应对更大面额，是「尽量留小币」贪心</td></tr>
+      </tbody>
+    </table>
+
+    <p><b>跳跃游戏（LC 55）：</b>核心是把问题从「能否到终点」转化为「能否覆盖到终点」，用一次扫描维护最大可达下标。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>jump-game.py</div>
+      <pre><code>def can_jump(nums):
+    reach = 0                                  # 当前能到达的最远下标
+    for i, step in enumerate(nums):
+        if i &gt; reach:                          # 连这个位置都到不了 → 失败
+            return False
+        reach = max(reach, i + step)           # 贪心：只要能走，就往最远覆盖
+        if reach &gt;= len(nums) - 1:            # 已覆盖到终点
+            return True
+    return True
+
+print(can_jump([2,3,1,1,4]))   # True
+print(can_jump([3,2,1,0,4]))   # False</code></pre>
+    </div>
+    <p>它为什么是贪心？因为在位置 <span class="mono">i</span> 我们能掌控的只有「从 <span class="mono">i</span> 能跳到哪」这一件事，把覆盖范围取到最大，<strong>绝不会亏</strong>——这就是贪心选择性质的体现，且 O(n) 一次遍历。</p>
+
+    <p><b>哈夫曼编码（Huffman Coding）：</b>一种经典的前缀编码（prefix code），没有哪个码字是另一个的前缀，从而解码无歧义。核心是构造 Huffman 树：每次挑出频率最小的两个节点合并，反复直至只剩根。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>huffman.py</div>
+      <pre><code>import heapq  # 最小堆：用于每次取出频率最小的两个节点
+def huffman(freq):                       # freq: 各符号出现次数/频率
+    heap = [[f, [None, None], chr(96+i)] for i, f in enumerate(freq)].copy()
+    heapq.heapify(heap)                  # 按频率建小顶堆
+    # 真实实现建议用带权子树的节点对象；这里示意「每次取最小两个」的贪心骨架
+    while len(heap) &gt; 1:
+        lo = heapq.heappop(heap)         # 频率最小
+        hi = heapq.heappop(heap)         # 次小
+        merged = [lo[0] + hi[0], [lo, hi], None]   # 合并成一个父节点，权值为和
+        heapq.heappush(heap, merged)
+    return heap[0]                       # 根节点，即 Huffman 树
+
+print(huffman([3,2,1]))   # 示意：频率 3,2,1 合并成最优二叉树</code></pre>
+    </div>
+    <p><b>为什么「每次合并最小两个」最优？</b>Huffman 树是最优二叉树：它的目标是使 <span class="mono">WPL = Σ(频次 × 码长)</span> 最小。让频次小的符号走长路径、频次大的走短路径，才能压低总代价；而「每次合并最小两个」正是把这个原则贯彻到每一步——直观上等于「最便宜的代价最早被合并、成本多次累加」。其正确性同样可用交换论证严格证明。</p>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>背三类高频题即可覆盖绝大多数面试：<strong>① 区间/活动调度类</strong>（按结束时间，LC435 / 452 / 646）；<strong>② 覆盖/跳跃类</strong>（维护最远可达，LC55 / 45）；<strong>③ 背包/择取类</strong>（分数背包按单位价值，与 DP 的 0/1 背包区分）。</p></div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>「跳跃游戏」有人会误写成「每一步都跳到最远的那一格」，然后发现复杂又容易错。正确做法是<strong>维护『能到达的最远下标』这一覆盖范围</strong>，而不是记录实际跳到哪，二者差别很大。另外注意 <span class="mono">can_jump</span> 里要先判断 <span class="mono">i &gt; reach</span> 再更新，否则会在不可达的位置误判。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">区间调度</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">跳跃游戏</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">哈夫曼</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">分数背包</div><div class="v">O(n log n)</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 4 -->
+  <section class="topic" id="greedy-vsdp">
+    <h3><span class="kno">知识点</span>贪心与动态规划的区别<span class="pt">greedy-vsdp</span></h3>
+    <p>贪心和<strong>动态规划（Dynamic Programming, DP）</strong>都依赖「最优子结构」——即原问题的最优解可由子问题的最优解构造出来。但两者在「每一步怎么选」上根本不同：</p>
+    <table class="tbl">
+      <thead><tr><th>维度</th><th>贪心（Greedy）</th><th>动态规划（DP）</th></tr></thead>
+      <tbody>
+        <tr><td><b>决策方式</b></td><td>自顶向下，<strong>每步只做一次选择，不回头、不回溯</strong></td><td>考虑<strong>所有</strong>候选选择，用状态记录子问题的最优解，可回溯</td></tr>
+        <tr><td><b>需要的性质</b></td><td>贪心选择性质 + 最优子结构<strong>缺一不可</strong></td><td>只需<strong>最优子结构</strong>（可选地有重叠子问题做记忆化）</td></tr>
+        <tr><td><b>结果保证</b></td><td><strong>不一定</strong>得到最优，需额外证明</td><td>按定义<strong>一定</strong>得到最优</td></tr>
+        <tr><td><b>复杂度</b></td><td>更低：常 O(n log n) / O(n)</td><td>更高：O(n·W) 或 O(n²) 等，视状态数</td></tr>
+        <tr><td><b>典型例子</b></td><td>区间调度、哈夫曼、分数背包、找零（硬币最优面额）</td><td>0/1 背包、最长公共子序列 LCS、编辑距离、打家劫舍</td></tr>
+      </tbody>
+    </table>
+    <p>用一个最熟悉的对照就能牢牢记住：<strong>分数背包（可切分）用贪心，0/1 背包（不可切分）用 DP</strong>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>knapsack-vs.py</div>
+      <pre><code># ---- 分数背包：物品可切分，按【单位价值】贪心即可得到最优 ----
+def fractional_knapsack(w, v, cap):         # w重量, v价值, cap容量
+    items = sorted(zip(w, v), key=lambda x: x[1] / x[0], reverse=True)  # 单位价值降序
+    total = 0
+    for wg, vv in items:                   # 单位价值最高的尽量装，装不下就切一部分
+        if cap &gt;= wg:
+            cap -= wg; total += vv
+        else:
+            total += vv * (cap / wg); break
+    return total
+
+# ---- 0/1 背包：物品【不可切分】，贪心会错，必须用 DP 枚举到底装还是不装 ----
+def zero_one_knapsack(w, v, cap):
+    n = len(w); dp = [0] * (cap + 1)
+    for i in range(n):                     # 每个物品：选 或 不选（逆序遍历容量避免重复用）
+        for c in range(cap, w[i] - 1, -1):
+            dp[c] = max(dp[c], dp[c - w[i]] + v[i])   # 决策：要么不带，要么带
+    return dp[cap]</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>判型口诀：</b>一个问题能不能贪心，看它是否<strong>每一步的抉择都是「绝对主导、无副作用、无需比较其余候选」</strong>。只要「需要权衡当前这一件 vs 其它件的取舍」——例如装了这个可能就装不下那个——通常就得用 DP；只有「这一步的选择不会让后面变差」时，贪心才安全。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>不要因为「背包」这两个字就默认能用贪心。区分的关键是<strong>物品能否切分</strong>：可切分→贪心；不可切分→DP。这也是面试里最容易被挖坑的一句：「你说这题是背包，你用贪心试试？」——要立刻意识到这是引导你走错方向。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">贪心复杂度</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">DP 复杂度</div><div class="v">O(n·cap)</div></div>
+      <div class="cx"><div class="k">选型</div><div class="v">满足贪心性质→贪心</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 5 -->
+  <section class="topic" id="greedy-cond">
+    <h3><span class="kno">知识点</span>适用条件与贪心反例<span class="pt">greedy-cond</span></h3>
+    <p>贪心不是万能的。能不能用，就看问题是否同时满足 <strong>贪心选择性质</strong> 与 <strong>最优子结构</strong>。下面用三个高频反例说明「贪心会在哪里翻车」，同时也是面试常客。</p>
+
+    <p><b>反例一：0/1 背包（物品不可切分）。</b>假设容量 10，物品如下，贪心按单位价值会选错。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>greedy-counterexample.py</div>
+      <pre><code># 容量 cap = 10
+# 物品：(重量, 价值, 单位价值)
+items = [(6, 30, 5.0), (5, 24, 4.8), (5, 24, 4.8)]
+# 单位价值最高的是 (6,30)，贪心先装它 → 剩余容量 4，装不下任何一件 → 总价值 30
+# 但最优是装两件 (5,24)+(5,24) = 48！贪心错了。
+def greedy_0_1(items, cap):
+    # 按单位价值降序尝试『整件』装入（不可切分导致会“卡住”剩余容量）
+    items = sorted(items, key=lambda x: x[2], reverse=True)
+    val = 0
+    for w, v, r in items:
+        if cap &gt;= w:
+            cap -= w; val += v
+    return val
+print(greedy_0_1(items, 10))   # 30（错误！应为 48）</code></pre>
+    </div>
+    <p>为什么错？因为贪心在装下第一件后「<strong>剩下一块不可用的空隙</strong>」，这空隙恰好不能容纳任何物品，白白浪费。这正是 0/1 背包缺了「贪心选择性质」的表现——<strong>局部的单位价值最高并不等于整体最优</strong>。</p>
+
+    <p><b>反例二：找零钱（非标准硬币面额）。</b>面额 <span class="mono">{1, 3, 4}</span>，要凑 <span class="mono">6</span> 元。贪心会先取最大面额 4，剩余 2 只能用两个 1，共 <strong>3 枚</strong>；而最优是 <span class="mono">3 + 3 = 2 枚</span>。原因：面额不满足「贪心最优」结构时，取大额反而破坏了组合的奇偶性。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>coin-change.py</div>
+      <pre><code>def greedy_coin(coins, n):        # 目前都先取最大面额
+    coins.sort(reverse=True); cnt = 0
+    for c in coins:
+        cnt += n // c; n %= c     # 能取多少张就取多少
+    return -1 if n else cnt       # 不能恰好凑出则返回 -1
+
+print(greedy_coin([1,3,4], 6))    # 4+1+1 → 3 枚（错误！最优是 3+3 → 2 枚）
+# 只有特殊面额（如 1,5,10,25 这类"进制"面额）贪心才正确；任意面额需用 DP。</code></pre>
+    </div>
+    <p><b>反例三：负权边上的最短路。</b>Dijkstra 是最典型的贪心算法（每次从未定集合挑距离最近的顶点定性），但它<strong>要求边权非负</strong>。一旦出现负权边，先被定性为「最近」的点之后可能还能被更短路径更新，于是贪心失效，此时必须用 <strong>Bellman-Ford</strong>（可处理负权）或 Floyd-Warshall。</p>
+
+    <div class="callout danger"><span class="i">✕</span><p><b>判断时机（强烈建议）：</b>拿到题先问三个问题——① 这一步的最优选择，会不会让后续变得更好而不是更差？（贪心选择性质）② 去掉这一步后，是不是还是一个同类子问题，且原问题最优 = 本次最优 + 子问题最优？（最优子结构）③ 能不能用<strong>一个具体反例</strong>反驳贪心？—— 只要有一条答不上来，就改用 DP 或别的算法。<strong>千万别背完贪心模板就套到所有题上。</strong></p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>一句话收尾：</b>贪心的适用边界 = <strong>贪心选择性质</strong>（这一刀切下去，后面只会更好）＋ <strong>最优子结构</strong>（剩下的是同型子问题）。满足这两条，贪心又快又对；不满足，哪怕看起来再合理也要果断转向动态规划。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">适用</div><div class="v">两性质均成立</div></div>
+      <div class="cx"><div class="k">失效</div><div class="v">任一性质不成立</div></div>
+      <div class="cx"><div class="k">兜底</div><div class="v">改用动态规划</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>LeetCode 135 分发糖果：</b>左右两趟贪心（一趟只保证左规则，一趟只满足右规则，最后取每位的最大值）。想一想：为什么必须两趟、且不能只用一趟？这是「贪心选择性质」在多约束下的应用。</li>
+      <li><b>LeetCode 452 用最少数量的箭引爆气球 / 435 无重叠区间：</b>都按「右端点排序」。请用<strong>交换论证</strong>写出文字证明，并说明为什么换作「按左端点排序」会出错。</li>
+      <li><b>LeetCode 45 跳跃游戏 II：</b>求<strong>最少</strong>跳跃次数。用「当前一波可达范围 + 下一波最远范围」的 BFS 式贪心，复杂度 O(n)。想想它和「单次跳跃游戏」贪心的联系。</li>
+      <li><b>思考 / 证明题：</b>用反例说明「面额 {1,3,4} 时贪心找零会错」；再总结：什么时候硬币找零能用贪心保证最优？（提示：与「面额是倍数/进制关系」相关，如 1、5、10、25）。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "greedy",                 // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "贪心算法",             // ex: 绪论与算法复杂度分析
+  eyebrow: "MODULE 14 · 数据结构与算法",
+  prev: "13-递归与分治.html",   // 前一节文件名
+  next: "15-动态规划.html",     // 下一节文件名
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"贪心算法在每一步做决策时，依据的核心原则是什么？",
+    opts:["选择全局最优解","选择当前状态下看起来最好的那个选项，且不再回溯","随机选一个可选项","遍历所有可能解后取最优"],
+    ans:1,
+    exp:"贪心 = 每一步都做「当前最优」的局部选择，并且从不回头、不撤销。它不枚举所有解，也不回溯。正因为它只走一条路，所以快；但也正因如此，它可能得不到全局最优，需要额外证明。"
+  },
+  {
+    type:"quiz",
+    q:"判定一个问题能否用贪心求解，通常要求它同时具备哪两条性质？",
+    opts:["只需最优子结构","只需贪心选择性质","贪心选择性质 + 最优子结构","任何问题都能贪心，无需条件"],
+    ans:2,
+    exp:"贪心要同时满足『贪心选择性质』(存在一个全局最优解的第一步就是贪心选择) 和『最优子结构』(做出选择后，剩下的是同型子问题，且最优 = 本次选择 + 子问题最优)。缺了任一条，局部最优都不保证等于全局最优。"
+  },
+  {
+    type:"quiz",
+    q:"关于「0/1 背包（物品不可分割）用贪心按单位价值排序」，下列哪项说法正确？",
+    opts:["只要按单位价值从大到小取即可得到最优解","贪心不一定正确，需改用 0/1 背包动态规划","贪心与分数背包一样总能得到最优解","0/1 背包无法用动态规划求解"],
+    ans:1,
+    exp:"0/1 背包每个物品不可分割，贪心先装单位价值最高的那件可能留下『再也装不下任何物品的空隙』，从而错过更优组合，是经典反例。只有可切分的『分数背包』才能贪心；0/1 背包要用 DP（对每个物品决定装/不装）。"
+  },
+  {
+    type:"quiz",
+    q:"「区间调度」要选出最多互不重叠的区间，标准贪心策略是：",
+    opts:["按开始时间最早优先","按区间长度最短优先","按结束时间最早优先","随机挑选区间"],
+    ans:2,
+    exp:"按『结束时间最早』排序并逐个取不重叠区间，可用交换论证严格证明最优：把任意最优解中第一个结束区间换成『结束最早』的区间，因它结束不晚，后面的区间不受影响，解的数量不变。按开始或按长度贪心都不保证最优。"
+  },
+  {
+    type:"quiz",
+    q:"「跳跃游戏」（判断能否到达末尾，LeetCode 55）的正确贪心思路是：",
+    opts:["维护能到达的最远下标 reach，若中途某下标超过 reach 则失败","每一步都真正跳到最远的那一格","从后往前每次找能到终点的最近位置","用二分查找最远可达距离"],
+    ans:0,
+    exp:"维护最大可达下标 reach = max(reach, i + step)，只要所有下标都 ≤ reach 就说明能一路覆盖到末尾。关键是把问题转化为『覆盖范围』而不是『具体跳哪一格』；注意要先判断 i > reach 再更新，否则会在不可达位误判。"
+  },
+  {
+    type:"interview",
+    q:"面试官追问：「分数背包能用贪心，为什么 0/1 背包就不能？」请给出你的回答：",
+    opts:["因为 0/1 背包没有最优子结构","因为分数背包可切分，贪心每一步都能充分消耗单位价值最高的物品；而 0/1 背包不可分割，贪心装下局部最优物品会留下无法利用的空隙，反而更差，需用 DP 枚举装/不装","因为 0/1 背包复杂度更高，所以不能贪心","因为分数背包不需要排序，所以更简单"],
+    ans:1,
+    exp:"核心差异在于『可切分』。分数背包里单位价值最高的物品可以完美装满剩余容量，贪心每一步都『无损地』用掉局部最优物，因此安全；而 0/1 背包物品不可分割，贪心拿下一件后可能剩下『装不了任何东西的空隙』，导致这个局部最优反而整体更差（如容量10，最优=两件5，贪心=一件6）。它仍满足最优子结构，但不满足贪心选择性质，所以必须用 DP。"
+  },
+  {
+    type:"interview",
+    q:"哈夫曼编码之所以用贪心（每次合并频率最小的两个节点）能得到最优前缀编码，根本原因是：",
+    opts:["权值越大越靠近根、权值越小越靠近叶子，可用交换论证证明最小化加权路径长度 WPL","因为哈夫曼树高度总是最小","因为字符数量越少越好","因为按字母序合并会得到更短编码"],
+    ans:0,
+    exp:"每次合并最小两个权值节点，可以构造出『小权值走长码、大权值走短码』的最优二叉树，目标是让 WPL = Σ(频率×码长) 最小。可用交换论证证明：若某最优树中两个最小叶子不是兄弟，交换它们后总开销不增。这正是贪心选择性质的体现——把最『便宜』的代价最早合并、多累加几次，从而压低总代价。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

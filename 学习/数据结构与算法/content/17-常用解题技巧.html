@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>常用解题技巧与模板 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 常用解题技巧与模板：双指针、滑动窗口、前缀和与差分、单调栈/队列、位运算、频率统计与速查表。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">常用解题技巧与模板</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 17 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">常用解题技巧与模板</h1>
+    <p class="lead" id="pageLead">把高频套路练成可复制的模板：双指针、滑动窗口、前缀和与差分、单调栈/队列、位运算、频率统计，以及「该用哪种技巧」的速查表。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <!-- TODO(目标): 逐条填写「学完后你能做到什么」，可验证、可考核。 -->
+      <li>学完后你能：识别一道题该用对撞双指针还是快慢指针，并写出 O(n) 的两数之和 / 链表找中点代码。</li>
+      <li>学完后你能：默写滑动窗口通用模板，说明窗口收缩的不变量，并解出最长无重复子串与字母异位词。</li>
+      <li>学完后你能：用前缀和 O(1) 求任意区间和，用差分处理多次区间加减后一次性还原。</li>
+      <li>学完后你能：说出单调栈与单调队列各自解决什么、答案在哪个时机确定，复杂度为何是 O(n)。</li>
+      <li>学完后你能：熟练运用判奇偶、消最后一个 1、异或去重、子集枚举等位运算技巧，并给出「计数 → 特征表示」的解题思路。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">前置知识：会一门编程语言（建议 Python 或 C++），懂数组 / 链表 / 栈 / 队列的增删基本操作；了解时间与空间复杂度、哈希表（字典 / 集合）、简单递归。本模块是「模板 / 套路速刷」，重在把常用套路总结成可复制的模板。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">17.1</span>双指针与滑动窗口 —— 把 O(n²) 压成 O(n)</h2>
+  </section>
+
+  <!-- 双指针 -->
+  <section class="topic" id="tech-twopointer">
+    <h3><span class="kno">模板</span>双指针（Two Pointers）· 对撞 / 快慢<span class="pt">对撞有序 · 快慢链表</span></h3>
+    <p><strong>双指针（Two Pointers）</strong>指在数组 / 链表上同时维护两个「下标或节点指针」，让它们按某种规则协同移动，从而把两层循环的暴力 O(n²) 压缩到 O(n)。它的本质是<strong>利用数据的有序性或单调性，每次移动都成批地排除掉不可能的情况</strong>。按移动方向分两类：</p>
+    <ul>
+      <li><b>对撞指针（左右指针，collision pointer）</b>：一个在头、一个在尾，向中间靠拢。用于「有序数组」上的查找、判断回文、求两数之和、接雨水等。</li>
+      <li><b>快慢指针（fast &amp; slow）</b>：一个每次走 1 步，一个每次走 2 步。用于单链表找中点、判断是否有环、找环入口、找倒数第 k 个节点。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>two_pointers.py</div>
+      <pre><code># —— 对撞指针：有序数组两数之和（LeetCode 167）——
+def two_sum_sorted(nums, target):
+    """数组已升序；返回两数之和为 target 的下标（1-based）。"""
+    left, right = 0, len(nums) - 1
+    while left &lt; right:                    # 两端向中间靠拢
+        s = nums[left] + nums[right]
+        if s == target:
+            return [left + 1, right + 1]
+        elif s &lt; target:                    # 和太小 → 右移左指针，让和变大
+            left += 1
+        else:                               # 和太大 → 左移右指针，让和变小
+            right -= 1
+    return []
+
+# —— 快慢指针：单链表找中间节点（LeetCode 876）——
+def middle_node(head):
+    slow = fast = head
+    while fast and fast.next:               # fast 每次 2 步，slow 每次 1 步
+        slow = slow.next
+        fast = fast.next.next
+    return slow                             # fast 到底时 slow 停在中点</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>双指针能提速的前提是数据「有序或单调」，这样才能有依据地决定哪个指针往哪动；快慢指针则利用了「快者一圈比慢者多走一步」的位移差。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>对撞指针的循环边界——就「两数之和」而言可用 <code>left &lt; right</code>；若题目允许左右指向同一元素则用 <code>left &lt;= right</code>，先看清题意。快慢指针里 <code>fast.next</code> 必须先判空再访问 <code>fast.next.next</code>，否则对奇数/偶数长度链表会空指针报错。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间（对撞）</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">时间（快慢）</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">有序数组 / 链表</div></div>
+    </div>
+  </section>
+
+  <!-- 滑动窗口 -->
+  <section class="topic" id="tech-sliding">
+    <h3><span class="kno">模板</span>滑动窗口（Sliding Window）<span class="pt">连续子数组 / 子串 · 左右指针</span></h3>
+    <p><strong>滑动窗口（Sliding Window）</strong>专门处理「连续子数组 / 子串」类问题：维护一个窗口 <code>[left, right]</code>，右端负责<strong>扩张</strong>（加入新元素），左端负责在窗口「不满足条件」时<strong>收缩</strong>（移出元素）。核心不变量是：<strong>窗口内始终满足题设约束，尽量让窗口最短或最长</strong>。</p>
+    <ul>
+      <li>适用特征：题干出现「连续」「子串 / 子数组」「最长 / 最短 / 恰好」等字眼。</li>
+      <li>三种状态：<b>固定长度窗口</b>（定长，如找到所有异位词）、<b>可变长度窗口</b>（最长 / 最短，如无重复子串、最短覆盖子串）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>sliding_window.py</div>
+      <pre><code># —— 滑动窗口通用模板：维护 [left, right] 上的状态 ——
+def sliding_window(s):
+    left = 0
+    for right, item in enumerate(s):        # ① 右端扩张，把 s[right] 纳入窗口
+        add(item, right)                    #   更新窗口内计数/状态
+        while not valid(left, right):       # ② 窗口不再满足条件 → 收缩左端
+            remove(s[left])                 #   移出 s[left] 并更新状态
+            left += 1                       #   左端只进不退（单调）
+        update_answer(left, right)          # ③ 此时窗口合法，更新答案
+    return answer
+
+# —— 例题：最长无重复字符子串（LeetCode 3，可变长窗口）——
+def length_of_longest_substring(s):
+    last = {}                               # 字符 -> 它最近一次出现的位置
+    left = 0
+    best = 0
+    for right, ch in enumerate(s):
+        if ch in last and last[ch] &gt;= left:   # 该字符在窗口内重复了
+            left = last[ch] + 1             # 左端跳到重复字符之后，保证窗口无重复
+        last[ch] = right                    # 记录/更新该字符的位置
+        best = max(best, right - left + 1)  # 当前窗口长度
+    return best</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>right 从 0 单调走到 n-1，left 也只会单调右移，因此每个元素<strong>至多进入窗口一次、离开窗口一次</strong>，整体 O(n)——这就是滑动窗口比暴力 O(n²) 快的原因。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>（1）收缩要用 while 而非 if——只缩一次窗口可能仍不合法；（2）收缩时一定要「先移出并更新状态，再 left += 1」的顺序，否则状态与窗口边界错位；（3）区分「最长无重复」用 <code>last[ch] &gt;= left</code> 判断重复，而「最短覆盖子串」是用满足条件的字符计数来判断。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(m)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">连续子序列</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">17.2</span>前缀和与单调结构 —— 预处理与空间换时间</h2>
+  </section>
+
+  <!-- 前缀和与差分 -->
+  <section class="topic" id="tech-prefix">
+    <h3><span class="kno">模板</span>前缀和（Prefix Sum）与差分（Difference）<span class="pt">区间和 · 区间统一加减</span></h3>
+    <p><strong>前缀和（Prefix Sum / 前缀数组）</strong>是预处理技巧：<code>pre[i]</code> 表示原数组前 i 个元素的和，构造好后可 <strong>O(1)</strong> 求任意区间 <code>[l, r]</code> 的和。它用一次 O(n) 的预处理换取了频繁查询的 O(1)。<strong>差分（Difference Array）</strong>是前缀和的「逆运算」，适合「多次对区间统一加减、最后才知道每个位置的最终值」的场景。</p>
+    <ul>
+      <li>前缀和适用：频繁区间求和、连续子数组和为 K（配合哈希表，LeetCode 560）。</li>
+      <li>差分适用：多次区间加 / 减，最后一次性还原（LeetCode 370、1094 等区间调度题）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>prefix_diff.py</div>
+      <pre><code># —— 前缀和：O(n) 预处理，O(1) 求 [l, r] 区间和（下标 0 基）——
+def build_prefix(a):
+    n = len(a)
+    pre = [0] * (n + 1)                     # pre[i] = a[0] + ... + a[i-1]
+    for i in range(n):
+        pre[i + 1] = pre[i] + a[i]
+    return pre
+
+def range_sum(pre, l, r):
+    return pre[r + 1] - pre[l]              # 前 r+1 个 - 前 l 个
+
+# 连续子数组和为 K 的个数（LeetCode 560）：前缀和 + 哈希
+def subarray_sum_k(a, k):
+    from collections import defaultdict
+    cnt = defaultdict(int); cnt[0] = 1      # 前缀和正好等于 0 的情况
+    ans = cur = 0
+    for x in a:
+        cur += x                            # 当前前缀和
+        ans += cnt[cur - k]                 # 出现多少次 cur-k 就有多少段
+        cnt[cur] += 1
+    return ans
+
+# —— 差分：对区间 [l, r] 统一加 val，最后一次性还原 ——
+def diff_array(n, ops):
+    diff = [0] * (n + 1)                    # 多开一格，防止 r+1 越界
+    for l, r, val in ops:
+        diff[l] += val
+        diff[r + 1] -= val                  # 在 r+1 处撤销，保证只影响 [l, r]
+    res, cur = [], 0
+    for i in range(n):
+        cur += diff[i]                      # 走一遍前缀和即可还原
+        res.append(cur)
+    return res</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>前缀和是「预处理 + O(1) 查询」的经典空间换时间；差分恰是它的逆，专门应对「区间统一操作、点最后取值」——差分数组做一次前缀和就是恢复后的原数组。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>（1）前缀和数组长度是 n+1，<code>pre[i]</code> 表示「前 i 个元素和」，求 <code>[l, r]</code> 必须用 <code>pre[r+1] - pre[l]</code>，下标差一位是最高频 bug；（2）差分数组要开到 n+1，因为 <code>r+1</code> 可能等于 n，越界会悄悄算错；（3）前缀和默认从 pre[0]=0 开始，处理「整段从 0 开头」的子数组时别漏掉 cnt[0]。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间（前缀和构建）</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">时间（单次查询）</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">时间（差分）</div><div class="v">O(n + k)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n)</div></div>
+    </div>
+  </section>
+
+  <!-- 单调栈 / 队列 -->
+  <section class="topic" id="tech-mono">
+    <h3><span class="kno">速览</span>单调栈 / 单调队列（Monotonic Stack / Queue）<span class="pt">一句话回顾 · 出栈/出队结算</span></h3>
+    <p><strong>单调栈（Monotonic Stack）</strong>栈内元素保持单调（递增或递减），多用「下一个更大 / 更小元素」；<strong>单调队列（Monotonic Queue）</strong>队内元素单调，配合滑动窗口求窗口内最值。两者都靠「把逆序 / 无用的旧元素及时扔掉」，从而让每个元素只进一次、出一次，摊到 O(n)。</p>
+    <ul>
+      <li><b>单调栈</b>：答案通常在<strong>出栈的那一刻</strong>确定——当前元素把栈里「更小（或更大）」的旧元素顶掉时，它就是那个旧元素的答案。</li>
+      <li><b>单调队列</b>：队首即当前窗口最值，队尾负责维护单调性；<strong>注意队列里存的是下标</strong>，以便判断是否滑出了窗口。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>monotonic.py</div>
+      <pre><code>from collections import deque
+
+# —— 单调栈：每个元素的下一个更大元素（LeetCode 739）——
+def next_greater(nums):
+    n = len(nums)
+    ans = [-1] * n
+    st = []                                 # 存下标，维护从底到顶递减
+    for i, x in enumerate(nums):
+        while st and nums[st[-1]] &lt; x:      # 栈顶比 x 小 → 被 x 顶出，答案此刻确定
+            ans[st.pop()] = x
+        st.append(i)
+    return ans
+
+# —— 单调队列：滑动窗口最大值（LeetCode 239）——
+def max_sliding_window(nums, k):
+    dq = deque()
+    res = []
+    for i, x in enumerate(nums):
+        while dq and dq[0] &lt;= i - k:        # 队首下标滑出了窗口，弹掉
+            dq.popleft()
+        while dq and nums[dq[-1]] &lt;= x:     # 队尾不比 x 大就弹出，保持单调递减
+            dq.pop()
+        dq.append(i)
+        if i &gt;= k - 1:                      # 窗口已满，队首即窗口最大值
+            res.append(nums[dq[0]])
+    return res</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>一句话回顾——单调栈在「出栈」时结算答案（下一个更大），单调队列在「队首」取最值（滑动窗口最值）。两者都是 O(n)，因为每个元素最多进出一次。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>（1）弹栈比较方向容易写反——求「下一个更大」用 <code>&lt; / &lt;=</code> 弹出栈顶（越小越先被顶掉）；（2）单调队列一定<strong>存下标</strong>而非值，判过期用 <code>dq[0] &lt;= i - k</code>，判单调用 <code>nums[dq[-1]] &lt;= x</code>；（3）队列过期判断要在维护单调性之前，否则可能把本已过期的队首保留下来。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间（单调栈）</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">时间（单调队列）</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">最值 / 最近更大</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">17.3</span>位运算与频率统计 —— 从「数」到「特征」</h2>
+  </section>
+
+  <!-- 位运算 -->
+  <section class="topic" id="tech-bit">
+    <h3><span class="kno">技巧</span>位运算（Bit Operations）<span class="pt">判奇偶 · 消1 · 异或 · 子集枚举</span></h3>
+    <p><strong>位运算（Bit Operations）</strong>直接操作二进制位，常数极小、无需开数组，适合「只出现一次」「找唯一 / 重复」「子集枚举」「判断 2 的幂」等题。掌握以下几条即可应付绝大多数面试题：</p>
+    <ul>
+      <li><b>判奇偶</b>：<code>x &amp; 1</code> —— 最右位为 1 是奇数。</li>
+      <li><b>消掉最后一个 1</b>：<code>x &amp; (x - 1)</code> —— 用于数 1 的个数、判断 2 的幂。</li>
+      <li><b>取最后一个 1</b>：<code>x &amp; (-x)</code> —— 即 lowbit，用于树状数组等。</li>
+      <li><b>异或（XOR）去重</b>：<code>x ^ x == 0</code>、<code>0 ^ x == x</code>，成对的数异或会抵消。</li>
+      <li><b>子集枚举</b>：用 <code>(1 &lt;&lt; n)</code> 遍历所有子集的位掩码（bitmask）。</li>
+      <li>常用性质：左移 <code>&lt;&lt;</code> 乘 2 的幂，右移 <code>&gt;&gt;</code> 整除 2；<code>n &amp; (n-1)</code> 是否为 0 判断 2 的幂。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>bit_ops.py</div>
+      <pre><code>def is_odd(x):      return (x &amp; 1) == 1     # 判奇偶
+def lowbit(x):      return x &amp; (-x)         # 取出最低位的那个 1
+def clear_last(x):  return x &amp; (x - 1)      # 消掉最低位的那个 1
+
+def popcount(x):                            # 数二进制里 1 的个数（LC 191）
+    c = 0
+    while x:
+        x &amp;= x - 1                          # 每清一个 1 计数 +1
+        c += 1
+    return c
+
+def is_pow2(x):     return x &gt; 0 and (x &amp; (x - 1)) == 0   # 2 的幂
+
+def single_number(nums):                    # 只出现一次的数（LC 136）
+    s = 0
+    for v in nums:
+        s ^= v                              # 成对的抵消，只剩落单的
+    return s
+
+def subsets(arr):                           # 子集枚举（LC 78）
+    n = len(arr); out = []
+    for mask in range(1 &lt;&lt; n):             # 每个 bit 表示「选/不选」
+        out.append([arr[i] for i in range(n) if (mask &gt;&gt; i) &amp; 1])
+    return out</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>记住这三条就是地基——<code>x &amp; (x-1)</code> 消最后一个 1、<code>x &amp; (-x)</code> 取最后一个 1、<code>x ^ x == 0</code>。异或尤其适合「成对抵消、落单者留」的题型。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>（1）位运算优先级低于比较与逻辑运算，写 <code>(mask &gt;&gt; i) &amp; 1</code> 一定要加括号；（2）判断 2 的幂必须先判 <code>x &gt; 0</code>，因为 0 是特例（0 可被 <code>&amp; (x-1)</code> 除尽但不属于 2 的幂）；（3）`&lt;&lt; n` 超量级会溢出或非常慢（C++ 里用 1LL&lt;&lt;n，Python 大整数虽无碍但别枚举 2^30 级别的全子集）。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间（单次）</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">时间（异或去重）</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">子集枚举</div><div class="v">O(2^n)</div></div>
+    </div>
+  </section>
+
+  <!-- 频率统计 -->
+  <section class="topic" id="tech-freq">
+    <h3><span class="kno">模板</span>频率统计（Frequency Count）与计数<span class="pt">计数/字典 → 特征表示</span></h3>
+    <p><strong>频率统计</strong>的核心是：用<strong>计数器（数组或字典）</strong>记录元素 / 字符出现的次数，再把它<strong>转成可比较的特征表示</strong>（例如把计数压成字符串），从而让「两串是否由相同字母构成」「两种结构是否同构」这类问题变成 O(1) 的特征比对。特征是「计数 → 映射」：字母异位词（anagram）、同构字符串（isomorphic）都是典型。</p>
+    <ul>
+      <li>范围小（如 26 个小写字母）用<strong>定长计数数组</strong>，最快。</li>
+      <li>范围大 / 未知用<strong>字典 Counter</strong>，更通用。</li>
+      <li>特征可以是「排序后的字符串」「计数拼接串（如 aabb）」「每类字符编号」等，视题目而定。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>freq_count.py</div>
+      <pre><code>from collections import Counter
+
+# 字母异位词（anagram）：字母种类与个数相同（LC 242）
+def is_anagram(s, t):
+    return Counter(s) == Counter(t)         # 计数字典直接比较
+
+# 特征表示：把计数压成一个唯一键，用于任意两串的「同构」比较
+def normalize(s):
+    cnt = [0] * 26
+    for ch in s:
+        cnt[ord(ch) - 97] += 1              # 仅限小写字母
+    return "#".join(str(c) for c in cnt)    # 形如 "0#2#1#..." 的特征键
+
+# 在 s 中找所有与 p 为字母异位词的起点（LC 438，固定长滑窗 + 计数）
+def find_anagrams(s, p):
+    need, have = Counter(p), Counter()
+    k = len(p); left = 0; res = []
+    for right, ch in enumerate(s):
+        have[ch] += 1
+        if right - left + 1 &gt; k:            # 窗口比 p 长 → 收缩左端
+            have[s[left]] -= 1
+            if have[s[left]] == 0:
+                del have[s[left]]           # 归零要删掉，否则无法与 need 比较
+            left += 1
+        if have == need:                    # 该窗口与 p 计数一致 → 异位词
+            res.append(left)
+    return res</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「计数 → 特征」是一招通用的降维套路：把「比较两个结构是否等价」转化为「比较两个由计数生成的特征是否相等」，常与滑动窗口配合使用以维持比较范围。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>注意：</b>用 Counter / 计数数组时要先确定字符范围（是否仅小写字母、是否含大写或数字）；用字典做窗口时，次数归零后要 <code>del</code>，因为 <code>Counter({'a':0}) == Counter()</code> 结果是 False（Python 会保留 0 计数参与比较），这个隐藏细节常让滑动窗口差一位。<br><span style="color:var(--muted)">延伸：同构字符串（LC 205）是把「每个字符首次出现位置」作为特征进行双向映射。</span></p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间（判异位词）</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">时间（找所有异位词）</div><div class="v">O(|s| + |p|)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1) / O(m)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">计数 / 同构 / 子串</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">17.4</span>综合速查 —— 该用哪种数据结构 / 技巧</h2>
+  </section>
+
+  <!-- 速查表 -->
+  <section class="topic" id="tech-keep">
+    <h3><span class="kno">速查表</span>常用数据结构与技巧速查表<span class="pt">按题目特征选套路</span></h3>
+    <p>下面这张表把「题目的关键词特征」映射到「优先尝试的技巧 / 数据结构」。笔试面试时先看题目特征，再对号入座，能极大提速。代表题标注了 LeetCode 编号，方便刷。</p>
+
+    <table class="tbl">
+      <tr><th>题目特征</th><th>首选技巧 / 结构</th><th>代表题</th></tr>
+      <tr><td>有序数组，求两数之和 / 判回文 / 装最多水</td><td class="mono">对撞双指针</td><td class="mono">1 · 11 · 167</td></tr>
+      <tr><td>链表找中点 / 判环 / 找倒数第 k 个</td><td class="mono">快慢指针</td><td class="mono">141 · 142 · 876</td></tr>
+      <tr><td>连续子数组 / 子串的最长、最短、无重复</td><td class="mono">滑动窗口</td><td class="mono">3 · 209 · 438</td></tr>
+      <tr><td>频繁区间求和 / 子数组和为 K</td><td class="mono">前缀和 + 哈希</td><td class="mono">303 · 560</td></tr>
+      <tr><td>多次区间统一加减再一次性取值</td><td class="mono">差分数组</td><td class="mono">370 · 1094</td></tr>
+      <tr><td>下一个更大 / 更小元素、直方图水量</td><td class="mono">单调栈</td><td class="mono">496 · 739 · 42</td></tr>
+      <tr><td>滑动窗口内的最值</td><td class="mono">单调队列</td><td class="mono">239</td></tr>
+      <tr><td>只出现一次的数、找缺失 / 重复、全子集</td><td class="mono">位运算</td><td class="mono">136 · 268 · 78</td></tr>
+      <tr><td>判断异位词 / 同构、统计频次、计数分组</td><td class="mono">频率统计(计数/字典)</td><td class="mono">242 · 205 · 438</td></tr>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>选择口诀——<b>有序就双指针，连续子串用滑窗，区间和想前缀和，区间改想差分，最近更大用单调栈，窗口最值用单调队列，成对抵消用异或，判同构用计数。</b>先判断数据是否有序、区间是否连续、是否需要「最近 / 最值」，基本就能锁定套路。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>提醒：</b>套路是起点不是终点。看清约束（是否连续、是否有序、数据范围）再套模板；同一道题常有多种解法（如两数之和可对撞也可哈希），面试时先问清需求再选最合适的一种并说明取舍。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <!-- TODO(挑战): 2–4 条更有难度的延伸题 / 思考题，建议标注推荐刷题来源。 -->
+      <li>用快慢指针做「环形链表 II」（LeetCode 142）：证明 fast 每次 2 步、slow 每次 1 步为何在环内必然相遇；相遇后再让一指针回到 head、两指针同速前进，推导入口节点位置。</li>
+      <li>用滑动窗口模板分别解「无重复字符的最长子串」（LeetCode 3）与「找到字符串中所有字母异位词」（LeetCode 438），并说明二者 left 收缩条件为何不同（一个是可变长、一个是定长）。</li>
+      <li>用「前缀和 + 哈希」解「和为 K 的子数组个数」（LeetCode 560）：解释为什么记录每个前缀和出现次数即可 O(n) 求出，并说明 cnt[0]=1 的必要性。</li>
+      <li>手写单调队列解决「滑动窗口最大值」（LeetCode 239）：解释为什么队首下标 <code>&lt;= i-k</code> 时要 popleft、队内为何保持单调递减，并分析均摊复杂度。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "techniques",             // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "常用解题技巧与模板",
+  eyebrow: "MODULE 17 · 数据结构与算法",
+  prev: "16-回溯算法.html",     // 前一节文件名
+  next: "",                     // 最后一节，留 ""
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"对撞双指针能 O(n) 解决「有序数组两数之和」，其正确性依赖什么？",
+    opts:["数组元素必须互不相同","数组有序，可据此决定该移动哪个指针","数组不能有负数","只适用于长度为偶数的数组"],
+    ans:1,
+    exp:"对撞指针靠「有序」作判断：和小于 target 就右移左指针（让和变大），大于就左移右指针（让和变小），每移动一次就排除一批候选，从而 O(n)。无序时无法判断该动哪一侧。"
+  },
+  {
+    type:"quiz",
+    q:"滑动窗口算法能把「连续子数组」类问题降到 O(n)，根本原因是？",
+    opts:["内部用了二分查找加速","right 与 left 都单调递增，每个元素至多进/出窗口一次","用哈希表替代了数组","窗口只关心长度这一个量"],
+    ans:1,
+    exp:"两个指针一路向右，元素只进一次、也只在需要时出一次，均摊下来每个元素常数次操作，故整体 O(n)；这是滑动窗口比枚举所有子数组的 O(n²) 快的关键所在。"
+  },
+  {
+    type:"quiz",
+    q:"前缀和数组 pre 中，求原数组区间 [l, r]（0 基）的和应写成？",
+    opts:["pre[l] - pre[r+1]","pre[r+1] - pre[l]","pre[r] - pre[l]","pre[l+1] - pre[r]"],
+    ans:1,
+    exp:"pre[i] 存的是前 i 个元素之和，所以 [l, r] 的和 = 前 r+1 个元素之和 - 前 l 个元素之和 = pre[r+1] - pre[l]。下标差一位是最常见 bug。"
+  },
+  {
+    type:"quiz",
+    q:"判断一个正整数 x 是否为 2 的幂，最简洁的写法是？",
+    opts:["x > 0 且 (x & (x-1)) == 0","x > 0 且 (x & (x+1)) == 0","x & 1 == 0","x & (-x) == 1"],
+    ans:0,
+    exp:"2 的幂二进制里只有最高位一个 1，x & (x-1) 会把它清成 0。注意先判 x > 0（0 是特例）。C 只判断「是偶数」（含 4/6 等非 2 的幂）；D 中 x & (-x) 取的是最低位，未必为 1。"
+  },
+  {
+    type:"quiz",
+    q:"数组里除一个数外其它都成对出现，找那个落单的数，最高效的做法是？",
+    opts:["先排序再扫描","用哈希表统计出现次数","把所有数全部异或一次","二分查找"],
+    ans:2,
+    exp:"成对的两个数异或为 0，而 0 异或任何数都得到它本身，所以把所有数异或一遍，成对的抵消、落单的留下，O(n) 时间、O(1) 空间。排序是 O(n log n)，哈希需额外 O(n) 空间。"
+  },
+  {
+    type:"interview",
+    q:"面试：如何判断两个字符串是「字母异位词」（anagram）？引申：在长字符串 s 里找出所有与 p 为异位词的起始下标，你用了什么技巧与复杂度？",
+    opts:["分别排序后比较，O(n log n)；找所有位置时反复排序即可","用 Counter 计数比较即可 O(n)；找所有位置用「滑动窗口 + 计数」，O(|s| + |p|)","必须用位运算，能 O(1) 完成","用前缀和思想，O(n log n)"],
+    ans:1,
+    exp:"判断异位词的本质是「计数特征相等」：Counter(s) == Counter(t) 即字母种类与个数一致。找所有起点（LC 438）用定长滑动窗口维护窗口内计数，与 p 的计数相等时记录 left，整体 O(|s| + |p|)。排序法只能判单个，无法在窗口里高效滚动维护。"
+  },
+  {
+    type:"interview",
+    q:"面试：单调栈求「下一个更大元素」，为什么扫一遍就能 O(n)，答案在什么时刻被确定？",
+    opts:["入栈时就确定，因为栈顶总是最小","出栈时确定——当前元素把栈里更小的旧元素弹出时，当前元素就是它的「下一个更大」","需要先对整个数组排序","遍历结束后再反向扫一遍才确定"],
+    ans:1,
+    exp:"维持栈内从底到顶严格递减；遇到更大的 x 时，把栈里比 x 小的元素依次弹出，弹出的一瞬间 x 正是它们的「下一个更大元素」，所以答案在出栈时写入。每个元素恰好入栈、出栈各一次，总 O(n)。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>变量与数据类型 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 变量与数据类型：动态类型、int/float/bool/None/str、类型转换、可变与不可变、引用与 id。含可运行代码示例、对照表格与自测题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+  .chap .intro{color:var(--ink-soft);font-size:15px;max-width:720px;margin:10px 0 0}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">变量与数据类型</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 基础</span></span>
+    <h1 id="pageTitle">变量与数据类型</h1>
+    <p class="lead" id="pageLead">变量是程序里<b>给值起的名字</b>，类型决定你能对它做什么。掌握它们，你就有了用 Python 描述数据、组织逻辑的地基。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能判断一个标识符是否符合 Python 变量名规则，并指出非法示例错在哪。</li>
+      <li>学完后，你能说出 <b>int、float、bool、str、NoneType</b> 五种基本类型的差异与常用场景。</li>
+      <li>学完后，你能用 <code class="mono">int()/float()/str()/bool()</code> 做显式类型转换，用 <code class="mono">type()/isinstance()</code> 做类型检查。</li>
+      <li>学完后，你能解释「赋值是引用绑定而非拷贝」、「<code class="mono">==</code> 与 <code class="mono">is</code> 的区别」、「可变 vs 不可变」三组核心概念。</li>
+      <li>学完后，你能躲开浮点比较、列表引用共享、字符串拼接性能等常见坑，并写出更稳健的代码。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">前置：能运行 <code class="mono">python</code> 命令并写出最简单的 <code class="mono">print()</code> 与 <code class="mono"># 注释</code>（见「Python 环境与运行」）。本页假设你已经敲过几句 Python 代码。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>从「给值起个名字」开始</h2>
+    <p class="intro">几乎所有程序的第一步都是拿到一块数据并给它一个名字。Python 用<b>变量</b>完成这件事；而变量的<b>类型</b>与<b>身份</b>，决定了接下来能对它做怎样的操作。本节按「变量 → 类型 → 转换 → 可变性」四层逐步展开。</p>
+  </section>
+
+  <section class="topic" id="var-bind">
+    <h3><span class="kno">变量 · 入门</span>变量：名字到对象的绑定<span class="pt">动态类型 · 命名 · 多重赋值</span></h3>
+    <p>在 Python 里，<b>变量不是一个「存放数据的盒子」，而是一个「名字」，绑定（指向）某个对象。</b>对象才有类型和值，名字只是引用它。因此同一个变量可以在不同时刻指向不同的对象——这就是<b>动态类型</b>。</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart LR
+  N1["变量名 x"] -- 引用绑定 --> O1["对象：值 10<br/>类型 int"]
+  N2["变量名 x（改绑）"] -- 引用绑定 --> O2["对象：值 'hi'<br/>类型 str"]
+      </div>
+    </div>
+    <ul>
+      <li><b>命名规则</b>：以<b>字母或下划线 <code class="mono">_</code> 开头</b>，之后可跟字母、数字、下划线；<b>不能以数字开头</b>，不能含连字符 <code class="mono">-</code>。</li>
+      <li><b>关键字</b>（<code class="mono">if</code>、<code class="mono">class</code>、<code class="mono">for</code>、<code class="mono">return</code> 等）不能用作变量名；且<b>大小写敏感</b>：<code class="mono">Name</code> 与 <code class="mono">name</code> 是两个不同变量。</li>
+      <li><b>多重赋值</b>：<code class="mono">a, b = 1, 2</code>；<b>交换</b>用 <code class="mono">a, b = b, a</code>，无需临时变量。</li>
+      <li>单个 <code class="mono">_</code> 常作「占位/丢弃」的下划线，表示「这个值我不在乎」。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 1) 变量 = 名字绑定到对象
+age = 25                # int
+name = "Ada"            # str
+pi = 3.14               # float
+ok = True               # bool
+nothing = None          # NoneType
+print(age, name, pi, ok, nothing)
+
+# 2) 动态类型：同一变量可改绑到不同类型
+x = 10
+print(type(x))          # &lt;class 'int'&gt;
+x = "hi"
+print(type(x))          # &lt;class 'str'&gt;
+
+# 3) 多重赋值 & 交换
+a, b = 1, 2
+a, b = b, a             # 交换 a 和 b
+print(a, b)             # 2 1
+
+# 4) 单下划线作占位：丢弃多余值
+first, *_ = [1, 2, 3]
+print(first)            # 1，_ 得到 [2, 3]</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>变量是<b>名字</b>，对象才拥有类型与值；Python 动态类型 ＝ 名字可改绑到不同类型，类型在<b>运行期</b>才确定。学会用 <code class="mono">type(x)</code> 看清任意变量的实际类型。</p></div>
+  </section>
+
+  <section class="topic" id="basic-types">
+    <h3><span class="kno">类型 · 基础</span>四大基本数据类型<span class="pt">int · float · bool · str · None</span></h3>
+    <p>Python 中最常用的「值」基础类型是<b>整数、浮点数、布尔、字符串</b>，再加上表示「无」的 <code class="mono">None</code>。理解它们在内存里的性质，是之后学习的一切根基——尤其是<b>不可变</b>这一点（详见下一节）。</p>
+    <table class="tbl">
+      <tr><th>类型</th><th>字面量示例</th><th>说明</th><th>可变?</th></tr>
+      <tr><td><span class="mono">int</span></td><td><span class="mono">42</span></td><td>任意精度整数，没有固定上限</td><td>不可变</td></tr>
+      <tr><td><span class="mono">float</span></td><td><span class="mono">3.14</span></td><td>双精度浮点，注意精度误差</td><td>不可变</td></tr>
+      <tr><td><span class="mono">bool</span></td><td><span class="mono">True / False</span></td><td>真/假，是 <span class="mono">int</span> 的子类</td><td>不可变</td></tr>
+      <tr><td><span class="mono">str</span></td><td><span class="mono">"hello"</span></td><td>有序、不可变文本</td><td>不可变</td></tr>
+      <tr><td><span class="mono">NoneType</span></td><td><span class="mono">None</span></td><td>表示「没有值 / 尚未赋值」</td><td>不可变</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># int：任意精度，无溢出
+big = 2 ** 100
+print(big)                 # 1267650600228229401496703205376
+
+# float：双精度浮点
+print(0.1 + 0.2)           # 0.30000000000000004  浮点误差！
+print(isinstance(0.1, float))
+
+# bool：真/假，是 int 的子类（可当作 0/1）
+print(True + True)         # 2
+print(issubclass(bool, int))   # True
+
+# str：不可变文本
+s = "hello"
+print(s[0], len(s), s.upper())   # h 5 HELLO
+
+# NoneType：表示「没有值」
+def f(): pass
+print(f())                 # None</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">!</span><p><b>浮点误差是陷阱：</b><code class="mono">0.1 + 0.2 != 0.3</code>（结果为 <code class="mono">0.30000000000000004</code>）。比较浮点应使用<b>误差范围</b>，如 <code class="mono">abs(a - b) &lt; 1e-9</code>，或用 <code class="mono">decimal.Decimal</code> / <code class="mono">math.isclose()</code>。</p></div>
+  </section>
+
+  <section class="topic" id="type-convert">
+    <h3><span class="kno">转换 · 常用</span>类型转换与类型检查<span class="pt">int/float/str/bool · type/isinstance</span></h3>
+    <p>很多坑源于「类型不对」。好在 Python 提供<b>显式转换函数</b>，以及 <code class="mono">type()</code>、<code class="mono">isinstance()</code> 来检查类型。转换是<b>产生新对象</b>，不会改掉原变量。</p>
+    <ul>
+      <li><code class="mono">int(x)</code>、<code class="mono">float(x)</code>、<code class="mono">str(x)</code>、<code class="mono">bool(x)</code> 做类型转换；<code class="mono">int("ff", 16)</code> 可按进制解析。</li>
+      <li><code class="mono">type(x)</code> 返回具体类型对象；<code class="mono">isinstance(x, T)</code> 判断 <code class="mono">x</code> 是不是 <code class="mono">T</code>（含子类），推荐用于逻辑判断。</li>
+      <li><b>真值判断</b>：<code class="mono">0</code>、<code class="mono">0.0</code>、<code class="mono">""</code>、<code class="mono">None</code>、空容器为「假」，其余为「真」。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 1) 类型转换（显式，产生新对象）
+print(int("42"))       # 42
+print(int(3.9))        # 3   截断（不是四舍五入）
+print(float("3.14"))   # 3.14
+print(str(100))        # '100'
+print(bool(""))        # False
+print(bool(0))         # False
+print(bool([1, 2]))    # True
+
+# 2) 进制转换
+print(int("ff", 16))   # 255
+print(bin(10), hex(255), oct(8))   # 0b1010 0xff 0o10
+
+# 3) 类型检查
+x = [1, 2, 3]
+print(type(x))                       # &lt;class 'list'&gt;
+print(isinstance(x, list))           # True
+print(isinstance(5, (int, float)))   # True   元组命中任一个即真
+
+# 4) 数值运算符
+print(7 / 2)    # 3.5   除法 -> float
+print(7 // 2)   # 3     整除（向下取整）
+print(7 % 2)    # 1     取模
+print(2 ** 3)   # 8     幂</code></pre>
+    </div>
+    <div class="callout warn"><span class="i">!</span><p><b>注意：</b><code class="mono">type(x)</code> 与 <code class="mono">isinstance(x, T)</code> 并不总等价——<code class="mono">isinstance</code> 会考虑<b>继承关系</b>（例如 <code class="mono">isinstance(True, int)</code> 为 <code class="mono">True</code>），所以判断「是不是某个类型」用 <code class="mono">isinstance</code> 更稳。</p></div>
+  </section>
+
+  <section class="topic" id="mutable">
+    <h3><span class="kno">概念 · 核心</span>可变与不可变<span class="pt">mutable · immutable · id · 引用</span></h3>
+    <p>这是本节最「值钱」的概念：<b>不可变</b>对象一旦创建就无法修改（要改就新建对象）；<b>可变</b>对象可以<b>原地</b>修改内容。理解它，你才能正确地理解 <code class="mono">==</code> 与 <code class="mono">is</code>，以及「多个名字共享同一个对象」时的行为。</p>
+    <table class="tbl">
+      <tr><th>分类</th><th>类型</th><th>能否原地修改</th><th>注意</th></tr>
+      <tr><td><b>不可变 immutable</b></td><td><span class="mono">int · float · bool · str · tuple · frozenset</span></td><td>不能</td><td>「修改」其实是新建对象再重新绑定</td></tr>
+      <tr><td><b>可变 mutable</b></td><td><span class="mono">list · dict · set</span> 及自定义对象</td><td>能</td><td>多个名字共享时，改一处会影响所有引用方</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 1) 不可变：str —— 看似修改，实为新建对象再重绑
+s = "abc"
+s2 = s
+print(id(s), id(s2))     # 相同：指向同一对象
+s = "abcd"               # 重绑定到新对象，原 "abc" 不变
+print(id(s))             # 不同：新对象新地址
+
+# 2) 可变：list —— 原地修改，共享者一起变
+lst = [1, 2]
+lst2 = lst               # lst2 与 lst 指向同一列表
+lst.append(3)            # 原地修改
+print(lst)               # [1, 2, 3]
+print(lst2)              # [1, 2, 3]  引用共享，都被改了！
+
+# 3) 想独立就拷贝
+copy = lst.copy()        # 浅拷贝
+copy.append(99)
+print(lst)               # [1, 2, 3]
+print(copy)              # [1, 2, 3, 99]
+
+# 4) == 比较值，is 比较「是否同一个对象」
+a = [1, 2, 3]
+b = [1, 2, 3]
+print(a == b)            # True  值相同
+print(a is b)            # False 但不是一个对象
+print(a is None)         # 判断 None 请用 is</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">!</span><p><b>引用共享是高频 Bug：</b><code class="mono">lst2 = lst</code> 只是让两个名字指向<b>同一个清单</b>，对它原地修改会「连坐」所有引用者。要独立副本用 <code class="mono">lst.copy()</code>；若内含嵌套对象（如 list of list），需 <code class="mono">import copy; copy.deepcopy(lst)</code>。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>一句话口诀：</b><code class="mono">==</code> 比「值」，<code class="mono">is</code> 比「身份」，判断 <code class="mono">None</code> 永远用 <code class="mono">is</code>。不可变类型用 <code class="mono">join</code> 拼接、可变类型注意拷贝与深浅拷贝。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用三种方式实现「交换两个变量的值」（含不用临时变量、用 <code class="mono">a, b = b, a</code>、用临时变量），并打印交换前后两个变量的 <code class="mono">id()</code>，说说它们的地址是否相同。</li>
+      <li>写一段代码对比：把 <code class="mono">int</code> 和 <code class="mono">list</code> 分别传入同一个函数并在函数内修改，观察调用方的变量是否变化，并用一句话解释「可变/不可变 + 引用传递」。</li>
+      <li>动手实验 <b>小整数缓存</b>：打印 <code class="mono">id(5)</code>、<code class="mono">id(5)</code>、<code class="mono">id(257)</code> 与 <code class="mono">id(257)</code>，验证 <code class="mono">-5..256</code> 范围内的整数会被 CPython 复用，超过则不保证。</li>
+      <li>思考题：为什么循环里用 <code class="mono">s = s + ch</code> 反复拼接字符串，比先把字符放进列表最后 <code class="mono">"".join(list)</code> 慢得多？从「字符串不可变 → 每次拼接新建对象」的角度解释，并用 <code class="mono">timeit</code> 测出差距。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="02-basics" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="01-python-env.html"><span class="d">上一节</span><span class="t" id="footPrevT">Python 环境与运行</span></a>
+      <a class="card nxt" id="footNext" href="03-operators.html"><span class="d">下一节</span><span class="t" id="footNextT">运算符与表达式</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "02-basics",                 // 本页知识点 id（= 大纲里的 id）
+  title: "变量与数据类型",
+  eyebrow: "PYTHON · 基础",
+  prev: "01-python-env.html",      // 上一节文件名
+  next: "03-operators.html",       // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"下列哪个是合法的 Python 变量名？",
+    opts:["2name","_name","my-name","class"],
+    ans:1,
+    exp:"变量名以字母或下划线开头，不能以数字开头（所以 2name 非法），不能含连字符 -（所以 my-name 非法），不能用关键字（class 是关键字，非法）。_name 以数字以外的下划线开头，合法。"
+  },
+  {
+    type:"quiz",
+    q:"执行 `type(3.14)` 会返回什么？",
+    opts:["<class 'int'>","<class 'float'>","<class 'str'>","<class 'bool'>"],
+    ans:1,
+    exp:"3.14 带小数点，是 float（浮点）字面量，type() 返回 <class 'float'>。整形 3 才是 int，带引号才是 str。"
+  },
+  {
+    type:"quiz",
+    q:"执行 `a, b = 1, 2; a, b = b, a` 后，a 的值是？",
+    opts:["1","2","(2, 1)","运行报错"],
+    ans:1,
+    exp:"第二个 `a, b = b, a` 是元组解包：右侧先组成 (2, 1)，再依次赋给 a、b，于是 a=2、b=1，完成交换，无需临时变量。"
+  },
+  {
+    type:"quiz",
+    q:"关于 `==` 与 `is`，下列说法正确的是？",
+    opts:["== 比较值，is 比较是否同一个对象（身份/地址）","is 比较值，== 比较身份","两者完全等价","is 只能用于字符串"],
+    ans:0,
+    exp:"`==` 调用 __eq__ 比较值是否相等；`is` 比较名字是否指向同一个对象（内存地址）。判断 None 应使用 `x is None`，而非 `x == None`。"
+  },
+  {
+    type:"quiz",
+    q:"下列哪个类型是「不可变（immutable）」的？",
+    opts:["list","dict","tuple","set"],
+    ans:2,
+    exp:"tuple（元组）不可变：一旦创建无法增删改。list、dict、set 都是可变（mutable），可原地修改内容。"
+  },
+  {
+    type:"quiz",
+    q:"`list1 = [1, 2]; list2 = list1; list2.append(3)` 之后，list1 的值是？",
+    opts:["[1, 2]","[1, 2, 3]","[3]","运行报错"],
+    ans:1,
+    exp:"`list2 = list1` 让两个名字指向同一个列表（引用共享），append 是原地修改，所以 list1 也变成 [1, 2, 3]。想要独立副本要用 list1.copy()。"
+  },
+  {
+    type:"quiz",
+    q:"`bool(' ')` 的返回值是？",
+    opts:["True","False","None","运行报错"],
+    ans:0,
+    exp:"所有非空字符串（哪怕是只含一个空格的 ' '）都为「真」。只有空字符串 ''、0、0.0、None、空容器等才为「假」。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：请解释 Python 的动态类型与 C/Java 等静态类型的区别；并说明把「可变对象（如 list）」和「不可变对象（如 int）」作为函数参数传入时，函数内的修改对调用方变量分别有什么影响？",
+    opts:[
+      "动态类型：类型运行期才确定；可变对象会被原地改（调用方受影响），不可变对象只是重新绑定（调用方不受影响）",
+      "动态类型：类型编译期确定；所有对象都不可变",
+      "静态类型：变量可随意改变类型；函数内修改都会影响调用方",
+      "两者没有本质区别"
+    ],
+    ans:0,
+    exp:"动态类型：运行时才知道类型、可改绑，写起来灵活但报错延后。函数传参是「值传递引用」：传入可变对象（list/dict）时，函数内原地修改会作用到调用方的同一对象；传入不可变对象（int/str/float）时，函数内只能重新绑定局部名，不会改动调用方。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

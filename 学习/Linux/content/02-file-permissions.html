@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件与权限 · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— 文件与权限：看懂 ls -l 权限字符串、rwx 对文件与目录的不同含义、chmod/chown/chgrp、SUID/SGID/sticky 与 umask。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">文件与权限</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · 文件</span></span>
+    <h1 id="pageTitle">文件与权限</h1>
+    <p class="lead" id="pageLead">看懂 <b>ls -l</b> 的权限字符串，会用 <b>chmod / chown / chgrp</b> 决定谁能读、写、执行——这是 Linux 多用户系统的<b>安全基石</b>。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能逐列读懂 <code>ls -l</code> 输出，并拆解 10 位权限字符串（类型 + user/group/other）。</li>
+      <li>学完后，你能说清 <code>r / w / x</code> 对「普通文件」与「目录」在行为上的不同。</li>
+      <li>学完后，你能用<b>数字法</b>和<b>符号法</b>两种方式 <code>chmod</code> 修改权限。</li>
+      <li>学完后，你能用 <code>chown</code>/<code>chgrp</code> 修改文件所有者与所属组，并知道何时需要 root。</li>
+      <li>学完后，你能解释 <b>SUID / SGID / sticky</b> 三位特殊权限的作用与用法（含 <code>/tmp</code>、<code>/usr/bin/passwd</code>）。</li>
+      <li>学完后，你能用 <code>umask</code> 推断新建文件与目录的默认权限。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">你已经会用终端做基本导航与文件查看（见「命令行基础与文件导航」）；本讲假设你大致理解「用户」「组」，并知道文件由 <b>所有者、所属组、其他人</b> 三类主体访问。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>文件权限：谁能读、写、执行</h2>
+  </section>
+
+  <section class="topic" id="read-ls-l">
+    <h3><span class="kno">01</span>解构 <code>ls -l</code> 输出<span class="pt">权限字符串与各列</span></h3>
+    <p>执行 <code>ls -l</code> 看到的是<b>长格式列表</b>，一行就是一个文件/目录的元信息。看懂它，是所有权限操作的第一步。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>ls -l
+# 输出示例：每个部分用 | 分隔示意
+-rw-r--r-- 1 alice dev 4096 Jun 12 10:30 report.txt
+# ^^^^^^^^^^ ^   ^^^^^ ^^^  ^^^^ ^^^^^^^^^^^^^ ^^^^^^^^^
+# ①权限字符串 ②硬链接 ③所有者 ④组 ⑤大小 ⑥修改时间 ⑦文件名</code></pre>
+    </div>
+    <ul>
+      <li><b>① 权限字符串（10 位）</b>：第 1 位是<b>文件类型</b>，后 9 位是 <code>user/group/other</code> 三组 <code>rwx</code>。</li>
+      <li><b>② 硬链接计数</b>：指向该文件的目录项数量（普通文件通常为 1，目录至少为 2）。</li>
+      <li><b>③ 所有者</b>（user）、<b>④ 所属组</b>（group）：决定权限的归属主体。</li>
+      <li><b>⑤ 大小</b>（字节）、<b>⑥ 修改时间</b>、<b>⑦ 文件名</b>。</li>
+    </ul>
+    <table class="tbl">
+      <thead><tr><th>首字符</th><th>类型</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">-</td><td>普通文件</td><td>最常见，文本/二进制数据</td></tr>
+        <tr><td class="mono">d</td><td>目录</td><td>directory</td></tr>
+        <tr><td class="mono">l</td><td>符号链接</td><td>指向另一路径</td></tr>
+        <tr><td class="mono">c / b</td><td>字符 / 块设备</td><td>如 <span class="mono">/dev/null</span>、磁盘</td></tr>
+        <tr><td class="mono">p / s</td><td>命名管道 / 套接字</td><td>进程间通信</td></tr>
+      </tbody>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心：</b>后面 9 位永远按 <code>rwx rwx rwx</code> 三段读，对应 <b>所有者(user) · 所属组(group) · 其他(other)</b>，顺序固定。</p></div>
+  </section>
+
+  <section class="topic" id="rwx-file-vs-dir">
+    <h3><span class="kno">02</span>rwx 对「文件」与「目录」的含义<span class="pt">一字之差，行为不同</span></h3>
+    <p>同一个 <code>r / w / x</code>，作用在<b>普通文件</b>和<b>目录</b>上含义不同，这是初学者最容易踩坑的地方。</p>
+    <table class="tbl">
+      <thead><tr><th>权限</th><th>对普通文件</th><th>对目录</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">r</td><td>读取文件内容</td><td>列出目录里有哪些条目（<code>ls</code> 能看名字）</td></tr>
+        <tr><td class="mono">w</td><td>修改/清空文件内容</td><td>在目录内<b>创建、删除、重命名</b>文件（增删目录项）</td></tr>
+        <tr><td class="mono">x</td><td>把文件当作程序执行</td><td><b>进入目录</b>（<code>cd</code>）并访问其中文件</td></tr>
+      </tbody>
+    </table>
+    <ul>
+      <li>对目录：<code>x</code>（又称 <b>traverse</b>）决定能否 <code>cd</code> 进去并访问里面的文件；<code>r</code> 只能列名字，<code>w</code> 只决定增删条目。</li>
+      <li>要<b>删除或重命名某文件</b>，看的是它<b>所在目录</b>的写<code>w</code>与执行<code>x</code>权限，而不是该文件自己的权限。</li>
+      <li>要<b>访问目录内文件</b>（读取/修改其内容），通常需要目录有 <code>x</code>；若只有 <code>r</code> 无 <code>x</code>，能列出名字却 <code>stat</code>/访问失败。</li>
+    </ul>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>「删不掉文件」时，请先检查<b>父目录</b>的 <code>rwx</code>，而不是盯着文件本身的权限。文件能否被删除由所在目录是否可写决定。</p></div>
+    <div class="callout warn"><span class="i">i</span><p><b>典型签名：</b>目录权限常见 <code>rwxr-xr-x(755)</code>——自己有全部权限，别的用户/组只可读、可进入；<code>/tmp</code> 为 <code>rwxrwxrwt</code>——谁都能读写，但带 sticky 位（见下文）。</p></div>
+  </section>
+
+  <section class="topic" id="chmod">
+    <h3><span class="kno">03</span>修改权限：<code>chmod</code> 数字法与符号法<span class="pt">两种改法</span></h3>
+    <p>权限的本质是 <code>r=4, w=2, x=1</code> 三个数的加和，三组各凑成一个 0~7 的数字，三位连写就是<b>八进制</b>权限。</p>
+    <table class="tbl">
+      <thead><tr><th>数字</th><th>对应</th><th>含义</th><th>常用例子</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">7</td><td>4+2+1</td><td>rwx</td><td class="mono">755 = rwxr-xr-x（程序/目录）</td></tr>
+        <tr><td class="mono">6</td><td>4+2</td><td>rw-</td><td class="mono">644 = rw-r--r--（普通文件）</td></tr>
+        <tr><td class="mono">5</td><td>4+1</td><td>r-x</td><td>可读可进入，不可写</td></tr>
+        <tr><td class="mono">0</td><td>—</td><td>---</td><td>无任何权限</td></tr>
+      </tbody>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 数字法</div>
+      <pre><code>chmod 755 script.sh   # rwxr-xr-x
+chmod 644 report.txt  # rw-r--r--
+chmod 700 ~/.ssh      # 只有自己能读写进入（私钥目录标准）</code></pre>
+    </div>
+    <p>符号法用 <b>主体</b>（<code>u</code>=用户, <code>g</code>=组, <code>o</code>=其他, <code>a</code>=全部）+ <b>操作</b>（<code>+</code>加, <code>-</code>去, <code>=</code>直接设定）+ <b>权限</b>（<code>rwx</code> 等）。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 符号法</div>
+      <pre><code>chmod u+x script.sh      # 给所有者加执行
+chmod go-w file          # 去掉组和其他的写
+chmod a+r file           # 所有人可读
+chmod u=rw,go=r file     # user=r+w，group/other=r
+chmod -R g+w dir/        # 递归给目录内所有条目加组写</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>记忆：</b>「数字法」适合<b>整段设置</b>（一次给三组赋值，不易出错）；「符号法」适合<b>相对微调</b>（只改某一位）。</p></div>
+  </section>
+
+  <section class="topic" id="owner-group">
+    <h3><span class="kno">04</span>所有者与所属组：<code>chown</code> / <code>chgrp</code> / <code>id</code></h3>
+    <p>先搞清楚<b>我是谁</b>、我<b>属于哪些组</b>，再谈修改归属。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>whoami            # 当前用户名
+id                # uid / gid / 所属组列表
+id alice          # 查看 alice 的 uid/gid/groups
+groups            # 当前用户所在的所有组
+chgrp dev file    # 只改所属组为 dev
+chown bob file    # 只改所有者为 bob
+chown bob:dev file  # 一条命令：所有者 bob、组 dev（最常用）
+chown -R bob:dev dir/  # 递归改整个目录树</code></pre>
+    </div>
+    <ul>
+      <li><code>chown</code> 通常需要 <b>root</b> 权限；普通用户只能把文件<code>chgrp</code> 到<b>自己所属的组</b>。</li>
+      <li><code>chown 用户:组 文件</code> 这种「用户:组」写法，比分开改更原子、更不易错。</li>
+      <li>安全习惯：不要把敏感文件所有者轻易改成他人；生产环境通常由 <code>root</code> 或专用账户持有服务目录。</li>
+    </ul>
+    <div class="callout warn"><span class="i">i</span><p><b>新旧语法：</b>老写法 <code>chown bob.dev file</code>（点号）可用，但为区分主机名/组名，现代更推荐 <code>chown bob:dev file</code>（冒号）。</p></div>
+  </section>
+
+  <section class="topic" id="special-bits">
+    <h3><span class="kno">05</span>特殊权限：SUID / SGID / Sticky<span class="pt">第四个八进制位</span></h3>
+    <p>除了 <code>rwx</code>，还有三个<b>特殊权限位</b>，用一个<b>额外的前导数字</b>表示：<code>4=SUID</code>、<code>2=SGID</code>、<code>1=sticky</code>。</p>
+    <table class="tbl">
+      <thead><tr><th>特殊位</th><th>数字</th><th>作用</th><th>常见例子</th></tr></thead>
+      <tbody>
+        <tr><td><b>SUID</b>（setuid）</td><td class="mono">4xxx</td><td>执行该程序时，以<b>文件所有者</b>身份运行</td><td class="mono">/usr/bin/passwd</td></tr>
+        <tr><td><b>SGID</b>（setgid）</td><td class="mono">2xxx</td><td>文件上：以<b>所属组</b>身份运行；目录上：<b>新文件自动继承目录的组</b></td><td class="mono">/usr/bin/wall、共享目录</td></tr>
+        <tr><td><b>Sticky</b>（粘滞）</td><td class="mono">1xxx</td><td>目录内文件只能由<b>其所有者（或 root）</b>删除，他人不能删</td><td class="mono">/tmp（1777）</td></tr>
+      </tbody>
+    </table>
+    <p>在 <code>ls -l</code> 中，特殊位<b>显示在对应的执行位</b>上：SUID 看 user 的 <code>x</code>，SGID 看 group 的 <code>x</code>，Sticky 看 other 的 <code>x</code>。</p>
+    <table class="tbl">
+      <thead><tr><th>执行位显示</th><th>含义</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">s / S</td><td>设了 SUID（owner 段）或 SGID（group 段）。<b>小写 s</b>=对应 x 也存在；<b>大写 S</b>=设了位但<b>没有</b>x</td></tr>
+        <tr><td class="mono">t / T</td><td>设了 sticky（other 段）。<b>小写 t</b>=有 x；<b>大写 T</b>=设了位但没有 x</td></tr>
+      </tbody>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>ls -l /usr/bin/passwd        # rwsr-xr-x  → 第4位有 s = SUID
+chmod 4755 prog               # 设 SUID + rwxr-xr-x
+chmod 2755 dir                # 文件 SGID；对目录则让新文件继承组
+chmod 1777 /tmp               # sticky + rwxrwxrwx（/tmp 标准值）
+chmod u+s file / chmod g-s file   # 符号法加/去 SUID SGID
+chmod +t dir                  # 给目录加 sticky</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">!</span><p><b>安全风险：</b>给可执行文件加 <b>SUID</b>＝让它以所有者（往往是 root）身份跑。若程序有漏洞，很可能被利用来<b>提权</b>。除非确有必要，不要随便给程序设 SUID/SGID。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>典型记忆：</b><code>passwd</code> 之所以能改 <code>/etc/shadow</code>（root 才能写），正是因为它带 <b>SUID</b>，普通用户执行时以 root 身份运行。<code>/tmp</code> 带 <b>sticky</b>，所以大家都能建临时文件，却删不掉别人的。</p></div>
+  </section>
+
+  <section class="topic" id="umask">
+    <h3><span class="kno">06</span>默认权限：<code>umask</code><span class="pt">新文件/目录的出生权限</span></h3>
+    <p>新建文件或目录时不手动 <code>chmod</code> 也会有一个默认权限，它由 <b>基准值</b> 减去 <b>umask</b> 决定：普通文件基准 <code>666</code>，目录基准 <code>777</code>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code>umask          # 查看当前（常见输出 0022）
+umask 022      # 设置遮蔽值
+touch a.txt    # 默认文件 → 666-022 = 644 (rw-r--r--)
+mkdir dir      # 默认目录 → 777-022 = 755 (rwxr-xr-x)</code></pre>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>umask</th><th>新建文件</th><th>新建目录</th><th>适用场景</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">022</td><td class="mono">644</td><td class="mono">755</td><td>最常见：本类可读可执行，他人只读</td></tr>
+        <tr><td class="mono">002</td><td class="mono">664</td><td class="mono">775</td><td>同组协作：组内可读写</td></tr>
+        <tr><td class="mono">027</td><td class="mono">640</td><td class="mono">750</td><td>更严格：组内只读，他人无权限</td></tr>
+      </tbody>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>为什么文件基准是 666 而目录是 777？</b>因为普通文件默认<b>不带执行位 x</b>（大多数数据文件不该被执行），而目录必须带 <code>x</code> 才能进入。所以是「文件 - x，目录 - x」两条路径的差。</p></div>
+  </section>
+
+  <!-- 访问判定流程图 -->
+  <section class="topic" id="access-check">
+    <h3><span class="kno">07</span>梳理：一次访问如何判定<span class="pt">从上到下匹配</span></h3>
+    <p>进程访问文件时，内核按“<b>所有者 → 所属组 → 其他</b>”的顺序，对命中那一段的 <code>rwx</code> 做判断，<b>命中即停</b>，只看一次。</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+    A[进程请求访问文件] --> B{我是文件所有者?}
+    B -- 是 --> C[用 owner 的 rwx 判断]
+    B -- 否 --> D{我在文件的所属组?}
+    D -- 是 --> E[用 group 的 rwx 判断]
+    D -- 否 --> F[用 other 的 rwx 判断]
+    C --> G{命中的权限含所需操作?}
+    E --> G
+    F --> G
+    G -- 有 --> H[✅ 允许访问]
+    G -- 无 --> I[❌ Permission denied]
+      </div>
+    </div>
+    <div class="callout warn"><span class="i">i</span><p><b>易错点：</b>匹配到一段就<b>不再往下看</b>。例如你是所有者，owner 位没有 <code>x</code>，即使 group 位有 <code>x</code> 也<b>不能</b>执行——permission denied。这不是「取各方并集」。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>动手：<code>ls -l /usr/bin/passwd</code> 找 SUID 位，再用 <code>cp /usr/bin/passwd /tmp/p && chmod u-s /tmp/p</code> 对比权限变化，说说 SUID 去掉后还是不是原来的行为。</li>
+      <li>动手：用 <code>mkdir /tmp/shared && chgrp + chmod 2775</code> 建一个共享协作目录，切到另一用户 <code>su - user2</code> 在其中建文件，回来看新文件继承的是不是目录的组。</li>
+      <li>思考：目录没有 <code>x</code> 但有 <code>r/w</code> 时，哪些操作能做、哪些不能？用一个小实验验证你的结论。</li>
+      <li>思考：服务器上常把 <code>umask</code> 设为 <code>022</code> 或 <code>027</code>，各自带来的安全性差异是什么？哪种更保守？</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="02-file-permissions" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "02-file-permissions",   // 本页知识点 id（= 大纲里的 id）
+  title: "文件与权限",
+  eyebrow: "LINUX · 文件",
+  prev: "01-terminal-basics.html",
+  next: "03-shell-basics.html",
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"`ls -l` 输出的权限字符串 `-rwxr-xr--` 中，最后一组（other，其他人）的权限是？",
+    opts:["rwx","r-x","r--","--x"],
+    ans:2,
+    exp:"10 位 = 类型(1)+user(3)+group(3)+other(3)。`-rwxr-xr--` → user=rwx、group=r-x、other=r--，所以最后 3 位为 r--。"
+  },
+  {
+    type:"quiz",
+    q:"数字权限 `755` 对应下面哪组符号权限？",
+    opts:["rwxr-xr-x","rwxrwxr-x","rwxr--r--","r-xr-xr-x"],
+    ans:0,
+    exp:"7=rwx(4+2+1)、5=r-x(4+1)、5=r-x，所以 755 = rwxr-xr-x。注意 755 常用于可执行文件与目录，普通文件常用 644。"
+  },
+  {
+    type:"quiz",
+    q:"想「进入某个目录并访问其中的文件」，对那个目录最少需要哪一项权限？",
+    opts:["r（可读，列目录）","w（可写，增删条目）","x（可进入/traverse）","需要 rw 两项都有"],
+    ans:2,
+    exp:"目录的 x 决定能否 cd 进入并访问其中文件（traverse）。只有 r 只能列出名字、访问不到内容；只有 w 只管增删条目，都不足以访问文件。"
+  },
+  {
+    type:"quiz",
+    q:"要把文件 a.txt 同时改为「所有者 bob、所属组 dev」，最简洁的一条命令是？",
+    opts:["chgrp bob:dev a.txt","chown bob:dev a.txt","chmod bob:dev a.txt","chown -R bob a.txt"],
+    ans:1,
+    exp:"`chown 用户:组 文件` 一条命令同时改所有者与所属组（冒号写法）。chgrp 只改组、chmod 只管权限，都不正确。"
+  },
+  {
+    type:"quiz",
+    q:"SUID（setuid）位的作用是？",
+    opts:["让程序以所属组身份运行","让程序以文件所有者身份运行","限制程序只能由 root 运行","让目录内新建文件继承目录的组"],
+    ans:1,
+    exp:"SUID 使执行者以「文件所有者」身份运行，典型如 /usr/bin/passwd 以 root 身份改 /etc/shadow。选项里「让目录内新文件继承组」是 SGID 在目录上的作用。"
+  },
+  {
+    type:"quiz",
+    q:"`/tmp` 显示为 `drwxrwxrwt`，末尾的 `t`（sticky 粘滞位）代表什么？",
+    opts:["任何人都能删除 /tmp 内任意文件","目录内文件只能由其所有者（或 root）删除","让进程常驻内存","禁止任何用户写入"],
+    ans:1,
+    exp:"sticky 位用在目录上，保证大家都能创建临时文件，但只有文件所有者（或 root）能删除它，别人删不了你的文件。"
+  },
+  {
+    type:"quiz",
+    q:"当前 `umask` 为 `022` 时，新建一个普通文件，它的默认权限是？",
+    opts:["rw-r--r-- (644)","rwxr-xr-x (755)","rw-rw-rw- (666)","r-xr-xr-x (555)"],
+    ans:0,
+    exp:"普通文件基准 666，减去 umask 022 → 644（rw-r--r--）。目录基准 777 减 022 → 755（rwxr-xr-x）；普通文件默认不带来执行位 x。"
+  },
+  {
+    type:"interview",
+    q:"情境题：`/etc/shadow` 只有 root 能读写，但普通用户却能用 `passwd` 改自己的密码。请结合权限位解释这是怎么做到的，并指出这样做的安全隐患。",
+    opts:["/etc/shadow 对普通用户可写，所以能直接改","/usr/bin/passwd 带 SUID 位，执行时以 root 身份运行，从而写入 /etc/shadow","普通用户通过 sudo 运行 passwd 获得 root 权限","/etc/shadow 设置了 sticky 位，允许用户改密码"],
+    ans:1,
+    exp:"/usr/bin/passwd 拥有 SUID（setuid）位，权限显示为 rwsr-xr-x（user 段第 4 位是 s）。普通用户执行它时，进程以「文件所有者 root」的身份运行，于是能写只有 root 能写的 /etc/shadow，这就是 setuid 的典型用途。隐患：若 setuid 程序自身有漏洞（如外部输入未过滤、缓冲区溢出），攻击者可能借它提升为 root 权限（提权），因此不应随意给程序加 SUID。"
+  }
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

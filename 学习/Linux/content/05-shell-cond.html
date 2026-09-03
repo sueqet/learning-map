@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shell 条件判断 · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— Shell 条件判断（if/case、[ ] 与 [[ ]] 与 (( ))、文件/字符串/数值判断、逻辑组合）：学习目标、内容讲解、练习考核。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">Shell 条件判断</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · Shell</span></span>
+    <h1 id="pageTitle">Shell 条件判断</h1>
+    <p class="lead" id="pageLead">学会用 <b>if / elif / else</b> 与 <b>case</b> 给脚本加上判断能力：用 <b>[ ]</b>、<b>[[ ]]</b>、<b>(( ))</b> 三种表达式测试<b>文件、字符串、数值</b>，再组合逻辑条件，让脚本能针对不同情况走不同分支。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能写出结构完整的 <code>if / elif / else / fi</code> 分支脚本，并理解命令退出码「0=真、非 0=假」的含义。</li>
+      <li>学完后，你能区分 <code>[ ]</code>、<code>[[ ]]</code>、<code>(( ))</code> 三种条件表达式，并选出适用场景。</li>
+      <li>学完后，你能用<b>文件判断</b>（<code>-e/-f/-d/-r/-w/-x/-s/-L</code>）检查一条路径的属性和状态。</li>
+      <li>学完后，你能用<b>字符串判断</b>（<code>-z/-n/= /!=/=~</code>）与<b>数值判断</b>（<code>-eq/-ne/-gt/-ge/-lt/-le</code>）比较变量，并注意引号与类型的陷阱。</li>
+      <li>学完后，你能用 <code>&amp;&amp;</code>、<code>||</code>、<code>!</code> 组合多个条件，理解<b>短路求值</b>的顺序。</li>
+      <li>学完后，你能用 <code>case</code> 处理多分支的字符串/模式匹配，读懂一个含条件判断的脚本流程。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p>会用终端，了解 <b>Shell 变量与引用</b>（建议先看 04 节：<span class="mono">${VAR}</span>、<span class="mono">$?</span>），知道每一条命令执行后都返回一个<b>退出状态</b>（<span class="mono">0</span> 表示成功，非 0 表示失败），这是条件判断成立与否的依据。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>if 语句：给脚本装上一副「眼睛」<br>（从确认命令成败到多路分支）</h2>
+  </section>
+
+  <section class="topic" id="if-basic">
+    <h3><span class="kno">01</span>if / elif / else 的基本结构<span class="pt">关键：then 与 fi 缺一不可</span></h3>
+    <p>Shell 的 <code>if</code> 不要求条件是一个「布尔值」，它只看<b>每一条命令结束后的退出状态码</b>：<code>0</code> = 成立（truthy），非 <code>0</code> = 不成立（falsy）。条件既可以是一个 <b>测试表达式</b>（如 <code>[ -f file ]</code>），也可以是<b>任意一条命令</b>（如 <code>grep</code>、<code>test</code>）。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · if</div>
+      <pre><code>if &lt;condition&gt;; then
+  echo "in if"
+elif &lt;condition&gt;; then
+  echo "in elif"
+else
+  echo "in else"
+fi
+
+# 单行写法：then 前必须加分号
+if &lt;condition&gt;; then echo "yes"; fi</code></pre>
+    </div>
+    <ul>
+      <li><b>结构要素</b>：<code>if</code> 开始、<code>then</code> 里写成立时执行的命令、<code>elif</code> 可写多个、<code>else</code> 可省略，<code>fi</code> 结束。</li>
+      <li><b>分隔符</b>：条件与 <code>then</code> 之间用 <b>分号</b>（<code>;</code> 或换行）隔开；不同命令也用分号分隔。</li>
+      <li><b>退出码真相</b>：<code>if grep -q key file</code> 之所以能当条件，是因为 grep 命中返回 0、没命中返回 1。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>别忘了「<code>; then</code>」里的分号，以及结束用的 <code>fi</code>。写错了最典型的报错是 <code>syntax error near unexpected token `then'</code> 或 <code>`fi'</code>。</p></div>
+    <div class="callout warn"><span class="i">i</span><p><b>单行技巧：</b>若一行写完 <code>if ... then ... else ... fi</code>，每个语句之间都要用分号隔开；写成一行只是为了省行数，可读性不如多行。</p></div>
+  </section>
+
+  <section class="topic" id="expr-choice">
+    <h3><span class="kno">02</span>三种条件表达式：<code>[ ]</code> 与 <code>[[ ]]</code> 与 <code>(( ))</code><span class="pt">先分清「命令」「关键字」「算术」</span></h3>
+    <p>括号<b>并不是语法糖</b>，它们的本质完全不同：<code>[ ]</code> 是一个<b>命令</b>（等价于 <code>test</code>），<code>[[ ]]</code> 是 bash 的<b>关键字</b>，<code>(( ))</code> 是<b>算术表达式</b>。选哪个，取决于你要可移植性、还是要更安全的扩展能力。</p>
+    <table class="tbl">
+      <thead><tr><th>表达式</th><th>本质</th><th>支持的运算</th><th>适用场景</th></tr></thead>
+      <tbody>
+        <tr><td><code>[ ]</code></td><td><code>test</code> 命令（POSIX）</td><td><code>-f</code>、<code>-z</code>、<code>=</code>、<code>-eq</code> 等；<code>==</code> 非 POSIX</td><td><b>跨 shell 可移植</b>（sh/脚本）需要最通用写法</td></tr>
+        <tr><td><code>[[ ]]</code></td><td>bash 关键字</td><td>额外支持 <code>==</code>、<code>!=</code>、<code>=~</code>（正则）、<code>&amp;&amp;</code> / <code>||</code> / <code>!</code></td><td><b>bash 脚本里更稳</b>：不做词拆分、支持模式与正则</td></tr>
+        <tr><td><code>(( ))</code></td><td>算术表达式</td><td><code>==</code>、<code>&gt;</code>、<code>&lt;</code>、<code>&gt;=</code> 等；结果非 0 为真</td><td><b>纯数值运算与比较</b>，写法更直观</td></tr>
+      </tbody>
+    </table>
+    <div class="gitgraph"><div class="mermaid">
+flowchart TD
+  A["需要一个条件判断"] --> B{"要判断什么?"}
+  B -->|"文件 / 字符串 / 数值"| C{"需要跨 shell 可移植?"}
+  C -->|"是, 要兼容 POSIX"| D["[ ](test) 命令<br>可移植, 但需留空格 + 加引号"]
+  C -->|"否, 只写 bash 脚本"| E["[[ ]] 关键字<br>支持 与/或/非 和正则 =="]
+  B -->|"纯数值比较"| F["(( )) 算术表达式<br>直接用 大于/小于/等于"]
+  D --> G["牢记: 操作数与操作符间留空格"]
+  E --> G
+  F --> G
+    </div></div>
+    <div class="callout key"><span class="i">★</span><p><b>一句话记法：</b><code>[ ]</code> 是「命令」（要空格、要引号、可移植）；<code>[[ ]]</code> 是「bash 增强」（能 <code>&amp;&amp;</code>、能正则、不用怕空变量）；<code>(( ))</code> 是「算数」（比较两个数字）。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>[ ]</code> 里的操作符与操作数<b>两侧必须留空格</b>，<code>[a=b]</code> 会被当成单个字符串；且 <code>[ ]</code> 中比较字符串要用 <code>=</code>，<code>==</code> 只是部分 shell 才支持。</p></div>
+  </section>
+
+  <section class="topic" id="file-string-number">
+    <h3><span class="kno">03</span>三类测试：文件、字符串、数值<span class="pt">判断一个对象「是什么、是否、多大」</span></h3>
+    <p>条件判断的三种常见对象：<b>路径</b>（文件/目录）、<b>字符串</b>、<b>整数</b>。下面分别给出常用选项与示例。</p>
+
+    <h4 style="margin:18px 0 6px;font-size:16px;font-weight:800">① 文件判断</h4>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 文件</div>
+      <pre><code>[ -f file ]     # 是普通文件且存在
+[ -d dir ]      # 是目录且存在
+[ -e path ]     # 路径存在（文件或目录均可）
+[ -r file ]     # 文件可读
+[ -w file ]     # 文件可写
+[ -x file ]     # 文件可执行
+[ -s file ]     # 文件存在且大小不为 0
+[ -L file ]     # 是符号链接</code></pre>
+    </div>
+
+    <h4 style="margin:18px 0 6px;font-size:16px;font-weight:800">② 字符串判断</h4>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 字符串</div>
+      <pre><code>[ -z "$str" ]            # 字符串为空
+[ -n "$str" ]            # 字符串不为空
+[ "$a" = "$b" ]          # 字符串相等（POSIX 用 =）
+[ "$a" != "$b" ]         # 字符串不相等
+[[ "$str" =~ ^[0-9]+$ ]] # 正则匹配（bash 专属, 且需用 [[ ]]）</code></pre>
+    </div>
+
+    <h4 style="margin:18px 0 6px;font-size:16px;font-weight:800">③ 数值判断</h4>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 数值</div>
+      <pre><code>[ $a -eq $b ]   # 等于
+[ $a -ne $b ]   # 不等于
+[ $a -gt $b ]   # 大于
+[ $a -ge $b ]   # 大于等于
+[ $a -lt $b ]   # 小于
+[ $a -le $b ]   # 小于等于
+(( a > b ))     # 数值比较（更直观）</code></pre>
+    </div>
+    <div class="callout warn"><span class="i">i</span><p><b>提醒：</b>数值比较的操作符（<code>-eq/-gt/...</code>）只用于整数；字符串比较（<code>=</code>、<code>!=</code>）绝不能混用数字比较符，否则会遇到「integer expression expected」之类的报错。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>在 <code>[ ]</code> 里尽量给变量<b>加上双引号</b>（<code>[ "$a" = "$b" ]</code>）。若不引号且变量为空，命令行会被拆掉而误判；<code>[[ ]]</code> 不会做词拆分，通常不需要。</p></div>
+  </section>
+
+  <section class="topic" id="logical">
+    <h3><span class="kno">04</span>逻辑组合：<code>&amp;&amp;</code>、<code>||</code>、<code>!</code><span class="pt">短路求值决定走到哪一步</span></h3>
+    <p>把多个条件组合起来有三种方式。注意它们都有<b>短路</b>特性：<code>&amp;&amp;</code> 左边成立才执行右边，<code>||</code> 左边失败才执行右边。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 逻辑</div>
+      <pre><code>[ cond1 ] &amp;&amp; [ cond2 ]        # 与（都成立才执行下一句）
+[ cond1 ] || [ cond2 ]        # 或（任一成立即可）
+! [ cond ]                    # 非（取反）
+[[ cond1 &amp;&amp; cond2 ]]          # bash 扩展写法, 更贴近逻辑
+[[ cond1 || cond2 ]]</code></pre>
+    </div>
+    <ul>
+      <li><b>短路的用途</b>：<code>mkdir -p dir &amp;&amp; cd dir</code> —— 目录创建成功才进入；<code>command || echo "失败"</code> —— 失败才提示。</li>
+      <li><b>bash 中推荐</b>：用 <code>[[ ]]</code> 把多个条件像真布尔逻辑一样组合，避免 <code>[ ] &amp;&amp; [ ]</code> 那种「串外部命令」的写法。</li>
+      <li><b>非</b>：<code>! [ -f file ]</code> 等价于「文件不存在」。注意 <code>!</code> 与 <code>[</code> 之间也要空格。</li>
+    </ul>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>不要用 <code>[ cond1 -a cond2 ]</code> 或 <code>[ cond1 -o cond2 ]</code> 写「与/或」——<code>-a</code>/<code>-o</code> 在 POSIX test 中很<b>含糊且已被弃用</b>。要组合逻辑，宁可写成 <code>[ cond1 ] &amp;&amp; [ cond2 ]</code>，或在 bash 里用 <code>[[ cond1 &amp;&amp; cond2 ]]</code>。</p></div>
+    <div class="callout warn"><span class="i">i</span><p><b>提示：</b><code>&&</code>/<code>||</code> 是<b>整条指令链</b>的语义，并非「布尔表达式的运算符」。可以把 <code>c1 &amp;&amp; c2 || c3</code> 想象成「c1 且 c2，否则 c3」，它不等价于严格的三元逻辑——c1 失败但 c2 也没执行时仍会落到 c3。</p></div>
+  </section>
+
+  <section class="topic" id="case">
+    <h3><span class="kno">05</span>case 语句：多分支字符串匹配<span class="pt">用 glob 模式代替重复的 elif</span></h3>
+    <p>当一个变量要匹配<b>多个可能取值</b>时，<code>case</code> 比一串 <code>elif</code> 更清晰。它自上而下匹配<b>模式</b>（支持 <code>*</code>、<code>?</code>、<code>[...]</code> 等 glob），命中即执行该分支，<code>;;</code> 结束。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · case</div>
+      <pre><code>case $var in
+  "a")
+    echo "is a"
+    ;;
+  "b"|"c")
+    echo "is b or c"
+    ;;
+  *)
+    echo "other"
+    ;;
+esac</code></pre>
+    </div>
+    <ul>
+      <li><b>多值合并</b>：用竖线 <code>|</code> 把多个模式并到一个分支，如 <code>"b"|"c"</code>。</li>
+      <li><b>兜底分支</b>：<code>*)</code> 匹配其余情况（相当于 <code>else</code>），强烈建议写上。</li>
+      <li><b>结束标记</b>：每个分支用 <code>;;</code> 结束；整体用 <code>esac</code> 结束（case 倒过来写）。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><code>case</code> 匹配的是<b>模式</b>而非精确串，所以 <code>"a|b"</code> 若写成 <code>*</code> 会匹配一切；想精确匹配就加引号。适合写菜单、处理命令行参数（如 <code>$1</code>）。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>动手 1 · 检查脚本</b>：写一个 <code>check.sh</code>，接收一个参数作为路径。若是普通文件则打印「是文件」并用 <code>-s</code> 判断是否非空；是目录则 <code>ls</code> 列出内容；否则报我不存在。用 <code>if / elif / else</code> 实现。</li>
+      <li><b>动手 2 · 菜单脚本</b>：用 <code>case</code> 写一个 <code>menu.sh</code>，输入 <code>1/2/3</code> 分别执行不同动作，其它输入打印提示；试用 <code>*</code> 兜底、用 <code>|</code> 合并多个模式。</li>
+      <li><b>思考 3 · 短路陷阱</b>：把 <code>[ -e "$f" ] &amp;&amp; grep "key" "$f" || echo "no file"</code> 改写成 <code>if/else</code>，并说明为什么不能简单地把所有失败都归到 <code>||</code> 分支（提示：grep 找不到 <code>key</code> 也会触发 <code>||</code>）。</li>
+      <li><b>探索 4 · 引号与分词</b>：对比 <code>[ "$a" = "$b" ]</code> 与 <code>[[ $a == $b ]]</code>：当 <code>$a</code> 为空或不加引号时行为有何不同？体会 <code>[[ ]]</code> 不做词拆分、<code>[ ]</code> 需要引号的原因。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="05-shell-cond" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "05-shell-cond",          // 本页知识点 id（= 大纲里的 id）
+  title: "Shell 条件判断",
+  eyebrow: "LINUX · Shell",
+  prev: "04-shell-vars.html",   // 上一节文件名
+  next: "06-shell-loop.html",   // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"下面哪个是 if 语句的正确写法？",
+    opts:[
+      "if [ -f a ]; then echo ok; fi",
+      "if [ -f a ] then echo ok; fi",
+      "if [ -f a ] then echo ok; endif",
+      "if [ -f a ]; then echo ok; end"
+    ],
+    ans:0,
+    exp:"答案 A。if 语句以 fi 结束，且 then 之前必须用分号 ; 或换行与条件隔开。[ -f a ] 是条件测试。B 漏了分号，C/D 用 endif/end 结束是错误写法。"
+  },
+  {
+    type:"quiz",
+    q:"想用正则匹配一串字符（如 [[ \"$str\" =~ ^[0-9]+$ ]]），必须使用哪种表达式？",
+    opts:[
+      "[ \"$str\" =~ ^[0-9]+$ ]",
+      "[[ \"$str\" =~ ^[0-9]+$ ]]",
+      "(( \"$str\" =~ ^[0-9]+$ ))",
+      "test \"$str\" =~ ^[0-9]+$"
+    ],
+    ans:1,
+    exp:"答案 B。=~ 是 bash 中 [[ ]] 专属的运算符，[ ]/test 是命令、(( )) 是算术表达式，都不支持正则。=~ 右侧的正则不要加引号，否则会被当作字面字符匹配。"
+  },
+  {
+    type:"quiz",
+    q:"命令 [ -s /root/data.log ] &amp;&amp; echo nonempty 中，-s 判断的是？",
+    opts:[
+      "文件是符号链接",
+      "文件存在且大小不为 0",
+      "文件是普通文件且存在",
+      "目录存在"
+    ],
+    ans:1,
+    exp:"答案 B。-s 表示「文件存在且大小不为 0」，常用来判断文件是否非空。符号链接用 -L，普通文件用 -f，目录用 -d，容易混淆。"
+  },
+  {
+    type:"quiz",
+    q:"比较两个字符串是否相等，下面哪一项是正确的？",
+    opts:[
+      "[ \"$a\" = \"$b\" ]",
+      "[ \"$a\" -eq \"$b\" ]",
+      "[ \"$a\" = \"$b\" ] 与 [ \"$a\" == \"$b\" ] 在 POSIX test 中都可用",
+      "(( \"$a\" == \"$b\" ))"
+    ],
+    ans:0,
+    exp:"答案 A。字符串相等用 =（POSIX 标准）。-eq 是整数比较符，用在字符串上会报 integer expression expected 一类的错。== 在 [ ](test) 不是 POSIX 标准、只有部分 shell 接受，而在 [[ ]] 里 == 和 = 都可用。(( )) 是算术比较，不用于字符串。"
+  },
+  {
+    type:"quiz",
+    q:"case 语句中，要同时匹配 'b' 或 'c' 两个取值，分支模式应写成？",
+    opts:[
+      "\"b\"|\"c\")",
+      "\"b\",\"c\")",
+      "\"b\" &amp;&amp; \"c\")",
+      "(\"b\" OR \"c\")"
+    ],
+    ans:0,
+    exp:"答案 A。case 用竖线 | 把多个 glob 模式合并到同一分支。逗号、&&、OR 都不是 case 的语法，写了会报语法错误。"
+  },
+  {
+    type:"quiz",
+    q:"表达式 [ -d \"$dir\" ] &amp;&amp; echo isdir || echo no 的语义是？",
+    opts:[
+      "若 $dir 是目录则打印 isdir，否则打印 no",
+      "先打印 isdir，接着一定还打印 no",
+      "只有在 $dir 不是目录时才打印 isdir",
+      "恒打印 no"
+    ],
+    ans:0,
+    exp:"答案 A。&& 短路：只有左边成功（退出码 0）才执行 echo isdir；|| 在 && 整体失败时才执行 echo no。整句等价于 if [ -d \"$dir\" ]; then echo isdir; else echo no; fi。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：[ ]、[[ ]]、(( )) 有什么区别？各自什么时候用？为什么在 [ ] 里要加引号？",
+    opts:[
+      "[ ] 是 POSIX 且支持 &&/||，[[ ]] 是 bash 专属但不支持正则，(( )) 用于字符串比较",
+      "[ ] 是 test 命令（POSIX），[[ ]] 是 bash 关键字且支持 &&/||/=~ 正则、不做词拆分，(( )) 用于算术比较；[ ] 中变量应加引号以防空值/分词出错",
+      "[ ] 与 [[ ]] 完全等价只是写法不同，(( )) 用来做文件测试",
+      "[[ ]] 一定比 [ ] 好，所以永远用 [[ ]] 即可"
+    ],
+    ans:1,
+    exp:"答案 B（最能体现概念清晰）。[ ] = test 命令，POSIX 可移植，但要求操作数与操作符间留空格、变量要引号、== 非标准；[[ ]] = bash 关键字，支持 &&/||/! 与正则 =~，不做词拆分，对空变量更安全；(( )) = 算术表达式，做数值比较更直观。没有「永远更好」：要跨 shell 用 [ ]，bash 脚本用 [[ ]] 更稳。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

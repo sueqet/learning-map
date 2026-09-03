@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>计算机专业就业方向手册</title>
+<meta name="description" content="面向计算机专业学生：全方向就业方向、城市分布、薪资待遇、技能要求与高性价比技能推荐，数据驱动、便于维护。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f6f1e7;
+    --paper-2:#fdfbf6;
+    --ink:#17150f;
+    --ink-soft:#4a463a;
+    --muted:#7d7568;
+    --line:#e2d9c6;
+    --line-2:#d4c9b1;
+    --accent:#b8392a;      /* 朱红 */
+    --accent-soft:#faede6;
+    --teal:#1f5c58;        /* 墨青 */
+    --teal-soft:#e7f0ee;
+    --amber:#a5672a;
+    --white:#fffdf8;
+    --radius:14px;
+    --maxw:1180px;
+    --shadow:0 1px 2px rgba(23,21,15,.04),0 10px 30px -18px rgba(23,21,15,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    color:var(--ink);
+    background:var(--paper);
+    background-image:
+      radial-gradient(1200px 600px at 85% -8%, rgba(184,57,42,.07), transparent 60%),
+      radial-gradient(900px 500px at -10% 8%, rgba(31,92,88,.06), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");
+    line-height:1.7;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:"JetBrains Mono","SFMono-Regular",Consolas,monospace}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+
+  /* ===== Hero ===== */
+  .hero{position:relative;padding:78px 0 34px;overflow:hidden}
+  .hero::after{
+    content:"";position:absolute;right:-120px;top:-120px;width:360px;height:360px;border-radius:50%;
+    border:1px solid var(--line-2);opacity:.6;
+  }
+  .hero::before{
+    content:"";position:absolute;right:60px;top:-40px;width:220px;height:220px;border-radius:50%;
+    border:1px solid var(--line-2);opacity:.35;
+  }
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:"JetBrains Mono",monospace;
+    font-size:12px;letter-spacing:.22em;color:var(--accent);text-transform:uppercase;
+    border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px var(--accent-soft)}
+  .hero h1{
+    font-family:"Fraunces","Songti SC","STSong",serif;
+    font-weight:900;font-size:clamp(38px,6vw,64px);line-height:1.08;margin:22px 0 8px;letter-spacing:-.02em;
+  }
+  .hero h1 .accent{color:var(--accent);position:relative}
+  .hero h1 .accent::after{
+    content:"";position:absolute;left:0;right:0;bottom:6px;height:10px;background:var(--accent-soft);z-index:-1;
+    transform:rotate(-1.2deg);
+  }
+  .hero p.lead{font-size:clamp(15px,1.7vw,18px);color:var(--ink-soft);max-width:720px;margin:0 0 26px}
+  .hero p.lead b{color:var(--ink)}
+
+  .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:8px}
+  .stat{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px 20px;min-width:140px;box-shadow:var(--shadow);
+  }
+  .stat .num{font-family:"JetBrains Mono",monospace;font-size:28px;font-weight:700;line-height:1;color:var(--accent)}
+  .stat .lab{font-size:12.5px;color:var(--muted);margin-top:6px;letter-spacing:.02em}
+
+  /* ===== Section ===== */
+  section{padding:44px 0}
+  .sec-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap;margin-bottom:20px}
+  .sec-head h2{
+    font-family:"Fraunces","Songti SC","STSong",serif;font-weight:900;font-size:clamp(24px,3.4vw,34px);
+    margin:0;letter-spacing:-.01em;
+  }
+  .sec-head h2 .idx{color:var(--accent);font-family:"JetBrains Mono",monospace;font-size:.55em;margin-right:4px;vertical-align:middle}
+  .sec-head .note{font-size:13px;color:var(--muted)}
+  .sec-desc{color:var(--ink-soft);max-width:760px;margin:-6px 0 22px;font-size:15px}
+
+  /* ===== Skill / 性价比 section ===== */
+  .skill-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+  .skill-card{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 18px 16px;box-shadow:var(--shadow);position:relative;transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .skill-card:hover{transform:translateY(-3px);box-shadow:0 18px 40px -22px rgba(23,21,15,.5)}
+  .skill-card.top{background:linear-gradient(135deg,var(--white),var(--accent-soft));border-color:#e8c3ba}
+  .skill-card .badge{
+    position:absolute;top:14px;right:14px;font-family:"JetBrains Mono",monospace;font-size:11px;
+    padding:3px 9px;border-radius:999px;background:var(--teal);color:#fff;
+  }
+  .skill-card .badge.best{background:var(--accent)}
+  .skill-card h3{margin:0 0 4px;font-size:18px;font-weight:700}
+  .skill-card .rank{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted)}
+  .skill-card .why{font-size:13.5px;color:var(--ink-soft);margin:8px 0 12px;min-height:36px}
+  .cov{display:flex;align-items:center;gap:10px}
+  .cov .bar{flex:1;height:9px;background:var(--line);border-radius:999px;overflow:hidden}
+  .cov .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--teal));border-radius:999px}
+  .cov .val{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap}
+  .cov .cost{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);margin-top:8px}
+  .skill-card .learn{
+    display:inline-flex;align-items:center;gap:6px;margin:10px 0 2px;padding:8px 14px;border-radius:999px;
+    border:1px solid var(--line-2);background:#fff;color:var(--teal);font-size:13px;font-weight:600;transition:.15s;
+  }
+  .skill-card .learn:hover{border-color:var(--teal);background:var(--teal-soft);color:var(--teal);text-decoration:none;transform:translateY(-1px)}
+  .skill-card .learn::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--teal)}
+
+  /* ===== Filter ===== */
+  .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+  .chip{
+    cursor:pointer;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-soft);
+    padding:7px 15px;border-radius:999px;font-size:13.5px;transition:all .15s ease;
+  }
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .chip .cnt{font-family:"JetBrains Mono",monospace;font-size:11px;opacity:.7;margin-left:5px}
+
+  .search{
+    width:100%;max-width:360px;padding:11px 16px;border:1px solid var(--line-2);border-radius:999px;
+    background:var(--paper-2);font-size:14px;color:var(--ink);outline:none;margin-bottom:22px;
+  }
+  .search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+
+  /* ===== Career cards ===== */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(345px,1fr));gap:18px}
+  .card{
+    background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 20px 22px;box-shadow:var(--shadow);display:flex;flex-direction:column;
+    transition:transform .18s ease,box-shadow .18s ease;position:relative;overflow:hidden;
+  }
+  .card:hover{transform:translateY(-4px);box-shadow:0 24px 44px -26px rgba(23,21,15,.55)}
+  .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--cat-color,var(--accent))}
+  .card .cat{
+    display:inline-block;align-self:start;font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.12em;
+    text-transform:uppercase;padding:3px 9px;border-radius:6px;margin-bottom:10px;color:var(--cat-color,var(--accent));
+    background:var(--cat-soft,var(--accent-soft));
+  }
+  .card h3{margin:0 0 2px;font-size:19px;font-weight:800;line-height:1.35}
+  .card .en{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted)}
+  .card .tags{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+  .tag{font-size:11.5px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);color:var(--ink-soft);background:#fff}
+  .tag.hard{border-color:#e8c3ba;color:var(--accent);background:var(--accent-soft)}
+  .tag.easy{border-color:#cfe0dc;color:var(--teal);background:var(--teal-soft)}
+  .card .intro{font-size:13.8px;color:var(--ink-soft);margin:4px 0 12px;min-height:52px}
+
+  .card .blk{margin-bottom:12px}
+  .card .blk .lb{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+  .card .blk .lb::before{content:"";width:6px;height:6px;background:var(--accent);border-radius:50%}
+  .skilllist{display:flex;flex-wrap:wrap;gap:5px}
+  .sk{font-size:12px;padding:3px 8px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink)}
+  .sk.plus{border-style:dashed;color:var(--muted)}
+
+  .cities{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:2px}
+  .cities .row{display:flex;gap:10px;padding:7px 12px;border-bottom:1px solid var(--line);font-size:12.5px;align-items:baseline}
+  .cities .row:last-child{border-bottom:none}
+  .cities .row:nth-child(odd){background:var(--paper)}
+  .cities .cname{font-weight:600;min-width:62px;color:var(--ink)}
+  .cities .csal{font-family:"JetBrains Mono",monospace;color:var(--accent);font-weight:600;min-width:96px}
+  .cities .cnote{color:var(--muted);flex:1;font-size:12px}
+
+  .growth{list-style:none;padding:0;margin:4px 0 0;font-size:12.5px;color:var(--ink-soft)}
+  .growth li{display:flex;gap:8px;padding:2px 0}
+  .growth li::before{content:"→";color:var(--teal);font-family:"JetBrains Mono",monospace}
+
+  .fit{margin-top:auto;padding-top:12px;font-size:12px;color:var(--ink-soft);border-top:1px dashed var(--line)}
+  .fit .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+  .fit .dot.hi{background:var(--accent)} .fit .dot.mid{background:var(--amber)} .fit .dot.lo{background:var(--muted)}
+
+  .empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0;font-size:15px}
+
+  /* ===== Footer / maint ===== */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:40px 0 60px}
+  .footer .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:40px}
+  .maint{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+  .maint h3{margin:0 0 10px;font-size:17px;font-weight:800;display:flex;gap:8px;align-items:center}
+  .maint h3 .key{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--accent);border:1px solid var(--line-2);padding:2px 8px;border-radius:6px}
+  .maint code{background:var(--paper);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--accent)}
+  .maint ol{margin:8px 0 0;padding-left:20px;font-size:13.5px;color:var(--ink-soft)}
+  .maint ol li{margin-bottom:5px}
+  .log{font-size:13px;color:var(--ink-soft)}
+  .log .l1{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted)}
+  .disclaimer{font-size:12.5px;color:var(--muted);margin-top:14px;line-height:1.6}
+  .src{font-size:12px;color:var(--muted)}
+  .src a{color:var(--teal)}
+
+  .off{opacity:0;transform:translateY(14px)}
+  .reveal{opacity:1;transform:none;transition:opacity .5s ease,transform .5s ease}
+
+  @media (max-width:720px){
+    .footer .cols{grid-template-columns:1fr}
+    .hero{padding-top:56px}
+    .topnav .links{display:none}
+  }
+
+  /* ===== 顶部导航 ===== */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(246,241,231,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:20px;height:58px}
+  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:15px;color:var(--ink);white-space:nowrap;letter-spacing:-.01em}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  .topnav .links{margin-left:auto;display:flex;gap:4px}
+  .topnav a.anchor{padding:7px 13px;border-radius:999px;font-size:13.5px;color:var(--ink-soft);transition:.15s ease}
+  .topnav a.anchor:hover{color:var(--accent);background:var(--accent-soft)}
+  .topnav .scope{font-family:"JetBrains Mono",monospace;font-size:11px;color:var(--muted);padding:5px 10px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2)}
+  section{scroll-margin-top:74px}
+
+  /* ===== 回到顶部 ===== */
+  .totop{position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line-2);background:var(--ink);color:var(--paper);font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:.25s ease;box-shadow:var(--shadow)}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{background:var(--accent);transform:translateY(-2px)}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span>就业方向手册</span>
+    <div class="links">
+      <span class="scope">计算机专业</span>
+      <a class="anchor" href="#skills">① 高性价比技能</a>
+      <a class="anchor" href="#dirs">② 全部就业方向</a>
+      <a class="anchor" href="#maint">③ 维护更新</a>
+    </div>
+  </div>
+</nav>
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>CAREER FIELD NOTES · 就业方向手册</span>
+    <h1>计算机专业<br><span class="accent">就业方向手册</span></h1>
+    <p class="lead">面向<b>计算机科学与技术</b>学生的就业参考。覆盖全部专业对口的就业方向，含<b>所在城市、薪资待遇、所需技能</b>，并回答一个关键问题：<b>学哪个技能性价比最高、能覆盖最多岗位？</b></p>
+    <div class="stats">
+      <div class="stat"><div class="num" id="nDir">—</div><div class="lab">就业方向</div></div>
+      <div class="stat"><div class="num" id="nCat">—</div><div class="lab">方向大类</div></div>
+      <div class="stat"><div class="num" id="nCity">—</div><div class="lab">覆盖城市</div></div>
+      <div class="stat"><div class="num" id="nSkill">—</div><div class="lab">入门级技能统计</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <!-- ===== 高性价比技能推荐 ===== -->
+  <section id="skills">
+    <div class="sec-head">
+      <h2><span class="idx">01</span>高性价比技能推荐</h2>
+      <span class="note">按「能覆盖多少就业方向」×「学习成本」排序，覆盖越广、成本越低越值得先学</span>
+    </div>
+    <p class="sec-desc">对于还没定方向的同学，<b>先学那些几乎每个方向都用到、且面试必考的底层技能</b>最划算。「数据结构与算法」是所有技术方向面试必考的通用底座（覆盖全部 20 个方向）；Python / SQL / Linux / Git / 网络构成普适的工程基础。下面的列表由网页内所有方向的技能要求<b>实时统计</b>得出。其中<b>Python 工程化、数据结构与算法、Git / 版本协作、Linux 与命令行</b>已配套<b>可交互学习页面</b>，点卡片底部按钮即可打开对应学习地图（Python 页面内含力扣题号与可运行代码）。</p>
+    <div class="skill-grid" id="skillGrid"></div>
+  </section>
+
+  <!-- ===== 全部就业方向 ===== -->
+  <section id="dirs">
+    <div class="sec-head">
+      <h2><span class="idx">02</span>全部就业方向</h2>
+      <span class="note">可按大类筛选，或直接搜索方向名 / 技能 / 城市</span>
+    </div>
+    <input class="search" id="searchBox" type="text" placeholder="🔍 搜索方向、技能或城市，如：算法 / SQL / 杭州">
+    <div class="filters" id="filters"></div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <!-- ===== 维护与更新 ===== -->
+  <section id="maint" style="padding-top:10px">
+    <div class="sec-head">
+      <h2><span class="idx">03</span>维护与更新</h2>
+      <span class="note">本页为「数据驱动」单文件，更新时只需要改动数据区，无需改结构</span>
+    </div>
+    <div class="footer">
+      <div class="cols">
+        <div class="maint">
+          <h3>如何更新 <span class="key">DATA</span></h3>
+          <p>所有内容都集中在页面底部 <code>&lt;script&gt;</code> 里的 <code>DATA</code> 对象中，四块数据：</p>
+          <ol>
+            <li><code>meta</code> — 页面标题、数据更新时间、声明。</li>
+            <li><code>topSkills</code> — 高性价比技能（第 01 区）。加/改一个技能即可，覆盖数自动统计。</li>
+            <li><code>categories</code> — 方向大类，用于顶部筛选。</li>
+            <li><code>careers</code> — 每个就业方向一条：工作内容、技能、城市+薪资、成长路径。新增方向复制一条结构即可。</li>
+          </ol>
+          <p>保存后在浏览器刷新即可看到效果。<b>建议每 3–6 个月更新一次薪资与热门城市。</b></p>
+        </div>
+        <div>
+          <div class="maint" style="margin-bottom:18px">
+            <h3>更新记录</h3>
+            <div class="log" id="log"></div>
+          </div>
+          <div class="maint">
+            <h3>数据说明</h3>
+            <p>薪资为<b>人民币税前月薪参考区间</b>，来源为公开招聘信息与招聘平台摘要；受城市、企业、学历、经验、奖金影响，实际收入有波动，<b>不能作为精确平均值</b>。技术岗位工具与薪资变化快，求职前请复查目标城市最近 3 个月岗位。</p>
+            <p class="src">参考平台：<a href="https://www.zhipin.com/">BOSS 直聘</a> · <a href="https://www.liepin.com/">猎聘</a> · <a href="https://www.jobui.com/">职友集</a> · <a href="https://www.nowcoder.com/">牛客</a></p>
+          </div>
+        </div>
+      </div>
+      <p class="disclaimer">本页面为个人职业规划参考工具，数据驱动的单文件网页，可直接用浏览器打开。配套《个人信息与技能档案.md》使用。</p>
+    </div>
+  </section>
+</div>
+
+<script>
+/* =========================================================
+   DATA — 所有可维护内容都集中在这里
+   更新提示：改数组条目前，请先看本页「维护与更新」说明。
+   ========================================================= */
+const DATA = {
+  meta: {
+    title: "计算机专业就业方向手册",
+    updated: "2026-09-02",
+    disclaimer: "薪资为参考区间，非官方平均值；求职前请复核最新数据。",
+  },
+
+  /* --- 高性价比技能（第01区）。coverage 自动统计。 --- */
+  topSkills: [
+    { id:"python", name:"Python 工程化", match:["Python"], cost:2, link:"学习/Python/index.html",
+      why:"几乎所有方向（算法、AI、后端、数据、测试、自动化）都要用到，是覆盖面最广的语言。"},
+    { id:"dsa", name:"数据结构与算法", match:["数据结构与算法"], cost:2, link:"学习/数据结构与算法/index.html",
+      why:"所有方向笔试/面试必考，决定能不能过简历和技术面，投入产出比极高。"},
+    { id:"git", name:"Git / 版本协作", match:["Git"], cost:1, link:"学习/Git 版本协作/index.html",
+      why:"所有开发岗位的协作基本功，几乎每个方向都要用；学习成本极低，人人必备。"},
+    { id:"sql", name:"SQL / 数据库", match:["SQL"], cost:1,
+      why:"后端、数据、算法、测试都要会，学习成本低，覆盖极广。"},
+    { id:"linux", name:"Linux 与命令行", match:["Linux"], cost:1, link:"学习/Linux/index.html",
+      why:"运维、后端、嵌入式、AI、测试的日常基础，搭环境/部署离不了。"},
+    { id:"network", name:"计算机网络 / 操作系统", match:["计算机网络","操作系统"], cost:2,
+      why:"后端、网络、安全、底层方向的面试核心，理解请求如何流转。"},
+    { id:"docker", name:"Docker / 容器化", match:["Docker"], cost:2,
+      why:"后端、运维、AI、数据的部署标配，能把项目跑起来。"},
+    { id:"framework", name:"后端框架", match:["FastAPI","Spring","Go"], cost:2,
+      why:"后端、全栈、AI 应用的核心工程能力，可复用度高。"},
+    { id:"dl", name:"深度学习框架", match:["PyTorch"], cost:3,
+      why:"AI / CV / 大模型方向的核心，学习成本高但对应高薪方向。"},
+    { id:"llm", name:"LLM / Agent / RAG", match:["大模型","LLM","Agent","RAG"], cost:3,
+      why:"当前最热门，与 AI/CV 背景可结合，稀缺但门槛偏高。"},
+    { id:"frontend", name:"前端三件套", match:["前端","HTML","JavaScript"], cost:2,
+      why:"前端与全栈方向基础，学会能做完整的 Web 产品界面。"},
+    { id:"cxx", name:"C / C++", match:["C++","C/C++"], cost:2,
+      why:"嵌入式、游戏、音视频、高性能计算及部分算法方向的核心语言。"},
+  ],
+
+  /* --- 方向大类 --- */
+  categories: [
+    { id:"backend", name:"后端 · 全栈", color:"#1f5c58", soft:"#e7f0ee" },
+    { id:"front",   name:"前端 · 客户端", color:"#a5672a", soft:"#f7efe2" },
+    { id:"ai",      name:"算法 · 人工智能", color:"#b8392a", soft:"#faede6" },
+    { id:"data",    name:"数据", color:"#3a6b8f", soft:"#e8f0f6" },
+    { id:"infra",   name:"基础设施 · 运维", color:"#5b5b6b", soft:"#ededf2" },
+    { id:"test",    name:"测试", color:"#7c4a8a", soft:"#f2ecf5" },
+    { id:"sec",     name:"安全", color:"#8a3a3a", soft:"#f6ecec" },
+    { id:"embed",   name:"嵌入式 · 系统", color:"#2c6a5a", soft:"#e9f3ef" },
+    { id:"game",    name:"游戏 · 图形学", color:"#6b5a2c", soft:"#f5f0e4" },
+    { id:"other",   name:"其他 · 交叉", color:"#4a4a4a", soft:"#ececec" },
+  ],
+
+  /* --- 就业方向。每个方向一条。
+       keySkills 用于「覆盖统计」；required/plus 用于展示；
+       fit: 与当前用户背景(CS硕士+CV/PyTorch/Python/C)的匹配度 hi|mid|lo；
+       cities: 代表城市 + 薪资；levels: 经验层级薪资。 --- */
+  careers: [
+    {
+      id:"backend-java", category:"backend", name:"后端开发工程师", en:"Backend Engineer",
+      intro:"构建服务端接口、数据库、缓存、消息队列，支撑高并发业务；多数企业最核心的岗位之一。",
+      threshold:"中", heat:"高", fit:"mid",
+      required:["Java 或 Go 或 Python","SQL / 数据库","数据结构与算法","计算机网络","Linux","Git"],
+      plus:["Redis","消息队列","微服务","Docker/K8s","分布式"],
+      keySkills:["python","dsa","sql","linux","git","network","docker","framework"],
+      cities:[["北京","18-32k","互联网大厂聚集"],["上海","18-32k","金融/电商/大厂"],["深圳","15-28k","硬件+互联网"],["杭州","16-30k","互联网电商"],["成都/武汉","10-20k","二线中心较多"]],
+      levels:[["应届/初级","12-22k","一线；二线 8-15k"],["中级 2-5y","20-35k","负责核心服务"],["高级 5y+","35-60k+","架构/负责人"]],
+      growth:["初级开发工程师","中级/资深开发","技术专家 / 架构师","技术管理层或研发主管"]
+    },
+    {
+      id:"fullstack", category:"backend", name:"全栈开发工程师", en:"Full-stack Engineer",
+      intro:"同时掌握前后端，能独立从界面到接口完成一个完整产品；创业公司与中小厂常见。",
+      threshold:"中", heat:"中", fit:"mid",
+      required:["前端三件套","后端框架","SQL / 数据库","Git","Linux"],
+      plus:["Docker","云服务","TypeScript","Node/React/Vue"],
+      keySkills:["python","frontend","framework","sql","linux","git","docker"],
+      cities:[["北京","15-28k"],["上海","15-28k"],["深圳","13-26k"],["杭州","14-26k"],["二线","10-18k"]],
+      levels:[["初级","10-20k"],["中级","18-32k"],["高级","30-50k"]],
+      growth:["全栈工程师","资深全栈","技术负责人 / 技术总监"]
+    },
+    {
+      id:"frontend-dev", category:"front", name:"前端开发工程师", en:"Front-end Engineer",
+      intro:"负责 Web 界面与交互，关注性能、体验与工程化；岗位数量多，入门相对友好。",
+      threshold:"中", heat:"高", fit:"lo",
+      required:["HTML/CSS/JavaScript","前端框架(Vue/React)","Git","浏览器原理"],
+      plus:["TypeScript","工程化构建","性能优化","Node","跨端"],
+      keySkills:["frontend","git","framework","network"],
+      cities:[["北京","15-28k"],["上海","15-28k"],["深圳","13-26k"],["杭州","14-28k"],["二线","9-16k"]],
+      levels:[["初级","10-18k"],["中级","18-32k"],["高级","30-50k"]],
+      growth:["前端工程师","资深前端","前端专家 / 前端负责人"]
+    },
+    {
+      id:"mobile", category:"front", name:"移动端开发工程师", en:"Mobile Developer",
+      intro:"开发 iOS / Android / 跨端 App，关注原生性能与跨端统一；与前端技能有交集。",
+      threshold:"中", heat:"中", fit:"lo",
+      required:["Java/Kotlin 或 Swift/OC","Android/iOS 基础","Git"],
+      plus:["Flutter/React Native","跨端工程化","性能优化"],
+      keySkills:["cxx","git","framework"],
+      cities:[["北京/上海","15-30k"],["深圳","14-28k"],["广州","13-25k"],["杭州","14-28k"]],
+      levels:[["初级","12-22k"],["中级","20-35k"],["高级","35-55k"]],
+      growth:["移动端开发","资深移动端","移动端负责人"]
+    },
+    {
+      id:"algo-ml", category:"ai", name:"算法工程师（推荐/搜索/ML）", en:"Algorithm / ML Engineer",
+      intro:"用机器学习模型解决推荐、搜索、排序、风控等业务问题；技术门槛最高的方向之一。",
+      threshold:"高", heat:"高", fit:"hi",
+      required:["Python","数据结构与算法","机器学习/深度学习","PyTorch 或 TensorFlow","数学(线代/概率)"],
+      plus:["特征工程","模型部署","大规模数据处理","论文/竞赛"],
+      keySkills:["python","dsa","dl","network","sql"],
+      cities:[["北京","20-40k","AI 大厂/研究院"],["上海","20-38k"],["深圳","18-35k"],["杭州","20-40k"],["广州","18-35k"]],
+      levels:[["应届/初级","20-40k","大厂应届可到 25-40k"],["中级","40-70k"],["高级","70-120k+"]],
+      growth:["算法工程师","资深算法","算法专家 / 研究员 / 架构"]
+    },
+    {
+      id:"cv-dl", category:"ai", name:"计算机视觉 / 深度学习算法", en:"CV / Deep Learning",
+      intro:"图像识别、检测、分割、生成式与恢复；与你现有 CV 研究方向最贴近、技能迁移最顺。",
+      threshold:"高", heat:"高", fit:"hi",
+      required:["Python","PyTorch","数据结构与算法","深度学习理论","数学"],
+      plus:["C++","模型部署/量化","论文/顶会","GPU/多卡训练"],
+      keySkills:["python","dsa","dl","cxx","linux","docker"],
+      cities:[["北京","20-40k","AI 研究院/大厂"],["上海","20-38k"],["深圳","18-35k"],["杭州","20-40k"],["西安","12-25k","制造业/研究所较多"]],
+      levels:[["应届/初级","18-35k"],["中级","35-60k"],["高级","60-100k+"]],
+      growth:["CV 算法工程师","资深算法","算法专家 / 算法负责人"]
+    },
+    {
+      id:"llm-app", category:"ai", name:"大模型应用工程师", en:"LLM / Agent Engineer",
+      intro:"基于大模型做 RAG、Agent、工具调用与工作流，把 LLM 接入业务系统；当下最热、增量最大的方向。",
+      threshold:"高", heat:"高", fit:"mid",
+      required:["Python","后端框架(FastAPI)","LLM/RAG/Agent 基础","SQL","Linux","Git"],
+      plus:["函数/工具调用","向量检索","评测与可观测","Docker/K8s","MCP/LangChain"],
+      keySkills:["python","llm","framework","sql","linux","git","docker"],
+      cities:[["北京","18-35k","大模型公司/大厂"],["上海","18-32k"],["深圳","15-30k"],["杭州","18-35k"],["广州/成都","14-28k"]],
+      levels:[["应届/初级","15-30k"],["中级","30-55k"],["高级","55-90k+"]],
+      growth:["大模型应用工程师","高级工程师","AI 应用架构师 / 负责人"]
+    },
+    {
+      id:"nlp", category:"ai", name:"自然语言处理算法", en:"NLP Algorithm Engineer",
+      intro:"文本理解、生成、对话、大模型相关算法；与 LLM 领域高度相关。",
+      threshold:"高", heat:"中高", fit:"mid",
+      required:["Python","深度学习框架","数据结构与算法","数学"],
+      plus:["C++","分布式训练","论文/竞赛"],
+      keySkills:["python","dl","dsa","cxx"],
+      cities:[["北京","20-40k"],["上海","20-38k"],["深圳","18-35k"],["杭州","20-40k"]],
+      levels:[["应届","20-38k"],["中级","38-65k"],["高级","60-100k+"]],
+      growth:["NLP 算法","资深算法","算法专家"]
+    },
+    {
+      id:"data-analyst", category:"data", name:"数据分析师", en:"Data Analyst",
+      intro:"用 SQL、Excel、BI 从数据中发现问题、产出报表与决策支持；入门门槛相对低、岗位多。",
+      threshold:"低", heat:"中", fit:"hi",
+      required:["SQL","Excel/可视化(BI)","数据清洗","统计基础","业务思维"],
+      plus:["Python/Pandas","机器学习","数据建模"],
+      keySkills:["python","sql","dl","linux","git"],
+      cities:[["北京","12-22k"],["上海","12-22k"],["深圳","11-20k"],["杭州","12-22k"],["二线","7-14k"]],
+      levels:[["初级","8-15k"],["中级","15-25k"],["高级","25-40k"]],
+      growth:["数据分析师","资深分析","数据专家 / 分析负责人"]
+    },
+    {
+      id:"bigdata", category:"data", name:"数据工程师 / 大数据开发", en:"Big Data Engineer",
+      intro:"搭建数据管道、离线/实时计算，用 Spark、Flink 等处理海量数据；偏工程。",
+      threshold:"中高", heat:"中高", fit:"mid",
+      required:["Java/Scala 或 Python","SQL","Hadoop/Spark/Flink","Linux"],
+      plus:["Kafka","数仓建模","实时计算","K8s"],
+      keySkills:["python","sql","linux","docker","cxx"],
+      cities:[["北京","16-30k"],["上海","16-30k"],["深圳","15-28k"],["杭州","16-30k"],["成都/南京","12-22k"]],
+      levels:[["初级","12-22k"],["中级","22-40k"],["高级","40-70k"]],
+      growth:["数据工程师","资深数据开发","数据架构师"]
+    },
+    {
+      id:"dw-bi", category:"data", name:"数据仓库 / ETL / BI", en:"Data Warehouse / BI",
+      intro:"负责数据仓库建模、ETL 加工与 BI 报表，支撑内部经营分析。",
+      threshold:"中", heat:"中", fit:"mid",
+      required:["SQL","数仓建模","ETL 工具","Linux"],
+      plus:["Python","数据质量","数据治理"],
+      keySkills:["python","sql","linux","docker"],
+      cities:[["北京","13-24k"],["上海","13-24k"],["深圳","12-22k"],["二线","9-16k"]],
+      levels:[["初级","10-18k"],["中级","18-32k"],["高级","30-50k"]],
+      growth:["数仓/BI 工程师","资深","数据架构师"]
+    },
+    {
+      id:"sre-devops", category:"infra", name:"运维 / SRE / DevOps", en:"SRE / DevOps",
+      intro:"保障线上稳定、自动化部署、监控告警、故障处理；云原生时代岗位稳定。",
+      threshold:"中", heat:"中高", fit:"mid",
+      required:["Linux","Shell/Python","Docker/K8s","计算机网络","Git"],
+      plus:["运维开发","监控/可观测","CI/CD","云平台"],
+      keySkills:["python","linux","docker","network","git","sql"],
+      cities:[["北京","14-26k"],["上海","14-26k"],["深圳","13-24k"],["杭州","14-26k"],["贵阳/内蒙","9-16k","数据中心集中"]],
+      levels:[["初级","10-16k"],["中级","18-30k"],["高级","30-50k"]],
+      growth:["运维工程师","SRE / 资深","运维架构师 / 负责人"]
+    },
+    {
+      id:"cloud", category:"infra", name:"云计算 / 云原生工程师", en:"Cloud Native Engineer",
+      intro:"围绕云平台、Kubernetes、容器、微服务基础设施做平台化建设。",
+      threshold:"中高", heat:"中", fit:"mid",
+      required:["Linux","Docker/K8s","Go 或 Python","计算机网络","Git"],
+      plus:["云厂商认证","服务网格","存储/网络","运维开发"],
+      keySkills:["python","linux","docker","network","git","cxx"],
+      cities:[["北京","16-30k"],["上海","16-30k"],["深圳","15-28k"],["杭州","16-30k"]],
+      levels:[["初级","12-22k"],["中级","22-38k"],["高级","38-60k"]],
+      growth:["云原生工程师","资深","基础设施架构师"]
+    },
+    {
+      id:"test-dev", category:"test", name:"测试开发工程师", en:"Test Development Engineer",
+      intro:"写自动化测试、测试平台与工具，保证质量；入手门槛相对友好、岗位稳定。",
+      threshold:"中", heat:"中", fit:"mid",
+      required:["Python 或 Java","测试理论","自动化框架","SQL","Git"],
+      plus:["性能测试","接口测试","CI/CD","Linux"],
+      keySkills:["python","sql","linux","git","docker"],
+      cities:[["北京","12-24k"],["上海","12-24k"],["深圳","11-22k"],["杭州","12-24k"],["二线","8-15k"]],
+      levels:[["初级","9-16k"],["中级","16-28k"],["高级","28-45k"]],
+      growth:["测试开发","资深测试","测试专家 / 负责人"]
+    },
+    {
+      id:"security", category:"sec", name:"网络安全 / 安全开发", en:"Security Engineer",
+      intro:"安全防护、渗透测试、代码审计、加固；国家重视、岗位有需求。",
+      threshold:"中高", heat:"中", fit:"mid",
+      required:["计算机网络","Web 安全","操作系统","Linux","脚本语言"],
+      plus:["渗透测试","密码学","逆向","安全开发"],
+      keySkills:["network","linux","cxx","python","git"],
+      cities:[["北京","14-28k"],["上海","14-28k"],["深圳","13-26k"],["成都/广州","12-24k"]],
+      levels:[["初级","10-18k"],["中级","18-35k"],["高级","35-60k"]],
+      growth:["安全工程师","资深安全","安全专家 / 负责人"]
+    },
+    {
+      id:"embedded", category:"embed", name:"嵌入式软件开发工程师", en:"Embedded Software Engineer",
+      intro:"单片机/嵌入式设备/车载/消费电子软件开发；C/C++ 为主，接近硬件，地域多元化。",
+      threshold:"中", heat:"中", fit:"mid",
+      required:["C/C++","Linux","单片机/嵌入式基础","数据结构与算法"],
+      plus:["RTOS","驱动开发","Qt","硬件接口"],
+      keySkills:["cxx","linux","dsa","git"],
+      cities:[["深圳","12-24k","电子/车载企业多"],["成都","10-20k"],["西安","9-18k","研究所/军工较多"],["北京/苏州","12-24k"]],
+      levels:[["初级","8-16k"],["中级","16-30k"],["高级","30-50k"]],
+      growth:["嵌入式工程师","资深/驱动","嵌入式架构师"]
+    },
+    {
+      id:"cpp-system", category:"embed", name:"C++ 系统 / 音视频 / 高性能", en:"C++ Systems Engineer",
+      intro:"音视频编解码、高性能服务器、底层系统；C++ 深入、竞争较强。",
+      threshold:"高", heat:"中", fit:"mid",
+      required:["C++","数据结构与算法","操作系统","计算机网络"],
+      plus:["音视频","多线程/并发","性能优化"],
+      keySkills:["cxx","dsa","network","linux"],
+      cities:[["北京","18-34k"],["上海","18-34k"],["深圳","16-30k"],["杭州","18-34k"]],
+      levels:[["初级","15-30k"],["中级","30-55k"],["高级","55-90k+"]],
+      growth:["C++ 工程师","资深","系统架构师"]
+    },
+    {
+      id:"game-dev", category:"game", name:"游戏开发工程师", en:"Game Developer",
+      intro:"Unity/Unreal 引擎做游戏玩法、逻辑与渲染；游戏行业集中城市较明确。",
+      threshold:"中高", heat:"中", fit:"lo",
+      required:["C# 或 C++","游戏引擎(U3D/UE)","数据结构与算法","图形学基础"],
+      plus:["网络同步","UI 系统","性能优化","版本管理"],
+      keySkills:["cxx","dl","dsa","git"],
+      cities:[["深圳","15-30k","头部游戏公司"],["上海","15-30k"],["广州","14-28k"],["杭州","15-30k"],["北京","14-28k"]],
+      levels:[["初级","12-25k"],["中级","25-50k"],["高级","50-80k+"]],
+      growth:["游戏开发","资深","技术主管 / 主程"]
+    },
+    {
+      id:"graphics", category:"game", name:"计算机图形学 / 渲染", en:"Graphics Programmer",
+      intro:"渲染管线、Shader、引擎底层、三维/实时渲染；技术门槛高、人才稀缺。",
+      threshold:"高", heat:"中", fit:"lo",
+      required:["C++","图形学/渲染管线","Shader","数据结构与算法","线性代数"],
+      plus:["数学/物理模拟","引擎底层","性能优化"],
+      keySkills:["cxx","dsa","dl","network"],
+      cities:[["深圳","20-40k"],["上海","20-38k"],["北京","18-35k"],["杭州","20-38k"]],
+      levels:[["初级","18-36k"],["中级","36-60k"],["高级","60-90k+"]],
+      growth:["图形程序员","资深","渲染架构师"]
+    },
+    {
+      id:"dba", category:"other", name:"数据库 / DBA", en:"DBA",
+      intro:"数据库设计、调优、备份与高可用；偏稳定、老牌岗位。",
+      threshold:"中高", heat:"低", fit:"lo",
+      required:["SQL","数据库原理","Linux","性能调优"],
+      plus:["MySQL/PostgreSQL/Oracle","分布式数据库","备份恢复"],
+      keySkills:["sql","linux","git","network"],
+      cities:[["北京","14-26k"],["上海","14-26k"],["深圳","13-24k"],["二线","10-18k"]],
+      levels:[["初级","12-20k"],["中级","20-35k"],["高级","35-55k"]],
+      growth:["DBA","资深 DBA","数据库架构师"]
+    },
+  ],
+
+  /* --- 更新记录 --- */
+  log: [
+    { date:"2026-09-02", note:"建立数据结构与单文件网页；覆盖 20 个就业方向、10 大类别；新增高性价比技能推荐区。" },
+  ],
+};
+
+/* =========================================================
+   RENDER — 渲染逻辑（无需改动）
+   ========================================================= */
+(function(){
+  const catMap = Object.fromEntries(DATA.categories.map(c=>[c.id,c]));
+
+  // 覆盖数统计：该技能被多少个方向列为必备/加分.
+  // 注意：数据结构与算法(dsa)几乎是所有技术方向面试必考的“通用底座”，故计为全覆盖。
+  const UNIVERSAL = ["dsa"];
+  function coverage(id){
+    const hit = c => UNIVERSAL.includes(id) || (c.keySkills||[]).includes(id);
+    return DATA.careers.filter(hit).length;
+  }
+  const total = DATA.careers.length;
+
+  // 01 区：高性价比技能
+  const skillGrid = document.getElementById('skillGrid');
+  const skills = DATA.topSkills
+    .map(s=>({...s, cov: coverage(s.id)}))
+    .sort((a,b)=> (b.cov - a.cov) || (a.cost - b.cost));
+  skillGrid.innerHTML = skills.map((s,i)=>{
+    const pct = Math.round(s.cov/total*100);
+    const best = i===0;
+    return `<div class="skill-card ${best?'top':''}">
+      <span class="badge ${best?'best':''}">${best?'性价比之首':'Top'+(i+1)}</span>
+      <h3>${s.name}</h3>
+      <div class="rank">覆盖 ${s.cov} / ${total} 个方向 · 学习成本 ${'★'.repeat(s.cost)}${'☆'.repeat(3-s.cost)}</div>
+      <div class="why">${s.why}</div>
+      ${s.link ? `<a class="learn" href="${s.link}" target="_blank" rel="noopener">📖 打开「${s.name}」学习地图 →</a>`:''}
+      <div class="cov">
+        <div class="bar"><span style="width:${pct}%"></span></div>
+        <div class="val">${pct}%</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 统计
+  document.getElementById('nDir').textContent = total;
+  document.getElementById('nCat').textContent = DATA.categories.length;
+  const citySet = new Set(); DATA.careers.forEach(c=>c.cities.forEach(x=>citySet.add(x[0].replace(/\/.*/,''))));
+  document.getElementById('nCity').textContent = citySet.size;
+  document.getElementById('nSkill').textContent = DATA.topSkills.length;
+
+  // 02 区：筛选
+  const filters = document.getElementById('filters');
+  let activeCat = 'all';
+  function renderChips(){
+    const count = id => id==='all'? total : DATA.careers.filter(c=>c.category===id).length;
+    const cats = [{id:'all',name:'全部'}, ...DATA.categories];
+    filters.innerHTML = cats.map(c=>`<button class="chip ${activeCat===c.id?'active':''}" data-cat="${c.id}">${c.name}<span class="cnt">${count(c.id)}</span></button>`).join('');
+    filters.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{ activeCat=ch.dataset.cat; renderChips(); renderGrid(); });
+  }
+  const searchBox = document.getElementById('searchBox');
+  searchBox.addEventListener('input', renderGrid);
+
+  function skillDiv(cls,f){ return f.length? `<div class="skilllist">${f.map(s=>`<span class="${cls}">${s}</span>`).join('')}</div>`:''; }
+  function fitLabel(f){
+    const m={hi:['match','与你的 CV/Python 背景高度匹配','hi'],mid:['partial','部分匹配，可作为备选','mid'],lo:['weak','匹配度较低','lo']}[f];
+    return m? `<div class="fit"><span class="dot ${m[2]}"></span>${m[0]} — ${m[1]}</div>`:'';
+  }
+
+  function renderGrid(){
+    const box = document.getElementById('grid');
+    const q = searchBox.value.trim().toLowerCase();
+    const list = DATA.careers.filter(c=>{
+      if(activeCat!=='all' && c.category!==activeCat) return false;
+      if(!q) return true;
+      const hay = [c.name,c.en,c.intro,...c.required,...c.plus,...c.cities.map(x=>x[0])].join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+    if(!list.length){ box.innerHTML='<div class="empty">没有找到匹配的方向，换个关键词试试。</div>'; return; }
+    box.innerHTML = list.map(c=>{
+      const cat = catMap[c.category] || {color:'#4a4a4a',soft:'#ececec',name:c.category};
+      const th = c.threshold==='高'?'<span class="tag hard">门槛高</span>':c.threshold==='低'?'<span class="tag easy">门槛低</span>':'<span class="tag">门槛中</span>';
+      const rows = c.cities.map(x=>`<div class="row"><span class="cname">${x[0]}</span><span class="csal">${x[1]}</span><span class="cnote">${x[2]||''}</span></div>`).join('');
+      const growth = (c.growth||[]).map(g=>`<li>${g}</li>`).join('');
+      return `<article class="card" style="--cat-color:${cat.color};--cat-soft:${cat.soft}">
+        <span class="cat" style="color:${cat.color};background:${cat.soft}">${cat.name}</span>
+        <h3>${c.name}</h3><div class="en">${c.en}</div>
+        <div class="tags">${th}<span class="tag">热度 · ${c.heat}</span></div>
+        <div class="intro">${c.intro}</div>
+        <div class="blk"><div class="lb">核心技能</div>${skillDiv('sk',c.required)}</div>
+        <div class="blk"><div class="lb">加分技能</div>${skillDiv('sk plus',c.plus)}</div>
+        <div class="blk"><div class="lb">代表城市 · 薪资(税前月薪)</div><div class="cities">${rows}</div></div>
+        <div class="blk" style="margin-bottom:8px"><div class="lb">成长路径</div><ul class="growth">${growth}</ul></div>
+        ${fitLabel(c.fit)}
+      </article>`;
+    }).join('');
+  }
+
+  // 03 区：更新记录
+  document.getElementById('log').innerHTML = DATA.log.map(l=>`<div><span class="l1">${l.date}</span> · ${l.note}</div>`).join('') || '<div>暂无记录</div>';
+
+  renderChips();
+  renderGrid();
+
+  // 回到顶部
+  const toTop = document.getElementById('toTop');
+  if(toTop){
+    const toggle = () => toTop.classList.toggle('show', window.scrollY > 600);
+    window.addEventListener('scroll', toggle);
+    toggle();
+    toTop.addEventListener('click', () => window.scrollTo({top:0,behavior:'smooth'}));
+  }
+})();
+</script>
+<button id="toTop" class="totop" title="回到顶部" aria-label="回到顶部">↑</button>
+</body>
+</html>

@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>递归与分治 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 递归与分治：递归三要素、递归式复杂度分析、分治三步、主定理与经典分治题。学习目标、知识点讲解、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">递归与分治</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 13 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">递归与分治</h1>
+    <p class="lead" id="pageLead">本模块带你吃透 <b>递归与分治</b>：先掌握递归三要素与递归式复杂度分析，再理解分治「分解 / 解决 / 合并」三步，最后用主定理估算复杂度，并独立做出最大子段和、逆序对计数等经典分治题。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能：清晰说出递归三要素（<b>终止条件 / 递归体 / 规模缩小</b>），并判断一个递归函数是否会无限递归或栈溢出。</li>
+      <li>学完后你能：用递归树展开与主定理，求出 <span class="mono">T(n)=2T(n/2)+n</span> 等常见递推式的渐进复杂度。</li>
+      <li>学完后你能：用分治三步描述归并排序与快速排序，并说明二者复杂度与稳定性的差异。</li>
+      <li>学完后你能：独立写出<b>最大子段和</b>、<b>逆序对计数</b>两类经典分治题的代码，分析其 <span class="mono">O(n log n)</span> 复杂度与合并细节。</li>
+      <li>学完后你能：解释<b>尾递归</b>与尾调用优化，把简单递归改写成迭代，并理解调用栈带来的空间开销。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">前置知识：会一门编程语言（Python 或 C++），理解函数、循环、数组与基本复杂度记号（大 O / Θ）；建议先学「栈与队列」理解调用栈，以及「排序算法」里的归并 / 快速排序。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">13.1</span>递归（Recursion）：从「自己调用自己」到三要素</h2>
+  </section>
+
+  <!-- 知识点：递归的基本思想与三要素 -->
+  <section class="topic" id="rec-basic">
+    <h3><span class="kno">知识点①</span>递归的基本思想与三要素<span class="pt">rec-basic · 三要素 / 调用栈 / 栈溢出</span></h3>
+    <p><strong>递归（Recursion）</strong>是指一个函数<strong>直接或间接调用自身</strong>来解题的编程范式。核心思想是：把原问题翻译成<strong>一个与原问题同构（same structure）但规模更小</strong>的子问题，通过「信任函数已能正确求解子问题」来把大问题化归为小问题。它天然契合许多数据结构（树、图）与数学定义，也是动态规划、回溯、分治的基座。</p>
+    <p>写一个正确的递归函数，必须同时具备<strong>三个要素</strong>：</p>
+    <ol>
+      <li><b>终止条件（Base Case / 递归出口）</b>：最小的、不需要再递归的情形必须直接返回，否则会无限递归。</li>
+      <li><b>递归体（Recursive Step / 递推关系）</b>：把当前问题表示成更小规模子问题的关系，例如 <span class="mono">f(n) = n * f(n-1)</span>。</li>
+      <li><b>规模缩小（Progress / 收敛）</b>：每次递归调用都必须向终止条件逼近，保证最终能触发 base case。</li>
+    </ol>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>recursion_basic.py</div>
+      <pre><code>def factorial(n):
+    # 要素① 终止条件：规模小到不能再递归
+    if n &lt;= 1:
+        return 1
+    # 要素②③ 递归体 + 规模缩小：把 n! 化归为 n * (n-1)!
+    return n * factorial(n - 1)
+
+def fib(n):
+    # 斐波那契：经典双分支递归（有重复计算，属易错点）
+    if n &lt;= 1:                 # 终止条件
+        return n
+    return fib(n-1) + fib(n-2)  # 递归体：规模缩为 n-1、n-2</code></pre>
+    </div>
+
+    <p>递归的实际执行依赖<strong>调用栈（Call Stack）</strong>：每次函数调用，系统压入一个<strong>栈帧（Stack Frame）</strong>，保存局部变量、参数与返回地址；递归返回时依次弹出。因此<strong>递归深度 = 系统调用栈的层数</strong>，这就是「栈溢出（Stack Overflow）」风险的来源。</p>
+
+    <table class="tbl">
+      <tr><th>要素</th><th>含义</th><th>反面教训</th></tr>
+      <tr><td class="mono">base case</td><td>最小的、不再递归的直接解</td><td>缺终止条件 → 无限递归</td></tr>
+      <tr><td class="mono">递归体</td><td>f(n) 与更小子问题的关系式</td><td>写错关系 → 结果错误</td></tr>
+      <tr><td class="mono">规模缩小</td><td>每次调用都逼近 base case</td><td>规模不变 → 无法收敛</td></tr>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>写递归的灵魂是「<b>信任函数调用</b>」——假设 <span class="mono">f(n-1)</span> 已经正确返回，你只需负责「<b>当前这步</b>」与「<b>递归关系</b>」。三要素就是：<b>边界 + 关系 + 收敛</b>。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>① 忘记 / 写错终止条件会导致无限递归，最终 <b>RecursionError：栈溢出</b>；② 递归深度过大同样爆栈（如用朴素递归 <span class="mono">fib(2000)</span>）；③ <b>双分支递归</b>（如 <span class="mono">fib</span>）会有大量重复计算，复杂度指数级，需用记忆化。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n) / O(2^n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n) 栈深</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">树 / 分治 / 回溯</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点：递归式的时间/空间复杂度分析 -->
+  <section class="topic" id="rec-analysis">
+    <h3><span class="kno">知识点②</span>递归式的时间/空间复杂度分析<span class="pt">rec-analysis · 递归树 / 展开 / 栈空间</span></h3>
+    <p>分析递归算法，通常先写出<strong>递归式（Recurrence Relation）</strong>：<span class="mono">T(n) = a·T(n/b) + f(n)</span>，其中 <span class="mono">a</span> 是分成子问题的个数、<span class="mono">n/b</span> 是子问题规模、<span class="mono">f(n)</span> 是「分解 + 合并」的代价。求解方法主要有：<strong>递归树（Recursion Tree）</strong>、<strong>代入法（Substitution）</strong>、<strong>展开法</strong>、<strong>主定理（Master Theorem）</strong>。</p>
+    <p><b>递归树法：</b>把递归展开成一棵树，每层求和，再对层数求和。以归并排序 <span class="mono">T(n)=2T(n/2)+n</span> 为例：每层合并代价为 <span class="mono">n</span>，共 <span class="mono">log₂n</span> 层，故 <span class="mono">T(n)=O(n log n)</span>。这是「画图看规律」最直观的方法。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>rec_analysis.py</div>
+      <pre><code># 线性递归：一次递归只走一条链路，深度 = n
+def sum_list(arr):
+    n = len(arr)
+    def go(i):
+        if i &gt;= n:          # base case
+            return 0
+        return arr[i] + go(i + 1)  # 递归体，规模缩小
+    return go(0)
+# 时间 O(n)：每个元素被访问一次
+# 空间 O(n)：递归深度 n，每个栈帧保存 i 与返回地址
+
+def fib_memo(n, memo=None):
+    # 记忆化：把 O(2^n) 降到 O(n) —— 递归 + 备忘 ≈ 动态规划
+    if memo is None: memo = {}
+    if n &lt;= 1: return n
+    if n in memo: return memo[n]
+    memo[n] = fib_memo(n-1, memo) + fib_memo(n-2, memo)
+    return memo[n]</code></pre>
+    </div>
+
+    <p>常见递归式的复杂度对照（务必背熟，面试常问）：</p>
+    <table class="tbl">
+      <tr><th>递归式</th><th>含义 / 例子</th><th>时间复杂度</th></tr>
+      <tr><td class="mono">T(n)=T(n-1)+1</td><td>线性递归（阶乘、顺序遍历）</td><td>O(n)</td></tr>
+      <tr><td class="mono">T(n)=T(n-1)+n</td><td>选择/插入排序、递归求和</td><td>O(n²)</td></tr>
+      <tr><td class="mono">T(n)=2T(n/2)+n</td><td>归并排序、快排平均</td><td>O(n log n)</td></tr>
+      <tr><td class="mono">T(n)=2T(n/2)+1</td><td>二叉树节点遍历</td><td>O(n)</td></tr>
+      <tr><td class="mono">T(n)=T(n/2)+1</td><td>二分查找（减治）</td><td>O(log n)</td></tr>
+      <tr><td class="mono">T(n)=2T(n-1)+1</td><td>指数展开（汉诺塔）</td><td>O(2ⁿ)</td></tr>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><b>空间复杂度 = 递归深度 × 每个栈帧的空间</b>。分治型递归深度通常是 <span class="mono">O(log n)</span>（如快排栈），线性递归深度是 <span class="mono">O(n)</span>；「额外空间 O(1)」在递归版本里常不成立。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>非常容易把递归算法的空间误判为 O(1)。只要还有系统调用栈在压栈，<b>递归本身就有 O(递归深度) 的空间</b>。只有<b>尾递归 + 尾调用优化</b>或<b>手动改迭代</b>才能把额外空间降到 O(1)。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(n) 或 O(n log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(递归深度)</div></div>
+      <div class="cx"><div class="k">方法</div><div class="v">递归树/主定理</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点：尾递归与递归改迭代 -->
+  <section class="topic" id="rec-opt">
+    <h3><span class="kno">知识点③</span>尾递归与递归改迭代<span class="pt">rec-opt · Tail Recursion / TCO / 显式栈</span></h3>
+    <p><strong>尾递归（Tail Recursion）</strong>指递归调用是函数体的<strong>最后一条语句</strong>，且递归调用的返回值<strong>直接</strong>作为函数返回值，不存在「返回后再做一次运算」。这样的写法配合<strong>尾调用优化（Tail Call Optimization, TCO）</strong>，编译器/解释器可以<strong>复用当前栈帧</strong>，把递归变成循环，空间降到 <span class="mono">O(1)</span>。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>tail_recursion.py</div>
+      <pre><code># 非尾递归：return n * factorial(n-1) —— 返回后还要乘 n，无法 TCO
+def factorial(n):
+    if n &lt;= 1: return 1
+    return n * factorial(n - 1)
+
+# 尾递归：把中间结果用「累加器 acc」向前传递，返回值就是递归调用
+def factorial_tail(n, acc=1):
+    if n &lt;= 1: return acc
+    return factorial_tail(n - 1, n * acc)   # 最后一条语句，直接返回
+
+# 手动改迭代：把「尾递归」翻译成 for 循环，空间 O(1)
+def factorial_iter(n):
+    acc = 1
+    for i in range(2, n + 1):
+        acc *= i        # 前向累计，替代递归的「回溯相乘」
+    return acc</code></pre>
+    </div>
+
+    <p><b>递归改迭代的通用思路：</b></p>
+    <ol>
+      <li>用<strong>累加器（accumulator）</strong>保存中间结果，把「返回值在回归中计算」改为「前向累计」——通常就得到尾递归或循环。</li>
+      <li>用<strong>显式栈</strong>模拟系统调用栈，保存需要「回溯」的状态（树遍历、深搜常这样改）。</li>
+      <li>把 base case 变成<strong>循环终止条件</strong>。</li>
+    </ol>
+    <p>注意：<b>不是所有递归都能优雅改成尾递归</b>。像树的两路递归、或 <span class="mono">fib(n-1)+fib(n-2)</span> 这种需要两个子结果合并的，通常要么用显式栈，要么换算法（如动态规划）。</p>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>关键提醒：</b><b>CPython（Python 默认解释器）并不做尾调用优化</b>。就算你写成「尾递归」，深递归依旧会抛 <span class="mono">RecursionError</span>。真正吃 TCO 红利的是 Scheme、某些 JIT/编译器优化。Python 里想避免爆栈，最靠谱的就是<b>手动改成显式迭代</b>。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>尾递归的判据是「<b>递归调用在最后，且直接返回其结果</b>」。收益是省一帧、省回归计算；但<b>是否真的被优化取决于语言实现</b>。面试问「如何避免递归爆栈」，答案往往是：<b>改迭代 / 用显式栈 / 加记忆化</b>。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">尾递归+TCO</div><div class="v">O(1) 空间</div></div>
+      <div class="cx"><div class="k">非尾递归</div><div class="v">O(n) 栈深</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">改迭代 / 省空间</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">13.2</span>分治（Divide and Conquer）：把大问题拆成小问题</h2>
+  </section>
+
+  <!-- 知识点：分治思想 -->
+  <section class="topic" id="rec-divide">
+    <h3><span class="kno">知识点④</span>分治思想（分解 / 解决 / 合并）<span class="pt">rec-divide · 归并排序 / 快速排序</span></h3>
+    <p><strong>分治法（Divide and Conquer, D&amp;C）</strong>把原问题<b>分解</b>成若干个规模更小、<b>结构与原问题相同</b>的子问题，递归<b>解决</b>子问题，最后把子问题的解<b>合并</b>成原问题的解。它是递归思想的「工程化」应用，核心在<strong>三个步骤</strong>：</p>
+    <ol>
+      <li><b>分解（Divide）</b>：把原问题划分成若干规模更小、同构的子问题。</li>
+      <li><b>解决（Conquer / Solve）</b>：递归地解决各子问题；当规模小到可作为 base case 时直接求解。</li>
+      <li><b>合并（Merge / Combine）</b>：把子问题的解组合成原问题的解。</li>
+    </ol>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>merge_sort.py</div>
+      <pre><code># 归并排序：分治三步的教科书例子
+def merge(l, r):
+    i = j = 0; res = []
+    while i &lt; len(l) and j &lt; len(r):
+        if l[i] &lt;= r[j]:          # 稳定：<= 保持相等元素相对顺序
+            res.append(l[i]); i += 1
+        else:
+            res.append(r[j]); j += 1
+    res.extend(l[i:]); res.extend(r[j:])
+    return res                    # ③ 合并
+
+def merge_sort(a):
+    n = len(a)
+    if n &lt;= 1:                   # ② 解决：base case
+        return a
+    mid = n // 2                  # ① 分解
+    left  = merge_sort(a[:mid])
+    right = merge_sort(a[mid:])
+    return merge(left, right)     # 合并子问题解
+
+# 快速排序：分治 + 就地划分（不稳定）
+def quick_sort(a):
+    if len(a) &lt;= 1: return a      # base case
+    pivot = a[len(a)//2]          # 取中位数附近，缓解最坏 O(n^2)
+    lo = [x for x in a if x &lt; pivot]
+    eq = [x for x in a if x == pivot]
+    hi = [x for x in a if x &gt; pivot]
+    return quick_sort(lo) + eq + quick_sort(hi)</code></pre>
+    </div>
+
+    <table class="tbl">
+      <tr><th>算法</th><th>平均时间</th><th>最坏时间</th><th>额外空间</th><th>稳定</th></tr>
+      <tr><td>归并排序 Merge Sort</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)（辅助数组）</td><td>稳定</td></tr>
+      <tr><td>快速排序 Quick Sort</td><td>O(n log n)</td><td>O(n²)（划分失衡）</td><td>O(log n)（栈）</td><td>不稳定</td></tr>
+      <tr><td>二分查找 Binary Search</td><td>O(log n)</td><td>O(log n)</td><td>O(1)（迭代）</td><td>—</td></tr>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>分治三要素对应递归三要素。归并排序之所以能把朴素排序从 <span class="mono">O(n²)</span> 提到 <span class="mono">O(n log n)</span>，就是让<strong>每一层合并的总代价都是 O(n)，且只有 log n 层</strong>。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>① <b>快速排序最坏 O(n²)</b>：当每次划分都极度不平衡（如已排序数组 + 固定取首位 pivot），递归深度 O(n)，每层 O(n)。用<b>随机 pivot / 三数取中</b>缓解。② 归并排序<b>稳定但需要 O(n) 额外空间</b>；快排<b>不冲突但最坏退化</b>——面试常对比二者取舍。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">归并时间</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">快排平均</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">二分查找</div><div class="v">O(log n)</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点：主定理 -->
+  <section class="topic" id="rec-master">
+    <h3><span class="kno">知识点⑤</span>主定理（Master Theorem）与常见递推<span class="pt">rec-master · 三种情形 / 公式应用</span></h3>
+    <p><strong>主定理（Master Theorem）</strong>用于求解分治型递归式 <span class="mono">T(n) = a·T(n/b) + f(n)</span> 的渐进界（<span class="mono">a≥1, b&gt;1</span>）。关键在于比较 <span class="mono">f(n)</span> 与 <span class="mono">n^(log_b a)</span> 的增长快慢。记 <span class="mono">c = log_b a</span>，则：</p>
+    <ul>
+      <li><b>情形 1（叶子主导）</b>：若 <span class="mono">f(n) = O(n^(c-ε))</span>，即 <span class="mono">f(n)</span> 增长慢于 <span class="mono">n^c</span>，则 <span class="mono">T(n) = Θ(n^c)</span>。</li>
+      <li><b>情形 2（各方均衡）</b>：若 <span class="mono">f(n) = Θ(n^c)</span>，每层代价相当，则 <span class="mono">T(n) = Θ(n^c · log n)</span>。</li>
+      <li><b>情形 3（根主导）</b>：若 <span class="mono">f(n) = Ω(n^(c+ε))</span>，且满足<b>正则条件</b> <span class="mono">a·f(n/b) ≤ k·f(n)</span>（<span class="mono">k&lt;1</span>），则 <span class="mono">T(n) = Θ(f(n))</span>。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>master_theorem.py</div>
+      <pre><code># 主定理求解示例：判断 a、b、f(n) -> 选情形
+def classify(a, b, f_formula):
+    # c = log_b(a)  即  n^(log_b a)
+    import math
+    return f"a={a}, b={b}, log_b(a)={math.log(a, b):.3f}（拿它与 f(n) 比较）"
+
+# T(n)=2T(n/2)+n      -> log2 2=1，f=n=n^1 均衡 -> 情形2 -> O(n log n)  归并
+# T(n)=2T(n/2)+1      -> log2 2=1，f=1=n^0 慢  -> 情形1 -> O(n)        遍历
+# T(n)=T(n/2)+1       -> log2 1=0，f=1=n^0 均衡 -> 情形2 -> O(log n)    二分
+# T(n)=2T(n/2)+n^2    -> log2 2=1，f=n^2 快   -> 情形3 -> O(n^2)
+# T(n)=3T(n/2)+n      -> log2 3≈1.585，f=n 慢 -> 情形1 -> O(n^1.585)</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>适用边界：</b>主定理<b>只对分治型</b> <span class="mono">T(n)=aT(n/b)+f(n)</span> 有效。<b>形如 <span class="mono">T(n)=T(n-1)+n</span> 的线性递推不适用</b>，需用展开/递归树法。情形 3 还要额外检查<b>正则条件</b>。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>三步速判：① 算 <span class="mono">c=log_b a</span>；② 把 <span class="mono">f(n)</span> 写成 <span class="mono">n^d</span>；③ 比较 d 与 c：<b>d&lt;c 取 n^c，d=c 乘 log n，d&gt;c 取 f(n)</b>。归并、二分、遍历三种复杂度都在此表里，一定要会背。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">情形1/叶子</div><div class="v">Θ(n^c)</div></div>
+      <div class="cx"><div class="k">情形2/均衡</div><div class="v">Θ(n^c·log n)</div></div>
+      <div class="cx"><div class="k">情形3/根</div><div class="v">Θ(f(n))</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点：典型分治题 -->
+  <section class="topic" id="rec-problems">
+    <h3><span class="kno">知识点⑥</span>典型分治题（最大子段和、逆序对计数）<span class="pt">rec-problems · LC53 / 逆序对 / 最近点对</span></h3>
+    <p>分治题的共性在于：<b>「合并」步骤往往是与跨边界相关的难题</b>。下面两个代表作，正好展示「跨越左右两半」的合并逻辑。</p>
+
+    <h4 style="margin:14px 0 6px;font-size:16px;color:var(--ink)">① 最大子段和（Max Subarray，LeetCode 53）</h4>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>max_subarray.py</div>
+      <pre><code>NEG = float('-inf')
+
+def cross_max(a, lo, mid, hi):
+    # 合并：求「必须跨过 mid」的最大和 = 左半靠中后缀 + 右半靠中前缀
+    s = 0; left = NEG
+    for i in range(mid, lo-1, -1):
+        s += a[i]; left = max(left, s)
+    s = 0; right = NEG
+    for j in range(mid+1, hi+1):
+        s += a[j]; right = max(right, s)
+    return left + right
+
+def max_subarray(a, lo, hi):
+    if lo == hi:                       # base case
+        return a[lo]
+    mid = (lo + hi) // 2              # 分解
+    lmax = max_subarray(a, lo, mid)   # 解决左半
+    rmax = max_subarray(a, mid+1, hi) # 解决右半
+    return max(lmax, rmax, cross_max(a, lo, mid, hi))  # 合并</code></pre>
+    </div>
+
+    <h4 style="margin:14px 0 6px;font-size:16px;color:var(--ink)">② 逆序对计数（Count Inversions，剑指 Offer 51）</h4>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>count_inversions.py</div>
+      <pre><code># 借归并排序的合并阶段统计跨左右两半的逆序对
+def merge_count(l, r):
+    i = j = 0; res = []; cnt = 0
+    while i &lt; len(l) and j &lt; len(r):
+        if l[i] &lt;= r[j]:
+            res.append(l[i]); i += 1
+        else:
+            res.append(r[j]); j += 1
+            cnt += len(l) - i   # 左半剩余都 &gt; r[j]，与其构成逆序对
+    res.extend(l[i:]); res.extend(r[j:])
+    return res, cnt
+
+def count_inversions(a):
+    def go(arr):
+        if len(arr) &lt;= 1: return arr, 0
+        mid = len(arr)//2
+        left,  cl = go(arr[:mid])
+        right, cr = go(arr[mid:])
+        merged, cm = merge_count(left, right)
+        return merged, cl + cr + cm
+    return go(a)[1]</code></pre>
+    </div>
+
+    <p><b>更多分治经典：</b><b>最近点对（Closest Pair）</b>：平面内找距离最近的两点，暴力 <span class="mono">O(n²)</span>，分治 <span class="mono">O(n log n)</span>——合并步骤凭「按 y 排序 + 跨界只需检查常数个点」剪枝，是分治最难的一题。<b>二分查找（Binary Search）</b>则常被看作<b>减治（Decrease and Conquer）</b>：每步只保留一半，不合并。</p>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>最大子段和的最优解其实是<b>Kadane 动态规划（O(n)）</b>，分治版 O(n log n) 用来展示思想——<b>分治不一定最优，但思路通用</b>。逆序对计数的<b>归并版 O(n log n)</b> 则是标准解法（暴力 O(n²)）。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>① 最大子段和的「跨中」必须<b>横跨 mid</b>，取「靠中后缀最大 + 靠中前缀最大」，若只取左右递归的答案会漏掉跨界的候选。② 逆序对统计是在<b>右半元素被取出时</b>累加左半剩余个数，别漏了 <span class="mono">len(l)-i</span> 这个「跨两半」的计数。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">最大子段和</div><div class="v">O(n log n) / O(n)</div></div>
+      <div class="cx"><div class="k">逆序对计数</div><div class="v">O(n log n)</div></div>
+      <div class="cx"><div class="k">最近点对</div><div class="v">O(n log n)</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>递归 / 显式栈互转：</b>把「二叉树的前序 / 中序递归遍历」改写成<b>显式栈迭代版</b>，说明空间复杂度变化（LeetCode 94 / 144）。</li>
+      <li><b>最近点对（Closest Pair）：</b>实现 <span class="mono">O(n log n)</span> 的分治解法；思考合并步骤为什么只需要检查「跨界线附近」的常数个点（提示：按 y 排序 + 鸽笼原理）。参考《算法导论》33.4。</li>
+      <li><b>快速排序最坏情形的对抗：</b>给近乎有序数组分别用「固定首位 pivot」和「随机 / 三数取中 pivot」快排，观察递归次数与栈深；体会最坏 <span class="mono">O(n²)</span> 的成因。</li>
+      <li><b>递归 → 记忆化 → 动态规划：</b>用 memo 把朴素 <span class="mono">fib</span>（O(2ⁿ)）降到 O(n)，再改写成自底向上的 DP，体会「递归 + 备忘 ≈ 动态规划」的联系。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "recursion",               // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "递归与分治",            // ex: 绪论与算法复杂度分析
+  eyebrow: "MODULE 13 · 数据结构与算法",
+  prev: "12-排序算法.html",       // 前一节文件名，如 "01-绪论与算法分析.html"；首页留 ""
+  next: "14-贪心算法.html",       // 下一节文件名；最后一节留 ""
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于递归三要素，下面哪项说法正确？",
+    opts:["递归必须包含终止条件，否则会无限递归导致栈溢出","递归体的子问题规模可以保持不变，只要递推关系写对即可","递归函数不能有返回值","递归只需要递推关系，不需要终止条件"],
+    ans:0,
+    exp:"递归三要素是：终止条件（base case）、递归体（递推关系）、规模缩小（收敛）。缺终止条件或规模不收敛都会无限递归，最终栈溢出。"
+  },
+  {
+    type:"quiz",
+    q:"朴素斐波那契递推 fib(n)=fib(n-1)+fib(n-2) 的时间复杂度约为？",
+    opts:["O(n)","O(n log n)","O(2^n)","O(n^2)"],
+    ans:2,
+    exp:"每次调用展开两个子问题，构成指数级递归树，节点数约 O(2^n)，且存在大量重复计算。用记忆化（memo）可降到 O(n)。"
+  },
+  {
+    type:"quiz",
+    q:"归并排序 T(n)=2T(n/2)+O(n) 的时间复杂度是？",
+    opts:["O(n)","O(n log n)","O(n^2)","O(log n)"],
+    ans:1,
+    exp:"主定理情形2：log₂2=1，f(n)=n 与 n^1 同阶，故 T(n)=Θ(n log n)。分治把朴素排序从 O(n²) 提速到 O(n log n)。"
+  },
+  {
+    type:"quiz",
+    q:"分治法（Divide and Conquer）的三个基本步骤是？",
+    opts:["初始化、循环、结束","分解、解决、合并","输入、处理、输出","遍历、回溯、剪枝"],
+    ans:1,
+    exp:"分治三步：分解（Divide）成同构子问题、递归解决（Conquer）、合并（Combine）子问题解。归并、快排、最大子段和、逆序对都是典型。"
+  },
+  {
+    type:"quiz",
+    q:"快速排序在最坏情况（如已排序数组 + 固定取首位为 pivot）下的时间复杂度是？",
+    opts:["O(n log n)","O(n)","O(n^2)","O(log n)"],
+    ans:2,
+    exp:"当每次划分都极度不平衡（一侧 0 个、一侧 n-1 个）时，递归深度 O(n)、每层 O(n)，最坏 O(n²)。用随机 pivot 或三数取中可缓解；平均是 O(n log n)。"
+  },
+  {
+    type:"interview",
+    q:"一项时间复杂度为 O(n log n) 的分治算法，它的空间复杂度为什么不能直接说成 O(1)？",
+    opts:["因为分治算法需要额外的辅助数组","因为递归调用会占用系统调用栈（栈帧），深度即递归层数","因为算法里使用了全局变量","因为它的时间复杂度会退化到 O(n^2)"],
+    ans:1,
+    exp:"递归的空间复杂度 = 递归深度 × 每个栈帧的空间，调用栈本身就是额外空间。分治递归深度通常为 O(log n)（如快排栈）或 O(n)（线性递归），所以不能当作 O(1)。归并排序的 O(n) 空间除调用栈外还来自合并用的辅助数组。"
+  },
+  {
+    type:"interview",
+    q:"关于尾递归与递归改迭代，下面哪个说法是错误？",
+    opts:["尾递归的递归调用是函数体最后一条语句，其返回值直接作为函数返回","尾递归配合尾调用优化可以复用栈帧、把空间降到 O(1)","CPython（默认解释器）支持尾调用优化，Python 深尾递归不会爆栈","递归改迭代常借助显式栈或累加器来保存 / 传递状态"],
+    ans:2,
+    exp:"这是错误说法。CPython 默认并不做尾调用优化，哪怕写成尾递归，深递归依旧报 RecursionError。真正复用栈帧需要语言/编译器支持（如 Scheme、某些 JIT）。Python 里通常直接改成显式迭代。其余三个选项都正确。"
+  },
+  {
+    type:"quiz",
+    q:"给定数组统计满足 i<j 且 a[i]>a[j] 的逆序对个数，常用的 O(n log n) 解法思想是？",
+    opts:["在归并排序的合并阶段统计跨左右两半的逆序对","暴力双重循环","用哈希表一次扫描","用堆（优先队列）"],
+    ans:0,
+    exp:"归并排序合并时，当右半元素 r[j] 被取出，说明左半剩余（从 i 到末尾）的所有元素都大于 r[j]，这些都与 r[j] 构成逆序对，累加 len(l)-i 即可。这是 O(n log n) 的标准做法，暴力是 O(n²)。"
+  },
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

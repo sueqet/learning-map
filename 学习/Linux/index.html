@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux 学习大纲（可交互）</title>
+<meta name="description" content="Linux 学习大纲：19 个循序渐进的知识点，可打勾记录进度（浏览器本地保存），点击标题进入对应详细学习页（含学习目标、讲解、练习考核）。内容基于朋友的 Linux 笔记整理并修正，补充了命令基础、权限、软链接与 SSH 等主题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;
+    --radius:14px;--maxw:1000px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1200px 600px at 90% -8%, rgba(31,125,77,.07), transparent 60%),radial-gradient(900px 520px at -6% 6%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.7;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:70;background:rgba(242,246,242,.9);backdrop-filter:blur(11px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15.5px;color:var(--ink);white-space:nowrap;letter-spacing:-.01em}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+  .topnav .prog{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
+  .topnav .prog b{color:var(--green)}
+  .topnav .reset{margin-left:auto;cursor:pointer;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-soft);padding:6px 13px;border-radius:999px;font-size:12.5px;transition:.15s}
+  .topnav .reset:hover{color:var(--red);border-color:var(--red)}
+
+  .hero{padding:56px 0 18px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-140px;top:-120px;width:360px;height:360px;border-radius:50%;border:1px solid var(--line-2);opacity:.5}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.22em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(34px,5.6vw,56px);line-height:1.1;margin:20px 0 8px;letter-spacing:-.02em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:7px;height:11px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:clamp(15px,1.8vw,18px);color:var(--ink-soft);max-width:760px;margin:0 0 22px}
+  .hero p.lead b{color:var(--ink)}
+
+  .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px}
+  .stat{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 22px;min-width:120px;box-shadow:var(--shadow)}
+  .stat .num{font-family:var(--font-mono);font-size:30px;font-weight:700;line-height:1;color:var(--orange)}
+  .stat .num.small{font-size:22px}
+  .stat .lab{font-size:12.5px;color:var(--muted);margin-top:6px}
+
+  .allprog{margin:26px 0 8px;background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:20px 24px;box-shadow:var(--shadow)}
+  .allprog .head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .allprog .title{font-size:16px;font-weight:800}
+  .allprog .pct{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--green)}
+  .allprog .bar{height:12px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:12px}
+  .allprog .bar span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#4aa06f);border-radius:999px;transition:width .4s ease}
+  .allprog .tip{font-size:12.5px;color:var(--muted);margin-top:10px}
+
+  .sec{margin-top:34px}
+  .sec .sh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+  .sec .sh .tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:4px 11px;border-radius:999px;color:#fff}
+  .sec .sh h2{font-family:var(--font-display);font-weight:900;font-size:clamp(20px,3vw,26px);margin:0;letter-spacing:-.01em}
+  .sec .sh .dn{font-size:13px;color:var(--muted)}
+  .sec .desc{color:var(--ink-soft);max-width:760px;margin:4px 0 0;font-size:14.5px}
+  .cta{display:inline-flex;align-items:center;gap:8px;margin-top:12px;padding:10px 18px;border-radius:12px;background:linear-gradient(90deg,var(--green-soft),var(--orange-soft));border:1px solid var(--line-2);color:var(--ink);font-weight:700;font-size:14px;box-shadow:var(--shadow);transition:.15s}
+  .cta:hover{text-decoration:none;transform:translateY(-1px);border-color:var(--green);box-shadow:0 16px 32px -22px rgba(44,122,80,.5)}
+
+  .list{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+  .row{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:flex;align-items:center;gap:14px;padding:15px 18px;transition:transform .16s ease,box-shadow .16s ease}
+  .row:hover{transform:translateY(-2px);box-shadow:0 18px 36px -24px rgba(29,33,28,.5)}
+  .row .no{flex:none;width:36px;height:36px;border-radius:9px;background:var(--orange-soft);color:var(--orange);font-family:var(--font-mono);font-weight:700;font-size:14px;display:inline-flex;align-items:center;justify-content:center}
+  .row label{display:flex;align-items:center;gap:12px;cursor:pointer;flex:1;min-width:0}
+  .row input{width:20px;height:20px;accent-color:var(--green);flex:none;cursor:pointer}
+  .row .body{flex:1;min-width:0}
+  .row .body a.t{font-size:17px;font-weight:800;color:var(--ink);display:inline-block}
+  .row .body a.t:hover{color:var(--orange);text-decoration:none}
+  .row .body a.t.done{color:var(--muted);text-decoration:line-through}
+  .row .body .d{font-size:13px;color:var(--ink-soft);margin-top:2px}
+  .row .meta{flex:none;display:flex;gap:8px;align-items:center}
+  .row .dif{font-family:var(--font-mono);font-size:11px;padding:3px 9px;border-radius:999px}
+  .row .dur{font-family:var(--font-mono);font-size:11px;color:var(--muted);padding:3px 8px;border-radius:999px;border:1px solid var(--line)}
+  .row .go{flex:none;font-family:var(--font-mono);font-size:12.5px;color:var(--orange);padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:#fff;transition:.12s;white-space:nowrap}
+  .row .go:hover{border-color:var(--orange);background:var(--orange-soft);text-decoration:none}
+  .dif.入门{background:var(--green-soft);color:var(--green)}
+  .dif.进阶{background:var(--orange-soft);color:var(--orange)}
+  .dif.高级{background:#eee1f2;color:#7a4a8a}
+
+  .footer{margin-top:44px;border-top:1px solid var(--line);padding:32px 0 60px;font-size:13.5px;color:var(--ink-soft)}
+  .footer .cols{display:grid;grid-template-columns:1.3fr 1fr;gap:28px}
+  .footer .b{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+  .footer h4{margin:0 0 10px;font-size:16px;font-weight:800}
+  .footer ul{margin:0;padding-left:18px}
+  .footer li{margin:4px 0;font-size:13.5px}
+  .footer code{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--orange)}
+  @media (max-width:720px){.footer .cols{grid-template-columns:1fr}.row .meta{display:none}}
+
+  .totop{position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line-2);background:var(--ink);color:var(--paper);font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:.25s;box-shadow:var(--shadow);z-index:60}
+  .totop.show{opacity:1;pointer-events:auto}
+  .totop:hover{background:var(--orange);transform:translateY(-2px)}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span>Linux 学习</span>
+    <span class="prog">进度 <b id="navDone">0</b>/<b id="navTotal">19</b></span>
+    <button class="reset" id="resetBtn">重置进度</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>LINUX LEARNING MAP · 学习大纲</span>
+    <h1>Linux 系统<br><span class="accent">学习地图</span></h1>
+    <p class="lead">从<b>命令行 &amp; 文件权限</b>开始，覆盖<b>Shell 编程、文件系统、进程与信号、systemd、软件包、网络与防火墙、证书管理</b>。共 19 个循序渐进的知识点，每个都有<b>详解页</b>（学习目标、讲解与练习考核）；学会一个就<b>打勾</b>，进度自动保存到本机浏览器。内容依据朋友的笔记整理，并已<b>修正错误</b>、补充了命令基础、软链接与 SSH 等主题。</p>
+    <div class="stats">
+      <div class="stat"><div class="num">19</div><div class="lab">知识点</div></div>
+      <div class="stat"><div class="num" id="nDone">0</div><div class="lab">已学会</div></div>
+      <div class="stat"><div class="num small" id="nPct">0%</div><div class="lab">完成率</div></div>
+    </div>
+    <div class="allprog">
+      <div class="head"><span class="title">整体学习进度</span><span class="pct" id="bigPct">0%</span></div>
+      <div class="bar"><span id="bigBar" style="width:0%"></span></div>
+      <div class="tip" id="progTip">勾选知识点即可记录进度；在详解页里也能一键「我已学会」，互相同步。</div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="sec">
+    <div class="sh"><span class="tag" style="background:#1f7d4d">Linux · 系统</span><h2>学习路径</h2><span class="dn">共 19 个知识点 · 从命令行到系统管理</span></div>
+    <p class="desc">建议按顺序学：先把<b>终端 &amp; 文件权限</b>打牢，再写 <b>Shell 脚本</b>；随后理解<b>文件系统、链接、重定向</b>；接着是<b>进程、信号、core dump</b> 与 <b>systemd 服务</b>；最后是<b>软件包、网络、防火墙、SSH</b> 与<b>证书管理</b>。每一节都尽量动手敲命令、做完自测题再打勾。</p>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<div class="wrap">
+  <div class="footer">
+    <div class="cols">
+      <div class="b">
+        <h4>📖 使用说明</h4>
+        <ul>
+          <li>点击知识点后的<b>「去学习 →」</b>或标题，进入对应详解页。</li>
+          <li>勾选左侧方框即标记<b>学会</b>，进度保存在<b>本机浏览器</b>（localStorage），刷新/关闭不丢。</li>
+          <li>详解页末尾有「本节考核」，做完可回到大纲在 <b>index.html</b> 打勾。</li>
+          <li>建议每个知识点都动手敲一遍命令，再做题巩固。</li>
+        </ul>
+      </div>
+      <div class="b">
+        <h4>🗂 维护</h4>
+        <p style="font-size:13.5px;color:var(--ink-soft);margin:0 0 10px">本文件为 <b>index.html</b>，详细页统一放在 <code>content/</code> 目录（<code>NN-slug.html</code>）。新增知识点：在下方 <code>MODULES</code> 数组加一项，并新建对应的 <code>content/NN-slug.html</code>（可复制 <code>content/_template.html</code>）。</p>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">进度 key：<code>learn:linux:done</code>，大纲与所有详解页共用同一个 key，互相同步。内容的正确性修正见 <a href="content/勘误与正确性说明.html">勘误与正确性说明.html</a>。</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const MODULES = [
+  { id:"01-terminal-basics", no:"01", diff:"入门", dur:"~30min", file:"01-terminal-basics.html",
+    t:"命令行基础与文件导航", d:"终端、ls/cd/cat/less、通配符与管道，先会用终端。", groups:["A"] },
+  { id:"02-file-permissions", no:"02", diff:"入门", dur:"~40min", file:"02-file-permissions.html",
+    t:"文件与权限", d:"ls -l、rwx 模式、chmod/chown、用户与组。", groups:["A"] },
+  { id:"03-shell-basics", no:"03", diff:"入门", dur:"~35min", file:"03-shell-basics.html",
+    t:"Shell 基础与脚本执行", d:"Shell 是解释器、shebang、三种执行方式、$0/$SHELL。", groups:["B"] },
+  { id:"04-shell-vars", no:"04", diff:"入门", dur:"~40min", file:"04-shell-vars.html",
+    t:"Shell 变量与替换", d:"普通/环境变量、特殊变量、${} 变量替换、export。", groups:["B"] },
+  { id:"05-shell-cond", no:"05", diff:"入门", dur:"~40min", file:"05-shell-cond.html",
+    t:"Shell 条件判断", d:"if/case、[] 与 [[]] 与 (())、文件/字符串/数值判断。", groups:["B"] },
+  { id:"06-shell-loop", no:"06", diff:"入门", dur:"~40min", file:"06-shell-loop.html",
+    t:"Shell 循环", d:"for/while/until、读取文件、break/continue。", groups:["B"] },
+  { id:"07-shell-func", no:"07", diff:"入门", dur:"~35min", file:"07-shell-func.html",
+    t:"Shell 函数", d:"定义与调用、参数、local、return 与 echo 返回结果。", groups:["B"] },
+  { id:"08-filesystem", no:"08", diff:"进阶", dur:"~45min", file:"08-filesystem.html",
+    t:"Linux 目录体系", d:"FHS 目录、/proc 与 /run 的用途/生命周期/区别。", groups:["C"] },
+  { id:"09-links", no:"09", diff:"进阶", dur:"~40min", file:"09-links.html",
+    t:"软链接与硬链接", d:"ln -s 软链接 vs ln 硬链接、inode、删除与失效。", groups:["C"] },
+  { id:"10-redirection", no:"10", diff:"进阶", dur:"~50min", file:"10-redirection.html",
+    t:"重定向与文件描述符", d:"fd 0/1/2、> / >> / 2>&1 / &>、dup2、缓冲区与 fork 打印。", groups:["C"] },
+  { id:"11-processes", no:"11", diff:"进阶", dur:"~45min", file:"11-processes.html",
+    t:"进程状态与优先级", d:"R/S/D/T/Z 状态、PR 与 NI、nice/renice、ps/top。", groups:["D"] },
+  { id:"12-signals", no:"12", diff:"进阶", dur:"~45min", file:"12-signals.html",
+    t:"信号与 kill", d:"SIGHUP/INT/QUIT/TERM/KILL、kill/killall/pkill、优雅退出。", groups:["D"] },
+  { id:"13-core-dump", no:"13", diff:"进阶", dur:"~35min", file:"13-core-dump.html",
+    t:"core dump 调试", d:"ulimit 启用、limits.conf、用 gdb 分析崩溃现场。", groups:["D"] },
+  { id:"14-systemd", no:"14", diff:"进阶", dur:"~50min", file:"14-systemd.html",
+    t:"systemd 服务单元", d:".service 的三段结构、Type/Restart、systemctl 与 daemon-reload。", groups:["E"] },
+  { id:"15-packages", no:"15", diff:"进阶", dur:"~50min", file:"15-packages.html",
+    t:"软件包管理", d:"rpm/dnf 层次、安装删除更新查询、repo 源配置与国内镜像。", groups:["F"] },
+  { id:"16-network", no:"16", diff:"进阶", dur:"~50min", file:"16-network.html",
+    t:"网络配置与包处理流程", d:"nmcli 静态 IP、数据包收发流程、netfilter 拦截点、时延图分析。", groups:["G"] },
+  { id:"17-firewall", no:"17", diff:"进阶", dur:"~50min", file:"17-firewall.html",
+    t:"防火墙与 iptables", d:"表/链/target、包流转路径、firewalld zone、命令对比。", groups:["G"] },
+  { id:"18-ssh", no:"18", diff:"进阶", dur:"~40min", file:"18-ssh.html",
+    t:"SSH 远程登录与安全", d:"ssh/scp/密钥登录、ssh-copy-id、守护进程与安全加固。", groups:["G"] },
+  { id:"19-certs", no:"19", diff:"高级", dur:"~45min", file:"19-certs.html",
+    t:"证书与信任自签", d:"系统根证书存储、openssl 获取证书、update-ca-trust 信任自签。", groups:["H"] },
+];
+
+const GROUPS = [
+  { tag:"#1f7d4d", name:"第 1 部分 · 终端与文件", ids:["01-terminal-basics","02-file-permissions"], note:"打基础：会用终端，看懂并修改文件权限。" },
+  { tag:"#376a8f", name:"第 2 部分 · Shell 脚本编程", ids:["03-shell-basics","04-shell-vars","05-shell-cond","06-shell-loop","07-shell-func"], note:"把重复劳动写成脚本：变量、判断、循环、函数。" },
+  { tag:"#7a4a8a", name:"第 3 部分 · 文件系统", ids:["08-filesystem","09-links","10-redirection"], note:"理解目录、链接，以及重定向与文件描述符。" },
+  { tag:"#b8392a", name:"第 4 部分 · 进程与系统管理", ids:["11-processes","12-signals","13-core-dump","14-systemd"], note:"进程状态、信号、调试崩溃，以及 systemd 服务。" },
+  { tag:"#c8891f", name:"第 5 部分 · 软件包与网络", ids:["15-packages","16-network","17-firewall","18-ssh"], note:"装软件、配网络、开端口、远程登录。" },
+  { tag:"#2c7a50", name:"第 6 部分 · 证书管理", ids:["19-certs"], note:"信任 HTTPS 与自签证书。" },
+];
+
+/* ---- 跨页进度同步（与详解页共用同一 key） ---- */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); sync(); }
+
+function sync(){
+  const a=getDone(); const total=MODULES.length; const n=a.length;
+  const pct=Math.round(n/total*100);
+  document.getElementById("nDone").textContent=n;
+  document.getElementById("nPct").textContent=pct+"%";
+  document.getElementById("bigPct").textContent=pct+"%";
+  document.getElementById("bigBar").style.width=pct+"%";
+  document.getElementById("navDone").textContent=n;
+  document.getElementById("progTip").textContent = pct>=100
+    ? "🎉 全部完成！可以系统地回顾易错命令、动手做实验，进阶网络与安全。"
+    : `已学会 ${n} 个知识点。建议按顺序推进，每个知识点都动手敲一遍命令再打勾。`;
+  document.querySelectorAll('input[data-done]').forEach(ch=>{ ch.checked = getDone().indexOf(ch.dataset.done)>=0; });
+  document.querySelectorAll('a.t[data-id]').forEach(a=>{ a.classList.toggle('done', getDone().indexOf(a.dataset.id)>=0); });
+}
+
+function render(){
+  const list=document.getElementById("list");
+  const byId={}; MODULES.forEach(m=>byId[m.id]=m);
+  let html="";
+  GROUPS.forEach((g,gi)=>{
+    const items=g.ids.map(id=>byId[id]).filter(Boolean);
+    html+=`<div style="margin:26px 0 4px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+      <span style="background:${g.tag};color:#fff;font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;padding:4px 11px;border-radius:999px">${g.name}</span>
+      <span style="font-size:13px;color:var(--muted)">${g.note}</span></div>`;
+    items.forEach(m=>{
+      html+=`<div class="row">
+        <span class="no">${m.no}</span>
+        <label><input type="checkbox" data-done="${m.id}" onchange="toggle('${m.id}')">
+          <span class="body">
+            <a class="t" data-id="${m.id}" href="content/${m.file}">${m.t}</a>
+            <div class="d">${m.d}</div>
+          </span>
+        </label>
+        <span class="meta"><span class="dif ${m.diff}">${m.diff}</span><span class="dur">${m.dur}</span></span>
+        <a class="go" href="content/${m.file}">去学习 →</a>
+      </div>`;
+    });
+  });
+  list.innerHTML=html;
+  sync();
+}
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(confirm("确定要清空所有已打勾的进度吗？此操作不可撤销。")){ setDone([]); sync(); }
+});
+
+// 回到顶部
+const toTop=document.createElement("button"); toTop.className="totop"; toTop.textContent="↑"; toTop.setAttribute("aria-label","回到顶部"); document.body.appendChild(toTop);
+const tog=()=>toTop.classList.toggle("show", window.scrollY>600);
+window.addEventListener("scroll", tog); tog();
+toTop.addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 图：图的定义与术语、存储、DFS/BFS、最短路径、最小生成树、拓扑排序与连通性。学习目标、知识点讲解、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 09 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">图</h1>
+    <p class="lead" id="pageLead">图（<strong>Graph</strong>）是最贴近现实关系的数据结构：社交网络、地图导航、课程依赖、任务调度都能建模成图。<b>本节你将掌握图的存储、DFS/BFS 遍历、最短路径、最小生成树、拓扑排序与连通性，并读懂常见面试/笔试背后的算法本质。</b></p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能说清图的基本术语：有向/无向、出度/入度、路径/环、连通/权，并会用握手定理论证度数。</li>
+      <li>学完后你能判断何时用邻接矩阵、何时用邻接表、何时用链式前向星，并比较它们的空间与操作复杂度。</li>
+      <li>学完后你能手写 DFS（去重）与 BFS（队列 + visited），并解释 BFS「层数」的距离语义。</li>
+      <li>学完后你能实现 Dijkstra 的小顶堆优化版本并说明其正确性前提与为何不能处理负权。</li>
+      <li>学完后你能写出 Prim（加点）与 Kruskal（加边 + 并查集）、Floyd（DP）、Bellman-Ford（负权），以及 Kahn/DFS 拓扑排序判环。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要掌握一门编程语言（推荐 Python，可作为 C++ 思路对照）；熟悉数组、链表、栈、队列、哈希表（O(1) 查找）；理解递归与「栈帧」；会使用堆 / 优先队列（heapq）；了解动态规划与贪心的基本思想。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>图的定义与术语<br>从「关系」出发理解图</h2>
+  </section>
+
+  <!-- 1. 图的定义与术语 -->
+  <section class="topic" id="graph-basic">
+    <h3><span class="kno">graph-basic</span>图的定义与术语<span class="pt">有向 / 无向、度、连通、权</span></h3>
+    <p>图（<strong>Graph</strong>）由<strong>顶点集</strong> V（Vertex）和<strong>边集</strong> E（Edge）构成，记作 <span class="mono">G = (V, E)</span>。它比树更自由：树是「无环连通」的特例，而图允许环、允许孤立点。建模时，顶点是对象（人、城市、课程），边是关系（好友、道路、依赖）。</p>
+    <ul>
+      <li><b>有向图 / 无向图</b>：无向图的边 (u,v) 不分方向；有向图用 u→v 表示，方向有意义（如「A 依赖 B」「车流单向」）。</li>
+      <li><b>度</b>：无向图顶点度数 = 关联的边数；有向图分<strong>入度</strong>（指向它的边数）与<strong>出度</strong>（它发出的边数）。</li>
+      <li><b>路径 / 环</b>：路径是「首尾相接的顶点序列」；若路径起点与终点相同则成环（cycle）。</li>
+      <li><b>权值（Weight）</b>：边上的开销/距离/成本，带权图称「加权图」，是 Dijkstra、最小生成树的舞台。</li>
+      <li><b>连通</b>：无向图任意两点都有路径则连通；连通分量 = 极大连通子图；有向图对应强连通（任意两点互相可达）。</li>
+      <li><b>握手定理</b>：无向图所有顶点度数之和 = <span class="mono">2|E|</span>（每条边贡献 2 度）；有向图入度和 = 出度和 = <span class="mono">|E|</span>。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>graph_basic.py</div>
+      <pre><code># 用 Python 表示一个简单图，并验证握手定理
+# 邻接表：键 node -> 邻接节点集合（无向）
+graph = {
+    'A': {'B', 'C'},
+    'B': {'A', 'D'},
+    'C': {'A', 'D'},
+    'D': {'B', 'C'},
+}
+# 顶点数与边数
+V = len(graph)
+E = sum(len(neigh) for neigh in graph.values()) // 2   # 无向：每个边被数两次
+print("顶点", V, "边", E)
+
+# 验证握手定理：所有顶点度数之和 == 2*E
+deg_sum = sum(len(neigh) for neigh in graph.values())
+assert deg_sum == 2 * E, "握手定理成立：度数之和 = 2*边数"
+print("度数之和 =", deg_sum, "== 2E =", 2 * E)
+
+# 有向图：分别统计入度/出度
+edges = [('A','B'), ('B','C'), ('C','A'), ('A','C')]  # 有向边
+indeg, outdeg = {}, {}
+for _u, _v in edges:
+    outdeg[_u] = outdeg.get(_u, 0) + 1      # 出度 +1
+    indeg[_v] = indeg.get(_v, 0) + 1        # 入度 +1
+print("入度和", sum(indeg.values()), "出度和", sum(outdeg.values()), "== |E|", len(edges))</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>图三要素是「顶点 + 边 +（可选）权」。做图算法题第一步永远是<b>明确建图方式</b>（有向/无向、是否带权、顶点编号从 0 还是 1 开始），这决定了后面所有细节，也是面试时最容易踩的坑。</p></div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>无向图加边要「双向」，即 <span class="mono">g[u]</span> 和 <span class="mono">g[v]</span> 都要记录；漏掉一条会导致遍历/最短路全部出错。另外顶点编号若从 1 开始，记得把数组开成 <span class="mono">n+1</span> 的大小。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">图的规模</div><div class="v">V 顶点 / E 边</div></div>
+      <div class="cx"><div class="k">边数范围</div><div class="v">E 稀疏或近 V²</div></div>
+      <div class="cx"><div class="k">判定</div><div class="v">图 vs 树</div></div>
+    </div>
+  </section>
+
+  <!-- 2. 图的存储 -->
+  <section class="topic" id="graph-store">
+    <h3><span class="kno">graph-store</span>图的存储（邻接矩阵 / 邻接表 / 链式前向星）<span class="pt">三种主流建图方式</span></h3>
+    <p>选对存储方式是图算法性能的一半。三种方案在下述维度权衡：<strong>建图空间</strong>、<strong>查询某条边是否存在</strong>、<strong>遍历某顶点的所有邻接点</strong>、<strong>实现难度</strong>。</p>
+    <table class="tbl">
+      <tr><th>方案</th><th>空间</th><th>判边 (u,v)</th><th>遍历邻接点</th><th>适合</th></tr>
+      <tr><td>邻接矩阵<em> Adj. Matrix</em></td><td>O(V²)</td><td>O(1)</td><td>O(V)</td><td>稠密图 / 小规模 / 需快速判边</td></tr>
+      <tr><td>邻接表<em> Adj. List</em></td><td>O(V+E)</td><td>O(deg)</td><td>O(deg)</td><td>稀疏图 / 大规模 / 默认首选</td></tr>
+      <tr><td>链式前向星<em> Chain Fwd. Star</em></td><td>O(V+E)</td><td>O(deg)</td><td>O(deg)</td><td>高性能竞赛 / 图很大、边查询频繁</td></tr>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>graph_store.py</div>
+      <pre><code>INF = float('inf')
+
+# ① 邻接矩阵：graph[u][v] = 边权（无权图记 1），对角为 0，不连通为 INF
+n = 5
+g_mat = [[INF]*n for _ in range(n)]
+for i in range(n):
+    g_mat[i][i] = 0
+def add_mat(u, v, w=1):
+    g_mat[u][v] = w        # 无向图再加 g_mat[v][u] = w
+if g_mat[u][v] != INF:    # O(1) 判边
+    print("存在边(u,v)")
+
+# ② 邻接表：dict / list 存 (邻接点, 边权)，默认首选，最常用
+from collections import defaultdict
+g_adj = defaultdict(list)
+def add_adj(u, v, w=1):
+    g_adj[u].append((v, w))       # 无向图：g_adj[v].append((u, w))
+for v, w in g_adj[u]:            # 遍历 u 的所有邻接点，O(deg(u))
+    print(v, w)
+
+# ③ 链式前向星：用数组手写"链表"，head[u] 指向 u 的第一条边
+head = [-1]*n
+to, wt, nxt = [], [], []
+def add_forward(u, v, w):
+    to.append(v); wt.append(w); nxt.append(head[u]); head[u] = len(to)-1
+# 遍历 u 的所有边（沿 next 链一路走）
+e = head[2]
+while e != -1:
+    print(to[e], wt[e])
+    e = nxt[e]   # 数组下标代替指针，正是"前向星"名字的由来</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><b>稠密图（E≈V²）用邻接矩阵</b>，<b>稀疏图（E≈V）用邻接表</b>。最短路、生成树的通用做法是邻接表 + 堆/并查集；只有题目需要 O(1) 判边（如判重边、floyd 的 DP 表）时矩阵才更合适。</p></div>
+
+    <div class="callout danger"><span class="i">!?</span><p><b>易错点：</b>邻接表判边是 <span class="mono">O(deg)</span>，不是 O(1)！如果题目频繁「查询某边是否存在」，需额外开一个 <span class="mono">set</span> 或改邻接矩阵，否则会超时。另外链式前向星的 <span class="mono">nxt[]</span> 存储的是「下一条边在数组中的下标」，必须从 <span class="mono">head[u]</span> 开始逐跳，别与顶点下标混淆。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">邻接矩阵空间</div><div class="v">O(V²)</div></div>
+      <div class="cx"><div class="k">邻接表空间</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">链式前向星空间</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">判边</div><div class="v">矩阵 O(1) / 表 O(deg)</div></div>
+    </div>
+  </section>
+
+  <!-- 3. 图的遍历 -->
+  <section class="topic" id="graph-traverse">
+    <h3><span class="kno">graph-traverse</span>图的遍历 DFS 与 BFS<span class="pt">visited 去重 + 距离语义</span></h3>
+    <p><strong>深度优先搜索</strong>（DFS，Depth-First Search）一路走到底再回溯；<strong>广度优先搜索</strong>（BFS，Breadth-First Search）按层向外扩散。两者都要<strong>visited 标记</strong>防止重复访问——因为图有环，不像树那样天然无环。</p>
+    <ul>
+      <li><b>DFS</b>：递归/栈，适合求连通分量、路径、染色、拓扑序（后序）。</li>
+      <li><b>BFS</b>：队列，层层扩展，<b>层数 = 从起点经过的边数</b>，因此在「无权图」上 BFS 可求最短路径。</li>
+      <li><b>visited 时机</b>：BFS 在入队时就应该标记，否则同层重复入队会指数膨胀；DFS 在进入时标记。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>graph_traverse.py</div>
+      <pre><code>from collections import deque
+g = defaultdict(list)
+for u,v in [(0,1),(0,2),(1,3),(2,3),(3,4)]:
+    g[u].append(v); g[v].append(u)    # 无向
+
+# ---------- DFS（递归 + visited 去重）----------
+def dfs(u, visited=None):
+    if visited is None: visited = set()
+    visited.add(u)
+    print(u, end=' ')
+    for v in g[u]:
+        if v not in visited:          # 关键：跳过已访问，防成环死循环
+            dfs(v, visited)
+print("DFS:"); dfs(0)
+
+# ---------- BFS（队列 + 层数 = 最短边数）----------
+def bfs(start):
+    dist = {start: 0}
+    q = deque([start])
+    while q:
+        u = q.popleft()
+        for v in g[u]:
+            if v not in dist:         # 首次遇到即最短（无权图）
+                dist[v] = dist[u] + 1  # 距离 = 层数 = 经过的边数
+                q.append(v)
+    return dist
+print("\nBFS dist:", bfs(0))          # 如 0->4 距离为 2（0-2-4 或 0-1-3-4 最短边数 2）</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>BFS 在<b>无权图/单位权图</b>上，首次弹出某节点的「层数」就是最短路径长度（LeetCode 547/695/200、127 单词接龙）。<b>带权图必须用 Dijkstra</b>，BFS 不再成立——这是最常被问的陷阱。</p></div>
+
+    <div class="callout danger"><span class="i">!?</span><p><b>易错点：</b>（1）BFS 一定要在<b>入队时</b>标记 visited，否则同一节点被反复入队导致 O(2^V) 甚至超时；（2）DFS 要用「<span class="mono">if v not in visited</span>」判断后再递归，别先递归再判断；（3）「visited 于弹出时标记」是按层处理某些问题的写法，但会多走重复节点，务必区分。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">DFS 时间</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">BFS 时间</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">DFS 空间</div><div class="v">O(V) 递归栈</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">无权图最短路</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>最短路径<br>从贪心到动态规划</h2>
+  </section>
+
+  <!-- 4. Dijkstra -->
+  <section class="topic" id="graph-dijkstra">
+    <h3><span class="kno">graph-dijkstra</span>最短路径 · Dijkstra（小顶堆优化）<span class="pt">O(E log V)，不能处理负权</span></h3>
+    <p><strong>Dijkstra（迪杰斯特拉）</strong>是典型的<strong>贪心</strong>算法：维护一个 <span class="mono">dist[]</span>（起点到各点的当前最短距离），每次从未确定集合里选「当前距离最小」的顶点 u 设为确定，再用 u 松弛它的出边。用<strong>小顶堆</strong>取代线性扫描即可把「找最小」从 O(V) 优化到 <span class="mono">O(log V)</span>。</p>
+    <div class="callout key"><span class="i">★</span><p><b>正确性前提：</b>所有边权 <b>非负</b>。因为一旦某个顶点从堆里弹出（出堆即确定），它将不再被更新；若存在负权边，后续可能找到更短路径，从而破坏「出堆即最优」的前提。贪心能成立的内在原因是——距离当前最短的顶点，之后不可能通过「加一条非负边」变得更短。</p></div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>dijkstra.py</div>
+      <pre><code>import heapq
+INF = float('inf')
+def dijkstra(g, start, n):
+    dist = [INF]*n
+    dist[start] = 0
+    pq = [(0, start)]                 # (当前距离, 顶点) 小顶堆
+    while pq:
+        d, u = heapq.heappop(pq)
+        if d > dist[u]:               # 关键：跳过已过时的堆节点
+            continue
+        for v, w in g[u]:             # 松弛 u 的所有出边
+            nd = d + w
+            if nd < dist[v]:
+                dist[v] = nd
+                heapq.heappush(pq, (nd, v))
+    return dist
+
+# 建图：邻接表，带权
+g = defaultdict(list)
+for u,v,w in [(0,1,4),(0,2,1),(2,1,2),(1,3,1),(2,3,5)]:
+    g[u].append((v,w)); g[v].append((u,w))
+print(dijkstra(g, 0, 4))   # [0, 3, 1, 4]：0->2(1)->1(2)->3(1) = 4</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>（1）堆中会残留「过时节点」，一定要判断 <span class="mono">if d &gt; dist[u]: continue</span>，否则结果错误；（2）Dijkstra 是<b>单源</b>最短路径，只能求「一个起点」到其余点；（3）C++ 用 <span class="mono">priority_queue</span> + <span class="mono">pair&lt;int,int&gt;</span>，注意默认是大顶堆，要重载为小顶堆（或入负数）。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">Dijkstra 时间</div><div class="v">O(E log V)</div></div>
+      <div class="cx"><div class="k">朴素版时间</div><div class="v">O(E + V²)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">限制</div><div class="v">边权非负</div></div>
+    </div>
+  </section>
+
+  <!-- 5. Floyd & Bellman-Ford -->
+  <section class="topic" id="graph-other">
+    <h3><span class="kno">graph-other</span>最短路径 · Floyd 与 Bellman-Ford（负权）<span class="pt">动态规划 + 多源/负权</span></h3>
+    <p><strong>Floyd（弗洛伊德）</strong>求<strong>所有点对</strong>最短路径，用<strong>动态规划</strong>做中转松弛：外层 <span class="mono">k</span> 表示「允许用前 k 个点作中转」。递推式 <span class="mono">dp[i][j] = min(dp[i][j], dp[i][k] + dp[k][j])</span>，三维压成二维原地更新。它天然支持负权边（但<strong>不能有负权环</strong>）。<strong>Bellman-Ford</strong> 是单源最短路，能处理负权并<strong>检测负环</strong>：松弛 <span class="mono">n-1</span> 轮后若还能再松弛，说明存在负环。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>floyd_bellman.py</div>
+      <pre><code>INF = float('inf')
+
+# ---------- Floyd：所有点对最短路（DP）----------
+def floyd(g, n):                        # g 为邻接矩阵
+    dist = [[INF]*n for _ in range(n)]
+    for i in range(n):
+        dist[i][i] = 0
+    for u,v,w in g:                     # 初始边
+        dist[u][v] = w                  # 有向
+    for k in range(n):                  # 外层：允许以 k 为中转
+        for i in range(n):
+            for j in range(n):
+                if dist[i][k] + dist[k][j] < dist[i][j]:
+                    dist[i][j] = dist[i][k] + dist[k][j]   # 松弛
+    return dist
+
+# ---------- Bellman-Ford：单源，含负权，判负环 ----------
+def bellman_ford(edges, start, n):
+    dist = [INF]*n
+    dist[start] = 0
+    for _ in range(n-1):                # 最多松弛 n-1 轮
+        for u,v,w in edges:
+            if dist[u] != INF and dist[u]+w < dist[v]:
+                dist[v] = dist[u]+w
+    for u,v,w in edges:                 # 再松弛一轮
+        if dist[u] != INF and dist[u]+w < dist[v]:
+            return None                 # 仍能更新 => 存在负权环
+    return dist
+
+edges = [(0,1,-2),(1,2,3),(0,2,5)]
+print("Bellman-Ford:", bellman_ford(edges, 0, 3))   # [0,-2,1]
+# SPFA 是 Bellman-Ford 的队列优化，平均更快但最坏仍可能退化，需格外小心。</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>看到「<b>所有点对</b>最短路」或顶点数小（V≤几百）→ Floyd（O(V³)）；看到「<b>可能出现负权边</b>」→ Bellman-Ford / SPFA（O(VE)）；边权非负 → Dijkstra（O(E log V)，最快）。分清「单源 vs 多源」「负权 vs 非负」是选算法的第一原则。</p></div>
+
+    <div class="callout danger"><span class="i">!?</span><p><b>易错点：</b>（1）Floyd 外层循环 <span class="mono">k</span> 必须放最外层，若把 <span class="mono">i/j</span> 放外层会破坏正确性（因为中转点要「从小到大逐步引入」）；（2）Floyd 用邻接矩阵，初始化对角为 0、无边为 INF；（3）Bellman-Ford 判负环必须<b>在第 n 轮</b>再检查能否更新，只有一轮判定不够。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">Floyd 时间</div><div class="v">O(V³)</div></div>
+      <div class="cx"><div class="k">Floyd 空间</div><div class="v">O(V²)</div></div>
+      <div class="cx"><div class="k">Bellman-Ford</div><div class="v">O(VE)</div></div>
+      <div class="cx"><div class="k">SPFA 平均</div><div class="v">O(E)~O(VE)</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>最小生成树与拓扑排序<br>加点法 / 加边法 / 依赖顺序</h2>
+  </section>
+
+  <!-- 6. MST -->
+  <section class="topic" id="graph-mst">
+    <h3><span class="kno">graph-mst</span>最小生成树 · Prim / Kruskal<span class="pt">加点 + 加边 + 并查集</span></h3>
+    <p><strong>最小生成树</strong>（MST，Minimum Spanning Tree）在连通带权无向图中选 <span class="mono">n-1</span> 条边使总权最小（结果必须是树：连通且无环）。两种经典思路：<strong>Prim</strong> 是「加点」——从一个点出发，每次把「连接已生成树与外部的最小边」连紧；<strong>Kruskal</strong> 是「加边」——按边权从小到大选边，用<strong>并查集</strong>判断是否会成环。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>mst.py</div>
+      <pre><code>INF = float('inf')
+
+# ---------- Prim（加点，O(V²)，可用堆优化到 O(E log V)）----------
+def prim(g, n):
+    in_mst = [False]*n
+    d = [INF]*n
+    d[0] = 0
+    total = 0
+    for _ in range(n):
+        u = -1
+        for i in range(n):                 # 选未入树且距离最小的点
+            if not in_mst[i] and (u==-1 or d[i] < d[u]):
+                u = i
+        in_mst[u] = True
+        total += d[u]
+        for v,w in g[u]:                   # 松弛：到树外的最近边
+            if not in_mst[v] and w < d[v]:
+                d[v] = w
+    return total
+
+# ---------- Kruskal（加边 + 并查集判环，O(E log E)）----------
+parent = list(range(6)); rank = [0]*6
+def find(x):
+    while parent[x]!=x:
+        parent[x] = parent[parent[x]]      # 路径压缩
+        x = parent[x]
+    return x
+def union(a,b):
+    ra,rb = find(a),find(b)
+    if ra==rb: return False
+    if rank[ra]<rank[rb]: ra,rb = rb,ra
+    parent[rb] = ra
+    if rank[ra]==rank[rb]: rank[ra]+=1
+    return True
+def kruskal(edges, n):
+    edges.sort(key=lambda e:e[2])          # 按权升序
+    total = 0; cnt = 0
+    for u,v,w in edges:
+        if union(u,v):                     # 不构成环才选
+            total += w; cnt += 1
+            if cnt == n-1: break
+    return total</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>Prim 适合<b>稠密图</b>（顶点多、边多，O(V²) 或堆优化）；Kruskal 适合<b>稀疏图</b>（边少，O(E log E)）。两者都基于「<b>切分定理</b>」：任何时刻，连接已选集合与外部的最小边必然属于某棵 MST——这是两者正确性的共同根基。</p></div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>（1）MST 应用于<b>无向带权连通图</b>，有向图不适用；（2）Kruskal 选边前要排序，<b>union 返回 False 说明成环</b>，必须跳过；（3）Prim 的 <span class="mono">d[]</span> 是「到树的最短边权」，不是到起点的路径距离，别和 Dijkstra 搞混——两者代码很像，但语义完全不同。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">Prim 朴素</div><div class="v">O(V²)</div></div>
+      <div class="cx"><div class="k">Prim 堆优化</div><div class="v">O(E log V)</div></div>
+      <div class="cx"><div class="k">Kruskal</div><div class="v">O(E log E)</div></div>
+      <div class="cx"><div class="k">并查集空间</div><div class="v">O(V)</div></div>
+    </div>
+  </section>
+
+  <!-- 7. 拓扑排序 -->
+  <section class="topic" id="graph-topo">
+    <h3><span class="kno">graph-topo</span>拓扑排序与判环<span class="pt">Kahn / DFS，判环</span></h3>
+    <p><strong>拓扑排序</strong>（Topological Sort）只针对<strong>有向无环图</strong>（DAG），给出一个线性序列使每条边 u→v 中 u 都在 v 之前。它天然对应「依赖关系」：先修课程、任务调度、编译依赖。若<strong>无法生成完整序列（剩下节点入度不为 0 / DFS 发现后向边）</strong>，则说明<strong>存在环</strong>。</p>
+    <ul>
+      <li><b>Kahn 法</b>：不断把「入度为 0」的顶点入队、删除，并更新邻居入度。最终序列长度 = 顶点数则无环。</li>
+      <li><b>DFS 法</b>：用三色状态（0 未访问 / 1 访问中 / 2 已结束）。回溯时遇到「访问中」的节点 → 存在环。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>topo.py</div>
+      <pre><code>from collections import deque
+# ---------- Kahn 法（入度为 0 逐点消除）----------
+def topo_kahn(g, indeg, n):
+    q = deque([i for i in range(n) if indeg[i]==0])
+    order = []
+    while q:
+        u = q.popleft()
+        order.append(u)
+        for v in g[u]:
+            indeg[v] -= 1                 # 删除 u 后，邻居入度 -1
+            if indeg[v] == 0:
+                q.append(v)
+    return order if len(order) == n else None   # None => 有环
+
+# ---------- DFS 三色判环（LeetCode 207 课程表核心）----------
+state = [0]*n    # 0 未访问 / 1 访问中 / 2 已完成
+def has_cycle(u):
+    state[u] = 1                        # 进入递归栈
+    for v in g[u]:
+        if state[v] == 1: return True   # 发现"访问中"节点 => 后向边 => 有环
+        if state[v] == 0 and has_cycle(v): return True
+    state[u] = 2                        # 离开，标记完成
+    return False
+def is_dag():
+    for i in range(n):
+        if state[i]==0 and has_cycle(i): return False
+    return True   # 无环（DAG）</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>拓扑排序只对 <b>DAG</b> 有意义；「<b>序列长度 &lt; n → 有环</b>」是 Kahn 判环的黄金结论（LeetCode 207 / 210 课程表）。DFS 三色判环里「<b>访问中</b>（state=1）状态是检测环的关键——它能捕捉到同一条递归路径上的"回指边"，而简单的 visited 布尔标记做不到。</p></div>
+
+    <div class="callout danger"><span class="i">!?</span><p><b>易错点：</b>（1）Kahn 要对<b>原点计算入度</b>，不要把「出度为 0」当入队条件；（2）拓扑排序<b>不唯一</b>（可能存在多个合法序列，按字典序最小需用优先队列）；（3）无环判定要用<b>序列长度</b>，不能只看队列是否为空；（4）DFS 判环三色中「访问中」与「已完成」<b>必须区分</b>，否则有环时可能误判。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">Kahn 时间</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">DFS 时间</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(V)</div></div>
+      <div class="cx"><div class="k">要求</div><div class="v">有向无环图</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">04</span>连通性进阶<br>选学：并查集、桥、强连通</h2>
+  </section>
+
+  <!-- 8. 连通性 -->
+  <section class="topic" id="graph-conn">
+    <h3><span class="kno">graph-conn</span>连通性：并查集、桥与强连通（选学）<span class="pt">union-find / bridge / SCC</span></h3>
+    <p>连通性问题是图的高级主题。<strong>并查集</strong>（Union-Find / DSU）用「树 + 路径压缩 + 按秩合并」维护等价类，近乎 <span class="mono">O(α(n))</span>，擅长判断「两点是否连通」「合并集合」；<strong>割边/桥</strong>与<strong>强连通分量（SCC）</strong>常用 <strong>Tarjan</strong> 算法，借助 DFS 的 <span class="mono">dfn[]</span>（发现时间）与 <span class="mono">low[]</span>（能回溯到的最早祖先）判定。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>unionfind.py</div>
+      <pre><code># ---------- 并查集：路径压缩 + 按秩合并 ----------
+parent = list(range(5)); rank = [0]*5
+def find(x):
+    if parent[x] != x:                  # 递归路径压缩
+        parent[x] = find(parent[x])
+    return parent[x]
+def union(a, b):
+    ra, rb = find(a), find(b)
+    if ra == rb: return False           # 已经在同一集合
+    if rank[ra] < rank[rb]: ra, rb = rb, ra
+    parent[rb] = ra
+    if rank[ra] == rank[rb]: rank[ra] += 1
+    return True
+def connected(a, b):
+    return find(a) == find(b)
+# 常用于：求连通分量个数 / 判断是否成环 / 最小生成树 Kruskal
+
+# ---------- Tarjan 求强连通分量（SCC）思路 ----------
+# dfn[u] = 首次访问时间；low[u] = u 及其子树能回溯到的最早 dfn
+# 当 low[u] == dfn[u] 时，栈中 u 之上的所有节点构成一个强连通分量。</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>并查集是「<b>加边 + 查连通</b>」的最强武器，适合动态合并（Kruskal、LeetCode 547 省份数量、冗余连接 684）。<b>桥 / 割点</b>与 <b>SCC</b> 需要 Tarjan，核心是 <span class="mono">low[]</span> 的递推：<span class="mono">low[u] = min(low[u], low[v])</span>（树边）与 <span class="mono">min(low[u], dfn[v])</span>（回边）。</p></div>
+
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>（1）并查集若<strong>不做路径压缩</strong>，最坏会退化成链，复杂度升到 O(n)；（2）Tarjan 判断「桥」条件为 <span class="mono">low[v] &gt; dfn[u]</span>，是严格大于；判断割点分「根节点（需 ≥2 个子树）」与「非根（low[v] ≥ dfn[u]）」两种情况，极易混淆；（3）SCC 只对<b>有向图</b>定义，无向图用「连通分量」。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">并查集（优化后）</div><div class="v">O(α(n))</div></div>
+      <div class="cx"><div class="k">Tarjan SCC</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">求桥/割点</div><div class="v">O(V+E)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">动态连通/割裂</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>LeetCode 207 / 210 课程表</b>：用 Kahn 拓扑排序判环并输出顺序；再改成 DFS 三色判环，对比两种写法各自判环的依据。</li>
+      <li><b>LeetCode 743 网络延迟时间</b>：用堆优化 Dijkstra 求源点到所有点的最短路，再取最大值；思考若边权有负数该如何改写。</li>
+      <li><b>LeetCode 127 单词接龙</b>：把「每次只改一个字符」建模成无权图，用 BFS 求最短变换（层数 = 单词距离），体会 visited 在 BFS 中的去重与剪枝。</li>
+      <li><b>改造与扩展</b>：给 Dijkstra 加「路径还原」（记录前驱节点）；用并查集优化 Kruskal，并思考如何输出最小生成树本身而非只求权值和。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "graph",                 // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "图",                 // ex: 绪论与算法复杂度分析
+  eyebrow: "MODULE 09 · 数据结构与算法",
+  prev: "08-堆与优先队列.html",   // 前一节文件名
+  next: "10-哈希表.html",        // 下一节文件名
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"无向图 G 有 |V| 个顶点、|E| 条边。下列「握手定理」的说法正确的是？",
+    opts:["所有顶点的度数之和等于 |E|","所有顶点的度数之和等于 2|E|","所有顶点的度数之和等于 |V|","度数之和仅与最大度有关，无固定关系"],
+    ans:1,
+    exp:"握手定理：无向图中每条边都会连接两个顶点、各贡献 1 个度数，因此所有顶点度数之和 = 2|E|（度数和一定是偶数）。选项 A 漏了系数 2。"
+  },
+  {
+    type:"quiz",
+    q:"对一个稀疏图（E 远小于 V²），下列哪种存储最节省空间且更适合做最短路？",
+    opts:["邻接矩阵","邻接表","必须用链式前向星才能省空间","无所谓，三种空间一样"],
+    ans:1,
+    exp:"邻接矩阵需 O(V²) 空间，稀疏图浪费严重；邻接表只存实际存在的边，空间 O(V+E)，是稀疏图做最短路/生成树的默认首选。链式前向星也能省空间，但「必须用它」的说法错误。"
+  },
+  {
+    type:"quiz",
+    q:"在无权图（或单位权图）上，BFS 首次到达某顶点的「层数」所表示的含义是？",
+    opts:["从起点到该顶点的边权之和","从起点到该顶点经过的边数，即最短路径长度","顶点的编号大小","该顶点的入度"],
+    ans:1,
+    exp:"BFS 按层扩散，每扩展一层代表多经过一条边，所以「层数 = 经过的边数」= 无权图上的最短路径长度。注意：一旦边带权，BFS 的层数就不再等于最短路径，必须改用 Dijkstra。"
+  },
+  {
+    type:"quiz",
+    q:"关于 Dijkstra 算法（小顶堆优化版），下列说法正确的是？",
+    opts:["能处理带负权边的图","因为用了优先队列，所以复杂度是 O(V²)","基于贪心，每次确定当前未确定顶点中距离最小的那个；边权须非负","它求的是所有点对之间的最短路径"],
+    ans:2,
+    exp:"Dijkstra 是贪心算法，每次出堆的顶点距离即确定（不可再被更新）。这一性质只在所有边权非负时成立：「短路+非负边」不可能变得更短；若存在负权边，出堆点可能被更晚的路径追上，从而出错。它是单源最短路，不是所有点对；堆优化复杂度是 O(E log V)。"
+  },
+  {
+    type:"quiz",
+    q:"关于 Floyd 与 Bellman-Ford，下列说法错误的一项是？",
+    opts:["Floyd 属于动态规划，复杂度 O(V³)，求所有点对最短路","Floyd 用邻接矩阵，外层枚举中转点 k，支持负权边但不可有负权环","Bellman-Ford 能处理负权，松弛 n-1 轮后再检验一轮来判断是否存在负权环","Floyd 适合求单源最短路，Bellman-Ford 才适合求所有点对最短路"],
+    ans:3,
+    exp:"说法弄反了：Floyd 求「所有点对」最短路，Bellman-Ford/SPFA 求「单源」最短路。单源最短路首选 Dijkstra（非负权）或 Bellman-Ford/SPFA（含负权）；Floyd 则是在顶点数较小时一次性算完所有点对。"
+  },
+  {
+    type:"quiz",
+    q:"最小生成树中，Prim 与 Kruskal 的「加点 / 加边」对应关系正确的是？",
+    opts:["Prim 是加边，Kruskal 是加点","Prim 是加点，Kruskal 是加边","两者都是加点","两者都是加边"],
+    ans:1,
+    exp:"Prim 每次把一个「离生成树最近」的顶点并入树（加点），适合稠密图；Kruskal 把边按权升序逐个尝试、用并查集判断是否成环来加边，适合稀疏图。两者都基于切分定理，但策略一个点一个边。"
+  },
+  {
+    type:"quiz",
+    q:"用 Kahn 算法做拓扑排序，若最终进入拓扑序列的节点数少于顶点总数，说明什么？",
+    opts:["图的顶点度算错了","图中存在环，无法完成拓扑排序","图是连通的","队列初始化错误"],
+    ans:1,
+    exp:"Kahn 法不断删除入度为 0 的顶点。若删除到最后还有顶点入度不为 0，说明这些顶点彼此成环、永远无法被「取消依赖」，因此序列长度 < n 即判定存在环。"
+  },
+  {
+    type:"interview",
+    q:"面试：用 DFS 三色法在 DAG 上判环时，「访问中（state=1）」状态的核心作用是什么？为什么简单的 visited 布尔标记不够？",
+    opts:["记录每个顶点被访问的次数","用于检测后向边：若在「当前递归栈」中再次遇到某顶点，说明该顶点经一条路径又指回自己，存在环","为了给顶点按访问顺序编号","没什么作用，三色法只是为了方便打印"],
+    ans:1,
+    exp:"「访问中」表示该顶点还在当前 DFS 递归栈（同一条路径）上。若沿一条边递归时再次遇到 state=1 的顶点，就意味着存在一条从该顶点出发又绕回自己的路径，即成环。普通 visited 只能区分「访问过/没访问过」，无法区分「还在当前路径上」与「已回溯完成」，因此会漏判环。三色法里的第三态（已完成）正是为了区分这两种情况。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>算法 · 数组与字符串 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 算法 · 数组与字符串：双指针与滑动窗口两大核心技巧；力扣 27、283、26、167、15、88、209 等，每道题标注题号、给出可运行 Python 代码与复杂度。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">算法 · 数组与字符串</b></span>
+    <div class="pager"><a id="prevLink" href="13-advanced.html">← 上一节</a><a id="nextLink" href="15-lc-hash.html">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 算法</span></span>
+    <h1 id="pageTitle">算法 · 数组与字符串</h1>
+    <p class="lead" id="pageLead">这是刷题面试的<b>第一块敲门砖</b>。本节只讲两大最常用的技巧——<b>双指针</b>与<b>滑动窗口</b>，用它们在 <b>O(n) 时间、O(1) 额外空间</b>内就地解决数组与字符串问题。每道题都标注【力扣题号】，给出<b>可运行、可直接提交的 Python 代码</b>与复杂度分析：从<b>移除元素 27</b>、<b>移动零 283</b> 到 <b>合并有序数组 88</b>、<b>三数之和 15</b>，再到 <b>长度最小的子数组 209</b>。练熟这些，你就掌握了 90% 数组题的套路。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能用<b>快慢双指针</b>在原地完成数组修改，并独立写出【力扣 27 移除元素】与【283 移动零】的 O(n)、O(1) 解法。</li>
+      <li>学完后，你能说清<b>「覆盖写入」（快慢指针）</b>与<b>「左右夹逼」（相向指针）</b>两类双指针的区别，并判断每种技巧适合的问题特征。</li>
+      <li>学完后，你能用<b>排序 + 相向双指针 + 去重</b>解出【力扣 15 三数之和】，并口算其 O(n²) 复杂度与剪枝逻辑。</li>
+      <li>学完后，你能用<b>三指针从后往前</b>原地合并两个有序数组（【力扣 88】），并解释为什么倒序填充能避免覆盖。</li>
+      <li>学完后，你能用<b>可变滑动窗口</b>求解【力扣 209 长度最小的子数组】，说清窗口何时扩展右边界、何时收缩左边界。</li>
+      <li>学完后，你能快速判断一道数组/字符串题该用<b>双指针</b>还是<b>滑动窗口</b>，并为每道题写出时间复杂度与空间复杂度。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">已掌握 Python 列表的<b>索引 / 切片 / <code class="mono">len</code> / 排序 / 推导式</b>，理解什么是「序列与下标」；同时要有最基本的<b>复杂度</b>概念（知道 <code class="mono">O(n)</code>、<code class="mono">O(n²)</code>、<code class="mono">O(1)</code> 分别指什么）。这些是看懂数组题解法的前提。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>双指针与滑动窗口<br>（数组与字符串的核心技巧）</h2>
+  </section>
+
+  <section class="topic" id="twoptr-intro">
+    <h3><span class="kno">力扣 27</span>双指针入门 · 原地移除元素<span class="pt">快慢双指针 · 覆盖写入</span></h3>
+    <p>很多数组题的「最优解」都依赖一个朴素观察：<b>与其真正删掉元素，不如「覆盖」——用一个慢指针划定「已经处理好的前缀」，用一个快指针去扫描，遇到要保留的就写进来。</b>这就是<b>双指针（two pointers）</b>，它能把需要额外数组的解法压到 <b>O(1) 额外空间、一次遍历 O(n)</b>。</p>
+    <p>先看【力扣 27 移除元素】：给你数组 <code class="mono">nums</code> 和目标值 <code class="mono">val</code>，原地移除所有等于 <code class="mono">val</code> 的元素，返回移除后数组的新长度。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def removeElement(nums, val):
+    slow = 0                      # 下一个可写入的位置，也即最终长度
+    for fast in range(len(nums)):
+        if nums[fast] != val:     # 只保留不等于 val 的元素
+            nums[slow] = nums[fast]
+            slow += 1             # 前缀范围扩一格
+    return slow                    # slow 就是移除后数组长度
+
+nums = [3, 2, 2, 3]
+print(removeElement(nums, 3))     # 2
+print(nums)                       # [2, 2, 3, 3]（前两位有效，后面是无用旧值）</code></pre>
+    </div>
+    <div class="gitgraph">
+<pre class="mermaid">
+flowchart LR
+  init["slow = 0"] --> scan["fast 扫描每个元素"]
+  scan --> look{"nums[fast] == val ?"}
+  look -- "是" --> skip["只看不动，fast++"]
+  look -- "否" --> write["nums[slow] = nums[fast]; slow++"]
+  write --> skip
+  skip --> scan
+  scan --> done["返回 slow（新长度）"]
+</pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>慢指针 <code class="mono">slow</code> 永远是<b>「下一个该填的位置」</b>，同时它恰好等于<b>已经放入的有效元素个数</b>；快指针 <code class="mono">fast</code> 负责<b>探路</b>。最终 <code class="mono">slow</code> 之前的元素全部合法，后面的旧值可以忽略。复杂度 <b>O(n) 时间、O(1) 空间</b>——原数组被就地覆盖，无需新建数组。</p></div>
+    <div class="callout danger"><span class="i">✕</span><p><b>高频错误：</b>① 用 <code class="mono">nums.remove(val)</code> 或 <code class="mono">pop</code> 逐个删——删除会移动大量元素，最坏是 <b>O(n²)</b>；② 忘了「<code class="mono">slow</code> 既是写入指针也是长度」这一层含义，返回的错误值导致答案不对；③ 提前用 <code class="mono">for x in nums</code> 遍历已经改过的列表，逻辑混乱。</p></div>
+  </section>
+
+  <section class="topic" id="fastslow">
+    <h3><span class="kno">力扣 283</span>快慢双指针进阶 · 移动零与去重<span class="pt">同一套「覆盖写入」的多重变体</span></h3>
+    <p>「覆盖写入」不只是移除元素，它可以<strong>重排数组</strong>。看【力扣 283 移动零】：把数组里所有 <code class="mono">0</code> 移到末尾，同时保持非零元素的相对顺序，且<b>必须原地</b>。思路与 27 几乎一样，只是把「不等于某值」「不等于 0」后，再把末尾填上 0。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def moveZeroes(nums):
+    slow = 0
+    for fast, x in enumerate(nums):
+        if x != 0:                # 非零元素保留，往前挪
+            nums[slow] = x
+            slow += 1
+    # 走到头后，slow 及之后的槽位统统填 0
+    for i in range(slow, len(nums)):
+        nums[i] = 0
+    return nums
+
+nums = [0, 1, 0, 3, 12]
+print(moveZeroes(nums))           # [1, 3, 12, 0, 0]</code></pre>
+    </div>
+    <p>同样地，【力扣 26 删除有序数组中的重复项】也用同一招：因为数组<b>已升序</b>，重复元素一定相邻，用 <code class="mono">slow</code> 记录「已去重前缀的末尾」，只要当前元素与前一个已保留元素不同就写入。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def removeDuplicates(nums):
+    if not nums:
+        return 0
+    slow = 1                      # 第一个元素必然保留
+    for fast in range(1, len(nums)):
+        if nums[fast] != nums[slow - 1]:   # 与上一个保留的比，不重复才写入
+            nums[slow] = nums[fast]
+            slow += 1
+    return slow
+
+nums = [0, 0, 1, 1, 1, 2, 2, 3]
+print(removeDuplicates(nums))     # 4（前四项有效：0,1,2,3）</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>问题</th><th>快慢指针关键判断</th><th>写入内容</th><th>收尾</th></tr>
+      <tr><td><b>移除元素</b>（27）</td><td><code class="mono">nums[fast] != val</code></td><td>快指针的值</td><td>无需处理（最终长度由 slow 决定）</td></tr>
+      <tr><td><b>移动零</b>（283）</td><td><code class="mono">nums[fast] != 0</code></td><td>快指针的值</td><td>把 slow 之后全部填 0</td></tr>
+      <tr><td><b>去重</b>（26）</td><td><code class="mono">nums[fast] != nums[slow-1]</code></td><td>快指针的值</td><td>无需处理（结果为前 slow 项）</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>判断对象各不相同——27 是「和目标值比」，283 是「和 0 比」，26 是「和上一个<b>已保留</b>的元素比」。三个都用一个 <code class="mono">slow</code> 指针，但「拿谁比较」要写对。26 里比较的是 <code class="mono">nums[slow-1]</code>，不是 <code class="mono">nums[fast-1]</code>——因为 <code class="mono">nums[fast-1]</code> 可能是已被覆盖的旧值。</p></div>
+  </section>
+
+  <section class="topic" id="opposite">
+    <h3><span class="kno">力扣 15</span>相向双指针 · 三数之和<span class="pt">排序 + 左右夹逼 + 去重剪枝</span></h3>
+    <p>快慢双指针让 <code class="mono">fast</code> 一直往一个方向走；而<b>相向双指针</b>则是让 <code class="mono">lo</code> 从头、<code class="mono">hi</code> 从尾<b>相向靠拢</b>。它通常配合「<b>先排序</b>」使用，用于求和、配对、找两个数之类的问题。看【力扣 15 三数之和】：在数组里找所有 <code class="mono">nums[i] + nums[j] + nums[k] = 0</code> 且下标互不相同的三元组，要求<b>去重</b>。</p>
+    <div class="gitgraph">
+<pre class="mermaid">
+flowchart LR
+  sort["先排序 O(n log n)"] --> fix["固定 i（跳过重复 & 剪枝）"]
+  fix --> pair["lo = i+1, hi = n-1"]
+  pair --> sum{"nums[i]+nums[lo]+nums[hi] ?"}
+  sum -- "== 0" --> ok["记录三元组<br>lo++ 且 hi-- 同时跳过重复"]
+  sum -- "&lt; 0" --> inc["lo++（和太小，加大的）"]
+  sum -- "&gt; 0" --> dec["hi--（和太大，减小）"]
+  ok --> pair
+  inc --> pair
+  dec --> pair
+</pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def threeSum(nums):
+    nums.sort()                       # 关键：先排序，才能夹逼 & 去重
+    n = len(nums)
+    res = []
+    for i in range(n - 2):
+        if i &gt; 0 and nums[i] == nums[i - 1]:   # 跳过重复的固定值（去重）
+            continue
+        if nums[i] &gt; 0:                        # 最小元素 &gt; 0，后面的和必 &gt; 0，直接停
+            break
+        lo, hi = i + 1, n - 1
+        while lo &lt; hi:
+            s = nums[i] + nums[lo] + nums[hi]
+            if s == 0:
+                res.append([nums[i], nums[lo], nums[hi]])
+                lo += 1
+                hi -= 1
+                while lo &lt; hi and nums[lo] == nums[lo - 1]:   # 跳过重复的左值
+                    lo += 1
+                while lo &lt; hi and nums[hi] == nums[hi + 1]:   # 跳过重复的右值
+                    hi -= 1
+            elif s &lt; 0:
+                lo += 1
+            else:
+                hi -= 1
+    return res
+
+print(threeSum([-1, 0, 1, 2, -1, -4]))
+# [[-1, -1, 2], [-1, 0, 1]]</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>三数之和 = <b>「固定一个数」+「对剩下的有序子数组做两数之和（相向双指针）」</b>。相向指针为什么能把 O(n²) 的两层嵌套压成 O(n)？因为一旦排序，指针只会<strong>单向移动</strong>：和太小就 <code class="mono">lo++</code> 变大，和太大就 <code class="mono">hi--</code> 变小，绝不回头。整体复杂度 <b>O(n log n)（排序）+ O(n²)（双指针）= O(n²)</b>，额外空间 <b>O(1)</b>（不计结果）。</p></div>
+    <div class="callout danger"><span class="i">✕</span><p><b>高频错误：</b>① 忘了<b>排序</b>——在乱序数组上相向双指针不成立；② <b>去重漏了</b>，结果出现重复三元组；③ 用了 <code class="mono">set</code> 每次 <code class="mono">in</code> 判断去重，空间变 O(n)；④ 排序后没有利用 <code class="mono">nums[i] &gt; 0</code> 提前 <code class="mono">break</code> 剪枝，白白多跑。</p></div>
+    <p>顺带一提，<b>相向双指针</b>也能解「有序数组的两数之和」【力扣 167】，逻辑更简单：和等于目标返回下标，小于则 <code class="mono">lo++</code>，大于则 <code class="mono">hi--</code>。你会在「哈希表」一节用另一种做法把 167 再做一遍，体会「空间换时间」的取舍。</p>
+  </section>
+
+  <section class="topic" id="merge">
+    <h3><span class="kno">力扣 88</span>从后往前的三指针 · 合并有序数组<span class="pt">利用尾部空位，逆序填充避免覆盖</span></h3>
+    <p>合并两个<b>有序</b>数组，最直觉的写法是「双指针从前往后」，但这需要额外数组，因为<b>小的放前面会覆盖还没比较的元素</b>。妙招是：<b>从后往前</b>。因为 <code class="mono">nums1</code> 尾部有空位，且两数组都有序，把「较大者」放到 <code class="mono">nums1</code> 的最末尾，永远不会覆盖我们还没用到的东西。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def merge(nums1, m, nums2, n):
+    i, j, p = m - 1, n - 1, m + n - 1   # i: nums1 有效尾, j: nums2 尾, p: 写入位置
+    # 每次把较大的放到 nums1 末尾；nums2 空了就结束（nums1 剩余自然有序）
+    while j &gt;= 0:
+        if i &gt;= 0 and nums1[i] &gt; nums2[j]:
+            nums1[p] = nums1[i]
+            i -= 1
+        else:
+            nums1[p] = nums2[j]
+            j -= 1
+        p -= 1
+    return nums1
+
+nums1, nums2 = [1, 2, 3, 0, 0, 0], [2, 5, 6]
+print(merge(nums1, 3, nums2, 3))     # [1, 2, 2, 3, 5, 6]</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>三个指针各司其职——<code class="mono">i</code> 看 <code class="mono">nums1</code> 有效部分、<code class="mono">j</code> 看 <code class="mono">nums2</code>、<code class="mono">p</code> 指向 <code class="mono">nums1</code> 要填的位置（从末尾往前）。因为「大的放最后」且尾部是空的，<b>倒序填充不会覆盖任何未处理的有效元素</b>。复杂度 <b>O(m+n) 时间、O(1) 空间</b>。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>① 把「从前往后」的写法直接套用会覆盖 <code class="mono">nums1</code> 里还没比较的元素；② 忘记 <code class="mono">nums1</code> 的有效长度是 <code class="mono">m</code>（前 m 个有值，后面的 0 是占位），直接用 <code class="mono">len(nums1)</code> 会导致错误；③ 循环结束条件是 <code class="mono">j &gt;= 0</code>——当 <code class="mono">nums2</code> 已全部放完就结束，因为此时 <code class="mono">nums1</code> 剩余的部分已经有序且无需移动。</p></div>
+  </section>
+
+  <section class="topic" id="sliding-window">
+    <h3><span class="kno">力扣 209</span>滑动窗口 · 长度最小的子数组<span class="pt">可变窗口 · 单调扩展与收缩</span></h3>
+    <p><b>滑动窗口（sliding window）</b>专门对付「<b>连续子段 / 子串</b>」类问题——要求满足某个条件，且条件随窗口「扩大或缩小」能维持。看【力扣 209 长度最小的子数组】：给一个正整数数组和一个目标值 <code class="mono">target</code>，找和 ≥ <code class="mono">target</code> 的<b>最短</b>连续子数组。<code class="mono">left</code> 与 <code class="mono">right</code> 两个指针共同圈出一个「窗口」，右边界不断向右扩展，一旦窗口和满足条件，就尽量把左边界收进来，找更短的窗口。</p>
+    <div class="gitgraph">
+<pre class="mermaid">
+flowchart LR
+  l["left = 0, cur = 0"] --> r["right 向右扩展<br>cur += nums[right]"]
+  r --> chk{"cur &gt;= target ?"}
+  chk -- "是" --> shrink["更新最短长度<br>cur -= nums[left]; left++"]
+  shrink --> chk
+  chk -- "否" --> r
+  shrink --> ret["返回最短长度（无解返回 0）"]
+</pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def minSubArrayLen(target, nums):
+    left = 0
+    cur = 0
+    ans = float('inf')
+    for right in range(len(nums)):
+        cur += nums[right]                    # 右边界扩展，纳入新元素
+        while cur &gt;= target:                  # 窗口满足条件，尝试收缩左边界
+            ans = min(ans, right - left + 1)
+            cur -= nums[left]
+            left += 1
+    return ans if ans != float('inf') else 0
+
+print(minSubArrayLen(7, [2, 3, 1, 2, 4, 3]))  # 2（子数组 [4,3]）
+print(minSubArrayLen(11, [1, 1, 1]))          # 0（无解）</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>窗口的<b>两个边界都只向右移动</b>，绝不回头——这是滑动窗口 O(n) 的关键。外层 <code class="mono">for</code> 让 <code class="mono">right</code> 走完全程；内层 <code class="mono">while</code> 只要满足了条件就不断收缩 <code class="mono">left</code>，从而得到「以当前 <code class="mono">right</code> 结尾的最短可行窗口」。每个元素至多被 <code class="mono">right</code> 和 <code class="mono">left</code> 各碰一次，所以<b>总 O(n) 时间、O(1) 空间</b>。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>① 窗口收缩条件写错——应当用 <code class="mono">while cur &gt;= target</code>（满足条件就继续收缩），而不是 <code class="mono">if</code>（只收一次，会漏掉更短窗口）；② 忘了处理「始终凑不齐」的情况，应返回 <code class="mono">0</code>；③ 窗口必须<b>连续</b>，若题目允许跳过元素（如子序列），滑动窗口就不适用，要换动态规划。</p></div>
+    <p>进阶：把「求和 ≥ 某值」换成「包含某字符串所有字符」就变成了【力扣 76 最小覆盖子串】。步骤一样——扩展右边界、用计数器维护窗口内字符、满足条件后收缩左边界，但收缩条件更复杂（要看是否还包含目标字符）。这道题可以作为「进阶挑战」自己动手练一练。</p>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>力扣 76 · 最小覆盖子串：</b>用「滑动窗口 + 字符计数器」实现。提示：<code class="mono">left</code>/<code class="mono">right</code> 双边界只前进；用 <code class="mono">collections.Counter</code> 记录 <code class="mono">t</code> 需要哪些字符、以及窗口还缺几个；一旦缺的变成 0 就收缩左边界并记录更优答案。完成后口算它的复杂度（参考答案：O(|s|)，O(|t|) 额外空间）。</li>
+      <li><b>力扣 11 · 盛最多水的容器：</b>用「相向双指针」求两条线之间能装的最大水量。提示：让 <code class="mono">lo</code>/<code class="mono">hi</code> 从两端相向靠拢，每次<b>移动较矮的那一边</b>（因为宽度减小，要想面积变大只能寄希望于更高的线）。说明为什么这样不会漏掉最优解。</li>
+      <li><b>一道二选一的思考题：</b>对比「快慢双指针」「相向双指针」「滑动窗口」三种模式，各自给一个「<b>绝对不能用</b>它」的反例（比如：滑动窗口对「无序数组求子序列和」为何失效？相向双指针对「未排序求两数」为何需要先排序？），并说明判断的直觉。</li>
+      <li><b>动手实现：</b>不用内置 <code class="mono">sort()</code>，手写一个 <code class="mono">quicksort(nums, arr)</code> 再用「排序 + 双指针」解出【力扣 15 三数之和】，并打印每一步 <code class="mono">lo / hi / sum</code> 的轨迹，习惯「用纸笔推演指针移动」的刷题方式。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="14-lc-array" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="13-advanced.html"><span class="d">上一节</span><span class="t" id="footPrevT">迭代器、生成器与装饰器</span></a>
+      <a class="card nxt" id="footNext" href="15-lc-hash.html"><span class="d">下一节</span><span class="t" id="footNextT">算法 · 哈希表与查找</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "14-lc-array",            // 本页知识点 id（= 大纲里的 id），如 "06-list-tuple"
+  title: "算法 · 数组与字符串",
+  eyebrow: "PYTHON · 算法",
+  prev: "13-advanced.html",     // 上一节文件名，如 "05-string.html"；首页留 ""
+  next: "15-lc-hash.html",      // 下一节文件名；最后一节留 ""
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"【力扣 27 移除元素】双指针解法中，变量 slow 的含义是？",
+    opts:["快指针，用来遍历数组查找 val","下一个可写入的位置，同时也是返回的最终长度","记录 val 出现的次数","数组的最后一个下标"],
+    ans:1,
+    exp:"slow 是「下一个可写入的位置」——它同时等于「已经成功保留的元素个数」，所以函数返回 slow 即为移除后的新长度。fast 才是用来遍历探路的那个指针。"
+  },
+  {
+    type:"quiz",
+    q:"【力扣 283 移动零】原地解法的时间复杂度和额外空间复杂度分别是？",
+    opts:["O(n²)，O(1)","O(n)，O(n)","O(n)，O(1)","O(log n)，O(1)"],
+    ans:2,
+    exp:"双指针只遍历一遍（fast 走完全程、slow 填 0），每个元素被访问常数次，所以 O(n)；没有借助额外数组，只用 slow/fast 两个下标，额外空间 O(1)。用 remove 逐元素删才会退化成 O(n²)。"
+  },
+  {
+    type:"quiz",
+    q:"【力扣 88 合并两个有序数组】为什么推荐「从后往前」合并而不是从前往后？",
+    opts:["因为从后往前更快","因为 nums1 尾部有足够的空位，从后往前填不会覆盖还没有比较过的有效元素","为了让结果变成倒序","其实没有区别，两种写法同样安全"],
+    ans:1,
+    exp:"nums1 后面的 0 是预留的空位。从前往后合并时，较小的元素往头部放，可能覆盖掉 nums1 里尚未处理的元素；而从后往前，把「较大者」放到末尾空位，永远不碰还没比较的有效元素，因此能原地 O(1) 完成。注意 i/j/p 三个指针要从有效长度 m、n 开始，而不是 len(nums1)。"
+  },
+  {
+    type:"quiz",
+    q:"【力扣 209 长度最小的子数组】内层 while cur >= target 那段循环的作用是？",
+    opts:["扩大右边界，让窗口和变大","在满足 sum ≥ target 时尽量收缩左边界，得到以当前右端点结尾的最短窗口","清空整个窗口的累加和","把窗口内元素全部置零"],
+    ans:1,
+    exp:"外层 for 让 right 不断向右并累加。一旦窗口和 ≥ target（满足条件），内层 while 就尝试「收缩左边界」，因为右边界不动时，窗口越短越好。每收缩一次就更新一次最短长度，直到窗口和 < target 才停止继续扩大右边界。这保证每个元素被 right 和 left 各碰一次，整体 O(n)。"
+  },
+  {
+    type:"quiz",
+    q:"【力扣 15 三数之和】为什么必须先排序？",
+    opts:["排序能让代码运行得更快（从 O(n³) 降到 O(n²)）","排序后可用相向双指针在 O(n) 内算两数之和，同时方便跳过重复元素去重","题目强制要求有序","排序后复杂度能降到 O(n)"],
+    ans:1,
+    exp:"三数之和本质是「固定一个数 + 在剩余有序子数组里用相向双指针求两数之和」。只有数组有序，左右夹逼才能根据和的大小单向移动 lo/hi（O(n)）；并且排序让重复元素相邻，可通过 nums[i]==nums[i-1] 等跳过，从而去重。整体 O(n²)，不是 O(n)。"
+  },
+  {
+    type:"quiz",
+    q:"关于「相向双指针」与「滑动窗口」的使用场景，下面说法正确的是？",
+    opts:["滑动窗口适合求满足某条件的「连续子串/子数组」，左右边界都只前进不回退","相向双指针适合求「连续区间和」","两者额外空间复杂度都必须是 O(n)","滑动窗口适用于任何数组问题，包括无序子序列"],
+    ans:0,
+    exp:"滑动窗口处理「连续」子段，两个边界单调向右推进（想借 O(n)）；相向双指针（如三数之和、盛最多水的容器）通常配合排序处理「配对/求和」。两者都只用常数个下标，是 O(1)。滑动窗口只对「连续且可单调维护条件」的问题有效，无序子序列如最长递增子序列要用动态规划，不能套滑动窗口。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：请向面试官解释「双指针」和「滑动窗口」的关系与区别，并说明你何时选哪个、复杂度各是多少。（建议覆盖：定义、适用条件、典型题、时空复杂度。请先想 2-3 个要点再组织回答）",
+    opts:["（请在此先思考并组织要点，再对照解析）","（面试延伸题：建议从「是否是连续区间、是否能单调维护条件」两个角度切入）"],
+    ans:1,
+    exp:"参考方向——① 双指针是「用两个下标协同遍历」的统称，包含快慢双指针（移除元素 27、移动零 283、去重 26）、相向双指针（三数之和 15、两数之和 167、盛最多水的容器 11）和从后往前（合并有序数组 88）；滑动窗口是双指针的一种特例，左右边界共同圈出「连续区间」且两个边界都只前进。② 选型：问题是「连续子串/子数组 + 单调可维护条件」→ 滑动窗口（209、3、76）；问题可排序且「配对/求和/夹逼」→ 排序 + 相向双指针（15、167）；要「原地重排/去重/移除」→ 快慢双指针（27、283、26）。③ 复杂度：三者通常都是 O(n) 时间（相向/从后往前为 O(n)，排序场景则 O(n log n)），额外空间 O(1)——这是它们对比暴力 O(n²)/O(n³) 的核心优势。能说出「根据问题是否连续、是否有序、能否单调维护」来做判断，最加分。"
+  }
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错题记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

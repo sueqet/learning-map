@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>模块、包与标准库 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 模块、包与标准库：理解 import 机制与包的层次、sys.modules 缓存、__name__ 用法，并落地常用标准库（datetime/random/collections/pathlib/os/sys）。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{margin-left:auto;font-size:12px;font-family:var(--font-mono);color:var(--muted);white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">模块、包与标准库</b></span>
+    <div class="pager"><a id="prevLink" href="10-file.html">← 上一节</a><a id="nextLink" href="12-oop.html">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 基础</span></span>
+    <h1 id="pageTitle">模块、包与<span class="accent">标准库</span></h1>
+    <p class="lead" id="pageLead">程序一变复杂，就要把代码拆成可复用的<b>模块（.py 文件）与包（目录）</b>。本节讲清 import 机制、包的组织，并带你熟练调用<b>标准库</b>——用几行代码搞定日期、随机数、统计与路径处理。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能说出模块与包的区别，并解释为什么要按职责拆分代码。</li>
+      <li>学完后，你能用 <code class="mono">import / from / as</code> 导入代码，并根据 <code class="mono">sys.path</code> 排查 <code class="mono">ImportError</code>。</li>
+      <li>学完后，你能解释模块为何只执行一次（<code class="mono">sys.modules</code> 缓存），并避免在模块顶层做副作用。</li>
+      <li>学完后，你能创建自己的包，用 <code class="mono">__init__.py</code> 统一导出，并用相对导入组织包内模块。</li>
+      <li>学完后，你能用 <code class="mono">if __name__ == "__main__"</code> 让脚本既可被运行、又可被导入。</li>
+      <li>学完后，你能熟练调用常用标准库（<code class="mono">datetime/random/collections/pathlib/os/sys</code> 等）完成常见任务。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">请先掌握 <b>函数与作用域</b>、<b>异常处理</b>，并了解上一节「文件与路径」。记住一个直觉——<b>模块就是一个 .py 文件、包就是一个目录</b>，本节就会很顺。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>模块化结构<br>从单个 .py 文件到成体系的包</h2>
+  </section>
+
+  <section class="topic" id="why-modular">
+    <h3><span class="kno">小节</span>为什么需要模块与包<span class="pt">module · package · 命名空间</span></h3>
+    <p>在 Python 里，<b>一个 .py 文件就是一个模块（module）</b>，<b>一个含 <code class="mono">__init__.py</code> 的目录就是一个包（package）</b>。把同一类功能抽成一个模块，就能在多个文件里复用，同时让各自的命名空间彼此隔离——这是从「写脚本」迈向「写项目」的第一步。</p>
+    <ul>
+      <li><b>复用</b>：同一段逻辑（判分、格式化、发请求）只写一次，随处 import。</li>
+      <li><b>隔离</b>：每个模块拥有自己的命名空间，函数与变量不会互相污染、撞名。</li>
+      <li><b>可测 & 协作</b>：模块职责单一，便于单独测试与多人分工。</li>
+      <li><b>组织</b>：把相关模块收进一个包，形成清晰的目录树。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 文件：mymath.py —— 这就是一个模块
+def add(a, b):
+    return a + b
+
+def mul(a, b):
+    return a * b
+
+# 文件：main.py —— 在另一个文件里复用这个模块
+import mymath
+print(mymath.add(2, 3))   # 5
+print(mymath.mul(3, 4))   # 12</code></pre>
+    </div>
+    <div class="mermaid">
+flowchart LR
+    A[一个 Python 项目] --> B[包 package<br>目录 + __init__.py]
+    A --> C[单个模块 .py 文件<br>可直接运行]
+    B --> D[若干模块 .py]
+    D --> E[函数 / 类 / 变量]
+    C --> E
+</div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>记住这句：<b>模块 = .py 文件，包 = 目录</b>。命名空间隔离是模块化最大的价值——各写各的，互不干扰。</p></div>
+  </section>
+
+  <section class="topic" id="import-ways">
+    <h3><span class="kno">小节</span>import 的三种写法与 sys.path<span class="pt">import · from · as · sys.path</span></h3>
+    <p>导入模块主要有三种写法，差别在于「把多少名字带进当前作用域」。惯例是<b>显式列出</b>需要的名字，避免命名空间失控。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">import mymath                 # 整模块导入，须用 模块名.名字 访问
+print(mymath.add(2, 3))
+
+from mymath import add, mul   # 只导入需要的名字，直接用
+print(add(2, 3))
+
+import mymath as m            # 起别名，常用于名字冲突或长包名
+print(m.mul(3, 4))
+
+import os, sys, datetime      # 一行导入多个模块</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>写法</th><th>访问方式</th><th>适用场景</th></tr>
+      <tr><td><code class="mono">import module</code></td><td><code class="mono">module.name</code></td><td>意图清晰、不污染当前作用域，<b>最推荐</b></td></tr>
+      <tr><td><code class="mono">from module import name</code></td><td><code class="mono">name</code></td><td>常用名字，省去模块前缀</td></tr>
+      <tr><td><code class="mono">import module as alias</code></td><td><code class="mono">alias.name</code></td><td>简短、避免与同名变量/模块混淆</td></tr>
+      <tr><td><code class="mono">from module import *</code></td><td>全部名字</td><td>不推荐：把大量名字塞进当前作用域，易冲突</td></tr>
+    </table>
+    <p>Python 按 <code class="mono">sys.path</code> 中的目录<b>顺序查找模块，命中第一个即停</b>。默认列表通常以 <code class="mono">''</code>（代表当前目录）开头。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">import sys
+print(sys.path)      # 解释器按这些目录顺序找模块
+# 常见内容: ['', '/usr/local/lib/python3.12', ...]   '' 表示当前目录
+
+# 临时往搜索路径里加一个目录
+if "/some/custom/lib" not in sys.path:
+    sys.path.append("/some/custom/lib")</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>别用 <code class="mono">from module import *</code>——它会把你并不知道的一堆标识符导入当前作用域，出错极难排查。显式列名字或用模块前缀（<code class="mono">module.name</code>）最稳。</p></div>
+    <div class="callout warn"><span class="i">!</span><p><b>提醒：</b>查找是「按顺序、命中即停」。把同名模块放在不同目录、或库安装路径不对，都会抛 <code class="mono">ImportError</code>；排查时先打印 <code class="mono">sys.path</code> 与当前工作目录（<code class="mono">os.getcwd()</code>）。</p></div>
+  </section>
+
+  <section class="topic" id="sys-modules-cache">
+    <h3><span class="kno">小节</span>模块只执行一次：sys.modules 缓存<span class="pt">sys.modules · 缓存 · 顶层副作用</span></h3>
+    <p>import 一个模块时，Python 会<b>先查缓存</b>：若该模块已在 <code class="mono">sys.modules</code>，就直接返回已创建的对象，<b>不再执行顶层代码</b>。因此模块顶层代码只在<b>首次导入</b>时运行一次，重复 import 是「免费」的。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">import sys
+print("这是 mymath 的顶层，只会打印一次")
+
+import mymath     # 第一次：执行顶层代码
+import mymath     # 第二次：直接取缓存，不再执行
+print(mymath in sys.modules)   # True —— 已被缓存</code></pre>
+    </div>
+    <div class="mermaid">
+flowchart TD
+    A["import mymath"] --> B{"已在 sys.modules 缓存?"}
+    B -- 是 --> C[直接返回已创建的模块对象<br>不再执行顶层代码]
+    B -- 否 --> D[按 sys.path 定位 .py 文件]
+    D --> E[执行模块顶层代码（定义函数/类）]
+    E --> F["把模块对象写入 sys.modules"]
+    F --> C
+</div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>顶层代码只执行一次。所以<br><b>不要把副作用</b>（大量打印、读文件、发请求）放在模块顶层——import 时会触发一次；这类副作用应放进函数或 <code class="mono">__main__</code> 里。</p></div>
+  </section>
+
+  <section class="topic" id="packages">
+    <h3><span class="kno">小节</span>包与 __init__.py、相对导入<span class="pt">__init__.py · 相对导入 · 绝对导入</span></h3>
+    <p>包是「装模块的目录」。只要目录里有 <code class="mono">__init__.py</code>（可为空），它就是一个包。这个文件可用来做<b>统一导出（门面）</b>——使用者只 import 一次包，就能拿到常用 API，而不必关心包内结构。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>tree</div>
+      <pre><code class="language-text">myproj/
+  __init__.py
+  utils/
+    __init__.py
+    strings.py
+  main.py</code></pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># utils/strings.py
+def upper(s):
+    return s.upper()
+
+# utils/__init__.py —— 相对导入：把子模块的名字暴露出来
+from .strings import upper
+
+# myproj/main.py —— 绝对导入，从项目根出发
+from myproj.utils import upper
+
+def show():
+    print(upper("hello"))
+
+if __name__ == "__main__":
+    show()</code></pre>
+    </div>
+    <p>运行方式：在 <code class="mono">myproj</code> 的<b>父目录</b>执行 <code class="mono">python -m myproj.main</code>，这样 <code class="mono">import myproj...</code> 才能被找到。</p>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>相对导入以 <code class="mono">.</code>（当前包）或 <code class="mono">..</code>（上一级包）开头，<b>只在包内部有效</b>；也<b>不能</b>直接运行子模块文件（如 <code class="mono">python utils/strings.py</code>），因为此时它已脱离包语境。要用 <code class="mono">-m</code> 从包外运行。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>用 <code class="mono">from .xxx import name</code> 在包内做相对导入，配合 <code class="mono">__init__.py</code> 把这些名字「上提一层」，外部就能一行 import 拿到，封装得很干净。</p></div>
+  </section>
+
+  <section class="topic" id="dunder-name">
+    <h3><span class="kno">小节</span>__name__ == "__main__"：运行 vs 导入<span class="pt">__name__ · __main__ · 入口</span></h3>
+    <p>直接运行时，模块的 <code class="mono">__name__</code> 是 <code class="mono">"__main__"</code>；被 import 时则是「模块名」（如 <code class="mono">"tools"</code>）。利用这一区别，把演示、自测、入口代码包进 <code class="mono">if __name__ == "__main__":</code>，模块就<b>既能被导入复用、又能直接运行</b>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># tools.py
+def calc(a, b):
+    return a * b
+
+def main():                       # 入口函数
+    print(calc(3, 4))
+
+if __name__ == "__main__":        # 直接运行时才执行
+    main()
+
+# 别处 import tools：calc 可用，但 main() 不会自动跑</code></pre>
+    </div>
+    <div class="mermaid">
+flowchart LR
+    A[python tools.py<br>__name__=='__main__'] --> B[执行入口 main]
+    C[import tools<br>__name__=='tools'] --> D[只定义函数/类<br>不执行入口]
+</div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>这是「可运行又可复用」脚本的关键一行。把自测/演示代码放进 <code class="mono">if __name__ == "__main__":</code>，既不影响被 import，也能单独跑起来验证。</p></div>
+  </section>
+
+  <section class="topic" id="stdlib">
+    <h3><span class="kno">小节</span>标准库导览与实战<span class="pt">datetime · random · collections · pathlib · os · sys</span></h3>
+    <p>标准库是安装 Python 就自带的「工具箱」。记住常用模块的用途，能省下大量手写代码。下面先给一张高频清单，再动手跑一段综合例子。</p>
+    <table class="tbl">
+      <tr><th>模块</th><th>常见用途</th><th>常用 API</th></tr>
+      <tr><td><code class="mono">os / os.path</code></td><td>与操作系统交互、环境变量、路径</td><td><code class="mono">os.getcwd</code>, <code class="mono">os.getenv</code>, <code class="mono">os.environ</code>, <code class="mono">os.path.join</code></td></tr>
+      <tr><td><code class="mono">sys</code></td><td>解释器与命令行</td><td><code class="mono">sys.argv</code>, <code class="mono">sys.path</code>, <code class="mono">sys.exit</code>, <code class="mono">sys.version</code></td></tr>
+      <tr><td><code class="mono">datetime</code></td><td>日期与时间</td><td><code class="mono">datetime.now</code>, <code class="mono">timedelta</code>, <code class="mono">strftime</code></td></tr>
+      <tr><td><code class="mono">random</code></td><td>随机数与抽样</td><td><code class="mono">randint</code>, <code class="mono">choice</code>, <code class="mono">sample</code>, <code class="mono">shuffle</code></td></tr>
+      <tr><td><code class="mono">collections</code></td><td>进阶容器</td><td><code class="mono">Counter</code>, <code class="mono">defaultdict</code>, <code class="mono">deque</code>, <code class="mono">namedtuple</code></td></tr>
+      <tr><td><code class="mono">pathlib</code></td><td>面向对象的路径</td><td><code class="mono">Path</code>, <code class="mono">.glob</code>, <code class="mono">.rglob</code>, <code class="mono">.read_text</code></td></tr>
+      <tr><td><code class="mono">json</code></td><td>JSON 序列化</td><td><code class="mono">dumps</code>, <code class="mono">loads</code>, <code class="mono">dump</code>, <code class="mono">load</code></td></tr>
+      <tr><td><code class="mono">re</code></td><td>正则表达式</td><td><code class="mono">compile</code>, <code class="mono">search</code>, <code class="mono">findall</code>, <code class="mono">sub</code></td></tr>
+      <tr><td><code class="mono">itertools</code></td><td>迭代器工具</td><td><code class="mono">chain</code>, <code class="mono">product</code>, <code class="mono">permutations</code>, <code class="mono">combinations</code></td></tr>
+      <tr><td><code class="mono">functools</code></td><td>高阶函数工具</td><td><code class="mono">reduce</code>, <code class="mono">lru_cache</code>, <code class="mono">partial</code></td></tr>
+      <tr><td><code class="mono">math</code></td><td>数学</td><td><code class="mono">sqrt</code>, <code class="mono">pi</code>, <code class="mono">floor</code>, <code class="mono">gcd</code></td></tr>
+      <tr><td><code class="mono">time</code></td><td>计时与延迟</td><td><code class="mono">time.time</code>, <code class="mono">time.sleep</code></td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">import datetime
+now = datetime.datetime.now()
+print(now.strftime("%Y-%m-%d %H:%M:%S"))
+print((now + datetime.timedelta(days=3)).strftime("%Y-%m-%d"))
+
+import random
+print(random.randint(1, 100))                 # 1~100 的整数
+print(random.choice(["红", "绿", "蓝"]))       # 等概率选一个
+print(random.sample(range(100), 5))           # 不重复抽 5 个
+deck = ["A", "K", "Q", "J"]; random.shuffle(deck)
+
+from collections import Counter, defaultdict, deque, namedtuple
+print(Counter("hello world").most_common(3))   # 统计 + 取前 3
+d = defaultdict(list); d["k"].append(1)        # 免去先初始化
+dq = deque([1, 2, 3]); dq.appendleft(0)
+Point = namedtuple("Point", ["x", "y"]); print(Point(1, 2).x)
+
+from pathlib import Path
+print(Path.cwd().name)                         # 当前目录名
+
+import os, sys
+print(os.getenv("PATH")[:40])                  # 读环境变量
+print(sys.argv)                                # 命令行参数列表</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>记不住所有 API 没关系，记住「每个模块一句话用途」并会查<a href="https://docs.python.org/zh-cn/3/library/index.html" target="_blank">官方文档</a>即可。用时 <code class="mono">dir(模块)</code> 看有哪些名字，<code class="mono">help(模块.函数)</code> 看用法。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b><code class="mono">sys.argv</code> 的<b>第一个元素是脚本文件名</b>（不是第一个参数），真正取参数要从 <code class="mono">sys.argv[1]</code> 开始；没传参数时列表很短，用前记得判空，否则会 <code class="mono">IndexError</code>。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>把上一节「文件与路径」的读写逻辑重构成一个 <code class="mono">file_ops.py</code> 模块：提供 <code class="mono">read_text(path)</code>、<code class="mono">write_text(path, content)</code>、<code class="mono">count_lines(path)</code> 三个函数，并在 <code class="mono">__main__</code> 里跑自测——体会从「脚本」到「模块」的重构。</li>
+      <li>创建 <code class="mono">validators/</code> 包，内含 <code class="mono">email.py</code> 与 <code class="mono">phone.py</code>；用相对导入在 <code class="mono">__init__.py</code> 里暴露 <code class="mono">is_email()</code> / <code class="mono">is_phone()</code>，再在项目根用 <code class="mono">from validators import is_email</code> 调用。</li>
+      <li>思考题：为什么会发生<b>循环导入</b>？造两个互相 import 的模块 <code class="mono">a.py</code>、<code class="mono">b.py</code>，看报错；再把其中一个 import 移进函数内，验证能否绕过。</li>
+      <li>动手：写一个命令行小工具，用 <code class="mono">sys.argv</code> 接收参数、用 <code class="mono">random</code> 抽奖、用 <code class="mono">datetime</code> 记录时间，把中奖名单与时间写入 <code class="mono">winners.json</code>。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="11-module" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="10-file.html"><span class="d">上一节</span><span class="t">文件与路径</span></a>
+      <a class="card nxt" id="footNext" href="12-oop.html"><span class="d">下一节</span><span class="t">面向对象</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "11-module",                 // 本页知识点 id（= 大纲里的 id）
+  title: "模块、包与标准库",
+  eyebrow: "PYTHON · 基础",
+  prev: "10-file.html",            // 上一节文件名
+  next: "12-oop.html",             // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于 Python 的模块与包，下面哪项说法是正确的？",
+    opts:["每个 .py 文件是一个模块；每个含 __init__.py 的目录是一个包","只有用 package 才叫模块，.py 文件不能当模块","一个包必须至少包含两个 .py 文件","模块只能被 import 一次，重复 import 会直接报错"],
+    ans:0,
+    exp:"模块 = .py 文件；包 = 含 __init__.py 的目录。B 倒置了；C 说包至少要两个文件，错——一个空的 __init__.py 也是包；D 错，重复 import 不会报错，而是走 sys.modules 缓存。"
+  },
+  {
+    type:"quiz",
+    q:"执行 import math as m 之后，想使用数学库的 sqrt，正确的写法是？",
+    opts:["sqrt(4)","math.sqrt(4)","m.sqrt(4)","from m import sqrt"],
+    ans:2,
+    exp:"import ... as m 给模块起别名 m，因此用 m.sqrt(4)。A 没有模块前缀，当前作用域未必有 sqrt；B 用的是原模块名 math，此处未导入；D 把 m 当成模块名再次 import，是错误写法。"
+  },
+  {
+    type:"quiz",
+    q:"关于「模块只执行一次」，下面哪项是正确的？",
+    opts:["每次 import 都会重新执行模块顶层代码","模块对象被缓存在 sys.modules，仅首次导入执行顶层代码，后续直接复用","模块永远不会执行，除非显式调用","只要 import 两次，就会执行两次顶层代码"],
+    ans:1,
+    exp:"模块在首次导入时执行顶层代码，并把模块对象写入 sys.modules；之后再 import 直接取缓存、不再重跑。A、D 忽略缓存；C 显然不对，import 就会执行一次顶层代码。"
+  },
+  {
+    type:"quiz",
+    q:"sys.path 这个列表的作用是？",
+    opts:["保存当前用户的环境变量","决定 import 时按哪些目录顺序查找模块","记录已导入的全部模块对象","设置解释器启动时的命令行参数"],
+    ans:1,
+    exp:"sys.path 是模块搜索路径列表，import 按其中目录顺序查找。B 正确。A 环境变量在 os.environ；C 记录已导入模块的是 sys.modules；D 命令行参数是 sys.argv——三者别混淆。"
+  },
+  {
+    type:"quiz",
+    q:"想让一个模块既能被导入复用、也能被直接运行，应该在模块末尾加上？",
+    opts:["if __name__ == \"__main__\":","from __future__ import print_function","import module as mb","pass"],
+    ans:0,
+    exp:"直接运行时 __name__=='__main__'，被导入时 __name__ 是模块名。用它把「演示/自测/入口」代码包起来，导入时不会触发，运行时才执行。这是可复用脚本的关键一行。"
+  },
+  {
+    type:"quiz",
+    q:"包内 from .strings import upper 中的点号 . 表示什么？",
+    opts:["当前文件所在目录的上一级","当前包（包含该模块的同一个包）","全局搜索路径 sys.path","当前工作目录 cwd"],
+    ans:1,
+    exp:"相对导入中 . 表示「当前包」，.. 表示「上一级包」。它只在包内部有效，且仅在包语境下可用——直接运行子模块文件会报错。A、B 的区分点就是易错点。"
+  },
+  {
+    type:"quiz",
+    q:"想统计一段文本里各字符出现次数并取前 3 个，最省事的是？",
+    opts:["手写 dict 计数再排序","from collections import Counter; Counter(text).most_common(3)","random.choice(text)","re.findall(text, text)"],
+    ans:1,
+    exp:"collections.Counter 直接统计出现次数，most_common(3) 按频次降序取前 3，一行搞定。A 也可行但繁琐；C 是随机取字符，跟统计无关；D 是正则查找，不会做频次统计。"
+  },
+  {
+    type:"interview",
+    q:"[面试延伸] 请谈谈 import 的查找机制：Python 如何决定在哪些目录找模块？sys.modules 缓存起什么作用，为何顶层代码只在首次导入执行？绝对导入与相对导入分别用在什么场景？又如何避免循环导入？",
+    opts:["解释器只在当前目录找模块；sys.modules 为空时每次 import 都重新加载；顶层代码每次 import 都执行；相对/绝对导入无差别；循环导入无法避免只能换写法。","模块按 sys.path 顺序查找、命中即停；首次导入执行顶层代码并把模块对象存入 sys.modules，后续 import 直接取缓存不再重跑；绝对导入（import package.name）从项目根出发、相对导入（from . import x）在包内部用；循环导入要靠把 import 移进函数或调整依赖顺序来避免。","import 只是语法，不涉及路径；模块从不缓存，因而总是重新加载；绝对导入与相对导入完全一样；循环导入会导致程序崩溃，只能删除其中一个模块。","sys.modules 只存已安装的第三方库；顶层代码每次 import 都会执行，除非有 __pycache__；from package import name 只能用于第三方包；相对导入无法被禁用。"],
+    ans:1,
+    exp:"关键要点：① import 按 sys.path 顺序查模块目录，命中即停（路径不对就报 ImportError）。② 首次导入执行顶层代码并把模块对象写进 sys.modules，之后 import 直接返回缓存对象，所以顶层代码只执行一次、重复 import 免费。③ 绝对导入从项目根定位最稳，适合代码库内部与外部使用；相对导入更贴近包内组织、重构时更灵活，但只在包内有效。④ 循环导入的两个模块互相等待，可用「把 import 移进函数内(延迟导入)」或「重构依赖方向让一方不导入另一方」来解决。A、C、D 都对机制理解有误。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

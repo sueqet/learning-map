@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>撤销、回退与恢复 · Git 版本协作</title>
+<meta name="description" content="Git 版本协作学习页 —— 撤销、回退与恢复：git reset 三档、git revert、restore/checkout 与 reflog 找回误删，含学习目标、正文讲解与考核练习。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 gitGraph / flowchart 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f5f2eb;--paper-2:#fdfcf8;--ink:#211d16;--ink-soft:#4e4838;--muted:#8a8069;
+    --line:#e7e0cf;--line-2:#d6cdb6;
+    --orange:#c8442e;--orange-soft:#f9ece6;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#376a8f;--blue-soft:#e9f1f7;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#20221c;--code-ink:#e7e4cf;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(33,29,22,.04),0 12px 32px -20px rgba(33,29,22,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(200,68,46,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,242,235,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262a21;font-family:var(--font-mono);font-size:11px;color:#a9a689;border-bottom:1px solid #34382b}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #edd5c9;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#b13a27}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(33,29,22,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Git 版本协作 · <b id="navTitle">知识点标题</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">GIT · 协作</span></span>
+    <h1 id="pageTitle">撤销、回退与恢复</h1>
+    <p class="lead" id="pageLead">代码改错了、提交错了、甚至误删了提交，别慌。这一节讲清楚 <b>reset / revert / restore / checkout / reflog</b> 五把「后悔药」分别作用在哪一层、什么场景该用哪个，让你既不丢内容，也不把团队的共享历史搞乱。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能说清 <code>git reset</code> 的 <b>--soft / --mixed / --hard</b> 三档各自动了哪一层（HEAD 指针、暂存区、工作区）。</li>
+      <li>学完后，你能区分「撤销已推送提交」和「改写本地未推送提交」，并正确选择 revert 或 reset。</li>
+      <li>学完后，你能用 <code>git restore</code> 恢复文件、用 <code>git checkout</code> 切换分支，并说清二者与 reset/revert 的区别。</li>
+      <li>学完后，你能用 <code>git reflog</code> 找回被 <code>reset --hard</code> 或删分支后「看似丢失」的提交。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">会用命令行、熟悉 <code>add / commit / push</code>；理解工作区（working tree）、暂存区（index/stage）、仓库（HEAD 提交）三层结构；知道分支与 HEAD 指向的含义。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>撤销、回退与恢复<br>先看清你在改哪一层，再动手</h2>
+  </section>
+
+  <section class="topic" id="reset">
+    <h3><span class="kno">小节</span>git reset 的三档（--soft/--mixed/--hard）<span class="pt">与 HEAD~ 引用</span></h3>
+    <p><b>一句话：<code>git reset</code> 的本质是把当前分支的 <code>HEAD</code> 指针移回某个目标提交</b>（通常用 <code>HEAD~</code> 表示「上一个提交」），移动完之后「还要不要重置暂存区、要不要重置工作区」由后面这个 <code>--&lt;mode&gt;</code> 决定。整个它只在你本地生效，几乎总要改写（rewrite）历史，所以<b>只适合还没推送出去的提交</b>。</p>
+    <p>先记住 Git 的三个「区」：工作区（你看到的实际文件）、暂存区（index，<code>git add</code> 放进去的快照）、仓库（<code>HEAD</code> 指向的最新提交）。<code>reset</code> 的每一档就是「把魔爪伸到哪一层」。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 常见的 HEAD 引用
+git reset HEAD~1            # 回到上一个提交（默认 --mixed）
+git reset HEAD~2            # 回到再往前一个
+git reset HEAD^             # HEAD 的父提交（合并提交时 ^ 指第一父）
+git reset --soft HEAD~1     # 只移动 HEAD 指针
+git reset --mixed HEAD~1    # 移动 HEAD + 清空暂存区（改动保留在工作区）
+git reset --hard HEAD~1     # 移动 HEAD + 清空暂存区 + 丢弃所有工作区改动！</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead>
+        <tr><th>命令档位</th><th>移动 HEAD</th><th>清空暂存区（index）</th><th>改动工作区</th><th>那次提交的改动去哪了</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>--soft</code></td>
+          <td>✔</td><td>✘</td><td>✘</td>
+          <td><b>仍留在暂存区</b>，等你重新 <code>commit</code>（改动已暂存，最「轻」）</td>
+        </tr>
+        <tr>
+          <td><code>--mixed</code>（默认）</td>
+          <td>✔</td><td>✔</td><td>✘</td>
+          <td><b>回到工作区、变成未暂存</b>，需要重新 <code>add</code> 再提交</td>
+        </tr>
+        <tr>
+          <td><code>--hard</code></td>
+          <td>✔</td><td>✔</td><td>✔</td>
+          <td><b>彻底丢光</b>（连同工作区里未提交的改动一起），工作区回到目标提交的样子</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead>
+        <tr><th>引用写法</th><th>含义（HEAD 引用 & reflog）</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>HEAD</code></td><td>当前分支指向的最新提交</td></tr>
+        <tr><td><code>HEAD~</code> / <code>HEAD~1</code></td><td>当前提交的父提交（第一父提交），即「上一个提交」</td></tr>
+        <tr><td><code>HEAD~2</code></td><td>往前数第 <b>2</b> 个提交（祖父提交）</td></tr>
+        <tr><td><code>HEAD^</code></td><td>当前提交的第一父提交；合并提交时可写 <code>HEAD^2</code> 指第二父提交</td></tr>
+        <tr><td><code>HEAD@{1}</code></td><td>reflog 中「上一次」HEAD 的位置，常用来找回被 <code>reset --hard</code> 甩掉的提交</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>这样记：</b>没写档位时默认 <code>--mixed</code>；<code>--soft</code> 只「拔指针」，<code>--mixed</code> 再「吐回暂存区」，<code>--hard</code> 最后「连工作区一起清」。越往右破坏力越强——如果你只是想把几个提交「并成一个再提交」，用 <code>--soft</code> 最安全；想彻底抹掉一个错误的本地提交且不保留改动，才考虑 <code>--hard</code>。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错警告：<code>--hard</code> 会丢弃未提交的工作区改动。</b>它把工作区直接重置为目标提交的状态，你「改了还没 <code>add</code>/<code>commit</code>」的内容会被永久清掉。如果工作区里有还没保存的改动，先 <code>git stash</code> 暂存起来，或用 <code>--soft</code>/<code>--mixed</code> 保留改动，再决定要不要丢。并且——<code>reset --hard</code> 之后提交看似「没了」，但 <b>reflog 往往还能救回来</b>（见最后一小节）。</p></div>
+
+    <div class="gitgraph"><div class="mermaid">
+flowchart TD
+    WT["工作区 Working Tree"]
+    IDX["暂存区 Index"]
+    HIS["提交历史 HEAD"]
+    RM["远程 Remote"]
+    WT -->|git add| IDX
+    IDX -->|git commit| HIS
+    HIS -->|git push| RM
+    HIS -. "reset --soft：只把 HEAD 移回，暂存/工作区原样" .-> IDX
+    HIS -. "reset --mixed：HEAD 移回 + 清空暂存区（默认）" .-> IDX
+    HIS -. "reset --hard：HEAD 移回 + 清空暂存区 + 抛掉工作区" .-> WT
+    HIS -->|git revert：追加一个反向撤销提交| RM
+    IDX -. "restore --staged：取消暂存（取消 add）" .-> WT
+    IDX -. "restore / checkout --：丢弃工作区改动" .-> WT
+    </div></div>
+  </section>
+
+  <section class="topic" id="revert">
+    <h3><span class="kno">小节</span>用 git revert 撤销已推送的提交<span class="pt">生成新提交</span></h3>
+    <p><b>一句话：<code>git revert</code> 不是「把历史删掉」，而是「用一个新的提交，把某个提交所做的工作反向抵消掉」。</b>它会计算目标提交的「反向补丁」（inverse patch），把改动反过来，然后<b>生成一个全新的提交</b>。原来的提交仍然躺在历史里，只是被这次新提交「抵消」了。</p>
+    <p>这正是它与 <code>reset --hard</code> 最大的区别，也决定了它的适用场景：<b>revert 不重写历史，而是向历史里「追加」内容</b>，所以对已经推送、别人可能已经拉取的分支是安全的。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 撤销最近一个提交，生成一个新提交（会弹出提交信息编辑器）
+git revert HEAD
+
+# 撤销指定哈希的提交
+git revert abc1234
+
+# 撤销一个范围（多个提交）
+git revert HEAD~2..HEAD
+
+# 只把"撤销改动"放到工作区/暂存区，并自动生成提交，但不弹出编辑器
+git revert --no-commit HEAD
+git revert --no-edit HEAD</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>记住：</b>revert 生成的是「新的提交」，历史没有消失，只是多了一个反向提交。这对共享分支（已经 push 的 main 或队友在用的分支）是唯一的正确选择——因为改写共享历史会让所有同事的推送和拉取产生冲突。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错警告：不要用 <code>reset --hard</code> 去撤销已经推送、别人已拉取的提交。</b>一旦你本地 <code>reset --hard</code> 把历史改了再强推（<code>push --force</code>），队友好不容易拉下来的提交会丢，团队可能各自为政、产生一堆合并冲突。已推送的「错误提交」请一律用 <code>git revert</code> 生个新提交来抵消；只有<b>你自己还没推送</b>的提交，才适合用 <code>reset</code> 改写本地历史。</p></div>
+
+    <p>补充：revert 也不是「删除历史」——它只是人为制造一个反方向的提交。如果目标提交后来又被别的提交基于它修改过，revert 可能遇到冲突，需要你手动解决后再提交。这也是「已推送的历史尽量不要乱动」的一个体现。</p>
+  </section>
+
+  <section class="topic" id="restore-checkout">
+    <h3><span class="kno">小节</span>git restore 与 git checkout 恢复文件/分支<span class="pt">恢复 vs 回退</span></h3>
+    <p><b>一句话：<code>git restore</code> 是恢复「文件内容」，<code>git checkout</code> 主要是「切换分支」。</b>当你改乱了某个文件、想让它回到上次提交的样子，用的是 <code>restore</code>；当你想到另一个分支去干活，用的是 <code>checkout</code>。老版本 Git 里这两件事都用 <code>git checkout --</code> / <code>git checkout &lt;branch&gt;</code> 来表达，很容易混淆，所以新版拆出了更清晰的 <code>restore</code>。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 丢弃工作区中对 file.txt 的未提交改动（用暂存区的版本覆盖）
+git restore file.txt
+
+# 把文件从暂存区"撤销回工作区"（取消 git add，但改动不丢）
+git restore --staged file.txt
+
+# 从指定提交恢复文件内容
+git restore --source=HEAD~1 src/app.js
+
+# 旧写法：等价于 git restore file.txt
+git checkout -- file.txt
+
+# 切换分支（不是恢复文件！）
+git checkout other-branch
+git switch other-branch</code></pre>
+    </div>
+
+    <p>注意 <code>restore</code> 的两种行为：不带 <code>--staged</code> 时它从<b>暂存区</b>恢复文件（丢弃你对工作区文件的未提交修改）；带 <code>--staged</code> 时它把文件从<b>暂存区</b>退回到<b>工作区</b>（把它变成「已修改未暂存」，好让你重新审视再提交）。两者都不生成新提交、都不改写历史。</p>
+
+    <table class="tbl">
+      <thead>
+        <tr><th>命令</th><th>典型语义</th><th>生成新提交</th><th>改写历史</th><th>最常用场景</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>git reset --hard &lt;c&gt;</code></td>
+          <td>把当前分支 HEAD 强行移回目标提交</td>
+          <td>否</td><td>✔ 是</td>
+          <td>撤销<b>本地未推送</b>的错误提交，整段抹掉</td>
+        </tr>
+        <tr>
+          <td><code>git restore &lt;file&gt;</code></td>
+          <td>丢弃某文件的工作区改动（回到暂存区/上次提交）</td>
+          <td>否</td><td>否</td>
+          <td>改乱了单个文件，想把它「恢复如初」</td>
+        </tr>
+        <tr>
+          <td><code>git checkout &lt;branch&gt;</code></td>
+          <td>切换分支（<code>git checkout -- file</code> 才是恢复文件）</td>
+          <td>否</td><td>否</td>
+          <td>换分支干活；<code>--</code> 后的文件是旧式恢复文件</td>
+        </tr>
+        <tr>
+          <td><code>git revert &lt;c&gt;</code></td>
+          <td>用新提交反向抵消某个提交</td>
+          <td>是</td><td>否（追加）</td>
+          <td>撤销<b>已推送</b>的提交，不破坏共享历史</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>别搞混：</b><code>git restore</code> 只管「文件」，<code>git checkout</code> 既可切分支也可恢复文件。若你只想撤销工作区改动而不想动历史，<code>restore</code> 是首选；若目标是要把整个分支/HEAD 移回去，才用 <code>reset</code>。它们虽都叫「撤销」，但作用对象和破坏力完全不同。</p></div>
+  </section>
+
+  <section class="topic" id="reflog">
+    <h3><span class="kno">小节</span>用 git reflog 找回误删的提交<span class="pt">最后一道保险</span></h3>
+    <p><b>一句话：<code>git reflog</code>（reference log）记录了你本地所有引用（HEAD、各分支、tag）每次移动的「日志」，哪怕你 <code>reset --hard</code> 把某个提交「删」了，它的哈希仍会留在 reflog 里。</b>它是你本地的「操作流水账」，专门用来在误操作之后把历史找回来。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell</div>
+      <pre><code># 查看本地 HEAD / 分支引用的移动日志（默认 90 天内）
+git reflog
+
+# 输出示例（每行：哈希  HEAD@{序号}  操作描述）
+# abc1234 HEAD@{0}: reset: moving to HEAD~2
+# 9f8e7d6 HEAD@{1}: commit: fix: 修正登录接口超时
+# 3c2b1a0 HEAD@{2}: commit: feat: 新增导出功能
+
+# 找回被 reset 掉的提交：按上次的 HEAD 位置恢复
+git reset --hard HEAD@{1}
+
+# 直接按 reflog 里看到的哈希恢复
+git reset --hard 9f8e7d6</code></pre>
+    </div>
+
+    <p>看懂几行即可：<code>HEAD@{0}</code> 是最新的状态，<code>HEAD@{1}</code> 是上一次。若你刚 <code>reset --hard HEAD~2</code>，被甩掉的提交通常就在 <code>HEAD@{1}</code> 或更早。用 <code>git reset --hard &lt;该哈希&gt;</code> 就能把头指针重新指回去，那个「丢失」的提交连同它后面的历史就都回来了。</p>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心结论：</b>reflog 是「本地」的保险，只在<b>你这台机器的这个仓库</b>里有效，<b>不会推到远程</b>，别人看不到。它默认保留 90 天（<code>gc.reflogExpire</code> 可调）。所以：commit 随手记、reflog 常看看；一旦发现 reset 错了，第一时间用 reflog 找回，别急着放弃。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：reflog 对「未提交的工作区改动」无能为力。</b>reflog 只记录已提交的历史移动。你用 <code>reset --hard</code> 丢掉的<b>未 git add / git commit 的改动</b>，reflog 救不回来——那部分内容只能靠 <code>git stash</code> 或编辑器/文件系统里的恢复。所以把「关键改动随手提交 + 临时的先 stash」当成习惯，才能最大化保住你的内容。</p></div>
+
+    <p>顺带一提：<code>git fsck --lost-found</code> 也能列出悬空对象（dangling commits），是 reflog 之外的另一条找回路子，但 reflog 是最快最直观的入口。</p>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e7e0cf" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#c8442e" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>在练习仓库里连续提交三笔，分别对同一个 <code>HEAD~1</code> 执行 <code>reset --soft</code>、<code>--mixed</code>、<code>--hard</code>，观察每次提交的改动分别落在哪一层（暂存区/工作区/丢失），并用 <code>git reflog</code> 把历史恢复到最初状态。</li>
+      <li>制造一个「已 push 的错误提交」，用 <code>git revert</code> 撤销它；再对比 <code>git reflog</code> 和 <code>git log</code>，说明为什么 revert 之后历史里有两个提交而 reset 只有一个。</li>
+      <li>故意用 <code>git checkout</code> 或者 Delete 删掉一个文件，分别用 <code>git restore file</code> 与 <code>git checkout -- file</code> 恢复，说明二者恢复来源的差别。</li>
+      <li>拓展：把 <code>HEAD~3</code> 处的状态用 <code>git reset --hard</code> 移过去后，再用 <code>git reflog</code> 找到原头并恢复；总结 reflog 为什么能保留「看似删除」的提交。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="07-undo" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Git 版本协作」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "07-undo",               // 本页知识点 id（= 大纲里的 id）
+  title: "撤销、回退与恢复",
+  eyebrow: "GIT · 协作",
+  prev: "06-remotes.html",     // 上一节文件名
+  next: "08-tags.html",        // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"执行 `git reset --soft HEAD~1` 之后，原来最后一次提交的改动会处于哪个位置？",
+    opts:["仍然留在暂存区（already staged），等你重新 commit","变成工作区的未暂存改动","被彻底丢弃，找不回来","已经被自动推送到远程"],
+    ans:0,
+    exp:"--soft 只移动 HEAD 指针，不动暂存区和工作区，所以那次提交的改动仍保持已暂存（staged）状态，目的是把若干提交「合并成一次」后重新提交。"
+  },
+  {
+    type:"quiz",
+    q:"你把一个「还没 push 的本地提交」提交错了，想把它整个撤销、且保留其中的改动以便重新组织，最安全的是？",
+    opts:["git reset --mixed HEAD~1","git reset --hard HEAD~1","git revert HEAD","git fetch origin"],
+    ans:0,
+    exp:"本地未推送、要保留改动，用默认的 --mixed（把改动退回工作区、未暂存）最合适；想保留改动直接再次 commit 则用 --soft。--hard 会丢改动，revert 是对已推送提交的兜底。"
+  },
+  {
+    type:"quiz",
+    q:"`git reset` 不带任何参数时，默认使用哪个档位？",
+    opts:["--soft","--mixed（默认）","--hard","--keep"],
+    ans:1,
+    exp:"git reset 默认档位是 --mixed：既把 HEAD 移回目标提交，也清空暂存区（把改动吐回工作区成未暂存），但不改动工作区文件本身。"
+  },
+  {
+    type:"quiz",
+    q:"某个提交已经 push 到 origin/main，且队友可能已经拉取。现在想撤销它，不破坏共享历史，应选择？",
+    opts:["git reset --hard <commit>","git checkout -- <file>","git revert <commit>","git push --force"],
+    ans:2,
+    exp:"已推送、共享的历史应当用 git revert 生出一个「反方向的撤销提交」来抵消，既不重写历史，也不会让团队冲突。reset --hard + push --force 会改写共享历史、让队友丢提交，属大忌。"
+  },
+  {
+    type:"quiz",
+    q:"关于 git reset 三档的对照，只有哪一档会「改动工作区」？",
+    opts:["--soft","--mixed","--hard","三者都不改动工作区"],
+    ans:2,
+    exp:"--soft 只移 HEAD；--mixed 再清空暂存区；--hard 才进一步把工作区也重置为目标提交的状态（极易丢未提交改动）。这也是它破坏力最强的档位。"
+  },
+  {
+    type:"quiz",
+    q:"`git restore --staged file.txt` 的作用是？",
+    opts:["丢弃 file.txt 在工作区的所有改动（并删除文件）","把 file.txt 从暂存区撤回工作区（取消 git add，改动仍保留）","切换到一个名为 file.txt 的分支","生成一个新提交来撤销 file.txt"],
+    ans:1,
+    exp:"--staged 只动暂存区：把文件从「已暂存」退回「已修改未暂存」，相当于撤销一次 git add，但文件内容和工作区改动都在。要真正丢弃工作区改动，应直接 git restore file.txt。"
+  },
+  {
+    type:"quiz",
+    q:"你手滑执行了 `git reset --hard HEAD~3`，发现少了好几个本地提交，想最快找回它们，首选命令是？",
+    opts:["git reflog 找到哈希，再 git reset --hard <hash>","git restore HEAD~3","git checkout -- .","git log --all --grep 找回"],
+    ans:0,
+    exp:"reset --hard 之后这些提交并未物理消失，reflog 仍记录着 HEAD 的移动。用 git reflog 找到目标哈希，再 git reset --hard <hash> 把指针移回去即可全部找回。注意它对未提交的工作区改动无效。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：团队有个已推送的提交，同事不小心用 `git reset --hard` 处理了本地以此提交为基的分支，会发生什么？如果提交真正丢失在各人本地而远程没有对应分支，你会如何用 reflog 与 fetch/rebase 补救？",
+    opts:["先思考，再查看参考答案"],
+    ans:0,
+    exp:"参考要点：① 已推送的提交若被别人 reset --hard 丢掉，远程 main 上如果还有该提交，重新 fetch 即可找回；② 若它从未被 push、只存在于某人本地，且又被 reset --hard 去掉，别的机器可能已无引用，但「丢失者」本机的 reflog 仍能看到，可用 git reflog 找到哈希，再 git reset --hard <hash> 恢复；③ 共享历史尽量不用 reset --hard + push --force，而用 revert 生成新提交；④ 若确需用 rebase 整理本地提交，也仅限于仍在本地的分支，先 stash 未提交改动。总之：区分「已共享」与「仅本地」，决定用 revert 还是 reset + reflog。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:git-version-collab:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Git 版本协作";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

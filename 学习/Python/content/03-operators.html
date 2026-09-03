@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运算符与表达式 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 运算符与表达式：系统掌握算术 / 比较 / 逻辑 / 位 / 赋值 / 三元运算符、in 与 is 的坑、短路求值与运算优先级，含可运行代码示例与自测。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">运算符与表达式</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 基础</span></span>
+    <h1 id="pageTitle">运算符与表达式</h1>
+    <p class="lead" id="pageLead">运算符是<b>把值加工成新值的动词</b>。这一节把 Python 的运算符家族一网打尽——算术、比较、逻辑、位、赋值与三元表达式，尤其讲清 <b>/ vs //</b>、<b>is vs ==</b>、<b>短路求值</b> 与 <b>优先级</b> 这些面试必考的坑，让你写出又对又漂亮的表达式。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能把 Python 运算符分成<b>算术、比较、逻辑、位、赋值、三元</b>六大类，并说出各自的返回类型。</li>
+      <li>学完后，你能用 <code>//</code>、<code>%</code>、<code>**</code> 做整除、取余与幂运算，并解释 <b>/ 恒返回 float、// 向下取整</b>。</li>
+      <li>学完后，你能用 <code>is</code> 判身份、<code>==</code> 判值相等、<code>in</code> 判成员，并避开「小整数缓存」「深浅拷贝」的坑。</li>
+      <li>学完后，你能利用 <code>and</code>/<code>or</code> 的<b>短路求值</b>写出带默认值的精炼表达式，并说明它返回的是<b>操作数而非布尔值</b>。</li>
+      <li>学完后，你能用位运算符做<b>掩码/标志位</b>操作与<b>异或交换</b>两个数，并能解释 <code>&</code>、<code>|</code>、<code>^</code>、<code>~</code>、<code>&lt;&lt;</code>、<code>&gt;&gt;</code>。</li>
+      <li>学完后，你能按<b>优先级与结合性</b>推导任意表达式的求值顺序，并在必要处用括号显式控制。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">进入本节前，请先掌握「变量与数据类型」（02-basics）：了解 <code>int</code>/<code>float</code>/<code>bool</code>/<code>str</code>/<code>None</code> 以及<b>可变与不可变</b>的区别，并会用 <code>print()</code> 输出内容。若已能读懂 <code>a = 3; print(a + 2)</code>，就可以开始了。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>运算符家族<br>从算术到优先级，系统地吃透表达式的写法</h2>
+  </section>
+
+  <section class="topic" id="arithmetic">
+    <h3><span class="kno">算术</span>算术运算符：/ // % ** 与字符串的 + *<span class="pt">先掌握最常用的一类</span></h3>
+    <p>Python 提供 <b>7 个算术运算符</b>：<code>+ - * / // % **</code>。其中 <code>/</code> 是<b>真除法</b>（恒返回 <code>float</code>），<code>//</code> 是<b>整除</b>（向下取整，返回 <code>int</code>），<code>%</code> 是<b>取余</b>，<code>**</code> 是<b>幂</b>。<code>+</code> 与 <code>*</code> 还支持字符串：拼接与重复。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 算术运算符
+a, b = 10, 3
+print(a + b)   # 13       加
+print(a - b)   # 7        减
+print(a * b)   # 30       乘
+print(a / b)   # 3.3333333333333335   真除法，恒为 float
+print(a // b)  # 3        整除（向负无穷取整），返回 int
+print(a % b)   # 1        取余
+print(a ** b)  # 1000     幂
+
+# 负数时注意：// 向下取整、% 取余，满足 a == (a//b)*b + a%b
+print(-7 // 2)   # -4      向负无穷取整
+print(-7 % 2)    # 1       因为 (-4)*2 + 1 = -7
+
+# 字符串也能用 + 和 *
+print("Py" + "thon")   # Python
+print("ab" * 3)        # ababab</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>运算符</th><th>含义</th><th>示例 <span class="mono">(10, 3)</span></th><th>返回</th></tr>
+      <tr><td class="mono">+</td><td>加（字符串拼接）</td><td class="mono">13</td><td>数值 / 字符串</td></tr>
+      <tr><td class="mono">-</td><td>减</td><td class="mono">7</td><td>数值</td></tr>
+      <tr><td class="mono">*</td><td>乘（字符串重复）</td><td class="mono">30</td><td>数值 / 字符串</td></tr>
+      <tr><td class="mono">/</td><td>真除法（恒 float）</td><td class="mono">3.333…</td><td>float</td></tr>
+      <tr><td class="mono">//</td><td>整除（向下取整）</td><td class="mono">3</td><td>int</td></tr>
+      <tr><td class="mono">%</td><td>取余</td><td class="mono">1</td><td>数值</td></tr>
+      <tr><td class="mono">**</td><td>幂（右结合）</td><td class="mono">1000</td><td>数值</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>Python 3 里 <code>/</code> 是<b>真除法</b>，即使能整除也会返回 <code>float</code>。<code>10 / 2</code> 得到 <code>5.0</code>，而不是 <code>5</code>；想要整数结果请用 <code>//</code>。<code>//</code> 是<b>向下取整</b>（向负无穷），所以 <code>-7 // 2</code> 是 <code>-4</code> 而不是 <code>-3</code>，这点常被面试考察。</p></div>
+  </section>
+
+  <section class="topic" id="comparison">
+    <h3><span class="kno">比较</span>比较运算符、身份 is 与成员 in<span class="pt">判断关系与归属</span></h3>
+    <p>比较运算符<b>恒返回 <code>bool</code></b>：<code>== != &lt; &lt;= &gt; &gt;=</code>。另有两个极易混淆的角色：<code>is</code>/<code>is not</code> 判断<b>是否同一个对象</b>（比内存地址），<code>in</code>/<code>not in</code> 判断<b>成员归属</b>（是否在容器里）。Python 还支持<b>链式比较</b>，比 <code>and</code> 写法更省内存。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 比较运算符：返回 True / False
+print(5 > 3)      # True
+print(5 == "5")   # False  类型不同不相等
+print(5 != 3)     # True
+
+# 链式比较：1 < x < 10  等价于 (1 < x) and (x < 10)，且 x 只求值一次
+x = 5
+print(1 < x < 10)   # True
+
+# 身份 is（同一内存对象） vs 值相等 ==
+a = [1, 2, 3]
+b = a       # 赋值不复制，b 和 a 是同一个对象
+c = a[:]    # 浅拷贝，c 是一个新对象
+print(a is b)   # True
+print(a == b)   # True
+print(a is c)   # False  不是同一个对象
+print(a == c)   # True   但值相等
+
+# 成员 in / not in
+print(2 in a)        # True
+print(9 not in a)    # True
+print("o" in "Hello")  # True</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：is 与 == 别混用。</b><code>==</code> 比较<b>值</b>；<code>is</code> 比较<b>是否为同一个对象</b>。判断 <code>None</code> 必须用 <code>x is None</code>（或 <code>is not None</code>），不要写 <code>x == None</code>。判断两个内容相同的容器是否「相等」用 <code>==</code>；只有关心「是不是同一个对象」时才用 <code>is</code>。</p></div>
+    <div class="callout warn"><span class="i">?</span><p><b>小整数驻留的坑：</b>CPython 会缓存 <code>-5 ~ 256</code> 的小整数并复用，因此 <code>a = 256; b = 256; a is b</code> 常为 <code>True</code>；而 <code>a = 257; b = 257; a is b</code> 常为 <code>False</code>（超出缓存，各自创建）。<b>这类行为高度依赖实现，不要依赖它</b>——比较值请一律用 <code>==</code>。</p></div>
+  </section>
+
+  <section class="topic" id="logical">
+    <h3><span class="kno">逻辑</span>and / or / not 与短路求值<span class="pt">写出精炼条件的核心</span></h3>
+    <p>逻辑运算符有 <code>and</code>（且）、<code>or</code>（或）、<code>not</code>（非）。关键点：<code>and</code>/<code>or</code> <b>返回参与运算的操作数本身，而不是 <code>True</code>/<code>False</code></b>，并遵循<b>短路求值</b>——一旦能确定结果就不再计算后面的部分。判断真值靠「真值性」：<code>0</code>、<code>0.0</code>、<code>""</code>、<code>[]</code>、<code>()</code>、<code>{}</code>、<code>set()</code>、<code>None</code> 为<b>假</b>，其余为<b>真</b>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 真值性
+print(bool(0), bool(""), bool([]), bool(None))          # False False False False
+print(bool("a"), bool([1]), bool(42))                   # True True True
+
+# and / or 返回操作数，不是 True/False
+print(0 and 5)     # 0   0 为假 → 短路，返回 0
+print(3 and 5)     # 5   两个都真 → 返回最后一个
+print(0 or 5)      # 5   0 为假 → 返回 5
+print(3 or 5)      # 3   3 为真 → 短路，返回 3
+print(not 3)       # False
+
+# 经典技巧：用 or 提供默认值（相当于 if 值 为空则用默认）
+name = input("名字：") or "匿名用户"      # 输入为空字符串时取默认
+print("你好，", name)
+
+# 短路还能避免副作用
+data = [] or [1, 2, 3]   # data 变成 [1, 2, 3]
+print(data)</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>运算符</th><th>含义</th><th>求值规则</th></tr>
+      <tr><td class="mono">and</td><td>逻辑与</td><td>左边为假→返回左边；否则继续，返回右边。全真返回<b>最后</b>一个。</td></tr>
+      <tr><td class="mono">or</td><td>逻辑或</td><td>左边为真→返回左边（短路）；否则返回右边。全假返回<b>最后</b>一个。</td></tr>
+      <tr><td class="mono">not</td><td>逻辑非</td><td>恒返回 <b>bool</b>，把真值取反（<code>not x</code>）。</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>and</code>/<code>or</code> 返回的是<b>操作数</b>，不是 <code>True</code>/<code>False</code>。所以 <code>0 or 5</code> 是 <code>5</code>，<code>3 and 5</code> 是 <code>5</code>，而不是 <code>True</code>。若你需要真正的布尔值，请在外面套 <code>bool(...)</code>。只有 <code>not</code> 一定是布尔结果。</p></div>
+  </section>
+
+  <section class="topic" id="bitwise">
+    <h3><span class="kno">位运算</span>位运算符：&amp; | ^ ~ &lt;&lt; &gt;&gt; 与掩码<span class="pt">处理标志位与底层状态</span></h3>
+    <p>位运算符<b>按二进制位</b>运算：按位与 <code>&amp;</code>、按位或 <code>|</code>、按位异或 <code>^</code>、按位取反 <code>~</code>、左移 <code>&lt;&lt;</code>、右移 <code>&gt;&gt;</code>。它常用于<b>权限/标志位</b>（掩码）、低位运算性能优化，以及经典的「异或交换」。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">#  5 -> 101   3 -> 011
+print(5 &amp; 3)   # 1   按位与   101 &amp; 011 = 001
+print(5 | 3)   # 7   按位或   101 | 011 = 111
+print(5 ^ 3)   # 6   按位异或  101 ^ 011 = 110
+print(~5)      # -6  按位取反  ~x = -x - 1
+print(1 &lt;&lt; 3)  # 8   左移 3 位（乘 2^3）
+print(8 &gt;&gt; 2)  # 2   右移 2 位（整除 2^2）
+
+# 异或交换两个数（不带临时变量）
+x, y = 7, 9
+x ^= y; y ^= x; x ^= y
+print(x, y)    # 9 7
+
+# 掩码：判断某一位是否为 1
+flags = 0b1100
+print(bool(flags &amp; 0b0100))    # True    第 2 位（从 0 数）为 1
+print(bool(flags &amp; 0b0010))    # False   第 1 位为 0</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>运算符</th><th>含义</th><th>示例</th><th>备注</th></tr>
+      <tr><td class="mono">&amp;</td><td>按位与</td><td class="mono">5 &amp; 3 = 1</td><td>都为 1 才是 1；用于<b>清零/取掩码</b></td></tr>
+      <tr><td class="mono">|</td><td>按位或</td><td class="mono">5 | 3 = 7</td><td>有 1 即 1；用于<b>置位</b></td></tr>
+      <tr><td class="mono">^</td><td>按位异或</td><td class="mono">5 ^ 3 = 6</td><td>不同为 1；用于<b>翻转/交换</b></td></tr>
+      <tr><td class="mono">~</td><td>按位取反</td><td class="mono">~5 = -6</td><td>规则 <code>~x = -x-1</code></td></tr>
+      <tr><td class="mono">&lt;&lt;</td><td>左移</td><td class="mono">1 &lt;&lt; 3 = 8</td><td>乘 <code>2^n</code></td></tr>
+      <tr><td class="mono">&gt;&gt;</td><td>右移</td><td class="mono">8 &gt;&gt; 2 = 2</td><td>整除 <code>2^n</code></td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>用<b>按位与</b>做掩码可判断某位是否置位（如 <code>flags &amp; 0b0100</code>）；用<b>按位或</b>可把某些位置 1；用<b>异或</b>无需临时变量即可交换两数，也常用于「翻转」位状态。写二进制字面量可用 <code>0b</code> 前缀（如 <code>0b1100</code>）更直观。</p></div>
+  </section>
+
+  <section class="topic" id="precedence">
+    <h3><span class="kno">优先级</span>赋值、三元表达式与运算优先级<span class="pt">写出可读表达式的最后一块拼图</span></h3>
+    <p><b>赋值运算符</b>会把算术与复合赋值合成一步（<code>+=</code>、<code>-=</code>、<code>*=</code>、<code>//=</code>、<code>%=</code> 等）；<b>海象运算符</b> <code>:=</code>（Python 3.8+）允许在表达式里直接赋值；<b>三元表达式</b> <code>为真时的值 if 条件 else 为假时的值</code>　能把简单分支压成一行。<b>优先级</b>决定了表达式从左到右的「谁先算」，幂 <code>**</code> 右结合是典型例外。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 赋值运算符
+x = 5
+x += 3     # 等价 x = x + 3
+x //= 3    # x = x // 3
+print(x)   # 2
+
+# 多元赋值 & 解包（交换变量）
+a, b, c = 1, 2, 3
+a, b = b, a      # 交换
+print(a, b, c)   # 2 1 3
+
+# 海象运算符 :=（在表达式里赋值，Python 3.8+）
+n = 10
+if (half := n // 2) &gt; 3:
+    print("half =", half)   # half = 5
+
+# 三元表达式：真值 if 条件 else 假值
+score = 88
+grade = "优秀" if score &gt;= 85 else "良好"
+print(grade)   # 优秀
+
+# 优先级示例：** 右结合，所以 2**3**2 = 2**(3**2) = 2**9 = 512
+print(2 ** 3 ** 2)   # 512
+print(2 * 3 ** 2)    # 18  （先幂后乘）
+print((2 * 3) ** 2)  # 36  （括号显式控制）</code></pre>
+    </div>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+  A["( ) 括号（最高）"] --> B["** 幂（右结合）"]
+  B --> C["+x 、 -x 、 ~x 一元正/负/取反"]
+  C --> D["* / // % 乘除整除取余"]
+  D --> E["+ - 加减"]
+  E --> F["<< >> 位左移位右移"]
+  F --> G["&amp; 按位与"]
+  G --> H["^ 按位异或"]
+  H --> I["| 按位或"]
+  I --> J["== != &lt; &gt; &lt;= &gt;=  in  is  比较/成员/身份"]
+  J --> K["not 逻辑非"]
+  K --> L["and 逻辑与"]
+  L --> M["or 逻辑或"]
+  M --> N["三元式  x if c else y"]
+  N --> O["=  +=  *=  := 赋值/海象（最低）"]
+      </div>
+    </div>
+    <table class="tbl">
+      <tr><th>级别</th><th>运算符</th><th>说明 / 结合性</th></tr>
+      <tr><td>1（高）</td><td class="mono">( )</td><td>括号，最高</td></tr>
+      <tr><td>2</td><td class="mono">**</td><td>幂，<b>右结合</b></td></tr>
+      <tr><td>3</td><td class="mono">+x -x ~x</td><td>一元正、负、按位取反</td></tr>
+      <tr><td>4</td><td class="mono">* / // %</td><td>乘、除、整除、取余</td></tr>
+      <tr><td>5</td><td class="mono">+ -</td><td>加、减</td></tr>
+      <tr><td>6</td><td class="mono">&lt;&lt; &gt;&gt;</td><td>位左移、位右移</td></tr>
+      <tr><td>7</td><td class="mono">&amp;</td><td>按位与</td></tr>
+      <tr><td>8</td><td class="mono">^</td><td>按位异或</td></tr>
+      <tr><td>9</td><td class="mono">|</td><td>按位或</td></tr>
+      <tr><td>10</td><td class="mono">== != &lt; &gt; &lt;= &gt;= in is</td><td>比较、成员、身份</td></tr>
+      <tr><td>11</td><td class="mono">not</td><td>逻辑非</td></tr>
+      <tr><td>12</td><td class="mono">and</td><td>逻辑与</td></tr>
+      <tr><td>13</td><td class="mono">or</td><td>逻辑或</td></tr>
+      <tr><td>14</td><td class="mono">x if c else y</td><td>三元条件表达式</td></tr>
+      <tr><td>15（低）</td><td class="mono">= += :=</td><td>赋值 / 海象运算符</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">?</span><p><b>提醒：</b>不要死记优先级。真正写代码时，<b>复杂表达式就用括号显式分组</b>，可读性和正确性远高于「我记得优先级」。唯一值得记住的例外是 <code>**</code> <b>右结合</b>：<code>2 ** 3 ** 2</code> 等于 <code>2 ** (3 ** 2) = 512</code>，而不是 <code>(2 ** 3) ** 2 = 64</code>。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>写一个函数 <code>is_odd(n)</code>，用<b>按位与</b> <code>n &amp; 1</code> 判断整数奇偶，并说明它和 <code>n % 2</code> 在负数情况下的差异。</li>
+      <li>解释表达式 <code>a or b or c</code> 为什么能实现「取第一个非空值」的兜底逻辑，并分别代入 <code>a=0,b="",c="ok"</code> 与 <code>a=5</code> 推导结果。</li>
+      <li>在解释器里运行 <code>a = 256; b = 256; a is b</code> 与 <code>a = 257; b = 257; a is b</code>，记录两次结果，并说明为什么不同（小整数驻留 -5~256）。</li>
+      <li>用 <code>//</code>、<code>%</code> 和<b>三元表达式</b>，把给定的秒数换算成「X 小时 Y 分钟 Z 秒」并打印（例如 <code>5000</code> 秒 → 1 小时 23 分钟 20 秒）。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="03-operators" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "03-operators",            // 本页知识点 id（= 大纲里的 id）
+  title: "运算符与表达式",
+  eyebrow: "PYTHON · 基础",
+  prev: "02-basics.html",        // 上一节
+  next: "04-control-flow.html",  // 下一节
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"表达式 <code>7 // 2</code> 的结果是？（整除）",
+    opts:["3.5","3","4","2"],
+    ans:1,
+    exp:"`//` 是整除（向下取整），返回 int：7//2 = 3。注意 <code>7 / 2</code> 才是 3.5（真除法）。"
+  },
+  {
+    type:"quiz",
+    q:"表达式 <code>-7 // 2</code> 的结果是？",
+    opts:["-3","-4","-3.5","3"],
+    ans:1,
+    exp:"`//` 是<b>向下取整</b>（向负无穷），所以 -7//2 = -4 而不是 -3。这是整除最常见的坑之一。"
+  },
+  {
+    type:"quiz",
+    q:"表达式 <code>2 ** 3 ** 2</code> 的结果是？",
+    opts:["64","36","512","8"],
+    ans:2,
+    exp:"幂 <code>**</code> 是<b>右结合</b>：等价于 <code>2 ** (3 ** 2)</code> = 2**9 = 512。若想得到 64 需写 <code>(2 ** 3) ** 2</code>。"
+  },
+  {
+    type:"quiz",
+    q:"<code>x = 0 or 5</code>，<code>print(x)</code> 输出什么？",
+    opts:["True","5","0","False"],
+    ans:1,
+    exp:"<code>or</code> 返回<b>操作数本身</b>而非布尔值。左边 0 为假，于是返回右边 5。同理 <code>3 and 5</code> 返回 5。"
+  },
+  {
+    type:"interview",
+    q:"面试常见：<code>a = 300; b = 300</code>，<code>a is b</code> 返回什么？为什么？",
+    opts:["True，因为 300 被 Python 缓存驻留，is 判真","False，Python 只缓存 -5~256 的小整数，300 超出缓存、是两个对象；值相等应改用 ==","True，因为 is 比较的是值","会抛 TypeError"],
+    ans:1,
+    exp:"<code>is</code> 比较<b>对象身份（内存地址）</b>，<code>==</code> 比较<b>值</b>。CPython 把 -5~256 的小整数缓存复用，所以该范围内的字面量 often 共享同一对象；300 超出缓存，会被各自创建，<code>a is b</code> 为 False。<b>判断值相等请用 ==，判断 None 用 is None</b>，切勿依赖小整数驻留。"
+  },
+  {
+    type:"quiz",
+    q:"表达式 <code>5 ^ 3</code>（按位异或）的结果是？",
+    opts:["1","7","6","8"],
+    ans:2,
+    exp:"按位异或：5=101，3=011，逐位异或得 110 = 6。<code>&amp;</code> 得 1，<code>|</code> 得 7。"
+  },
+  {
+    type:"quiz",
+    q:"<code>x = 10; y = \"大\" if x &gt; 5 else \"小\"; print(y)</code> 输出什么？",
+    opts:["大","小","True","10"],
+    ans:0,
+    exp:"三元表达式 <code>真值 if 条件 else 假值</code>：条件 <code>x > 5</code> 为 True，因此取 <code>\"大\"</code>。"
+  },
+  {
+    type:"quiz",
+    q:"<code>type(10 / 2)</code> 的结果是？",
+    opts:["<class 'float'>","<class 'int'>","<class 'str'>","抛异常"],
+    ans:0,
+    exp:"Python 3 中 <code>/</code> 是<b>真除法，恒返回 float</b>，即使能整除：<code>10 / 2</code> == 5.0。<code>10 // 2</code> 才是 5（int）。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

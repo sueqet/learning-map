@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>软件包管理 · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— 软件包管理：软件包与 rpm/dnf 工具、软件源配置、依赖处理。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">软件包管理</b></span>
+    <div class="pager"><a id="prevLink" href="14-systemd.html">← 上一节</a><a id="nextLink" href="16-network.html">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · 系统管理</span></span>
+    <h1 id="pageTitle">软件包<span class="accent">管理</span></h1>
+    <p class="lead" id="pageLead">学会用 <b>dnf / rpm</b> 安装、查询、更新、卸载软件包，理解<b>软件源</b>的配置与<b>依赖关系</b>——这是 RHEL 系 Linux 上安装软件的基石。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能用 <span class="mono">dnf</span> 完成软件包的安装、删除、更新、搜索与历史回滚。</li>
+      <li>学完后，你能用 <span class="mono">rpm</span> 查询已安装包的信息、文件归属、并校验包内容。</li>
+      <li>学完后，你能说清 <span class="mono">dnf</span> 与 <span class="mono">rpm</span> 的分工差异，并解释依赖关系。</li>
+      <li>学完后，你能读懂并编写 <span class="mono">/etc/yum.repos.d</span> 下的 <span class="mono">.repo</span> 软件源文件。</li>
+      <li>学完后，你能为 Rocky Linux 配置一个国内软件源并刷新缓存。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">会使用终端（ls、cd、grep、重定向/管道），了解文件系统中的 <span class="mono">/etc</span>、<span class="mono">/usr/bin</span> 等目录，并知道什么是环境变量与配置文件。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>从软件包到包管理器<br>理解"装软件"这件事如何被自动化</h2>
+  </section>
+
+  <section class="topic" id="what-is-package">
+    <h3><span class="kno">概念</span>软件包是什么？两种主流格式<span class="pt">packages · formats</span></h3>
+    <p>软件包是把一个程序的<b>二进制文件、配置文件、文档、依赖声明</b>等打包到一起的压缩文件，方便分发和安装。Linux 世界主要有两种主流封装格式：Red Hat 系的 <span class="mono">.rpm</span> 和 Debian 系的 <span class="mono">.deb</span>。</p>
+    <table class="tbl">
+      <tr><th>格式</th><th>工具（低层 → 高层）</th><th>适用发行版</th></tr>
+      <tr><td><span class="mono">.rpm</span></td><td>rpm、dnf、yum</td><td>RHEL、CentOS、Rocky Linux、Fedora</td></tr>
+      <tr><td><span class="mono">.deb</span></td><td>dpkg、apt</td><td>Debian、Ubuntu</td></tr>
+    </table>
+    <ul>
+      <li><b>rpm</b>：低层工具，直接操作 <span class="mono">.rpm</span> 文件，<b>不会自动解决依赖</b>。</li>
+      <li><b>dnf</b>：基于 rpm 的高层工具，会<b>自动从软件源</b>拉取并安装所有依赖。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>本页以 RHEL 系（Rocky/CentOS/Fedora）为例，重点掌握 <span class="mono">rpm</span> 与 <span class="mono">dnf</span> 这一套；Ubuntu 用 <span class="mono">dpkg/apt</span>，思路完全平行。</p></div>
+  </section>
+
+  <section class="topic" id="layers">
+    <h3><span class="kno">分层</span>包管理的层次：dnf → rpm → 内核<span class="pt">hierarchy</span></h3>
+    <p>安装软件时，命令并不是直接写入文件系统，而是经过一层层的"包装"：高层工具负责<b>找包、解依赖、下载</b>，低层工具负责把 <span class="mono">.rpm</span> 文件<b>真正解包并安装到系统</b>。</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+flowchart TD
+  A[用户 / 管理员] --> B{"dnf / yum<br/>高层工具"}
+  A -->|手动指定文件| C["rpm<br/>低层工具"]
+  B -->|从软件源下载、自动解析依赖| C
+  C -->|直接把文件安装进系统| D[内核 / 文件系统]
+      </div>
+    </div>
+    <ul>
+      <li><b>dnf / yum</b>：自动处理依赖、从软件源下载（你只说出软件名，如 <span class="mono">nginx</span>）。</li>
+      <li><b>rpm</b>：直接操作本地 <span class="mono">.rpm</span> 文件、不处理依赖（你给它一个文件路径）。</li>
+      <li><b>内核（文件系统）</b>：最终把文件写入系统的底层。</li>
+    </ul>
+    <div class="callout warn"><span class="i">!</span><p><b>易错点：</b>很多人以为 <span class="mono">rpm</span> 也能像 <span class="mono">dnf</span> 一样自动补齐依赖——不是的。<span class="mono">rpm -i</span> 缺依赖会直接报错，而 <span class="mono">dnf</span> 会替你解决。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">02</span>rpm 与 dnf 的常用操作</h2>
+  </section>
+
+  <section class="topic" id="rpm-tools">
+    <h3><span class="kno">rpm</span>rpm：底层包管理器<span class="pt">install · query · verify</span></h3>
+    <p><span class="mono">rpm</span>（RPM Package Manager）直接操作 <span class="mono">.rpm</span> 文件，<b>不自动处理依赖</b>。最常用的三个动作是：安装（装本地文件）、卸载（按包名）、查询（只读，几乎不会出错）。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>rpm</div>
+      <pre><code># 安装 / 升级
+rpm -ivh package.rpm         # -i 安装，-v 显示详情，-h 显示进度
+rpm -Uvh package.rpm         # 升级（不存在则安装）
+rpm -Fvh package.rpm         # 升级（不存在则跳过）
+
+# 卸载（注意：这里用"包名"，不是文件名）
+rpm -e package
+rpm -e --nodeps package      # 强制删除、忽略依赖（慎用！）
+
+# 查询
+rpm -qa                      # 列出所有已安装的包
+rpm -qa | grep nginx         # 在已安装包里搜索
+rpm -qi package              # 查看包的详细信息
+rpm -ql package              # 列出该包安装的所有文件
+rpm -qf /usr/bin/git         # 某个文件属于哪个包
+rpm -qc package              # 列出该包的配置文件
+rpm -q --changelog package   # 变更记录
+
+# 验证
+rpm -V package               # 验证包内文件是否被改动
+rpm -K package.rpm           # 验证 .rpm 文件的签名与完整性</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>记忆技巧：</b><span class="mono">-q</span> 是 query（查询）；<span class="mono">-f</span> 是 file（文件），所以 <span class="mono">rpm -qf</span> 就是"这个文件归谁"。查询类操作对系统只读、安全，可以放心练。</p></div>
+  </section>
+
+  <section class="topic" id="dnf-tools">
+    <h3><span class="kno">dnf</span>dnf：高层包管理器（自动解依赖）<span class="pt">install · remove · update</span></h3>
+    <p><span class="mono">dnf</span>（Dandified YUM）是 RHEL/CentOS/Rocky 的高层包管理工具，<span class="mono">yum</span> 的继任者，<b>自动处理依赖关系</b>。你只需要说"我想要什么软件"，它负责找到并装齐一切。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>dnf</div>
+      <pre><code># 安装
+dnf install nginx             # 安装（会提示确认）
+dnf install nginx -y          # 自动确认
+dnf install ./local.rpm       # 安装本地 rpm（同时解决依赖）
+dnf reinstall nginx           # 重新安装
+
+# 删除
+dnf remove nginx              # 删除软件包
+dnf autoremove                # 清理不再需要的孤立依赖包
+
+# 更新
+dnf update                    # 更新所有包
+dnf update nginx              # 更新指定包
+dnf check-update              # 只检查有无可用更新（不执行）
+
+# 搜索与查询
+dnf search keyword            # 按关键词搜包名/描述
+dnf info nginx                # 查看包详细信息
+dnf list installed            # 列出所有已安装包
+dnf list available            # 列出软件源中所有可用的包
+dnf provides /usr/bin/git     # 哪个包提供了某文件
+
+# 软件源与缓存
+dnf repolist                  # 列出所有启用的软件源
+dnf repolist all              # 列出所有（含禁用）
+dnf makecache                 # 更新软件源缓存
+dnf clean all                 # 清除所有缓存
+
+# 历史（可回滚）
+dnf history                   # 查看操作历史
+dnf history undo &lt;id&gt;         # 撤销指定操作（回滚）</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>场景</th><th>推荐工具 / 命令</th></tr>
+      <tr><td>从软件源安装软件</td><td><span class="mono">dnf install &lt;pkg&gt;</span>（自动解依赖）</td></tr>
+      <tr><td>安装本地 .rpm 文件</td><td><span class="mono">dnf install ./xxx.rpm</span>（也能处理依赖）</td></tr>
+      <tr><td>查询已安装包信息</td><td><span class="mono">rpm -qi</span>、<span class="mono">rpm -ql</span></td></tr>
+      <tr><td>查询文件归属</td><td><span class="mono">rpm -qf</span></td></tr>
+      <tr><td>撤销一次误操作</td><td><span class="mono">dnf history undo &lt;id&gt;</span></td></tr>
+    </table>
+    <div class="callout danger"><span class="i">✕</span><p><b>易错点：</b><span class="mono">dnf remove</span> 一定别加上系统必需的依赖；<span class="mono">rpm -e --nodeps</span> 会强行跳过依赖检查，可能弄坏系统。生产环境优先用 <span class="mono">dnf</span> 并先看 <span class="mono">dnf history</span>。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">03</span>软件源（Repository）配置</h2>
+  </section>
+
+  <section class="topic" id="repo-config">
+    <h3><span class="kno">repo</span>软件源配置：/etc/yum.repos.d<span class="pt">mirror · gpgcheck</span></h3>
+    <p>软件源（Repository）是存放软件包的服务器。dnf 通过软件源的<b>索引</b>来搜索并下载包，配置文件统一放在 <span class="mono">/etc/yum.repos.d/</span> 目录下，每个 <span class="mono">.repo</span> 文件可以定义一个或多个软件源。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>.repo 文件格式</div>
+      <pre><code># /etc/yum.repos.d/mirror.repo
+[repo-id]                                           # 软件源唯一标识
+name=描述名称
+baseurl=https://mirror.example.com/path/            # 软件源地址
+enabled=1                                           # 1 启用，0 禁用
+gpgcheck=1                                          # 1 校验 GPG 签名，0 跳过
+gpgkey=https://mirror.example.com/RPM-GPG-KEY       # GPG 公钥地址</code></pre>
+    </div>
+    <p>下面以 Rocky Linux 配置 <b>163 国内镜像源</b>为例。先备份原有的 rocky 源，再写入新的镜像源，最后刷新缓存。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 配置 163 源</div>
+      <pre><code>cd /etc/yum.repos.d
+# 1) 备份原有 repo 文件
+for repo in rocky*.repo; do mv "$repo" "$repo.backup"; done
+
+# 2) 写入 163 镜像源（注意 $releasever 与 $version 的差异！）
+repos=(BaseOS AppStream extras)
+version=9
+url=https://mirrors.163.com
+file=/etc/yum.repos.d/mirror.repo
+rm -f ${file}
+for repo in "${repos[@]}"; do
+  echo -e "[rocky-$repo]\nname=Rocky Linux \$releasever - $repo\nbaseurl=${url}/rocky/\$releasever/$repo/\$basearch/os/\nenabled=1\ngpgcheck=1\ngpgkey=${url}/rocky/RPM-GPG-KEY-Rocky-$version\n\n" >> ${file}
+done
+unset repos version url file
+
+# 3) 更新缓存
+dnf makecache</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">✕</span><p><b>务必注意：</b>上面脚本里 <span class="mono">name</span> 用的是 <span class="mono">\$releasever</span>（<b>dnf 运行时变量</b>，由包管理器解析），而 <span class="mono">gpgkey</span> 用的是 shell 变量 <span class="mono">$version</span>（<b>写死为 9</b>，在 <span class="mono">echo</span> 执行时立即被替换成字面量 9）。<b>二者来源不一致。</b></p></div>
+    <div class="callout key"><span class="i">★</span><p><b>建议：统一用 <span class="mono">\$releasever</span>（或全部统一用 <span class="mono">$version</span>）保持一致。</b>若镜像的 GPG 公钥文件名固定带版本号（如 <span class="mono">RPM-GPG-KEY-Rocky-9</span>），用 <span class="mono">\$releasever</span> 也能由 dnf 自动展开成对应的系统版本号，更省心、跟系统自动匹配。</p></div>
+    <p>还原备份（如需恢复原源）：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>shell · 还原</div>
+      <pre><code>for repo in *.repo.backup; do mv "$repo" "${repo%.backup}"; done</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>为什么要有 gpgcheck：</b>开启 <span class="mono">gpgcheck=1</span> 会校验下载到的包的 GPG 签名，防止被篡改或替换成恶意包。生产环境建议保持开启、并配置正确的 <span class="mono">gpgkey</span>。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>动手：为 Rocky Linux 配置一个国内软件源（阿里云/清华镜像均可），注意把 <span class="mono">\$releasever</span> 与 <span class="mono">$version</span> 统一，再用 <span class="mono">dnf repolist</span> 和 <span class="mono">dnf makecache</span> 验证。</li>
+      <li>动手：用 <span class="mono">dnf provides</span> 找出某个常用命令（如 <span class="mono">/usr/bin/vim</span>）属于哪个包，再对比 <span class="mono">rpm -qf</span> 的结果，思考两者各自查询的数据库有何不同。</li>
+      <li>动手：在虚拟机里用 <span class="mono">rpm -ivh</span> 故意安装一个缺依赖的 <span class="mono">.rpm</span>，记录报错；随后用 <span class="mono">dnf install ./xxx.rpm</span> 重复同样安装，观察它如何自动补齐依赖。</li>
+      <li>思考：为什么软件源必须启用 <span class="mono">gpgcheck=1</span>？如果关闭它，安装过程可能带来哪些安全风险？</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="15-packages" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="14-systemd.html"><span class="d">上一节</span><span class="t" id="footPrevT">14 · systemd</span></a>
+      <a class="card nxt" id="footNext" href="16-network.html"><span class="d">下一节</span><span class="t" id="footNextT">16 · 网络</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "15-packages",                 // 本页知识点 id（= 大纲里的 id）
+  title: "软件包管理",
+  eyebrow: "LINUX · 系统管理",
+  prev: "14-systemd.html",           // 上一节文件名
+  next: "16-network.html",           // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于包管理工具的分层，下列说法正确的是？",
+    opts:["dnf 直接操作 .rpm 文件，不处理依赖","rpm 是低层工具，不自动处理依赖关系","yum 是 dnf 的继任者","dnf 无法安装本地 .rpm 文件"],
+    ans:1,
+    exp:"dnf 是高层工具，会自动从软件源解析并安装依赖；rpm 才是低层工具、不处理依赖。dnf 是 yum 的继任者（而非相反）。dnf install ./xxx.rpm 可以安装本地 .rpm 文件并顺带解决依赖。"
+  },
+  {
+    type:"quiz",
+    q:"本地已安装了 git，想查出 /usr/bin/git 这个文件属于哪个软件包，用哪个命令？",
+    opts:["rpm -qi /usr/bin/git","rpm -qf /usr/bin/git","dnf list /usr/bin/git","rpm -ql /usr/bin/git"],
+    ans:1,
+    exp:"rpm -qf 查询\"某文件归属哪个包\"（f=file）。rpm -qi 是查包的详细信息（需要包名），rpm -ql 是列出某包安装的所有文件（需要包名），dnf list 不用于按文件查归属。用 dnf provides 也能查，但本题指名要 rpm 命令。"
+  },
+  {
+    type:"quiz",
+    q:"dnf 中只检查有没有可用更新、但不去真正执行更新的是？",
+    opts:["dnf update","dnf upgrade","dnf check-update","dnf list available"],
+    ans:2,
+    exp:"dnf check-update 只对比本地与软件源、列出可更新的包并返回退出码，不会实际升级。dnf update / dnf upgrade（在 RHEL 系常视为等价）会真正执行更新；dnf list available 是列出所有可用包，与\"检查更新\"含义不同。"
+  },
+  {
+    type:"quiz",
+    q:"用 rpm -ivh 安装一个缺依赖的本地 .rpm 文件，会发生什么？",
+    opts:["dnf 会自动替 rpm 补齐依赖","rpm 自动从软件源下载依赖","rpm 直接报错，不会处理依赖","内核自动补全缺失文件"],
+    ans:2,
+    exp:"rpm 只操作本地 .rpm 文件、不联网、不解析依赖。缺依赖时 rpm -i 会报错并列出缺失的依赖，需要你手动解决。想让它自动补依赖，应改用 dnf install ./xxx.rpm。"
+  },
+  {
+    type:"quiz",
+    q:"在 /etc/yum.repos.d 的 .repo 文件里，gpgkey 这一项的作用是？",
+    opts:["软件源的唯一标识","软件源的下载地址","GPG 公钥地址，用于校验包签名","是否启用该软件源"],
+    ans:2,
+    exp:"gpgkey 提供 GPG 公钥地址，配合 gpgcheck=1 使用，用来校验下载到的软件包是否被篡改。唯一标识是 [repo-id]（方括号那行），下载地址是 baseurl，是否启用是 enabled。"
+  },
+  {
+    type:"quiz",
+    q:"想撤销一次 dnf 安装操作（回滚），最合适的是？",
+    opts:["dnf return","dnf history undo &lt;id&gt;","dnf rollback","dnf autoremove"],
+    ans:1,
+    exp:"dnf history 记录每次操作及其编号，dnf history undo <id> 可按编号撤销并回滚对应事务。dnf autoremove 是清理孤立依赖包，不是回滚；dnf 没有 return/rollback 子命令。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：为什么生产环境一般推荐用 dnf 安装软件，而不是直接 rpm？请结合依赖处理和软件源说明。",
+    opts:["rpm 更稳定，因为它不处理依赖、完全可控","dnf 会从软件源自动分析并安装所有依赖，rpm 需要手动解决、易遗漏","二者毫无区别，只是命令写法不同","rpm 只能在服务器用，dnf 只能用在桌面环境"],
+    ans:1,
+    exp:"因为软件包之间存在依赖关系。dnf 会把软件名交给软件源，自动检索、下载并安装所有依赖项，一次装齐；rpm 只操作本地文件、不联网也不解依赖，缺依赖只能报错并靠人肉补齐，很容易遗漏。此外 dnf 还提供缓存、历史回滚、GPG 校验等能力，更贴合生产环境的可运维要求。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

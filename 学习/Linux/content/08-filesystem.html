@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux 目录体系 · Linux 学习</title>
+<meta name="description" content="Linux 学习页 —— Linux 目录体系：FHS 目录总览、/proc 与 /run 的用途/生命周期/区别、/var/run 符号链接方向修正。学习目标、内容讲解、练习考核。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#1f7d4d;--orange-soft:#e6f2ea;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Linux 学习 · <b id="navTitle">Linux 目录体系</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">LINUX · 文件系统</span></span>
+    <h1 id="pageTitle">Linux 目录体系</h1>
+    <p class="lead" id="pageLead">先建立 Linux <b>目录体系</b>的整体地图，再深入两个最容易混淆的特殊目录：<b>/proc</b>（内核与进程的实时信息）与 <b>/run</b>（用户空间的运行时数据）。搞清楚它们各自管什么、何时消失，你就成功了一半。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能画出 FHS 顶层目录树，说出 <span class="mono">/etc</span>、<span class="mono">/var</span>、<span class="mono">/usr</span>、<span class="mono">/tmp</span>、<span class="mono">/dev</span> 各自该放什么。</li>
+      <li>学完后，你能从 <span class="mono">/proc</span> 中读取内核与进程的实时信息（如 <span class="mono">/proc/meminfo</span>、<span class="mono">/proc/[PID]/cmdline</span>）。</li>
+      <li>学完后，你能说清 <span class="mono">/run</span> 存储什么（PID 文件、套接字、锁文件），以及为何重启后会清空。</li>
+      <li>学完后，你能用一张表对比 <span class="mono">/proc</span> 与 <span class="mono">/run</span> 的<b>用途、类型、生命周期</b>差异，不再混用。</li>
+      <li>学完后，你能正确指出 <span class="mono">/var/run</span> 与 <span class="mono">/run</span> 的符号链接方向（<span class="mono">/var/run → /run</span>），并解释为何容易写反。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">会用终端（<span class="mono">ls</span>、<span class="mono">cat</span>、<span class="mono">cd</span>、<span class="mono">ln</span>），了解「文件」「进程」「硬链接/符号链接」的基础概念；这一节不讲命令细节，重点是<b>目录该放什么、何时消失</b>。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>Linux 目录体系总览：先分清「谁放在哪儿」</h2>
+  </section>
+
+  <section class="topic" id="fhs">
+    <h3><span class="kno">FHS</span>Filesystem Hierarchy Standard：顶层目录<span class="pt">Linux 的「房间布局」</span></h3>
+    <p>Linux 遵循 <b>FHS（文件系统层次标准）</b>，把整个系统安排在根目录 <span class="mono">/</span> 下的一棵目录树里。知道每个目录的<b>职责</b>比死记路径更重要：持久配置放 <span class="mono">/etc</span>，可执行程序放 <span class="mono">/usr</span>，会变化的日志放 <span class="mono">/var</span>，运行时临时状态放 <span class="mono">/run</span>，内核与进程的实时信息放 <span class="mono">/proc</span>。</p>
+    <div class="mermaid">
+flowchart TD
+  R["/"] --> bin["/bin → usr/bin"]
+  R --> boot["/boot"]
+  R --> dev["/dev"]
+  R --> etc["/etc"]
+  R --> home["/home"]
+  R --> lib["/lib → usr/lib"]
+  R --> proc["/proc"]
+  R --> root["/root"]
+  R --> run["/run"]
+  R --> sbin["/sbin → usr/sbin"]
+  R --> tmp["/tmp"]
+  R --> usr["/usr"]
+  R --> var["/var"]
+  proc -. 内核动态生成 .-> p1["CPU/内存/进程实时信息"]
+  run -. tmpfs 内存 .-> r1["PID/套接字/锁，重启清空"]
+</div>
+    <table class="tbl">
+      <thead><tr><th>目录</th><th>放什么</th><th>要不要持久化</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">/bin →/usr/bin</span></td><td>基本用户命令（<span class="mono">ls</span>、<span class="mono">cat</span>）</td><td>持久</td></tr>
+        <tr><td><span class="mono">/boot</span></td><td>内核、initramfs、引导加载器</td><td>持久</td></tr>
+        <tr><td><span class="mono">/dev</span></td><td>设备文件（由 udev 管理）</td><td>启动时创建</td></tr>
+        <tr><td><span class="mono">/etc</span></td><td>系统配置文件（持久化配置）</td><td>持久（关键）</td></tr>
+        <tr><td><span class="mono">/home</span></td><td>普通用户家目录</td><td>持久</td></tr>
+        <tr><td><span class="mono">/lib →/usr/lib</span></td><td>共享库</td><td>持久</td></tr>
+        <tr><td><span class="mono">/proc</span></td><td>内核与进程的<b>实时</b>信息（虚拟）</td><td>非持久</td></tr>
+        <tr><td><span class="mono">/root</span></td><td>root 用户家目录</td><td>持久</td></tr>
+        <tr><td><span class="mono">/run</span></td><td>运行时数据（PID、套接字、锁）</td><td>非持久（重启清空）</td></tr>
+        <tr><td><span class="mono">/sbin →/usr/sbin</span></td><td>系统管理命令</td><td>持久</td></tr>
+        <tr><td><span class="mono">/tmp</span></td><td>临时文件</td><td>重启清空</td></tr>
+        <tr><td><span class="mono">/usr</span></td><td>用户程序与数据（大多数内容）</td><td>持久</td></tr>
+        <tr><td><span class="mono">/var</span></td><td>可变数据：日志、缓存、<span class="mono">/var/run</span>、<span class="mono">/var/log</span></td><td>持久</td></tr>
+      </tbody>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>把「<b>持久 vs 运行时</b>」作为分界线：配置文件、程序、日志 → 持久化目录；当前状态的临时信息（PID、套接字、锁、内核状态）→ 放 <span class="mono">/proc</span> 与 <span class="mono">/run</span>，重启即变。</p></div>
+  </section>
+
+  <section class="topic" id="proc">
+    <h3><span class="kno">/proc</span>/proc：内核与进程的「实时观察窗口」<span class="pt">procfs · 虚拟文件系统</span></h3>
+    <p><span class="mono">/proc</span> 是一个<b>虚拟文件系统（procfs）</b>：它不占磁盘，里面的文件由<b>内核在读取的瞬间动态生成</b>。它既是内核与用户空间的接口，也用「每一个正在运行的进程对应一个数字目录」的方式，把进程信息暴露成文件，供 <span class="mono">cat</span>、<span class="mono">ps</span>、<span class="mono">top</span> 等工具读取。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>proc · 内核信息</div>
+      <pre><code>cat /proc/cpuinfo   # CPU 硬件详情
+cat /proc/meminfo   # 内存使用情况
+cat /proc/devices   # 已注册的设备列表
+cat /proc/modules   # 已加载的内核模块</code></pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>proc · 进程信息（按 PID 编号的子目录）</div>
+      <pre><code>cat /proc/1234/status     # 进程状态：内存、线程、PPID 等
+cat /proc/1234/cmdline    # 启动该进程的命令行参数
+ls -l /proc/1234/fd/      # 该进程已打开的文件描述符
+cat /proc/1234/maps       # 该进程的内存映射</code></pre>
+    </div>
+    <ul>
+      <li><b>读取即实时</b>：文件内容随内核/进程状态变化，没有固定大小，也没法「写回」去改内核。</li>
+      <li><b>随进程消失</b>：进程结束，它的 <span class="mono">/proc/[PID]/</span> 子目录立即被内核清理。</li>
+      <li><b>常用工具</b>：<span class="mono">ps</span>、<span class="mono">top</span>、<span class="mono">lsof</span> 背后往往就是在读 <span class="mono">/proc</span>。</li>
+    </ul>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><span class="mono">/proc</span> 是<b>内核生成、用户只读</b>的运行观察窗口——它用来「看」，不用来「存」。</p></div>
+  </section>
+
+  <section class="topic" id="run">
+    <h3><span class="kno">/run</span>/run：用户空间的「运行时数据区」<span class="pt">tmpfs · 内存中</span></h3>
+    <p><span class="mono">/run</span> 基于 <b>tmpfs</b>（内存中的临时文件系统），是<b>用户空间程序（服务、守护进程）</b>存放运行时状态的地方：它们被<u>写入</u>，而非由内核生成。系统开机时创建，<b>重启后自动清空</b>，因此非常适合放「只活在本次开机期间」的临时状态。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>run · 运行时数据</div>
+      <pre><code>cat /run/sshd.pid          # 服务 PID 文件（记录 sshd 进程号）
+ls -l /run/docker.sock     # 进程间通信用套接字文件
+find /run/lock -maxdepth 1 # 锁文件（防止服务重复启动）
+ls /run/systemd/           # systemd 的运行时信息</code></pre>
+    </div>
+    <ul>
+      <li><b>PID 文件</b>：记录服务进程 PID，可用于判断是否已有实例、检查存活。</li>
+      <li><b>套接字文件</b>：供进程间通信，如 Docker 守护进程的 <span class="mono">/run/docker.sock</span>。</li>
+      <li><b>锁文件</b>：防止同一服务被重复启动（如 <span class="mono">/run/lock/lvm</span>）。</li>
+      <li><b>生命周期</b>：随开机创建、随重启清空，服务需在启动时自己重新创建。</li>
+    </ul>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>别把运行时状态放进 <span class="mono">/etc</span> 这类<b>持久化配置目录</b>。PID、套接字、锁都是「过一天就失效」的瞬态数据，放 <span class="mono">/run</span>；配置文件（持久）才放 <span class="mono">/etc</span>。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Key Contrast · 核心对照</div>
+    <h2><span class="num">02</span>/proc 与 /run：一张表看懂它们</h2>
+  </section>
+
+  <section class="topic" id="compare">
+    <h3><span class="kno">对比</span>/proc vs /run：用途、类型、生命周期的区别<span class="pt">两者的核心差异</span></h3>
+    <p>两者都存放<b>运行时信息</b>、都<b>非持久化</b>，这是最常被混淆的根源。但它们<b>由谁生成、给谁用、何时消失</b>很不一样：<span class="mono">/proc</span> 是<b>内核写、用户看</b>；<span class="mono">/run</span> 是<b>用户程序写、用户程序看</b>。</p>
+    <table class="tbl">
+      <thead><tr><th>特性</th><th>/proc</th><th>/run</th></tr></thead>
+      <tbody>
+        <tr><td><b>类型</b></td><td>虚拟文件系统（procfs）</td><td>临时文件系统（tmpfs，内存中）</td></tr>
+        <tr><td><b>用途</b></td><td>提供<b>内核和进程</b>的实时信息</td><td>存储<b>运行时临时数据</b>（PID 文件、套接字）</td></tr>
+        <tr><td><b>数据来源</b></td><td>由<b>内核</b>动态生成</td><td>由<b>用户空间程序</b>（服务、守护进程）写入</td></tr>
+        <tr><td><b>生命周期</b></td><td>进程结束，其目录自动清理</td><td>系统重启后清空</td></tr>
+        <tr><td><b>持久性</b></td><td>非持久化（随内核/进程状态变化）</td><td>非持久化（仅运行时存在）</td></tr>
+        <tr><td><b>典型内容</b></td><td>CPU、内存、进程信息、已加载模块</td><td>PID 文件、锁文件、套接字文件、systemd 状态</td></tr>
+      </tbody>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>一句话记忆：</b><span class="mono">/proc</span> 是「<b>内核自己报的状态</b>」，<span class="mono">/run</span> 是「<b>程序给自己留的便签</b>」。前者管「系统现在怎样」，后者管「服务现在在跑什么」。</p></div>
+  </section>
+
+  <section class="topic" id="var-run">
+    <h3><span class="kno">易错</span>/var/run 与 /run：被写反的符号链接<span class="pt">常见混淆点 · 已修正</span></h3>
+    <p>在很多 systemd 发行版上，<span class="mono">/var/run</span> 并不是一个独立的真实目录，而是<b>指向 <span class="mono">/run</span> 的符号链接</b>。也就是说，<span class="mono">/var/run</span> 和 <span class="mono">/run</span> 指向的是<b>同一个</b>临时目录。</p>
+    <div class="callout danger"><span class="i">!</span><p><b>方向容易写反——务必记住：</b><br>　错误的说法：「<span class="mono">/run</span> 是 <span class="mono">/var/run</span> 的符号链接」<b>（反了）</b>。<br>　正确的方向：<b><span class="mono">/var/run</span> → <span class="mono">/run</span></b>，即 <span class="mono">/var/run</span> 是 <span class="mono">/run</span> 的符号链接，两者指向同一位置。</p></div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>验证符号链接方向</div>
+      <pre><code>ls -ld /run /var/run   # 看类型与链接指向
+# 典型输出（注意 var/run 是 lrwxrwxrwx，箭头指向 ../run）
+# drwxr-xr-x  ... /run
+# lrwxrwxrwx  ... /var/run -> ../run</code></pre>
+    </div>
+    <p>由于现代 systemd 普及，<span class="mono">/var/run</span> 都指向 <span class="mono">/run</span>。因此历史代码里写的 <span class="mono">/var/run/sshd.pid</span> 与今天的 <span class="mono">/run/sshd.pid</span> 其实是<b>同一文件</b>——这既是为了向后兼容，也避免「运行时状态」和「可变数据」在 <span class="mono">/var</span> 里混放。</p>
+    <div class="callout warn"><span class="i">i</span><p><b>记忆技巧：</b>顺着「<span class="mono">/var/run</span> 是 <span class="mono">/run</span> 的别名」来记。读链接时箭头 <span class="mono">→</span> 从旧路径指向新路径：<span class="mono">/var/run → /run</span>。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Practical · 实际场景</div>
+    <h2><span class="num">03</span>它用来解决问题</h2>
+  </section>
+
+  <section class="topic" id="scenarios">
+    <h3><span class="kno">场景</span>两个典型用例：查进程资源 &amp; 管服务<span class="pt">上手练习</span></h3>
+    <p><b>场景 1：</b>想知道进程 <span class="mono">1234</span> 的内存映射，用 <span class="mono">/proc</span>；<b>场景 2：</b>想确认 Nginx 是否在运行、它的 PID 是多少，用 <span class="mono">/run</span>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>场景 · let's practice</div>
+      <pre><code># 场景 1：查看进程 1234 的内存映射（来自 /proc）
+cat /proc/1234/maps
+
+# 场景 2：查找 Nginx 服务的 PID（来自 /run）
+cat /run/nginx.pid     # 或等价的 /var/run/nginx.pid
+
+# 顺手：看本机 pidof，再核对 /proc 里的真实情况
+pidof nginx            # 返回 PID 列表
+ps -p $(cat /run/nginx.pid)   # 用 PID 确认该进程状态</code></pre>
+    </div>
+    <div class="callout warn"><span class="i">i</span><p><b>提醒：</b>如果 <span class="mono">/run/nginx.pid</span> 不存在，通常意味着服务<b>没在运行</b>，或该服务尚未创建 PID 文件——这是排查「服务没起来」的第一步。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用 <span class="mono">ls -l</span> 分别查看 <span class="mono">/run</span> 与 <span class="mono">/var/run</span>，确认箭头方向是 <span class="mono">../run</span>；再找一个你当前服务（如 sshd）的 PID 文件读一读。</li>
+      <li>用 <span class="mono">cat /proc/meminfo</span> 和 <span class="mono">free -h</span> 对比输出，说出两者来源分别是哪里、哪一个是「内核实时」的。</li>
+      <li>找到当前 shell 的 PID（<span class="mono">echo $$</span>），再 <span class="mono">ls /proc/$$/fd/</span> 看它打开的文件描述符，想想为什么和 <span class="mono">/proc/$$/status</span> 不同。</li>
+      <li>思考：为什么 <span class="mono">/run</span> 用内存（tmpfs）而 <span class="mono">/var/log</span> 用磁盘？如果 PID 文件放 <span class="mono">/etc</span> 会产生什么问题？</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="08-filesystem" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Linux 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "08-filesystem",          // 本页知识点 id（= 大纲里的 id）
+  title: "Linux 目录体系",
+  eyebrow: "LINUX · 文件系统",
+  prev: "07-shell-func.html",   // 上一节文件名
+  next: "09-links.html",        // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"/proc 属于下列哪种文件系统？",
+    opts:["tmpfs（内存临时文件系统）","procfs（虚拟文件系统，由内核动态生成）","ext4（普通磁盘文件系统）","xfs（日志文件系统）"],
+    ans:1,
+    exp:"/proc 是 procfs，内容由内核在读取瞬间动态生成，不是 tmpfs，也不是持久化的磁盘文件系统。"
+  },
+  {
+    type:"quiz",
+    q:"关于 /run 的生命周期，下面说法正确的是？",
+    opts:["系统重启后内容保留不变","系统重启后被清空，由服务重新创建","它是硬链接，重启不影响","数据永久保存在磁盘上"],
+    ans:1,
+    exp:"/run 基于 tmpfs（内存），开机创建、重启清空，服务需在启动时自行重建，用于管理临时运行时状态。"
+  },
+  {
+    type:"quiz",
+    q:"服务进程的 PID 文件（如 sshd.pid）通常放在哪个目录？",
+    opts:["/proc","/etc","/run","/home"],
+    ans:2,
+    exp:"PID 文件放在 /run（或等价指向它的 /var/run），如 /run/sshd.pid。/proc 是内核动态生成的虚拟信息，/etc 用于持久配置。"
+  },
+  {
+    type:"quiz",
+    q:"要查看进程 1234 的启动命令行参数，应读取哪个文件？",
+    opts:["/proc/1234/status","/proc/1234/cmdline","/proc/1234/maps","/proc/cpuinfo"],
+    ans:1,
+    exp:"/proc/[PID]/cmdline 保存启动该进程的命令行参数；/proc/[PID]/status 是进程状态，/proc/[PID]/maps 是内存映射，/proc/cpuinfo 是 CPU 信息。"
+  },
+  {
+    type:"quiz",
+    q:"关于 /run 与 /var/run 的关系，正确的是？",
+    opts:["/run 是 /var/run 的符号链接","/var/run 是 /run 的符号链接，二者指向同一目录","二者是磁盘上互不相干的独立目录","/var/run 是 /run 的备份目录"],
+    ans:1,
+    exp:"正确方向是 /var/run → /run：/var/run 作为 /run 的符号链接，两者指向同一个临时目录。注意别把方向写反。"
+  },
+  {
+    type:"quiz",
+    q:"容器守护进程所需的进程间通信套接字文件（如 docker.sock）通常存在于哪里？",
+    opts:["/proc/docker.sock","/run/docker.sock","/boot/docker.sock","/root/docker.sock"],
+    ans:1,
+    exp:"套接字文件用于进程间通信，属于运行时状态，存放于 /run，如 /run/docker.sock。/proc 不存这样的套接字文件。"
+  },
+  {
+    type:"quiz",
+    q:"下列哪一项会「随进程结束而自动消失」？",
+    opts:["/etc/passwd 里的用户记录","/proc/[PID]/ 对应子目录","/usr/bin 下的可执行文件","/home 下的用户配置"],
+    ans:1,
+    exp:"/proc/[PID]/ 由内核为每个进程创建，进程结束即清理；/etc、/usr、/home 是持久化目录，内容长期保留。"
+  },
+  {
+    type:"interview",
+    q:"面试：请解释为什么把 PID 文件放在 /run 而不是 /etc，并说明 /proc 与 /run 的本质区别。",
+    opts:["/proc 内核生成、用户只读；/run 用户程序写入运行时状态。PID 是瞬态状态，放 /run（重启清空），放 /etc 会污染持久化配置目录","两者没有区别，放哪都行","/proc 是持久化的，/run 是临时的","/run 由内核写入，/proc 由用户程序写入"],
+    ans:0,
+    exp:"/proc 由内核动态生成、供读取观察；/run 是用户空间程序写入的运行时数据。PID 文件是本次开机才有效的瞬态状态，放 /run（重启即清空）合理，放 /etc 会把运行时状态误当成持久配置，造成管理混乱。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:linux:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Linux 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>

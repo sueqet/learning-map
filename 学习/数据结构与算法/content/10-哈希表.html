@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>哈希表 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 哈希表：平均 O(1) 的核心思想、哈希函数设计、冲突解决、负载因子与扩容、计数去重与算法实战。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 10 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">哈希表</h1>
+    <p class="lead" id="pageLead">哈希表用哈希函数把任意键映射成数组下标，让查找、插入、删除都逼近 <b>O(1)</b>——它是最典型的「用空间换时间」数据结构，也是字符串匹配、图论、设计题与笔试面试里出现频率最高的一类题。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能解释哈希表「键 → 下标」的映射思想，以及平均 <b>O(1)</b>、最坏 <b>O(n)</b> 的来源与成立前提。</li>
+      <li>学完后你能按场景设计哈希函数（除留余数法 / 乘法散列 / 多项式滚动哈希），并说出 <b>m 取素数</b> 的作用。</li>
+      <li>学完后你能分别用<b>链地址法</b>与<b>开放定址法</b>实现冲突解决，并说明线性探测删除为何必须打 <b>DELETED</b> 标记。</li>
+      <li>学完后你能用<b>负载因子 α</b> 判断何时扩容，解释 rehash 的过程与<b>摊还 O(1)</b> 的代价来源。</li>
+      <li>学完后你能熟练用哈希集合 / 映射，把「两数之和、去重、计数、最长连续序列」等题的暴力解优化到 O(n)。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">会一门编程语言（推荐 Python，或 C++/Java 亦可）；理解<b>数组随机访问为 O(1)</b>、链表、循环与函数；了解时间复杂度的渐进分析，若懂一点<b>摊还（amortized）分析</b>，学「扩容」会更顺。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区：每个知识点一个 <section class="topic" id="锚点">
+       ============================================================ -->
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">10.1</span>哈希表基础：核心思想与哈希函数设计</h2>
+  </section>
+
+  <!-- 知识点 1：哈希表的基本思想与平均 O(1) -->
+  <section class="topic" id="hash-basic">
+    <h3><span class="kno">知识点</span>哈希表的基本思想与平均 O(1)<span class="pt">hash-basic</span></h3>
+    <p><strong>哈希表（Hash Table，散列表）</strong>的核心思想：用一个<strong>哈希函数（hash function）</strong>，把任意类型的<strong>键（key）</strong>计算成一个数组<strong>下标（index）</strong>，从而把「查找」从线性/对数比较，变成一次随机访问。</p>
+    <ul>
+      <li><b>直接寻址（direct addressing）</b>：当键本身就是 0..M-1 的整数时，直接用键当下标，O(1) 无冲突；但键域通常很大（如名字、字符串），无法开那么大数组。</li>
+      <li><b>哈希推广</b>：不直接用小键，而是用 <code class="mono">index = h(key)</code> 把它「压缩」到一个有限范围内，用数组存这个范围内的桶。</li>
+      <li><b>平均 O(1) 的关键</b>：哈希函数把键<strong>均匀</strong>分散到不同桶，每次操作只访问「大概率只有常数个」元素的桶；<strong>冲突</strong>不可避免，但期望冲突很少。</li>
+      <li>最坏情况 O(n)：如果所有键都散到同一个桶（哈希函数被攻击或设计极差），链表/探测退化成线性查找。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>hash_basic.py</div>
+      <pre><code># 用「桶数组 + 链地址」搭一个最简哈希表，体会 O(1) 的由来
+class SimpleHashMap:
+    def __init__(self, m=13):
+        self.m = m
+        self.buckets = [[] for _ in range(m)]     # 每个桶是一条链（冲突时挂到链上）
+
+    def h(self, key):            # 除留余数法：把任意整数压到 [0, m-1]
+        return key % self.m
+
+    def put(self, key, val):
+        i = self.h(key)
+        for j, (k, _) in enumerate(self.buckets[i]):   # 桶内线性扫：期望极短
+            if k == key:
+                self.buckets[i][j] = (key, val)        # 覆盖旧值
+                return
+        self.buckets[i].append((key, val))             # 链上新键
+
+    def get(self, key):
+        i = self.h(key)
+        for k, v in self.buckets[i]:                   # 桶内找
+            if k == key:
+                return v
+        raise KeyError(key)
+
+d = SimpleHashMap()
+d.put(42, "answer"); d.put(55, "five")
+print(d.get(42))     # answer —— O(1) 平均</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>哈希表的精髓是<strong>以空间换时间</strong>——花一块数组，把「比较查找」变成「映射 + 随机访问」。平均 O(1) 是<strong>期望意义</strong>，建立在<strong>哈希函数均匀 + 负载因子合理</strong>两个前提下。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>不要把「平均 O(1)」当成「永远是 O(1)」。<strong>最坏是 O(n)</strong>（全部冲突到同一桶）。面试里被追问「哈希表一定快吗？」时，要答出 了期望/均摊、好哈希函数、合适负载因子、扩容 这些前提。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">查询 / 插入 / 删除</div><div class="v">avg O(1) · worst O(n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(m + n)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">无序快速查找</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 2：哈希函数的设计 -->
+  <section class="topic" id="hash-func">
+    <h3><span class="kno">知识点</span>哈希函数的设计<span class="pt">hash-func</span></h3>
+    <p>好的哈希函数要满足三点：<strong>确定性</strong>（同一键恒返回同一值）、<strong>计算快</strong>、<strong>分布均匀</strong>（把键域均匀撒到每个桶，减少聚集）。常见设计方法如下。</p>
+    <table class="tbl">
+      <thead><tr><th>方法</th><th>公式 / 思路</th><th>特点<strong> / </strong>用途</th></tr></thead>
+      <tbody>
+        <tr><td><b>除留余数法</b>（division method）</td><td class="mono">h(k) = k mod m</td><td>最简单常用；m 宜取<strong>素数</strong>，减少键的规则性带来的聚集。</td></tr>
+        <tr><td><b>乘法散列法</b>（multiplication）</td><td class="mono">h(k) = floor(m · frac(k·A))</td><td>m 取 2 的幂也可，A 常用 0.618…；对 m 不敏感。</td></tr>
+        <tr><td><b>平方取中 / 折叠法</b></td><td>取平方的中间若干位；把键分段相加</td><td>适合键本来是数串、需打散位数分布时。</td></tr>
+        <tr><td><b>多项式滚动哈希</b>（polynomial / rolling）</td><td class="mono">h = (h·base + c) mod m</td><td>字符串哈希（Rabin–Karp）的核心；base 常取 31/13331。</td></tr>
+        <tr><td><b>完美哈希</b>（perfect hashing）</td><td>两级哈希 / cuckoo 哈希</td><td>键集<strong>静态</strong>时构造<strong>零冲突</strong>映射，可实现最坏 O(1)。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>hash_func.py</div>
+      <pre><code># 除留余数法：m 建议取不接近 2 的幂的素数
+def division_hash(key: int, m: int) -> int:
+    return key % m          # m=13 而非 16，避免低位规则性被直接用作下标
+
+# 乘法散列法（Knuth 建议 A≈0.6180339887）
+def multiply_hash(key: int, m: int, a=0.6180339887) -> int:
+    return int(m * ((key * a) % 1))
+
+# 字符串多项式滚动哈希：像进制数一样逐位累加，用于字符串题
+def polynomial_hash(s: str, base=31, mod=1_000_000_007) -> int:
+    h = 0
+    for ch in s:
+        h = (h * base + ord(ch)) % mod   # base 大且为素数，罕见重散
+    return h</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>为什么 m 取素数：</b>若键本身呈「等差数列」或「低 2 位固定」，用 2 的幂作 m 会让这些键永远落在少数桶里（<strong>聚集</strong>）。取素数可以打破这种周期性，让分布更均匀。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点 — 哈希洪水（hash-flooding）：</b>若哈希函数对<strong>恶意输入</strong>高度可预测，攻击者可构造大量同桶键，把哈希表拖成 O(n²)。防御做法是<strong>加随机盐（random seed）</strong>，或让冲突桶<strong>树化</strong>（见 Java HashMap）。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">单键哈希耗时</div><div class="v">O(1) / O(len)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">质量目标</div><div class="v">均匀 · 快速</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 3：冲突解决 -->
+  <section class="topic" id="hash-collision">
+    <h3><span class="kno">知识点</span>冲突解决（链地址 / 开放定址）<span class="pt">hash-collision</span></h3>
+    <p>冲突（collision）是指<strong>两个不同键被映射到同一位置</strong>。解决思路分两大流派：<strong>链地址法（separate chaining）</strong>让每个桶「能装多个」，<strong>开放定址法（open addressing）</strong>让冲突的键<strong>顺延放</strong>到后续空位。</p>
+    <ul>
+      <li><b>链地址法</b>：每个桶是链表（或红黑树）。Java <code class="mono">HashMap</code> 在链表过长时<strong>树化</strong>；负载因子<strong>可大于 1</strong>。简单、无聚集、删除容易。</li>
+      <li><b>开放定址法</b>：桶只存一个元素，冲突就按探测序列找下一个空位。负载因子必须 &lt;1（常在 0.5~0.75 触发扩容）。<strong>删除要打 DELETED 标记</strong>。</li>
+      <li><b>线性探测（linear probing）</b>：<code class="mono">h + i</code>，依次找下一个；实现简单但易<strong>主聚集（primary clustering）</strong>。</li>
+      <li><b>二次探测（quadratic probing）</b>：<code class="mono">h + i²</code>，跳跃式探测，缓解主聚集；但可能跳不到所有桶。</li>
+      <li><b>双重哈希（double hashing）</b>：<code class="mono">h + i·h₂(key)</code>，用第二个哈希函数定步长，分布最均匀。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>hash_collision.py</div>
+      <pre><code># 开放定址 + 线性探测：插入 / 查找；删除必须用 DELETED 占位
+class LinearProbe:
+    def __init__(self, m=11):
+        self.m, self.table = m, [None] * m   # None=空，__DEL__=被删除
+        self.__DEL__ = object()
+
+    def h(self, key):
+        return key % self.m
+
+    def find(self, key):                     # 查找：沿探测序列找键
+        i = self.h(key)
+        for step in range(self.m):
+            j = (i + step) % self.m
+            cell = self.table[j]
+            if cell is None:                 # 遇到真正的空才可断定"不在"
+                return -1
+            if cell is not self.__DEL__ and cell[0] == key:
+                return j
+        return -1
+
+    def insert(self, key, val):
+        i = self.h(key)
+        for step in range(self.m):
+            j = (i + step) % self.m
+            c = self.table[j]
+            if c is None or c is self.__DEL__:   # 空位或被删除位都能放
+                self.table[j] = (key, val)
+                return
+            if c[0] == key:
+                self.table[j] = (key, val); return
+        raise RuntimeError("表已满，需扩容")
+
+    def delete(self, key):
+        j = self.find(key)
+        if j < 0: return False
+        self.table[j] = self.__DEL__          # 只标记，不置 None！</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>为何删除要打 DELETED 标记：</b>线性探测中，若直接把键所在格置 <code class="mono">None</code>，就会<strong>切断探测链</strong>——后面本来与该位置「同链」的键在查找时会提前遇到 <code class="mono">None</code> 而误判「不存在」。用 <code class="mono">DELETED</code> 占位即可保持探测链连续。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>面试对照：</b>Java <code class="mono">HashMap</code> 用<strong>链地址</strong>，并在桶数≥64 且单链长≥8 时把链表<strong>转红黑树</strong>（把最坏 O(n) 降到 O(log n)）；Python <code class="mono">dict</code>/<code class="mono">set</code> 用开放定址的探测式存储。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">链地址 平均</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">开放定址 平均</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">最坏</div><div class="v">O(n)</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Performance · 性能与工程</div>
+    <h2><span class="num">10.2</span>负载因子与扩容（rehash）</h2>
+  </section>
+
+  <!-- 知识点 4：负载因子与扩容 -->
+  <section class="topic" id="hash-load">
+    <h3><span class="kno">知识点</span>负载因子与扩容（rehash）<span class="pt">hash-load</span></h3>
+    <p><strong>负载因子（load factor）</strong> α = n / m（已存元素 n ÷ 桶数 m），它是判断哈希表「有多挤」的核心指标。α 越大，冲突期望越高、操作越慢，因此要设一个<strong>上限阈值</strong>，超过就<strong>扩容（resize / rehash）</strong>。</p>
+    <ul>
+      <li><b>链地址法</b>：α 允许 &gt;1（链表变长即可），工程上常设 <code class="mono">0.75</code> 左右。</li>
+      <li><b>开放定址法</b>：α 必须 &lt;1，否则永远插不进；实际常控制在 <code class="mono">0.5~0.75</code>，再高就扩容。</li>
+      <li><b>扩容过程</b>：把桶数组扩为约 2 倍（如 <code class="mono">m → 2m</code>），并把<strong>所有</strong>旧键<strong>重新哈希</strong>进新表——因为 m 变了，每个键的下标几乎全变。</li>
+      <li><b>摊还分析</b>：单次扩容 O(n)，但元素数量指数增长，分摊到每次插入是<strong>均摊 O(1)</strong>（类比动态数组）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>hash_rehash.py</div>
+      <pre><code># 链地址 + 阈值扩容：装得越满冲突越多，宁可提前扩大
+class RehashMap:
+    def __init__(self, init=8, factor=0.75):
+        self.cap, self.n, self.factor = init, 0, factor     # n=cnt of keys
+        self.buckets = [[] for _ in range(init)]
+
+    def h(self, key):                # m 用当前容量
+        return key % self.cap
+
+    def _touch(self):                # 每次插入后检查负载
+        if self.n / self.cap >= self.factor:      # α 超阈值 → 扩容
+            self._rehash(self.cap * 2)
+
+    def _rehash(self, new_cap):
+        old = self.buckets
+        self.cap, self.n, self.buckets = new_cap, 0, [[] for _ in range(new_cap)]
+        for chain in old:                                    # 旧元素逐个重散
+            for k, v in chain:
+                self[k] = v
+
+    def __setitem__(self, key, val):
+        self._touch()                        # 先扩容再插入（体现"提前"）
+        i = self.h(key)
+        for j, (k, _) in enumerate(self.buckets[i]):
+            if k == key:
+                self.buckets[i][j] = (key, val); return
+        self.buckets[i].append((key, val))
+        self.n += 1</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>负载因子是「空间与时间」的平衡开关——调小则更省冲突但更费内存，调大则省内存但更易冲突。阈值（0.75）是工程上的经验值，不是定理。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>「扩容后要把所有键重新哈希」——不能把旧槽位直接拷贝过来，因为 <b>m 变了</b>，下标已失效。另外扩容<strong>不是 O(1)</strong>，是 O(n)；但通过摊还分析，整体平均仍是 O(1)。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">单次扩容</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">摊还每次操作</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">负载因子阈值</div><div class="v">≈0.75</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Practice · 实战应用</div>
+    <h2><span class="num">10.3</span>哈希集合 / 映射与算法实战</h2>
+  </section>
+
+  <!-- 知识点 5：哈希集合 / 映射与计数去重实战 -->
+  <section class="topic" id="hash-usage">
+    <h3><span class="kno">知识点</span>哈希集合 / 映射与计数去重实战<span class="pt">hash-usage</span></h3>
+    <p><strong>哈希集合（hash set）</strong>与<strong>哈希映射（hash map）</strong>是把 O(n²) 暴力优化成 O(n) 的万能钥匙：凡是「我有没有见过它」「它出现了几次」「它对应的那个人是谁」，都能用哈希在常数时间回答。</p>
+    <ul>
+      <li><b>去重</b>：<code class="mono">set</code> 天然去重，<code class="mono">len(set(x)) != len(x)</code> 即可判断是否有重复。</li>
+      <li><b>计数</b>：<code class="mono">Counter</code> / <code class="mono">dict</code> 统计频率，O(n)。</li>
+      <li><b>查找 / 映射</b>：存「值 → 它出现位置」或「键 → 配对对象」，把双重循环拆成一次遍历。</li>
+      <li><b>集合运算</b>：交集 / 并集 / 差集用 <code class="mono">set</code> 直接做；图 / 树的 visited 标记也用 set 达到 O(1)。</li>
+      <li>注意：set / dict <strong>无序</strong>，需要有序结果时要显式排序或用有序容器。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>hash_usage.py</div>
+      <pre><code>from collections import Counter
+
+def contains_duplicate(nums):          # LeetCode 217：去重后长度不同 => 有重复
+    return len(set(nums)) != len(nums)
+
+def count_chars(s):                     # 计数：统计频率用 Counter（内部即哈希表）
+    return Counter(s)
+
+def intersection(a, b):                 # LeetCode 349：两个数组的交集
+    return sorted(set(a) & set(b))      # set 的 & 即交集，O(n)
+
+def single_number(nums):                # LeetCode 136：只出现一次的数字
+    seen = set()
+    for x in nums:
+        if x in seen: seen.remove(x)    # 出现两次就移除
+        else:           seen.add(x)
+    return seen.pop()                   # 剩下的就是只出现一次的那个</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>花 O(1) 的哈希存储，把「需要回头再找一遍」的<strong>二次扫描</strong>变成<strong>一次扫描 + 哈希反查</strong>——这就是所谓<strong>用空间换时间</strong>。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点 — 可哈希性（hashable）：</b>Python 里 <code class="mono">list</code>、<code class="mono">dict</code>、<code class="mono">set</code> 是<strong>可变</strong>的，不可作为 dict 的 key / set 的元素；<code class="mono">tuple</code> 的<strong>所有元素都不可变</strong>时可哈希。要用列表做 key，先转成 <code class="mono">tuple</code>。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">查 / 加 / 删（哈希）</div><div class="v">avg O(1)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">去重 · 计数</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 6：设计题与应用 -->
+  <section class="topic" id="hash-problems">
+    <h3><span class="kno">知识点</span>设计题与应用（两数之和 / 最长连续序列等）<span class="pt">hash-problems</span></h3>
+    <p>哈希最经典的考法，是把它当作「<strong>加速找伴侣 / 判断存在</strong>」的辅助结构，把找配对从两层循环变一次遍历。以下两道是几乎必考的模板。</p>
+    <ul>
+      <li><b>两数之和（LeetCode 1）</b>：一遍哈希，每遇到一个数，立刻查「target - 它」是否出现过。</li>
+      <li><b>最长连续序列（LeetCode 128）</b>：用 set 判断「我是不是连续段的最左端点」，是才开始向后数，保证每段只数一次，整体 O(n)。</li>
+      <li><b>字母异位词分组（LeetCode 49）</b>：把「排序后的字符串」或「字符计数字符串」作为 key，异位词归到同一组。</li>
+      <li><b>设计 LRU 缓存（LeetCode 146）</b>：哈希表负责 O(1) 定位键，双向链表维护访问顺序并支持 O(1) 摘下/插入。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>hash_problems.py</div>
+      <pre><code># 1) 两数之和（LC 1）：一遍哈希，边遍历边查"互补数"
+def two_sum(nums, target):
+    pre = {}
+    for i, x in enumerate(nums):
+        y = target - x
+        if y in pre:                  # O(1) 找到之前出现过的互补数，返回两下标
+            return [pre[y], i]
+        pre[x] = i                    # 记下"值 -> 它的下标"
+    return []
+
+# 2) 最长连续序列（LC 128）：只从"连续段最左端"开始数，保证每段 O(1) 处理
+def longest_consecutive(nums):
+    s, best = set(nums), 0
+    for x in s:
+        if x - 1 in s:                # 左边还有人，说明自己不是起点，跳过
+            continue
+        cur, y = 0, x
+        while y in s:                 # 只在起点往后数整段
+            cur += 1; y += 1
+        best = max(best, cur)
+    return best
+
+print(two_sum([2, 7, 11, 15], 9))      # [0, 1]
+print(longest_consecutive([100, 4, 200, 1, 3, 2]))  # 4 (1,2,3,4)</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>答题套路：</b>看到「找配对 / 查存在 / 统计频率 / 去关注过没」的题，先想能不能用哈希把<strong>第二层循环</strong>变成 <strong>O(1) 反查</strong>。这就是哈希在算法题里 60% 以上的出场动机。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点 — 连续序列别爆 O(n²)：</b>若对每个数都向后 while 延伸，最坏会重复数同一段而超时。关键是<strong>判断起点</strong>（<code class="mono">x-1 in s</code>），保证每个连续段只被数一次，整体才是 O(n)。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">两数之和</div><div class="v">O(n) / O(n)</div></div>
+      <div class="cx"><div class="k">最长连续序列</div><div class="v">O(n) / O(n)</div></div>
+      <div class="cx"><div class="k">LRU / 设计题</div><div class="v">O(1) 每次</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>LeetCode 146 · LRU 缓存</b>：用 哈希表 + 双向链表 实现 O(1) 的 get / put；思考为什么必须链表维护顺序、哈希表负责定位。</li>
+      <li><b>LeetCode 380 · O(1) 时间插入、删除和获取随机元素</b>：哈希表为什么还要配合数组、以及「删除时把末尾元素搬过来」的技巧。</li>
+      <li><b>手写开放定址哈希表</b>：用线性探测实现增删查，正确处理 DELETED 标记；再各自实现一遍二次探测与双重哈希，比较其探测序与聚集情况。</li>
+      <li><b>LeetCode 49 · 字母异位词分组</b>：分别用「排序」与「字符计数」两种 key 思路求解，讨论哪一种更省时间、并解释其哈希键的可哈希性。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "hash",                  // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "哈希表",             // ex: 绪论与算法复杂度分析
+  eyebrow: "MODULE 10 · 数据结构与算法",
+  prev: "09-图.html",          // 前一节文件名
+  next: "11-并查集.html",      // 下一节文件名
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"哈希表平均 O(1) 的成立前提，下列哪项说法最准确？",
+    opts:["哈希函数能完全避免任何冲突","哈希函数分布均匀且负载因子合理，冲突的期望很少","数组长度必须是素数以保证无冲突","所有键必须互不相同才能使用哈希表"],
+    ans:1,
+    exp:"答案 B。平均 O(1) 是期望意义，靠的是「哈希函数把键均匀散开 + 负载因子合适」让冲突期望收敛到常数。A/C 都无法保证零冲突（冲突不可避免），D 是直接寻址而非哈希表的必要条件。"
+  },
+  {
+    type:"quiz",
+    q:"除留余数法 h(k)=k mod m 中，m 通常取素数，主要目的是什么？",
+    opts:["让取模运算更快","打破键的周期性分布，减少哈希值聚集、使分布更均匀","让桶的数量更大","完全避免冲突"],
+    ans:1,
+    exp:"答案 B。当键本身呈等差或低位固定时，若 m 是 2 的幂，这些规则性会被「截断」而让大量键落到少数桶里（聚集）。素数 m 能打散这种周期性，让分布更均匀。取模速度与 m 类型无关，也并不能避免冲突。"
+  },
+  {
+    type:"quiz",
+    q:"开放定址法的线性探测中，删除一个元素时正确做法是？",
+    opts:["直接把该格置为 None 表示空","用特殊标记 DELETED 占位","把后续所有元素都前移一位","把表缩小并重新哈希"],
+    ans:1,
+    exp:"答案 B。直接把格子置 None 会切断探测链——后面原本与它同链的键，在查找时提前遇到 None 会被误判为「不存在」。用 DELETED 占位既表示「曾经有键、继续探测」，又能复用为插入位置。"
+  },
+  {
+    type:"quiz",
+    q:"关于负载因子 α=n/m，下列哪项说法正确？",
+    opts:["开放定址法的负载因子可以大于 1","负载因子越小一定越好，越小性能越高","链地址法通常允许负载因子大于 1","负载因子与冲突频率完全无关"],
+    ans:2,
+    exp:"答案 C。链地址法每个桶能挂链表，α 可大于 1（链表变长而已），工程上常取 0.75 作为阈值；而开放定址法每个格只能存一个，α 必须小于 1，否则永远插不进。α 过大确实增加冲突，但也并非越小越好——太小会浪费内存，是空间与时间的平衡。"
+  },
+  {
+    type:"quiz",
+    q:"LeetCode 1「两数之和」用一遍遍历 + 哈希表的复杂度是？",
+    opts:["O(n²) 时间、O(1) 空间","O(n log n) 时间、O(n) 空间","O(n) 时间、O(n) 空间","O(1) 时间、O(n²) 空间"],
+    ans:2,
+    exp:"答案 C。边遍历边查「target - x 是否出现过」，每次哈希反查平均 O(1)，整体 O(n) 时间；用一张 dict 记「值→下标」，空间 O(n)。这比暴力双重循环的 O(n²) 快得多。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：Java HashMap 为什么在单链长度达到 8、且桶数≥64 时会把链表转成红黑树？",
+    opts:["红黑树插入比链表更快","为了应对哈希函数糟糕或受攻击时的大量冲突，避免查找最坏退化为 O(n)","红黑树比链表更节省内存","红黑树更易删除元素"],
+    ans:1,
+    exp:"答案 B。当大量键冲突到同一桶，链表查找会退化为 O(n)。转红黑树把单桶最坏复杂度降到 O(log n)，缓解哈希洪水等场景。注意这是「兜底」手段，正常均匀分布时根本不触发；链表+树化的根本目的仍是让平均 O(1) 保持稳健。"
+  },
+  {
+    type:"quiz",
+    q:"下列哪个对象可以作为 Python 字典的 key？",
+    opts:["list（列表）","dict（字典）","全部元素都不可变的 tuple","set（集合）"],
+    ans:2,
+    exp:"答案 C。dict 的 key 必须可哈希（hashable），即可变对象 list/dict/set 都不行。tuple 只在「所有元素都不可变」时可哈希；若 tuple 里含 list 或 dict，则不可哈希。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：LRU 缓存（LeetCode 146）为什么用「哈希表 + 双向链表」？",
+    opts:["哈希表负责 O(1) 定位键，双向链表维护访问顺序并支持 O(1) 摘下/移到头部","用哈希表记录每个键的最后访问时间戳","只用双向链表就能做到 O(1) 查找","为了减少哈希冲突"],
+    ans:0,
+    exp:"答案 A。哈希表把「根据 key 找到节点」做成 O(1)；双向链表按访问先后有序排列，且能在 O(1) 内把某节点从其当前位置摘下并插到头部。二者配合，才能同时满足 O(1) 的 get / put 与「淘汰最久未使用」的语义。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>查找 · 二分查找 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 查找 · 二分查找：学习目标、知识点讲解、区间不变量、二分变体与二分答案、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">查找 · 二分查找</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 06 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">查找 · 二分查找</h1>
+    <p class="lead" id="pageLead"><b>二分查找</b>（Binary Search）以每次砍半的代价，把一个看运气的问题变成一条可证明的 O(log n) 路径；掌握好「区间不变量」，从寻找一个数到寻找<em>第一个 / 最后一个</em>、再到「对答案二分」，都能一眼看穿。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能说明二分查找的三个前提（有序、可 O(1) 随机访问、可比较大小），并解释为什么链表上的二分退化为 O(n)。</li>
+      <li>学完后你能讲清「左闭右闭 [l, r]」与「左闭右开 [l, r)」两套区间不变量，并把区间定义、循环条件、l/r 收缩三处写对。</li>
+      <li>学完后你能熟练写出「第一个等于 / 最后一个等于 / 第一个 ≥（插入位置）/ 最后一个 ≤」四种变体模板。</li>
+      <li>学完后你能把「对答案二分」模型套到单调性判定问题上，写出 check(x) 判定 + 二分答案的骨架。</li>
+      <li>学完后你能一眼识别 off-by-one 与死循环，并给出铁律式的修复手段。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">掌握一门编程语言的基本语法（变量、while/for 循环、函数、对象数组）；理解「数组是按下标访问的连续存储」这一事实；会简单分析 O(1)/O(n)/O(log n) 的时间复杂度；了解「有序数组」与「大小比较」。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">06</span>查找 · 二分查找<br>从「每次砍半」到「区间不变量」与「对答案二分」</h2>
+  </section>
+
+  <!-- 知识点 1：基本思想与前提 -->
+  <section class="topic" id="bs-basic">
+    <h3><span class="kno">知识点</span>二分查找的基本思想与前提<span class="pt">bs-basic · LeetCode 704</span></h3>
+    <p><strong>二分查找</strong>（Binary Search，又称<strong>折半查找</strong>）的核心思想只有一个：<b>每一次比较都把待查区间砍掉一半</b>。因为序列有序，若中间元素 a[mid] 比目标大，那么目标只可能出现在左半；若比目标小，只可能出现在右半——于是我们不需要"逐个看"，而是对数级地缩小搜索空间。</p>
+    <p>它之所以能成立，靠的是下面这三个<strong>前提</strong>，缺一不可：</p>
+    <ul>
+      <li><b>有序</b>：序列必须能通过比较决定"往哪一半走"。无序序列无法从一次比较推断出该区间。</li>
+      <li><b>可 O(1) 随机访问</b>：能按下标瞬间拿到中间元素。数组是可以的，链表不行——取中点在链表上要遍历，复杂度就退化。</li>
+      <li><b>可比较大小</b>：元素之间必须能比出 <、=、&gt;。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>bs_basic.py</div>
+      <pre><code># LeetCode 704：二分查找。在升序数组 a 中找 target，返回下标，找不到返回 -1
+def binary_search(a, target):
+    l, r = 0, len(a) - 1      # 左闭右闭区间 [l, r]，r 是「最后一个有效下标」
+    while l <= r:             # 区间非空才继续；l > r 说明已完全排除
+        mid = l + (r - l) // 2   # 防 (l+r) 溢出的标准写法
+        if a[mid] < target:
+            l = mid + 1       # mid 已被排除，区间右移到 mid+1
+        elif a[mid] > target:
+            r = mid - 1       # mid 已被排除，区间左移到 mid-1
+        else:
+            return mid        # 恰好命中
+    return -1                 # 区间耗尽仍未找到</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>每比较一次，候选区间长度减半，因此从 n 到 1 只需约 log₂n 次比较——这就是 O(log n) 的来源。前提（有序 + 随机访问 + 可比较）是面试常考的第一问。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>很多同学以为二分"对任意数组都 O(log n)"。错！二分对<strong>链表</strong>取中点需要遍历，等价于 O(n) 渐进复杂度，并不比线性查找更省。另外"有序"不是"必须是严格升序"，非递减（允许相等）也 OK，但变体写法要看「等于」处理。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">前提</div><div class="v">有序 + 随机访问</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 2：区间不变量与边界写法 -->
+  <section class="topic" id="bs-boundary">
+    <h3><span class="kno">知识点</span>区间不变量与边界写法<span class="pt">bs-boundary · 左闭右闭 vs 左闭右开</span></h3>
+    <p>二分最容易翻车的不是"有没有想到用二分"，而是<b>边界到底怎么收</b>。答案藏在<strong>区间不变量</strong>（Loop Invariant）里——「当前未排除的候选元素范围」。只要把「区间定义 / 循环条件 / l、r 收缩」三处写成<em>同一套不变量</em>，代码就自动自洽；哪一处偷换了一套，就会死循环或越界。</p>
+
+    <table class="tbl">
+      <tr><th>不变量</th><th>区间定义</th><th>循环条件</th><th>命中后收缩</th><th>未找到时结束</th></tr>
+      <tr><td>左闭右闭</td><td class="mono">[l, r]，0≤l≤r≤n-1</td><td class="mono">l &lt;= r</td><td>l = mid+1 / r = mid-1</td><td class="mono">l == r+1</td></tr>
+      <tr><td>左闭右开</td><td class="mono">[l, r)，0≤l&lt;r≤n</td><td class="mono">l &lt; r</td><td>l = mid+1 / r = mid</td><td class="mono">l == r</td></tr>
+    </table>
+
+    <p><strong>为什么循环条件不一样？</strong>左闭右闭的区间里 l == r 时仍有<i>一个</i>元素没排除，必须继续，所以是 <span class="mono">l &lt;= r</span>；而左闭右开的区间里 l == r 时区间已经为空，所以是 <span class="mono">l &lt; r</span>。右开区间里 <span class="mono">r = mid</span> 而不是 mid-1，正是因为 r 本身是"开"的、不含元素，把上界挪到 mid 即可。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>bs_boundary.py</div>
+      <pre><code># 两种等价写法，实现同一功能（找 target 下标）。务必成对使用！
+def bs_closed(a, target):          # 左闭右闭 [l, r]
+    l, r = 0, len(a) - 1
+    while l <= r:                  # 区间非空
+        mid = l + (r - l) // 2
+        if a[mid] < target:  l = mid + 1
+        elif a[mid] > target: r = mid - 1
+        else: return mid
+    return -1
+
+def bs_open(a, target):            # 左闭右开 [l, r)
+    l, r = 0, len(a)               # r 是「上限」，取 len(a)（不含）
+    while l < r:                   # 区间非空
+        mid = l + (r - l) // 2
+        if a[mid] < target:  l = mid + 1
+        else:                r = mid   # 开区间：r 用 mid 即可
+    return l if l < len(a) and a[l] == target else -1</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>面试时讲清"我采用的是左闭右闭区间"，然后把 <span class="mono">l&lt;=r</span>、<span class="mono">l=mid+1/r=mid-1</span> 三件套讲齐，考官就信你了。中点计算统一写 <span class="mono">mid = l + (r-l)//2</span>，避免 <span class="mono">(l+r)//2</span> 在 C/C++/Java int 相加时溢出。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>常见错配：</b>把「右闭区间配了 l&lt;r」或「右开区间配了 r=mid-1」，都会漏掉元素或死循环。记住铁律：<strong>右闭则 -1，右开则不减</strong>；<strong>左闭右闭用 l&lt;=r，左闭右开用 l&lt;r</strong>。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">有序数组查找</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 3：变体 -->
+  <section class="topic" id="bs-variants">
+    <h3><span class="kno">知识点</span>变体：第一个 / 最后一个 / 插入位置<span class="pt">bs-variants · LeetCode 34 / 35</span></h3>
+    <p>基础二分的"找到就返回"面对重复元素时不够用——题目经常要我们找到<strong>目标值的第一个位置或最后一个位置</strong>（数组里可能有多个相同值），或返回<strong>目标应插入的位置</strong>。诀窍只有一个：<b>命中后不要立即返回，继续收紧边界</b>，直到把一边的重复项也排掉。你只需要回答一个设计问题：<em>相等时往哪边走？</em></p>
+
+    <ul>
+      <li><b>求最后一个/第一个</b>：把比较符号从 <span class="mono">&lt;</span> 换成 <span class="mono">&lt;=</span>，就决定"等于时是往左收（求第一个）还是往右收（求最后一个）"。</li>
+      <li><b>插入位置（first ≥，即 C++ 的 lower_bound）</b>：找到"第一个 ≥ target 的位置"，找不到就返回数组长度。这就是 LeetCode 35。</li>
+      <li><b>第一个 &gt; target（upper_bound）</b>：把大于等于收紧成严格大于。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>bs_variants.py</div>
+      <pre><code># 用左闭右开 [l, r) 统一写四个变体，只改「相等时的走向」。
+# find_first: 第一个 == target（未找到返回 -1）
+def find_first(a, target):
+    l, r = 0, len(a)
+    while l < r:
+        mid = (l + r) // 2
+        if a[mid] &lt; target: l = mid + 1     # 严格小于才右移 → 找到"第一个 >=t"边界
+        else:              r = mid          # 相等也左收
+    return l if l < len(a) and a[l] == target else -1   # 返回值即候选位置
+
+# find_last: 最后一个 == target
+def find_last(a, target):
+    l, r = 0, len(a)
+    while l < r:
+        mid = (l + r) // 2
+        if a[mid] &lt;= target: l = mid + 1    # 相等也右移到 mid+1 → 找到"第一个 >t"边界
+        else:                r = mid
+    return (l - 1) if l - 1 >= 0 and a[l-1] == target else -1
+
+# lower_bound: 第一个 >= target（即插入位置，LeetCode 35）
+def lower_bound(a, target):
+    l, r = 0, len(a)
+    while l < r:
+        mid = (l + r) // 2
+        if a[mid] &lt; target: l = mid + 1     # 同 find_first，但返回值不校验命中
+        else:              r = mid
+    return l   # 若全部 < target，则 l == len(a)，正是"插到末尾"</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>所有"第一个/最后一个"变体，都是<strong>把普通二分里"相等就返回"改成"相等继续收"，方向由你选</strong>。比较符号里是 <span class="mono">&lt;</span> 还是 <span class="mono">&lt;=</span>，决定了结果是"第一个"还是"最后一个"。LeetCode 34（起止）、35（插入位置）直接把这三个模板考遍。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>求"最后一个等于"时，很多同学直接 <span class="mono">return r</span> 或 <span class="mono">return mid</span>，但循环结束时 <span class="mono">l==r</span>，正确候选是 <span class="mono">l-1</span>（因为最后一次右移后 l 指向的是"第一个 &gt; target"）。务必结合你选的不变量推导返回值，用一张表在白板上推一遍。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">应用</div><div class="v">LC 34 / 35</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 4：二分答案 -->
+  <section class="topic" id="bs-answer">
+    <h3><span class="kno">知识点</span>二分答案（对结果二分 + 可行性判定）<span class="pt">bs-answer · LeetCode 410</span></h3>
+    <p>前面的二分都是<strong>在数组下标上</strong>做；<strong>二分答案</strong>（Binary Search on Answer）是另一种更强的思维：<b>直接在"答案的取值上"二分</b>。当我们要找"满足条件的最大/最小值"，而答案的可行性随取值呈现<strong>单调性</strong>时，就可以每次猜一个值 <span class="mono">mid</span>，写一个 <span class="mono">check(mid)</span> 判断"这个值可行吗"，从而把"求最优"变成"判定 + 二分"。</p>
+
+    <p><strong>单调性是什么？</strong>例如"把数组分成 k 段，使每段和的最大值最小"。设上限为 X，段数随 X 增大只会变少（段可用更长的片段装下），所以"能否用 ≤k 段、每段和 ≤X 装完"对 X 是单调的：X 越大越容易，X 越小越难。我们就能二分 X，找"能装完的最小 X"。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>bs_answer.py</div>
+      <pre><code># 通用骨架 + 一个实例（LeetCode 410：分割数组的最大值）
+def split_array(nums, k):
+    # check(x)：是否能用 <=k 段，使每段和 <= x（贪心从左往右尽量多取）
+    def check(x):
+        cnt, cur = 1, 0
+        for v in nums:
+            if cur + v > x:        # 当前段装不下，另起一段
+                cnt += 1
+                cur = v
+            else:
+                cur += v
+        return cnt <= k
+
+    lo, hi = max(nums), sum(nums)   # 答案区间：[单个元素最大值, 总和]
+    while lo &lt; hi:                  # 找满足 check 的最小 x（左闭右开，lo<hi 即收敛）
+        mid = lo + (hi - lo) // 2
+        if check(mid):  hi = mid    # 可行 → 尝试更小
+        else:           lo = mid + 1  # 不可行 → 必须更大
+    return lo   # 最小值最大化 / 最大值最小化模型的答案</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>二分答案的三板斧——① 确定答案的<strong>取值范围 [lo, hi]</strong>；② <strong>证明 check(x) 关于 x 单调</strong>；③ 按"求最小可行值"用 <span class="mono">hi=mid</span>，按"求最大可行值"用 <span class="mono">lo=mid</span>（后者要配合上取整 <span class="mono">lo+(hi-lo+1)//2</span> 防死循环）。<strong>单调性永远是第一优先级</strong>，没有单调就别二分答案。</p></div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>注意复杂度：</b>总时间 = <span class="mono">O(log(值域跨度) × check 的代价)</span>。check 可能是 O(n) 甚至 O(n log n)，所以别只看到"二分"就以为是 O(log n)。这类题（木头切割、跳石头、乌龟阵、LC 1011/410）是"贪心判定 + 二分答案"的黄金组合。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(log R × O(check))</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">单调性判定</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 5：常见错误与死循环排查 -->
+  <section class="topic" id="bs-pitfalls">
+    <h3><span class="kno">知识点</span>常见错误与死循环排查<span class="pt">bs-pitfalls · off-by-one 与 l=mid</span></h3>
+    <p>二分写错通常不是"思路不对"，而是<strong>几个典型陷阱</strong>。把它们背下来，就能在面试里把 bug 当场消灭在纸上。</p>
+    <ul>
+      <li><b>区间不变量前后矛盾</b>：开头声明左闭右闭，中间却用了左闭右开的收缩，结果栈溢出或越界。</li>
+      <li><b>mid 取法错误</b>：<span class="mono">(l+r)//2</span> 在极端 int 下溢出；应写 <span class="mono">l+(r-l)//2</span>。</li>
+      <li><b>死循环</b>：最常见是「下取整 mid 配 <span class="mono">l = mid</span>」。当 l 与 r 相邻（l==r-1）且走向 <span class="mono">l=mid</span> 时，mid==l，区间不缩小，死循环。</li>
+      <li><b>返回值错误</b>：求"第一个/最后一个"时，到底返回 l 还是 r，忘掉"此时 l==r"去验证。</li>
+      <li><b>边界遗忘</b>：空数组、单元素、target 比所有元素小/大、重复元素全等…… 都要能跑通。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>bs_pitfalls.py</div>
+      <pre><code># ✘ 死循环写法：mid 下取整却配 l = mid
+# 当 l=0,r=1 时，mid=0，a[0]<target 走 l=mid=0 —— 区间停留在 [0,1]，无限循环
+def bad(a, target):
+    l, r = 0, len(a) - 1
+    while l &lt; r:
+        mid = (l + r) // 2          # 下取整
+        if a[mid] &lt; target: l = mid  # ✗ 危险
+        else:               r = mid
+    return a[l] == target
+
+# ✓ 两条铁律修复（任选其一）
+def good_cut(a, target):           # 铁律A：下取整 → 用 l = mid + 1
+    l, r = 0, len(a) - 1
+    while l &lt; r:
+        mid = (l + r) // 2
+        if a[mid] &lt; target: l = mid + 1
+        else:               r = mid
+    return a[l] == target
+
+def good_up(a, target):            # 铁律B：两元素死循环场景 → 上取整 mid
+    l, r = 0, len(a) - 1
+    while l &lt; r:
+        mid = (l + r + 1) // 2      # 上取整
+        if a[mid] &lt;= target: l = mid
+        else:               r = mid - 1
+    return a[l] == target</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点（死循环铁律）：</b>只要用了 <strong>下取整</strong> 的 <span class="mono">mid</span>，就<strong>不要</strong>写 <span class="mono">l = mid</span>，否则 l 与 r 相邻时不动，死循环。要写 <span class="mono">l = mid</span> 就必须改<strong>上取整</strong> <span class="mono">mid = l + (r-l+1)//2</span>。这条规律能救回大半二分 bug。</p></div>
+
+    <div class="callout key"><span class="i">★</span><p><b>排查技巧：</b>哪都不确定时，直接在循环里把 <span class="mono">(l, r, mid, a[mid])</span> 打印出来，重点观察 l 与 r 相邻（r-l==1）那一步 mid 是否等于 l 或 r。二分手工推演时，永远把"剩余区间"画标尺。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(log n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(1)</div></div>
+      <div class="cx"><div class="k">常见</div><div class="v">off-by-one</div></div>
+    </div>
+  </section>
+
+  <!-- 知识点 6：二分扩展 -->
+  <section class="topic" id="bs-ext">
+    <h3><span class="kno">知识点</span>二分扩展：三分查找、牛顿法、平方根<span class="pt">bs-ext · 选学</span></h3>
+    <p>二分只适合<strong>单调</strong>（单调递增或递减）问题。若函数<strong>先增后减或先减后增</strong>（单峰），二分就失效了，这时可以用<strong>三分查找</strong>（Ternary Search）每次缩掉区间的 1/3，等价于 O(log<sub>3/2</sub> n)。另外求函数零点或平方根还可借助<strong>牛顿法</strong>（Newton's Method，二次收敛）。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>bs_ext.py</div>
+      <pre><code># 1) 二分求整数平方根：最大 x 使 x*x <= a（是"二分答案"的典型例子）
+def my_sqrt(a):
+    lo, hi = 0, a
+    while lo &lt; hi:
+        mid = lo + (hi - lo + 1) // 2   # 上取整，求"最大可行" 
+        if mid * mid &lt;= a:  lo = mid
+        else:              hi = mid - 1
+    return lo
+
+# 2) 牛顿法求平方根（非整数、二次收敛）
+def sqrt_newton(a):
+    x = a
+    while abs(x*x - a) &gt; 1e-7:
+        x = (x + a/x) / 2      # 迭代公式 x_{n+1} = (x + a/x)/2
+    return x
+
+# 3) 三分查找：求单峰函数（先增后减）在 [lo, hi] 上的最大值
+def ternary_search(f, lo, hi):
+    while hi - lo &gt; 1e-7:
+        m1 = lo + (hi - lo) / 3
+        m2 = hi - (hi - lo) / 3
+        if f(m1) &lt; f(m2):  lo = m1    # 峰值在右侧
+        else:              hi = m2
+    return (lo + hi) / 2</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">⚠</span><p><b>适用限制：</b>三分只对<strong>严格单峰</strong>有效（平台段、多峰会失效）；牛顿法<strong>不保证一定收敛</strong>（对初值和函数性质敏感），且有除法、浮点误差。这三者是"选学/加分项"，面试常问的是它们的<strong>适用场景与优缺点</strong>，而不是默写实现。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">三分 O(log n)</div></div>
+      <div class="cx"><div class="k">牛顿法</div><div class="v">近似二次收敛</div></div>
+      <div class="cx"><div class="k">二分平方根</div><div class="v">O(log a)</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用二分在<strong>旋转有序数组</strong>里找最小值（LeetCode 153）与找目标值（33）；思考如何利用"区间不变量"决定往哪一半收缩，并处理旋转点。</li>
+      <li>实现「第一个被破坏的版本」（LeetCode 278）：把"版本是否损坏"当作 check，验证这正是"二分答案"模型。</li>
+      <li>用「贪心判定 + 二分答案」实现「分割数组的最大值」（LeetCode 410）与「在 D 天内送达包裹的能力」（1011），并推导时间复杂度的上界。</li>
+      <li>尝试用牛顿法或扩展二分求 <span class="mono">sqrt(x)</span> 的高精度解，并与内置 math.sqrt 比较精度与迭代次数，说明二次收敛为何快。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "bsearch",                 // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "查找 · 二分查找",        // 模块标题
+  eyebrow: "MODULE 06 · 数据结构与算法",
+  prev: "05-串与字符串匹配.html",  // 前一节文件名；首页留 ""
+  next: "07-树与二叉树.html",      // 下一节文件名；最后一节留 ""
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"二分查找（Binary Search）能取得 O(log n) 的前提，除了「序列有序」之外，还必须有：",
+    opts:["数据量必须小于 100","可通过下标 O(1) 随机访问（如数组），且元素可比较大小","序列必须用链表实现","必须用递归方式编写"],
+    ans:1,
+    exp:"解析：二分每次要能 O(1) 取得中间元素，所以需要「按下标随机访问」；同时要有大小比较才能决定往哪走。链表取中点需遍历，退化为 O(n)；递归只是实现手段，不是前提。"
+  },
+  {
+    type:"quiz",
+    q:"采用「左闭右闭 [l, r]」区间不变量，当 a[mid] &gt; target 时应如何收缩？",
+    opts:["l = mid + 1","l = mid","r = mid - 1","r = mid"],
+    ans:2,
+    exp:"解析：左闭右闭时 mid 在区间内且已被排除，所以上界收缩为 r = mid - 1。若写成 r = mid 会漏判且可能死循环——这是区间不变量错配的典型错误。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪种 mid 计算写法能避免 (l + r) 在极端 int 下溢出？",
+    opts:["mid = (l + r) // 2","mid = l + (r - l) // 2","两种写法都能防溢出","mid = r - (r - l) // 2"],
+    ans:1,
+    exp:"解析：当 l、r 都接近 int 上限时，(l+r) 会先溢出。l + (r-l)//2 先算差值再除以 2，不会溢出，是标准安全写法。r - (r-l)//2 是上取整写法，用于求「最大可行」的场景，但不能防溢出于本义上（它同样安全，但不是本题默认正确答案）。"
+  },
+  {
+    type:"quiz",
+    q:"用「左闭右开 [l, r)」模板实现 lower_bound（第一个 &gt;= target），循环结束后 l == r 的含义是：",
+    opts:["l 是最后一个 &lt; target 的位置","l 是第一个 &gt;= target 的位置；若该值不存在则为序列长度（即插入末尾）","一定发生了越界","说明无法收敛、死循环"],
+    ans:1,
+    exp:"解析：左闭右开下 l == r 时区间为空，且不变式保证「[0,l) 全部 &lt; target」，「[l, len) 全部 &gt;= target」，所以 l 就是第一个 &gt;= target 的位置（插入位置），没有该值则为 len。这正是 LeetCode 35 / lower_bound。"
+  },
+  {
+    type:"interview",
+    q:"为什么把二分查找应用到「链表」上无法得到 O(log n)？",
+    opts:["链表自动有序，因此永远是 O(1)","链表可以 O(1) 定位中点，复杂度不变","链表中点无法 O(1) 定位，每次取 mid 都要从头遍历，整体退化为 O(n)","链表不支持大小比较"],
+    ans:2,
+    exp:"解析：二分的前提之一是「O(1) 随机访问」。链表没有下标，取中间元素要沿链遍历 O(mid)，一轮下来最坏合计 O(n)，所以渐进复杂度仍是 O(n)，并不比线性查找快。这也是「二分必须用数组」的根本原因。"
+  },
+  {
+    type:"quiz",
+    q:"「二分答案」模型（对结果二分）能成立的先决条件是：",
+    opts:["答案必须恰好等于数组中的某个元素","必须用递归实现","数据必须是无序的","答案的可行性随答案呈单调变化，且能写出 check(x) 进行判定"],
+    ans:3,
+    exp:"解析：二分答案的核心是「单调性」——可行性随答案取值单调增减，这样才可二分区间。不要求答案恰是某元素、不要求递归、也不要求无序。没有单调性，check 的正确性无从谈起，二分也就失去依据。"
+  },
+  {
+    type:"interview",
+    q:"「把数组分成 k 个连续子数组，使各段和的最大值最小」（LC 410）为什么适合用二分答案？",
+    opts:["因为数组本身有序，可直接套普通二分","因为存在单调性：每段和上限 X 越小越难装完，可行性随 X 单调，故可用贪心 check 二分 X","因为 k 是常数，天然可二分","因为必须用分治法"],
+    ans:1,
+    exp:"解析：这正是「最大值最小化」模型。让 check(x) 用贪心判断「能否用 ≤k 段、每段和 ≤X 装完」，显然 X 越大越容易、X 越小越难，可行性关于 X 单调。于是二分 X 找最小可行值，复杂度 O(n log(sum))。"
+  }
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

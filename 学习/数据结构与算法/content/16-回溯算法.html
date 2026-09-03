@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>回溯算法 · 数据结构与算法</title>
+<meta name="description" content="数据结构与算法学习网页 —— 回溯算法：解空间树上的深度优先搜索，选择→递归→撤销，全排列/组合/子集、剪枝优化、棋盘与网格搜索、回溯与分支限界对比。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     DSA 学习网页 · 共享设计系统（请不要改动本 <style> 块）
+     每个知识点详情页复用同一套样式 / 进度 / 答题引擎。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">数据结构与算法 · <b id="navTitle">回溯算法</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 16 · 数据结构与算法</span></span>
+    <h1 id="pageTitle">回溯算法</h1>
+    <p class="lead" id="pageLead">回溯（<b>Backtracking</b>）就是在解空间树上做<b>深度优先搜索</b>：每一步「<b>选择 → 递归 → 撤销</b>」，系统化地穷举所有可能。它既是笔试/面试的常客（全排列、子集、N 皇后、数独、单词搜索），也是你理解「暴力搜索 + 剪枝」的思维起点。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后你能复述回溯法的三步模型「选择 → 递归 → 撤销」，并写出一份通用的回溯模板。</li>
+      <li>学完后你能独立写出全排列、组合、子集三件套，并对含重复元素的输入做正确去重。</li>
+      <li>学完后你能看懂并运用剪枝（可行性剪枝 / 剩余数量剪枝 / 上下界剪枝）减少无效搜索。</li>
+      <li>学完后你能用回溯解决棋盘/网格类问题（N 皇后、数独、单词搜索），并正确处理搜索状态的撤销恢复。</li>
+      <li>学完后你能说清回溯法与分支限界的区别，知道各自的适用场景。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要掌握一门编程语言（示例以 Python 为主、C++ 为辅）；熟悉<strong>递归</strong>与<strong>深度优先搜索（DFS）</strong>、<strong>栈/递归调用栈</strong>、以及<strong>集合与去重</strong>的基本用法。若对递归不熟，建议先复习「递归与分治」再回来看本模块。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">16</span>回溯算法：在解空间树上做深度优先搜索</h2>
+  </section>
+
+  <!-- 1. bt-basic -->
+  <section class="topic" id="bt-basic">
+    <h3><span class="kno">知识点</span>回溯的基本思想（选择 → 递归 → 撤销）<span class="pt">Backtracking · 核心模型</span></h3>
+    <p><strong>回溯法（Backtracking）</strong>是一种在<strong>解空间树 / 状态空间树（solution space tree / state space tree）</strong>上做<strong>深度优先搜索（DFS）</strong>的系统化穷举方法。它把「要做的决定」一步步铺成一棵树：每个节点代表一个<strong>部分解（partial solution）</strong>，每条边代表一个<strong>选择（choice）</strong>。我们从根出发，深入一条路径直到遇到<strong>叶子（完整解）</strong>或<strong>死胡同（当前部分解已不可能通向合法解）</strong>，就「回退（backtrack）」到上一层，换一条路继续走，直到穷尽所有分支。</p>
+    <p>所有回溯问题都能浓缩成<strong>三步循环</strong>：</p>
+    <ul>
+      <li><b>选择（choose）</b>：在当前层做出一个候选决定，并把状态推进到下一层。</li>
+      <li><b>递归（explore）</b>：带着这个决定，递归进入下一层继续搜。</li>
+      <li><b>撤销（un-choose）</b>：从下层回来后，把这次决定造成的一切改动<strong>恢复原状</strong>，再去尝试下一个候选。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>backtrack_template.py</div>
+      <pre><code># 通用回溯模板：你自己把"路径/选择列表/结束条件"换成具体问题即可
+def backtrack(路径, 选择列表):
+    # 结束条件：到达叶子，得到一个完整解
+    if 满足结束条件:
+        记录(结果, 路径)          # 通常复制一份，避免引用被后续改动污染
+        return
+
+    for 选择 in 选择列表:
+        if 该选择不合法:          # 剪枝：明确不可能就走这一步能省大量时间
+            continue
+        做选择                    # 1) 推进状态：标记、加入路径、占用某资源
+        backtrack(路径, 选择列表)  # 2) 递归进入下一层
+        撤销选择                  # 3) 恢复现场：解除标记、弹出路径、释放资源
+
+# 一句话记忆：先"做选择"深挖，再"撤销选择"换下一个，保证每条分支独立不互相污染。</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>回溯的每一步都必须是「可逆的」——<b>做了就要撤销</b>。它是暴力枚举 + 按约束提前剪枝，不是聪明地猜，而是<strong>有组织地穷举</strong>。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点（面试高频）：</b>第 3 步忘了「撤销」会导致<strong>状态被污染</strong>——上一次分支留下的痕迹会泄漏到下一次分支，产生重复或错误结果。凡是你第 1 步动过的<strong>全局状态</strong>（visited 集合、棋盘格、当前路径、计数值）都要在第 3 步<strong>对应的还原</strong>。另外，往结果里加路径时要用<code>path[:]</code> 复制一份，否则保存的是同一个列表对象的引用。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">时间</div><div class="v">O(分支数^深度)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(深度)</div></div>
+      <div class="cx"><div class="k">适用</div><div class="v">排列/组合/搜索/存在性</div></div>
+    </div>
+  </section>
+
+  <!-- 2. bt-perm -->
+  <section class="topic" id="bt-perm">
+    <h3><span class="kno">知识点</span>全排列 / 组合 / 子集（含去重）<span class="pt">LeetCode 46 · 77 · 78 · 90</span></h3>
+    <p>回溯最经典的入门题就是「排列 / 组合 / 子集」三件套。它们的区别在于<strong>「当前层能选的候选范围」和「什么是完整解」</strong>：</p>
+    <table class="tbl">
+      <thead>
+        <tr><th>问题</th><th>候选范围</th><th>完整解</th><th>常用参数</th><th>代表题</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>全排列</td><td>所有<strong>没用过</strong>的元素</td><td>用满 n 个</td><td><span class="mono">used[]</span></td><td>LeetCode 46</td></tr>
+        <tr><td>组合</td><td>从 <span class="mono">start</span> 起的元素</td><td>刚好 k 个</td><td><span class="mono">start</span> 下标</td><td>LeetCode 77</td></tr>
+        <tr><td>子集</td><td>从 <span class="mono">start</span> 起的元素</td><td>每个节点都是解</td><td><span class="mono">start</span> 下标</td><td>LeetCode 78</td></tr>
+      </tbody>
+    </table>
+    <p>要记住一个关键结论：<strong>全排列用 <code>used[]</code>（因为顺序相关、每层都要从 0 重新扫），组合/子集用 <code>start</code> 下标（因为组合与顺序无关、避免重复的排列）。</strong>「组合」其实是「子集剪掉长度不为 k 的」特例。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>perm_comb_subset.py</div>
+      <pre><code># ---- 1) 全排列：无重复元素 (LeetCode 46) ----
+def permute(nums):
+    res, path, used = [], [], [False]*len(nums)
+    def dfs():
+        if len(path) == len(nums):        # 用满了 n 个，得到完整排列
+            res.append(path[:])           # 复制！不能直接 append(path)
+            return
+        for i in range(len(nums)):        # 每层都从 0 重新扫，顺序相关
+            if used[i]: continue          # 已经用过，跳过
+            used[i] = True; path.append(nums[i])   # 1. 选择
+            dfs()                                 # 2. 递归
+            path.pop(); used[i] = False           # 3. 撤销
+    dfs(); return res
+
+# ---- 2) 组合：从 n 里选 k (LeetCode 77) ----
+def combine(n, k):
+    res, path = [], []
+    def dfs(start):
+        if len(path) == k: res.append(path[:]); return
+        for i in range(start, n+1):       # start 保证不回头，避免重复组合
+            path.append(i)
+            dfs(i+1)                      # 下一层从 i+1 开始
+            path.pop()
+    dfs(1); return res
+
+# ---- 3) 子集 (LeetCode 78)：每个节点都是解 ----
+def subsets(nums):
+    res = []
+    def dfs(start, path):
+        res.append(path[:])               # 进入即记录，节点即答案
+        for i in range(start, len(nums)):
+            path.append(nums[i])
+            dfs(i+1, path)
+            path.pop()
+    dfs(0, []); return res</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点（含重复元素必须去重）：</b>当输入有重复元素（如 <code>[1,1,2]</code>）时，直接暴力会产生<strong>重复解</strong>。标准做法是<strong>先排序</strong>，然后在<strong>同一层</strong>跳过与上一个相同的元素：<code>if i &gt; start and nums[i]==nums[i-1]: continue</code>（<code>start</code> 下标法）或 <code>if i &gt; 0 and nums[i]==nums[i-1] and not used[i-1]: continue</code>（<code>used[]</code> 法）。<b>核心是「只用同一层第一次出现的那个重复值」。</b></p></div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>subsets_with_dup.py</div>
+      <pre><code># 子集 II：含重复元素去重 (LeetCode 90)
+def subsetsWithDup(nums):
+    nums.sort()                       # 关键：先排序，让重复元素相邻
+    res = []
+    def dfs(start, path):
+        res.append(path[:])
+        for i in range(start, len(nums)):
+            if i > start and nums[i] == nums[i-1]:   # 同层去重
+                continue
+            path.append(nums[i])
+            dfs(i+1, path)
+            path.pop()
+    dfs(0, []); return res
+
+# used[] 法（用于顺序相关、如全排列 II / 排列 47）：
+#   if i > 0 and nums[i]==nums[i-1] and not used[i-1]: continue
+# 两种写法都是"同层跳过重复"，只是判定"上一次是否已被撤销"的方式不同。</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「顺序相关 → <code>used[]</code>（每层从头扫）；顺序无关 → <code>start</code>（每层从 i+1 扫）」。去重一律「先排序，再在同层剪掉与前一个相同的元素」。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">全排列时间</div><div class="v">O(n·n!)</div></div>
+      <div class="cx"><div class="k">子集时间</div><div class="v">O(n·2^n)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(n)</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">16.2</span>进阶模型：剪枝优化与棋盘/网格搜索</h2>
+  </section>
+
+  <!-- 3. bt-prune -->
+  <section class="topic" id="bt-prune">
+    <h3><span class="kno">知识点</span>剪枝优化<span class="pt">Pruning · 提前砍掉不可能的分支</span></h3>
+    <p>回溯本质是穷举，一旦分支多就会爆炸。**剪枝（pruning）**就是在<strong>还没深入之前</strong>，判断当前分支<strong>不可能通向合法解 / 也不可能优于已知最优</strong>，于是<strong>直接不去递归它</strong>，从而砍掉整棵子树。剪枝分为几类：</p>
+    <ul>
+      <li><b>可行性剪枝（feasibility pruning）</b>：当前状态已经<strong>不满足约束</strong>，再往下也救不回来。例如 N 皇后当前格会与已有皇后冲突、数独当前格填了冲突数字、括号生成时右括号数已超过左括号数——直接 <code>continue</code>。</li>
+      <li><b>剩余数量剪枝</b>：即使把剩下所有能选的全用上，也凑不够目标长度。例如组合 <code>combine(n,k)</code> 中，当 <code>n - start + 1 &lt; k - len(path)</code> 时就无需再搜。</li>
+      <li><b>上下界剪枝（bound pruning）</b>：即使当前分支达到最好情况，也比不上<strong>已找到的最优解</strong>，就砍掉它。这是<strong>分支限界法</strong>的核心，见下一节。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>combine_pruned.py</div>
+      <pre><code># 组合 + 剩余数量剪枝 (LeetCode 77)：i 的上界不再搜到 n，直接填上界
+def combine(n, k):
+    res, path = [], []
+    def dfs(start):
+        if len(path) == k: res.append(path[:]); return
+        # 还要选 need=k-len(path) 个，i 至多取到 n - need + 1，保证够选
+        for i in range(start, n - (k - len(path)) + 2):
+            path.append(i)
+            dfs(i+1)                 # 注意：这里是 i+1，不是 start+1
+            path.pop()
+    dfs(1); return res
+
+# 这一行 for 上界的写法，就是经典的"剩余数量剪枝"：
+#   当从 start 到 n 的元素总数 < 还需要选的个数 时，就提前结束循环。</code></pre>
+    </div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>generate_parentheses.py</div>
+      <pre><code># 括号生成：可行性剪枝 (LeetCode 22)
+def generateParenthesis(n):
+    res = []
+    def dfs(path, left, right):
+        if len(path) == 2*n: res.append(path); return
+        if left < n:                       # 还能放左括号
+            dfs(path+"(", left+1, right)
+        if right < left:                   # 右括号必须少于左括号，这是合法性约束
+            dfs(path+")", left, right+1)
+    dfs("", 0, 0); return res
+    # 剪枝点：right 一旦 >= left，就不可能合法，直接不再递归。</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>剪枝口诀是「<strong>先判断、后递归</strong>」。把检查放在 <code>for</code> 循环里用 <code>continue</code> 跳过，或直接在 <code>for</code> 的上下界上做文章，能指数级减少搜索量。剪枝越靠前、越早，收益越大。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b>① 递归参数容易写成 <code>dfs(start+1,…)</code> 而不是 <code>dfs(i+1,…)</code>，导致组合去重失效；② 剪枝条件<strong>箭头方向写反</strong>（如 <code>right &lt; left</code> 写成 <code>right &lt;= left</code>）会漏掉合法解；③ 剪枝只影响「快慢」，不影响正确性——<span style="color:var(--ink);font-weight:700">千万别为了剪枝而误删合法分支</span>。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">无剪枝</div><div class="v">O(分支^深度)</div></div>
+      <div class="cx"><div class="k">有剪枝</div><div class="v">大幅减少</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(深度)</div></div>
+    </div>
+  </section>
+
+  <!-- 4. bt-grid -->
+  <section class="topic" id="bt-grid">
+    <h3><span class="kno">知识点</span>棋盘与网格类（N 皇后、数独、单词搜索、岛屿）<span class="pt">LeetCode 51 · 37 · 79</span></h3>
+    <p>棋盘/网格类是回溯最好的练兵场：每放一个子/填一个格/走一个格都构成一个<strong>「选择」</strong>，且必须做<strong>状态标记与恢复</strong>。N 皇后、数独是「可行性剪枝」的典型；单词搜索、岛屿则是「在邻接格上沿 DFS 深入、探索完复原格子」的典型。</p>
+
+    <p><strong>N 皇后（LeetCode 51）</strong>：逐行放皇后，保证每一列、两个对角线都不能有冲突。用三个集合（列、副对角线 <code>r-c</code>、主对角线 <code>r+c</code>）做到 <code>O(1)</code> 冲突判断：同一副对角线上 <code>r-c</code> 相等，同一主对角线上 <code>r+c</code> 相等。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>solve_n_queens.py</div>
+      <pre><code>def solveNQueens(n):
+    res = []
+    cols, diag1, diag2 = set(), set(), set()   # 列 / 副对角线(r-c) / 主对角线(r+c)
+    board = [["."]*n for _ in range(n)]
+    def dfs(r):
+        if r == n:                     # 每行都放好，得到完整解
+            res.append(["".join(row) for row in board]); return
+        for c in range(n):
+            if c in cols or (r-c) in diag1 or (r+c) in diag2:
+                continue               # 可行性剪枝：已有皇后冲突，跳过该列
+            board[r][c] = "Q"          # 1. 选择
+            cols.add(c); diag1.add(r-c); diag2.add(r+c)
+            dfs(r+1)                    # 2. 递归下一行
+            board[r][c] = "."           # 3. 撤销：恢复格子与三个集合
+            cols.discard(c); diag1.discard(r-c); diag2.discard(r+c)
+    dfs(0); return res
+    # 注：因为每行只放一个皇后，这里用 r+1 逐行即可，不必额外回溯"行"。</code></pre>
+    </div>
+
+    <p><strong>单词搜索（LeetCode 79）</strong>：在网格上按四方向匹配单词，核心是<strong>标记已访问 → 深入 → 恢复</strong>。把当前格子<strong>临时改成已访问</strong>（或用 <code>visited</code>），探索完四个方向后再<strong>改回来</strong>，否则一格只能用一次就会被互相干扰。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>word_search.py</div>
+      <pre><code>def exist(board, word):
+    R, C = len(board), len(board[0])
+    def dfs(r, c, i):
+        if i == len(word): return True               # 单词完全匹配
+        if not (0<=r<R and 0<=c<C): return False
+        if board[r][c] != word[i]: return False      # 可行性剪枝：不匹配
+        tmp, board[r][c] = board[r][c], '#'          # 标记已访问（用 '#' 占位）
+        for dr, dc in [(1,0),(-1,0),(0,1),(0,-1)]:
+            if dfs(r+dr, c+dc, i+1): 
+                board[r][c] = tmp; return True       # 命中则复原并整体返回
+        board[r][c] = tmp                            # 4 个方向都没走到，复原格子（撤销）
+        return False
+    for r in range(R):
+        for c in range(C):
+            if dfs(r, c, 0): return True
+    return False
+    # 关键：先标记、四方向试探、结束后一定复原——这样其它起点/路径才不受污染。</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>网格题的回溯通用形态是「<strong>标记当前格（占用） → 向邻域递归 → 释放当前格（撤销）</strong>」。多起点（如单词搜索遍历所有格子、岛屿统计）往往在最外层再加一重<code>for</code> 循环作为「根」。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错点（状态恢复）：</b>① 忘了恢复 <code>board[r][c]</code> / <code>visited</code>，导致同一个格子被重复使用，产生错误路径；② 用 <code>copy.deepcopy</code> 传递棋盘会带来巨大开销，正确做法是<strong>原地改动 + 递归后复原</strong>；③ 数独、岛屿这类「找到一个解即可」的题，命中后要用<strong>返回值一路向上返回</strong>，而不是继续裸搜。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">N 皇后时间</div><div class="v">O(n!)</div></div>
+      <div class="cx"><div class="k">单词搜索</div><div class="v">O(m·n·3^L)</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">O(深度)</div></div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">16.3</span>思想对比：回溯 vs 分支限界</h2>
+  </section>
+
+  <!-- 5. bt-vs -->
+  <section class="topic" id="bt-vs">
+    <h3><span class="kno">知识点</span>回溯 vs 分支限界<span class="pt">Backtracking vs Branch and Bound</span></h3>
+    <p>二者都在<strong>解空间树</strong>上搜索，但方向与目标不同：</p>
+    <table class="tbl">
+      <thead>
+        <tr><th>维度</th><th>回溯法（Backtracking）</th><th>分支限界法（Branch and Bound）</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>搜索顺序</td><td><strong>深度优先（DFS）</strong>，一条路走到头再回头</td><td><strong>广度优先 / 最佳优先</strong>，用队列或优先队列按层/按代价扩展</td></tr>
+        <tr><td>主要目标</td><td>求<strong>可行解 / 所有解</strong>（是否存在、列举）</td><td>求<strong>最优解</strong>（最大化/最小化目标）</td></tr>
+        <tr><td>剪枝依据</td><td>以<strong>可行性剪枝</strong>为主（不满足约束就砍）</td><td>以<strong>上/下界剪枝</strong>为主（当前分支的界不优于已知最优就砍）</td></tr>
+        <tr><td>维护结构</td><td>递归调用栈</td><td>活结点表（队列 / 优先队列）</td></tr>
+        <tr><td>代表问题</td><td>N 皇后、全排列、数独、单词搜索</td><td>0-1 背包、旅行商（TSP）、货郎担</td></tr>
+      </tbody>
+    </table>
+
+    <p>这里用一个例子说明两者差别——<strong>0-1 背包</strong>：</p>
+    <ul>
+      <li><b>回溯法</b>：把「选 / 不选」当成一棵二<strong>叉</strong>树，先一路搜到底记录可行解，主要靠「当前重量是否超负重」来剪枝（可行性剪枝），输出可能是最优也可能不是。</li>
+      <li><b>分支限界法</b>：把物品按<strong>单位价值（value/weight）</strong>排序，给每个结点算一个<strong>上界（bound）</strong>——即使把剩余物品全塞进包里也最多值多少。若这个上界<strong>低于当前已知最优</strong>，就<strong>不再扩展该结点</strong>（上界剪枝）。优先队列保证总是先扩展<strong>最有希望</strong>的结点，更快逼近最优解。</li>
+    </ul>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>一句话区分——<strong>回溯 = 深度优先 + 可行性剪枝（求可行/所有解）；分支限界 = 最佳优先 + 上下界剪枝 + 活结点表（求最优解）。</strong>面试常让你「说出区别、各自适用场景」，把这张表背下来即可。</p></div>
+
+    <div class="callout warn"><span class="i">▲</span><p><b>补充：</b>不要把 DFS 与回溯、分支限界划等号。<b>DFS 只是一种遍历/搜索方式</b>；回溯是「带状态恢复 + 可行性剪枝的 DFS」；分支限界则是「带上下界剪枝 + 活结点表」的另一种搜索框架，常用 BFS/优先队列实现。</p></div>
+
+    <div class="complexity">
+      <div class="cx"><div class="k">回溯(可行解)</div><div class="v">O(分支^深度)</div></div>
+      <div class="cx"><div class="k">分支限界(最优)</div><div class="v">取决于界质量</div></div>
+      <div class="cx"><div class="k">空间</div><div class="v">回溯 O(深度) / 限界 O(结点数)</div></div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li><b>LeetCode 22 括号生成</b>：体会「左括号数 &lt; n 才能放左、右括号数 &lt; 左括号数才能放右」的双重可行性剪枝；进阶尝试用 <code>StringBuilder</code>/字符数组代替字符串拼接来提速。</li>
+      <li><b>LeetCode 47 全排列 II / 40 组合总和 II</b>：在含重复元素的数组上分别用「<code>used[]</code>」与「<code>start</code> 下标」去重，对比两者为何都等价于「排序 + 同层跳过重复」，并找出两者的适用差异。</li>
+      <li><b>LeetCode 37 数独</b>：用回溯逐格填数。进阶：思考能否「先填候选数最少的格子」（启发式/MRV），理解<strong>搜索顺序对剪枝效率</strong>的巨大影响。</li>
+      <li><b>思考题（面试）</b>：为什么回溯一定要「撤销」？若只标记不撤销，用「全排列 / 单词搜索」举例说明会产生什么错误；并解释回溯 DFS 与普通 DFS 的边界。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「数据结构与算法」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "backtrack",                 // 模块唯一 id（与学习大纲里的模块 id 一致）
+  title: "回溯算法",                // ex: 绪论与算法复杂度分析
+  eyebrow: "MODULE 16 · 数据结构与算法",
+  prev: "15-动态规划.html",          // 前一节文件名
+  next: "17-常用解题技巧.html",       // 下一节文件名
+};
+
+/* 考核题目：每道题一个对象。
+   type: 可填 "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"回溯法（Backtracking）本质上是在什么结构上做深度优先搜索？",
+    opts:["线性表 / 数组","解空间树 / 状态空间树","哈希表 / 散列表","优先队列"],
+    ans:1,
+    exp:"解析：回溯把所有可能的决策铺成一颗「解空间树（状态空间树）」，用深度优先遍历这颗树来系统化穷举。优先队列是分支限界法常用的结构，不是回溯的搜索对象。"
+  },
+  {
+    type:"quiz",
+    q:"「选择 → 递归 → 撤销」三步中，「撤销选择」的根本目的是什么？",
+    opts:["释放递归所占内存","删除已经收集到的结果","把状态恢复到上一层，便于尝试其它分支","提高程序运行速度（让剪枝更快）"],
+    ans:2,
+    exp:"解析：撤销是为了「还原现场」，使当前层尝试下一个候选时，不希望有上一次分支留下的痕迹（如 visited 标记、棋盘格、当前路径）。若不撤销，状态会被污染，产生重复或错误解。"
+  },
+  {
+    type:"quiz",
+    q:"给定数组 [1,1,2]，求所有互不相同的子集（LeetCode 90），最常用且正确的去重做法是？",
+    opts:["用哈希集合存储所有结果以避免重复","先排序，然后在同一层跳过与前一个相同的元素（i>start 且 nums[i]==nums[i-1]）","每到一层直接丢弃重复元素","只保留长度为偶数的子集"],
+    ans:1,
+    exp:"解析：含重复元素的子集/组合去重的标准做法是「排序 + 同层剪枝」：排序让重复值相邻，再用 i>start 跳过同一层已经处理过的重复值。用哈希集合虽然能去重，但当解很多时内存开销大且不够优雅；本题追求的是在搜索树上主动剪掉重复分支。"
+  },
+  {
+    type:"quiz",
+    q:"求 n 个各不相同的元素的全排列（LeetCode 46），其时间复杂度约为？",
+    opts:["O(n!)","O(n·n!)","O(n^2)","O(2^n)"],
+    ans:1,
+    exp:"解析：一共会有 n! 个排列，而每个排列长度为 n，因此枚举并输出所有排列的时间是 O(n·n!)。注意「元素各不相同」时不存在重复解；若含重复元素还需额外去重。"
+  },
+  {
+    type:"quiz",
+    q:"N 皇后问题中，用「副对角线 r-c 相等、主对角线 r+c 相等」来判断皇后冲突，需要怎样的辅助数据结构来做到 O(1) 判断？",
+    opts:["单链表（每次线性扫描）","哈希集合 / 布尔数组（记录已占用的列与两条对角线）","栈（后进先出）","二叉搜索树（按值排序）"],
+    ans:1,
+    exp:"解析：用三个集合 visited（或对应布尔数组）分别记录已占用的「列」「副对角线 r-c」「主对角线 r+c」，判断与加入均为 O(1)。这是 N 皇后从 O(n!) 级别暴力到高效回溯的关键优化。"
+  },
+  {
+    type:"quiz",
+    q:"在「组合总和 II / 组合」这类问题里（LeetCode 40 / 77），最常见的剪枝手段是？",
+    opts:["排序 + 剩余数量剪枝（提前结束不足以凑够目标的循环）","随机化（打乱输入）","用动态规划替换递归","用位运算穷举所有组合"],
+    ans:0,
+    exp:"解析：组合类常先排序，再用「剩余数量剪枝」：当从 start 到 n 的元素数不足还需要选的个数时提前结束循环（如 for i in range(start, n-(k-len(path))+2)）；含重复元素时再叠加同层去重。随机化与本题无关。"
+  },
+  {
+    type:"interview",
+    q:"下列关于回溯法与分支限界法的说法，正确的是？",
+    opts:["回溯法采用广度优先搜索解空间树","分支限界法用深度优先搜索且以可行性剪枝为主","回溯法常用于求可行解/所有解（可行性剪枝），分支限界法常用于求最优解（上/下界剪枝）","两者在搜索方式和剪枝依据上完全相同，只是叫法不同"],
+    ans:2,
+    exp:"解析：回溯法是「深度优先 + 可行性剪枝」，适合求可行解与所有解（N 皇后、全排列、数独）；分支限界法是「队列/优先队列驱动 + 上/下界剪枝」，用活结点表和界限来逼近最优解（0-1 背包、TSP）。二者搜索顺序与目标均不同，不能混为一谈。"
+  },
+  {
+    type:"interview",
+    q:"关于「单词搜索」（LeetCode 79）在网格上的回溯，下列说法错误的一项是？",
+    opts:["每深入一个格子要标记为已访问，避免同一格被重复使用","找到一个完整单词后应向上返回，不必继续深挖其它方向","探索完当前格子的四个方向后，要把该格子恢复成原字符（撤销）","一旦当前格字符不匹配，要立即原地递归下去，等回溯自然修正"],
+    ans:3,
+    exp:"解析：D 项错误。当前格字符与 word[i] 不匹配时应直接返回 False（可行性剪枝），而不是「原地递归」；所谓递归必须建立在字符匹配的基础上。A、C 是网格回溯的标准动作（标记→深入→复原），B 是「找到解就返回」的正确做法。"
+  },
+];
+
+/* 进度：本模块「已掌握」状态，与学习大纲共享同一 localStorage 键逻辑。
+   键名约定：dsa_<CONFIG.id>_master = "1" 表示已掌握。 */
+(function(){
+  const KEY = "dsa_"+CONFIG.id+"_master";
+  const btn = document.getElementById("masterBtn");
+  function sync(){ const on = localStorage.getItem(KEY)==="1"; btn.classList.toggle("done",on); btn.textContent = on? "✓ 本节已掌握" : "标记：我已掌握本节"; }
+  btn.addEventListener("click", ()=>{ if(localStorage.getItem(KEY)==="1"){ localStorage.removeItem(KEY); } else { localStorage.setItem(KEY,"1"); } sync(); });
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · 数据结构与算法";
+
+  function setup(el, href, label){ if(href){ el.href = href; el.classList.remove("disabled"); el.setAttribute("aria-disabled","false"); if(el.id==="footPrevT"||el.id==="footNextT"){ el.textContent = label; } } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  const prevL = document.getElementById("prevLink"), nextL = document.getElementById("nextLink");
+  setup(prevL, CONFIG.prev, "上一节"); setup(nextL, CONFIG.next, "下一节");
+  setup(document.getElementById("footPrev"), CONFIG.prev, "");
+  setup(document.getElementById("footNext"), CONFIG.next, "");
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const render = (q,i)=>{
+    const letter = "ABCDEFGHIJ";
+    return `<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  };
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true), answered = results.filter(x=>x===null).length===0;
+    const pct = answered? Math.round(got.length/results.length*100) : Math.round((results.filter(x=>x===true).length)/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all = got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续看「进阶挑战」，并把错题在笔记里记下来。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+</script>
+</body>
+</html>

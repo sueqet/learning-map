@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>异常与错误处理 · Python 学习</title>
+<meta name="description" content="Python 学习页 —— 异常与错误处理：try/except/else/finally、常见异常、raise 与自定义异常、异常链与最佳实践，含可运行代码与自测。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<!-- Mermaid：用于画 flowchart / 时序图 图解（离线自动降级为不渲染，文字仍可见） -->
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  :root{
+    --paper:#f2f6f2;--paper-2:#fdfcf8;--ink:#1d211c;--ink-soft:#465048;--muted:#878b7f;
+    --line:#e3e8e0;--line-2:#d2dacf;
+    --orange:#2564a0;--orange-soft:#e5eef7;--green:#2c7a50;--green-soft:#e7f2ea;
+    --blue:#31688a;--blue-soft:#e7f0f6;--red:#b8392a;--red-soft:#f9e9e6;
+    --code-bg:#16211b;--code-ink:#e3efe5;--radius:14px;--maxw:920px;
+    --shadow:0 1px 2px rgba(29,33,28,.04),0 12px 32px -20px rgba(29,33,28,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:radial-gradient(1100px 540px at 92% -6%, rgba(31,125,77,.06), transparent 60%),radial-gradient(820px 480px at -8% 8%, rgba(44,122,80,.05), transparent 55%),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;}
+  a{color:var(--orange);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(242,246,242,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--orange);border-color:var(--orange);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--orange);color:var(--orange);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  .hero{padding:44px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--orange);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--orange);box-shadow:0 0 0 4px var(--orange-soft)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em}
+  .hero h1 .accent{color:var(--orange);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--orange-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 18px}
+  .hero p.lead b{color:var(--ink)}
+
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--orange)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfdfe4}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--green);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--orange);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic h3{margin:0 0 12px;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--orange);background:var(--orange-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--orange);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.tbl th{background:var(--orange-soft);color:var(--orange);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1d2c24;font-family:var(--font-mono);font-size:11px;color:#9fb5a6;border-bottom:1px solid #2b3d32}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf6ea;border-color:#ecddb8}.callout.warn .i{background:var(--blue);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0d5}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+
+  .gitgraph{margin:14px 0}
+  .gitgraph .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto}
+
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--orange-soft));border:1px solid #cfe0d5;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--orange);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--orange-soft);color:var(--orange);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--blue);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s}
+  .qcard .opt:hover{border-color:var(--orange);background:var(--orange-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--orange)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#165038;border:1px solid #cfe0d5}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow)}
+  .btn:hover{border-color:var(--orange);color:var(--orange)}
+  .btn.pri{background:var(--orange);border-color:var(--orange);color:#fff}
+  .btn.pri:hover{background:#17633c}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--orange)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--green);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--orange);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(29,33,28,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){.topnav .crumb{display:none}.fn a.card{min-width:100%}}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">Python 学习 · <b id="navTitle">知识点标题</b></span>
+    <div class="pager"><a id="prevLink" class="disabled" href="#">← 上一节</a><a id="nextLink" class="disabled" href="#">下一节 →</a></div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">PYTHON · 编程</span></span>
+    <h1 id="pageTitle">知识点标题</h1>
+    <p class="lead" id="pageLead">一句话引言：这个知识点让你学会什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>学完后，你能区分<b>语法错误</b>与<b>运行时异常</b>，并说出至少 6 种常见内置异常及触发场景。</li>
+      <li>你能写出 <code>try/except/else/finally</code> 完整结构，并说清 <code>else</code> 与 <code>finally</code> 的执行时机。</li>
+      <li>你能用<b>元组</b>一次捕获多个异常、用 <code>as</code> 拿到异常对象，并规避危险的裸 <code>except:</code>。</li>
+      <li>你能用 <code>raise</code>、<code>assert</code> 主动抛出异常，并能定义<b>继承自 Exception</b> 的自定义异常类。</li>
+      <li>你能解释异常<b>沿调用栈传播</b>的机制，并借助 <code>raise ... from</code> 保留异常链、利于排查。</li>
+      <li>你能运用 <b>EAFP</b> 思想，配合 <code>with</code>/<code>finally</code> 正确清理资源，写出健壮且不吞异常的代码。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Prerequisites · 前置知识</div>
+    <p id="prereqText">需要会写函数、理解基本的 if/for 控制流与变量作用域（可复习 04 控制流、08 函数）。这一节在基础上讲解：程序出错时如何让执行流仍然<b>可控、可诊断、可恢复</b>，而不是直接崩溃或悄悄吞掉错误。</p>
+  </section>
+
+  <!-- ============================================================
+       学习内容区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Content · 学习内容</div>
+    <h2><span class="num">01</span>从「崩掉」到「接得住」</h2>
+  </section>
+
+  <section class="topic" id="why-exception">
+    <h3><span class="kno">认识异常</span>错误、异常与内置异常<span class="pt">先分清三类「错」</span></h3>
+    <p>写程序时总共有三类「错」：<b>语法错误</b>、<b>运行时异常</b>、<b>逻辑错误</b>。语法错误在解析阶段就让程序无法运行；逻辑错误是程序跑得通但结果不对；而<b>异常（Exception）</b>是语法正确、但执行到某一步时触发的错误——它恰恰是我们能「接住」、能「处理」的错误。</p>
+    <ul>
+      <li><b>语法错误</b>：如 <code>if True print("hi")</code> 缺少冒号，解析期就报 <code>SyntaxError</code>，无法靠 <code>try</code> 捕获。</li>
+      <li><b>运行时异常</b>：代码能编译，执行时才抛出，可被 <code>try/except</code> 捕获。</li>
+      <li><b>逻辑错误</b>：不报错但结果错误，<code>try</code> 无能为力，要靠测试与调试。</li>
+    </ul>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python"># 语法错误：解析期就失败，try 救不了
+# if True print("hi")        # SyntaxError: expected ':'
+
+# 运行时异常：语法没问题，执行到这才崩 — 这才是我们要处理的
+print(10 / 0)                # ZeroDivisionError: division by zero
+print(int("abc"))            # ValueError: invalid literal for int()
+print([1, 2][5])             # IndexError: list index out of range
+print({"a": 1}["b"])         # KeyError: 'b'
+print("x" + 1)               # TypeError: can only concatenate str</code></pre>
+    </div>
+    <p>Python 内置了几十种异常，全部继承自 <code>Exception</code>。下面是最高频的几种：</p>
+    <table class="tbl">
+      <thead><tr><th>异常</th><th>触发场景</th><th>典型例子</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">ZeroDivisionError</span></td><td>除以零</td><td><span class="mono">10 / 0</span></td></tr>
+        <tr><td><span class="mono">ValueError</span></td><td>类型对，但值不合法</td><td><span class="mono">int("abc")</span></td></tr>
+        <tr><td><span class="mono">TypeError</span></td><td>类型不匹配</td><td><span class="mono">"x" + 1</span></td></tr>
+        <tr><td><span class="mono">IndexError</span></td><td>下标越界</td><td><span class="mono">[1,2][5]</span></td></tr>
+        <tr><td><span class="mono">KeyError</span></td><td>字典缺键</td><td><span class="mono">{"a":1}["b"]</span></td></tr>
+        <tr><td><span class="mono">AttributeError</span></td><td>属性/方法不存在</td><td><span class="mono">(1).foo</span></td></tr>
+        <tr><td><span class="mono">FileNotFoundError</span></td><td>打开不存在的文件</td><td><span class="mono">open("nope.txt")</span></td></tr>
+        <tr><td><span class="mono">ImportError</span></td><td>导入模块/名字失败</td><td><span class="mono">import not_a_module</span></td></tr>
+      </tbody>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>异常是<b>执行期</b>抛出的、可被捕获的错误；语法错误在解析期就结束，<code>try</code> 是救不回来的。</p></div>
+  </section>
+
+  <section class="topic" id="try-except">
+    <h3><span class="kno">try/except</span>完整的异常处理结构</h3>
+    <p><code>try</code> 块里放「可能出错的代码」；一旦抛异常，控制流立刻跳到匹配的 <code>except</code> 块；<b>只有没抛异常</b>才走 <code>else</code>；而 <code>finally</code> <b>无论是否异常都一定执行</b>（哪怕之前 <code>return</code>）。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def safe_div(a, b):
+    try:
+        r = a / b                       # 可能抛 ZeroDivisionError
+    except ZeroDivisionError:           # 捕获并处理：程序不崩溃
+        print("除数不能为 0")
+        return None
+    else:                               # 只有 try 没抛异常才会执行
+        print("计算结果：", r)
+        return r
+    finally:                            # 无论是否异常，都一定会执行
+        print("（这里的清理代码一定会跑）")
+
+safe_div(10, 2)   # 计算结果：5.0 / 清理
+safe_div(10, 0)   # 除数不能为 0 / 清理</code></pre>
+    </div>
+    <p>控制流可以用一张图看得很清楚：</p>
+    <div class="gitgraph">
+      <div class="mermaid">
+        flowchart TD
+          A[执行 try 块] --> B{发生了异常?}
+          B -- 否 --> C[执行 else 块]
+          B -- 是 --> D[从上往下匹配 except]
+          D --> E[执行对应 except 块处理]
+          C --> F[执行 finally 块]
+          E --> F
+          F --> G[程序继续 / 若无处理则向上传播]
+      </div>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>块</th><th>执行时机</th><th>典型用途</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">try</span></td><td>总是先执行</td><td>放可能出错的代码</td></tr>
+        <tr><td><span class="mono">except</span></td><td>抛异常且类型匹配时</td><td>处理错误、降级、记日志</td></tr>
+        <tr><td><span class="mono">else</span></td><td>仅当 try 无异常时</td><td>把「成功后的逻辑」与 try 分开</td></tr>
+        <tr><td><span class="mono">finally</span></td><td>无论是否异常都执行</td><td>释放资源、关闭文件/连接</td></tr>
+      </tbody>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><code>finally</code> 负责「必定要做的收尾」，<code>else</code> 负责「只有成功才做的后续」，两者都用好了才算真正理解异常处理。</p></div>
+  </section>
+
+  <section class="topic" id="catch-multiple">
+    <h3><span class="kno">except 进阶</span>捕获多个异常与错误分级</h3>
+    <p>需要处理不同类型的错误时，可以写多个 <code>except</code>，按<b>从上到下</b>匹配；范围大的（<code>Exception</code>）要放在最后兜底。一次想捕获好几类，把它们包成一个<b>元组</b>；想拿到异常对象，用 <code>as</code>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">try:
+    n = int(input("输入一个数字："))
+    print(100 / n)
+except ValueError:
+    print("你输入的不是整数")            # 先匹配具体的
+except ZeroDivisionError:
+    print("不能输入 0")
+except (TypeError, OverflowError) as e:  # 元组一次性捕获多类
+    print("其它数值异常：", e)
+except Exception as e:                   # 兜底，务必放最后
+    print("未知异常：", e)</code></pre>
+    </div>
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>作用</th><th>建议</th></tr></thead>
+      <tbody>
+        <tr><td><span class="mono">except:</span></td><td>捕获一切（含 KeyboardInterrupt / SystemExit）</td><td>❌ 易吞掉 Bug，尽量别用</td></tr>
+        <tr><td><span class="mono">except ValueError:</span></td><td>只捕获指定异常</td><td>✅ 推荐，明确、可预期</td></tr>
+        <tr><td><span class="mono">except (A, B):</span></td><td>一次捕获多类（元组）</td><td>✅ 处理方式相同时用</td></tr>
+        <tr><td><span class="mono">except ValueError as e:</span></td><td>捕获并拿到异常对象</td><td>✅ 需要看错误详情/记日志时用</td></tr>
+      </tbody>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>易错点：</b><code>except:</code>（不带类型）会捕获<b>包括</b><code>KeyboardInterrupt</code>（Ctrl+C）、<code>SystemExit</code> 在内的所有异常，把真正的问题掩盖成「什么都没发生」。请始终指明异常类型，哪怕最后用一个 <code>except Exception</code> 兜底并<b>记录日志</b>。</p></div>
+  </section>
+
+  <section class="topic" id="raise-custom">
+    <h3><span class="kno">raise</span>主动抛错与自定义异常</h3>
+    <p>很多时候错误不是第三方抛的，而是<b>你自己</b>在业务里发现「这个状态不合法」——此时用 <code>raise</code> 主动抛异常，强制调用方处理。<code>assert</code> 用于开发期的<b>断言检查</b>，失败抛 <code>AssertionError</code>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def set_age(age):
+    if not isinstance(age, int):
+        raise TypeError("年龄必须是整数")     # 主动抛：类型不对
+    if age &lt; 0 or age &gt; 150:
+        raise ValueError(f"年龄不合法：{age}")  # 主动抛：值不对
+    print("设置年龄为", age)
+
+# assert：开发期断言，失败抛 AssertionError；python -O 运行会被跳过
+assert 100 / 10 == 10, "计算结果应等于 10"</code></pre>
+    </div>
+    <p>当系统自带异常不够表达业务语义时，可定义<b>自定义异常</b>——继承 <code>Exception</code>，并可在 <code>__init__</code> 里携带更多上下文信息：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">class InsufficientBalanceError(Exception):
+    """余额不足异常，携带 need / have 上下文便于上层定位。"""
+    def __init__(self, need, have):
+        self.need = need
+        self.have = have
+        super().__init__(f"余额不足：需要 {need}，仅 {have}")
+
+class BankAccount:
+    def __init__(self, balance=0):
+        self.balance = balance
+    def withdraw(self, amount):
+        if amount &gt; self.balance:
+            raise InsufficientBalanceError(amount, self.balance)
+        self.balance -= amount
+
+try:
+    BankAccount(100).withdraw(200)
+except InsufficientBalanceError as e:
+    print("交易失败：", e)   # 交易失败： 余额不足：需要 200，仅 100</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>用 <code>raise</code> 把「异常状态」显式化，比返回一个幽灵般的 <code>None</code> 更保险；<b>自定义异常继承 <code>Exception</code></b>（不要继承 <code>BaseException</code>），这样能被通用的 <code>except Exception</code> 捕获。</p></div>
+  </section>
+
+  <section class="topic" id="propagation">
+    <h3><span class="kno">传播与最佳实践</span>异常链、EAFP 与「不吞异常」</h3>
+    <p>异常被抛出后，会<b>沿调用栈逐层向上传播</b>，直到遇到能匹配它的<code>except</code>；若一直没人接，程序就崩溃并打印完整回溯（traceback）。如果想在「处理一层」的同时保留原始错误，用 <code>raise ... from</code> 把它串成一条<b>异常链</b>。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">def inner():
+    return 10 / 0
+
+def outer():
+    return inner()          # 异常从 inner 一路传到调用方
+
+try:
+    outer()
+except ZeroDivisionError as e:
+    print("在上层捕获：", e)   # 在上层捕获：  division by zero
+
+# 抛新异常时用 from 保留原始链，方便追根溯源
+try:
+    n = int("abc")
+except ValueError as ve:
+    raise RuntimeError("转换失败") from ve   # __cause__ 指回 ValueError</code></pre>
+    </div>
+    <p>处理「可能失败」的常见做法有两派，Python 社区更推崇<b>EAFP</b>（Easier to Ask Forgiveness than Permission）：</p>
+    <table class="tbl">
+      <thead><tr><th>风格</th><th>写法</th><th>特点</th></tr></thead>
+      <tbody>
+        <tr><td><b>LBYL</b><br><span class="mono">Look Before You Leap</span></td><td><span class="mono">if "k" in d: print(d["k"])</span></td><td>先检查再操作；需额外判断、有竞态风险，代码更啰嗦。</td></tr>
+        <tr><td><b>EAFP</b><br><span class="mono">Ask Forgiveness</span></td><td><span class="mono">try: print(d["k"])<br>except KeyError: ...</span></td><td>直接做、出错再处理；更简洁、更符合 Python 习惯。</td></tr>
+      </tbody>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#40b877"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>python</div>
+      <pre><code class="language-python">d = {"name": "Ada"}
+
+# EAFP：直接取，出错再兜底（推荐）
+try:
+    print(d["name"])
+except KeyError:
+    print("键不存在")
+
+# with 语句清理资源：文件、连接、锁等用完自动关闭，等价于 finally
+with open("notes.txt", "w", encoding="utf-8") as f:
+    f.write("hello")</code></pre>
+    </div>
+    <div class="callout danger"><span class="i">!</span><p><b>千万别这样做：</b><code>try: ... except: pass</code> 是「吞异常」的典型坏味道——程序看似不崩，Bug 却被藏进暗处。<br><b>正确姿势：</b>指明异常类型；要么记日志/降级，要么确实处理不了就用 <code>raise</code> 再抛，让调用方知晓。</p></div>
+  </section>
+
+  <!-- 考核 / 练习 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 练习</h2></div>
+    <p class="sub">选择答案后点「提交」查看对错与解析。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3e8e0" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1f7d4d" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>给 <code>BankAccount.withdraw</code> 写一个健壮版：同时处理「金额不是数字」「金额为负」「余额不足」三种异常，并保证发生异常时<b>余额不被篡改</b>。</li>
+      <li>实现函数 <code>safe_get(d, key, default=None)</code>：分别用 <code>dict.get</code>（LBYL 思路更宽松）与 <code>try/except KeyError</code>（EAFP）两版，说清二者差异与各自适用场景。</li>
+      <li>写一个「重试」逻辑：模拟可能失败的 <code>network_call()</code>，捕获自定义 <code>NetworkError</code>，最多重试 3 次，每次等待递增；成功即返回结果，3 次均失败则抛出最后一个异常。</li>
+      <li><b>思考题：</b>实现一个用于计时/记录日志的上下文管理器，并用代码解释 <code>__exit__</code> 返回 <code>True</code> 与 <code>False</code> 分别意味着什么、对异常传播的影响。</li>
+    </ul>
+  </section>
+
+  <!-- 标记已学会（与大纲同步） -->
+  <div class="master">
+    <label style="display:inline-flex;align-items:center;gap:10px;font-size:15px;font-weight:700;color:var(--ink)">
+      <input type="checkbox" id="masterChk" data-done="09-exception" style="width:20px;height:20px;accent-color:var(--green);cursor:pointer">
+      我已学会本节（在大纲同步打勾）
+    </label>
+    <div class="tip">勾选后保存到本机浏览器，回到学习大纲也会显示已完成。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「Python 学习」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG & QUZ —— 每个详细页唯一改动点；其余 JS 保持不动。
+   ============================================================ */
+const CONFIG = {
+  id: "09-exception",                 // 本页知识点 id（= 大纲里的 id）
+  title: "异常与错误处理",
+  eyebrow: "PYTHON · 进阶",
+  prev: "08-function.html",           // 上一节文件名
+  next: "10-file.html",               // 下一节文件名
+};
+
+/* 自测题：每道题一个对象；ans 为正确选项下标；exp 为解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"在 try/except/else/finally 中，哪一段只有在「没有抛出异常」时才会执行？",
+    opts:["try 块","except 块","else 块","finally 块"],
+    ans:2,
+    exp:"else 块仅在 try 正常执行（未抛异常）时运行；finally 无论是否异常都会运行。"
+  },
+  {
+    type:"quiz",
+    q:"执行 \"x\" + 1 会抛出哪种异常？",
+    opts:["ValueError","TypeError","SyntaxError","AttributeError"],
+    ans:1,
+    exp:"字符串与整数相加属于类型不匹配，抛出 TypeError；ValueError 是「类型对但值非法」的场景。"
+  },
+  {
+    type:"quiz",
+    q:"关于 finally 块的说法，正确的是？",
+    opts:["仅在出现异常时执行","仅在无异常时执行","无论是否异常都会执行，即使 try 里 return 也不能跳过","在 return 之后永不执行"],
+    ans:2,
+    exp:"finally 无论 try 是否抛异常（哪怕函数内部 return）都会执行，常用于关闭文件、释放连接、清理锁等资源。"
+  },
+  {
+    type:"quiz",
+    q:"为什么不推荐使用裸的 except: ？",
+    opts:["它会让代码执行变慢","它会捕获包括 KeyboardInterrupt、SystemExit 在内的一切异常，极易掩盖真正的 Bug","它一次只能捕获一种异常","它对代码没有任何影响"],
+    ans:1,
+    exp:"bare except: 会捕获包括 Ctrl+C（KeyboardInterrupt）、SystemExit 在内的所有异常，把问题静默吞掉。应尽量指明异常类型。"
+  },
+  {
+    type:"quiz",
+    q:"关于 raise 与 assert，下列说法错误的是？",
+    opts:["raise 可以主动抛出一个异常","assert 条件不满足时抛出 AssertionError","自定义异常通常应继承自 Exception","assert 在使用 python -O（优化模式）运行时同样照常生效"],
+    ans:3,
+    exp:"assert 在使用 -O 优化运行时会被跳过，所以它只适合开发期检查，不能代替正式的业务校验（业务校验应写 if + raise）。"
+  },
+  {
+    type:"quiz",
+    q:"若要同时捕获 ValueError 和 TypeError 并拿到异常对象，应写成哪一种？",
+    opts:["except ValueError + TypeError as e:","except ValueError, TypeError as e:","except (ValueError, TypeError) as e:","except ValueErrorAndTypeError as e:"],
+    ans:2,
+    exp:"把多个异常包进元组再捕获：except (ValueError, TypeError) as e:，as e 用于取得异常对象。"
+  },
+  {
+    type:"interview",
+    q:"（面试）某同事代码里的 try 块只写了 except: pass，把所有异常都吞掉了。以下哪一种做法最值得提倡？",
+    opts:["无脑 pass，让程序继续跑","把异常打印到控制台后继续","指明异常类型并记录日志，或合理降级；确实无法处理时再 raise 让上层知晓","捕获后立刻 raise 一个更大的异常，吓唬调用方"],
+    ans:2,
+    exp:"吞异常会掩盖真实错误。正确做法是：明确异常类型、记录日志或做合理降级；若这一层确实处理不了，应再次 raise 让调用方知道，而不是静默 pass。"
+  },
+  {
+    type:"interview",
+    q:"（面试）设计一个自定义异常类时，为什么建议继承 Exception 而不是 BaseException，且常在 __init__ 里携带更多信息？",
+    opts:["继承 BaseException 更通用","继承 Exception 才能被常规的 except Exception 捕获；重写 __init__ 可携带错误详情、便于上层定位与日志追踪","自定义异常无法携带额外的上下文","自定义异常一定要继承 KeyboardInterrupt"],
+    ans:1,
+    exp:"BaseException 是 KeyboardInterrupt、SystemExit 等系统级异常的基类，通常不应继承。自定义异常应继承 Exception，才能被通用 except 捕获，并在 __init__ 里传入需要/已有等上下文，让调用方与日志拿到足够信息。"
+  },
+];
+
+/* ============================================================
+   跨页进度同步（与大纲共用同一 localStorage key）—— 请不要改动
+   ============================================================ */
+const KEY = "learn:python:done";
+function getDone(){ try { return JSON.parse(localStorage.getItem(KEY)||"[]"); } catch { return []; } }
+function setDone(a){ localStorage.setItem(KEY, JSON.stringify(a)); }
+function toggle(id){ let a=getDone(); const i=a.indexOf(id); if(i<0) a.push(id); else a.splice(i,1); setDone(a); update(); }
+function update(){ const a=getDone(); const el=document.getElementById("masterChk"); if(el){ el.checked = a.indexOf(CONFIG.id)>=0; } }
+
+/* 页面标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = document.getElementById("pageLead").textContent;
+  document.title = CONFIG.title + " · Python 学习";
+  function setup(el,href){ if(href){ el.href=href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 已学会勾选（与大纲同步） */
+(function(){
+  const el = document.getElementById("masterChk");
+  el.checked = getDone().indexOf(CONFIG.id)>=0;
+  el.addEventListener("change", ()=> toggle(CONFIG.id));
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  box.innerHTML = QUZ.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+    <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+    ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+    <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+    <div class="fb"></div>
+  </div>`).join('');
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>btn.addEventListener('click',()=>{
+    const card=btn.closest('.qcard'), i=+card.dataset.i, q=QUZ[i];
+    const sel=card.querySelector('input:checked'), fb=card.querySelector('.fb');
+    if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+    const si=+sel.value, ok=si===q.ans; results[i]=ok;
+    card.querySelectorAll('.opt').forEach((o,j)=>{ o.classList.add('disabled'); if(j===q.ans&&!false) o.classList.add('okmark'); });
+    // 高亮正确/错误
+    card.querySelectorAll('.opt').forEach((o,j)=>{ if(j===q.ans) o.style.borderColor="#2c7a50", o.style.background="var(--green-soft)"; if(j===si&&!ok){ o.style.borderColor="#b8392a"; o.style.background="var(--red-soft)"; } });
+    btn.disabled=true;
+    fb.className="fb show "+(ok?"ok":"bad");
+    fb.innerHTML=(ok?"✅ 回答正确！":"❌ 回答错误。")+" <b>"+q.opts[q.ans]+"</b><br>"+q.exp;
+    updateScore();
+  }));
+  function updateScore(){
+    const got=results.filter(x=>x===true); const pct=Math.round(got.length/results.length*100);
+    const len=2*Math.PI*27, fg=document.getElementById("ringFg");
+    fg.style.strokeDasharray=len; fg.style.strokeDashoffset=len*(1-pct/100);
+    document.getElementById("ringPct").textContent=pct+"%";
+    const sc=document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    const all=got.length===results.length;
+    document.getElementById("scoreText").innerHTML = all? `🎉 全部答对，共 <b>${results.length}</b> 题！<br><span style="color:var(--muted);font-size:13px">建议继续「进阶挑战」，并把易错命令记进笔记。</span>`
+      : `答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已掌握，建议回看错题对应的小节。":"需回顾本节内容，再测一次。"}`;
+  }
+})();
+
+/* 渲染 Mermaid 图（离线时静默失败，不影响文字内容） */
+try{ mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+</script>
+</body>
+</html>
