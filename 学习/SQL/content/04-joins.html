@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多表连接 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 多表连接：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 04 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">多表连接</h1>
+    <p class="lead" id="pageLead"></p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能说清「连接」的本质是<b>按条件配对两表的行</b>，并算出任意两表连接的<b>结果行数</b>。</li>
+      <li>能正确写出 <b>INNER / LEFT / RIGHT / FULL OUTER / CROSS JOIN</b>，并说明各自保留哪些行。</li>
+      <li>能区分 <b>ON</b> 与 <b>WHERE</b> 在 LEFT JOIN 中的不同效果（面试高频）。</li>
+      <li>会用<b>自连接</b>解决「同一张表内比较」类问题（员工-经理、环比）。</li>
+      <li>能写出三表以上连接，并判断连接顺序是否影响结果与性能。</li>
+      <li>会用 <b>EXISTS / NOT EXISTS</b> 表达半连接、反连接，并说清 <code class="inl">NOT IN</code> 的 NULL 陷阱。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：<code class="inl">SELECT / FROM / WHERE</code> 单表查询、比较与逻辑运算符、主键与外键的概念（模块 01、02）。本页所有示例基于内置示例数据 <code class="inl">customers</code>（8 行）与 <code class="inl">orders</code>（12 行）。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">04</span>从「笛卡尔积」到「半连接」<br>把两张表拼成一张结果表</h2>
+  </section>
+
+  <!-- ========== 知识点 1 ========== -->
+  <section class="topic" id="join-basic">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>连接的本质与笛卡尔积<span class="pt">join-basic</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="joins::join-basic"><span>已学会</span></label>
+    </div>
+    <p><b>连接（JOIN）</b>就是让两张表的行按某个条件「配对」，配对成功的组合成为结果表的一行。理解连接，先要理解它的地基——<b>笛卡尔积（Cartesian product）</b>：把左表每一行与右表每一行都组合一次，得到的行数是 <span class="mono">左表行数 × 右表行数</span>。</p>
+    <ul>
+      <li>连接 = <b>笛卡尔积 + 过滤条件（ON）</b>。不写 ON 条件时，得到的就是完整笛卡尔积。</li>
+      <li>结果行数由<b>匹配关系</b>决定，不由表的行数直接决定：一对多会让行数放大。</li>
+      <li>外键（如 <code class="inl">orders.customer_id → customers.id</code>）是连接的「桥梁」，也让连接有意义。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>cartesian.sql</div>
+      <pre><code>-- 笛卡尔积：8 × 12 = 96 行（几乎都是无意义的组合）
+SELECT c.name, o.id
+FROM customers c
+CROSS JOIN orders o;
+
+-- 加上配对条件：只剩 12 行（每个订单找到它的客户）
+SELECT c.name, o.id
+FROM customers c
+JOIN orders o ON c.id = o.customer_id;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>配对条件</th><th>结果行数（本例）</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">CROSS JOIN</td><td>无条件，全组合</td><td class="mono">8 × 12 = 96</td></tr>
+        <tr><td class="mono">JOIN … ON c.id = o.customer_id</td><td>客户 id = 订单的客户 id</td><td class="mono">12</td></tr>
+        <tr><td class="mono">LEFT JOIN 同上</td><td>同上，但保留没配上的客户</td><td class="mono">13</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>忘写 <code class="inl">ON</code> 条件、或条件写错（比如把 <code class="inl">c.id = o.customer_id</code> 写成 <code class="inl">c.id = o.id</code>），会得到几十上百倍的重复行。看到「结果突然变多」先怀疑连接条件。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>连接 = 笛卡尔积 + 条件过滤；行数放大是「一对多」的正常现象，不是 Bug。</p></div>
+  </section>
+
+  <!-- ========== 知识点 2 ========== -->
+  <section class="topic" id="inner-join">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>INNER JOIN 与 ON / USING<span class="pt">inner-join</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="joins::inner-join"><span>已学会</span></label>
+    </div>
+    <p><b>INNER JOIN</b>（内连接）只保留<b>两边都配对成功</b>的行，是默认的连接类型：写 <code class="inl">JOIN</code> 等价于 <code class="inl">INNER JOIN</code>。</p>
+    <ul>
+      <li><b>ON</b> 后面写配对条件，可以是等值，也可以是范围、多个条件用 <code class="inl">AND</code> 连接。</li>
+      <li><b>USING(col)</b> 是简写：要求两表有<b>同名列</b>，等价于 <code class="inl">ON a.col = b.col</code>，且结果里该列只出现一次。</li>
+      <li>必须给表起<b>别名</b>（<code class="inl">customers c</code>），并用 <code class="inl">别名.字段</code> 限定，避免字段名歧义。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>inner-join.sql</div>
+      <pre><code>-- 三种等价写法
+SELECT c.name, o.id, o.amount
+FROM customers AS c
+INNER JOIN orders AS o ON c.id = o.customer_id;
+
+SELECT c.name, o.id, o.amount
+FROM customers c JOIN orders o ON c.id = o.customer_id;   -- JOIN = INNER JOIN
+
+-- USING 要求两表同名列；本例列名不同（id / customer_id），所以不能这么写
+-- SELECT * FROM customers JOIN orders USING (id);   -- 错误示范：语义完全不同</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>客户</th><th>订单号</th><th>金额</th></tr></thead>
+      <tbody>
+        <tr><td>张伟</td><td class="mono">1001</td><td class="mono">247.00</td></tr>
+        <tr><td>张伟</td><td class="mono">1002</td><td class="mono">1299.00</td></tr>
+        <tr><td>李娜</td><td class="mono">1003</td><td class="mono">89.00</td></tr>
+        <tr><td colspan="3" style="color:var(--muted)">… 共 12 行（周涛 id=8 没有订单，因此不出现在结果里）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>INNER JOIN 的结果行数 = 所有配对成功的组合数。一对多会展开成多行；右表没有匹配行时，该左表行直接消失。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>面试点：</b>对 INNER JOIN 而言，把过滤条件写在 <code class="inl">ON</code> 还是 <code class="inl">WHERE</code> 结果<b>相同</b>；但对 LEFT JOIN 就完全不同（见下一个知识点）。</p></div>
+  </section>
+
+  <!-- ========== 知识点 3 ========== -->
+  <section class="topic" id="outer-join">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>LEFT / RIGHT / FULL OUTER JOIN<span class="pt">outer-join</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="joins::outer-join"><span>已学会</span></label>
+    </div>
+    <p><b>外连接（OUTER JOIN）</b>在配对失败时<b>不丢弃行</b>，而是把另一侧的列补成 <code class="inl">NULL</code>，从而「保留」这张表的全部行。</p>
+    <ul>
+      <li><b>LEFT JOIN</b>：保留左表全部行，右表没配上的补 NULL。</li>
+      <li><b>RIGHT JOIN</b>：保留右表全部行（实际工作中一般调换表顺序写成 LEFT JOIN，可读性更好）。</li>
+      <li><b>FULL OUTER JOIN</b>：两边都保留。MySQL 8.0 不支持该关键字，要用 <code class="inl">LEFT JOIN UNION RIGHT JOIN</code> 模拟。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>outer-join.sql</div>
+      <pre><code>-- LEFT JOIN：13 行（12 个订单 + 1 个没有订单的客户，右侧为 NULL）
+SELECT c.name, o.id AS order_id
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id
+ORDER BY c.id;
+
+-- 只在 ON 里过滤：保留所有客户，没付款的客户右侧为 NULL
+SELECT c.name, o.id
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id AND o.status = 'paid';
+
+-- 把过滤放到 WHERE：结果退化成 INNER JOIN（没付款的客户整行被过滤掉）
+SELECT c.name, o.id
+FROM customers c
+LEFT JOIN orders o ON c.id = o.customer_id
+WHERE o.status = 'paid';</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>最经典的坑：</b>对 LEFT JOIN 的<b>右表列</b>加 <code class="inl">WHERE</code> 条件（尤其是 <code class="inl">WHERE o.col IS NOT NULL</code> 或等值判断），会把补 NULL 的行全部过滤掉，LEFT JOIN 实际退化成了 INNER JOIN。要保留左表全部行，条件必须写在 <code class="inl">ON</code> 里。</p></div>
+
+    <div id="demo-join"></div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>结果行数</th><th>周涛（无订单）是否出现</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">INNER JOIN</td><td class="mono">12</td><td class="null">不出现</td></tr>
+        <tr><td class="mono">LEFT JOIN</td><td class="mono">13</td><td>出现（订单列为 NULL）</td></tr>
+        <tr><td class="mono">RIGHT JOIN</td><td class="mono">12</td><td class="null">不出现</td></tr>
+        <tr><td class="mono">FULL OUTER JOIN</td><td class="mono">13</td><td>出现</td></tr>
+        <tr><td class="mono">CROSS JOIN</td><td class="mono">96</td><td>出现 12 次（每张订单一次）</td></tr>
+      </tbody>
+    </table>
+
+    <div id="demo-leftjoin"></div>
+  </section>
+
+  <!-- ========== 知识点 4 ========== -->
+  <section class="topic" id="self-join">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>自连接（同一张表多次使用）<span class="pt">self-join</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="joins::self-join"><span>已学会</span></label>
+    </div>
+    <p><b>自连接（self join）</b>是把同一张表用<b>两个不同别名</b>当成两张表来连接，用来处理「表内行与行之间有关系」的问题，比如员工与直属经理、本月与上月、当前行与上一行。</p>
+    <ul>
+      <li>关键：<b>必须起两个别名</b>（如 <code class="inl">e</code> 和 <code class="inl">m</code>），否则数据库无法区分。</li>
+      <li>连接条件指向同一张表的另一列：<code class="inl">e.manager_id = m.id</code>。</li>
+      <li>顶层人员 <code class="inl">manager_id IS NULL</code>，用 LEFT JOIN 才能保留。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>self-join.sql</div>
+      <pre><code>-- 每位员工及其直属经理（9 行，顶层经理的经理为 NULL）
+SELECT e.name AS 员工, m.name AS 经理, e.salary
+FROM employees e
+LEFT JOIN employees m ON e.manager_id = m.id
+ORDER BY e.id;
+
+-- 找出「比直属经理工资还高」的员工（自连接的典型写法）
+-- 本例示例数据里没有这种员工，所以结果 0 行；换成 e.salary < m.salary 就能看到结果
+SELECT e.name, e.salary, m.name AS 经理, m.salary AS 经理工资
+FROM employees e
+JOIN employees m ON e.manager_id = m.id
+WHERE e.salary &gt; m.salary;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>员工</th><th>经理</th><th>月薪</th></tr></thead>
+      <tbody>
+        <tr><td>张伟</td><td class="null">NULL</td><td class="mono">35000</td></tr>
+        <tr><td>李娜</td><td>张伟</td><td class="mono">28000</td></tr>
+        <tr><td>王强</td><td>张伟</td><td class="mono">26000</td></tr>
+        <tr><td>刘敏</td><td class="null">NULL</td><td class="mono">30000</td></tr>
+        <tr><td colspan="3" style="color:var(--muted)">… 共 9 行</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>自连接不是新语法，只是「同一张表起两个别名」。想清楚「两个别名分别代表什么角色」，问题就清晰了。</p></div>
+  </section>
+
+  <!-- ========== 知识点 5 ========== -->
+  <section class="topic" id="cross-join">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>CROSS JOIN 与生成序列<span class="pt">cross-join</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="joins::cross-join"><span>已学会</span></label>
+    </div>
+    <p><b>CROSS JOIN</b> 就是无条件笛卡尔积。它看似「没用」，其实是<b>构造组合</b>的利器：生成日期序列、补齐「每个品类 × 每个月」的空缺报表、生成测试数据。</p>
+    <ul>
+      <li>行数 = 两表行数相乘，注意别在大表上用。</li>
+      <li><code class="inl">JOIN … ON 1=1</code> 与 <code class="inl">CROSS JOIN</code> 效果相同，但语义上前者容易被误读。</li>
+      <li>MySQL 8.0 可用<b>递归 CTE</b> 生成数字/日期序列，再与维度表 CROSS JOIN 补齐空行。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>cross-join.sql</div>
+      <pre><code>-- 6 个商品 × 8 个客户 = 48 行（常见于「给每个客户列出所有商品」的模板）
+SELECT c.name, p.name AS product
+FROM customers c
+CROSS JOIN products p
+LIMIT 5;
+
+-- 用递归 CTE 生成 1..10，再和客户 CROSS JOIN，给每个客户补齐 10 个序号
+WITH RECURSIVE nums AS (
+  SELECT 1 AS n
+  UNION ALL
+  SELECT n + 1 FROM nums WHERE n &lt; 10
+)
+SELECT c.name, nums.n
+FROM customers c CROSS JOIN nums;</code></pre>
+    </div>
+
+    <div class="callout warn"><span class="i">◆</span><p><b>性能提醒：</b>CROSS JOIN 的结果规模是乘积级。1 万 × 1 万 = 1 亿行，务必先估算再执行；生产环境里通常要和 <code class="inl">LIMIT</code> 或维度过滤一起用。</p></div>
+  </section>
+
+  <!-- ========== 知识点 6 ========== -->
+  <section class="topic" id="multi-join">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>多表连接与连接顺序<span class="pt">multi-join</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="joins::multi-join"><span>已学会</span></label>
+    </div>
+    <p>真实查询往往要连 3 张以上的表。写法上依次 <code class="inl">JOIN</code> 即可；<b>连接顺序由优化器决定</b>，对纯 INNER JOIN 来说不改变结果，但会影响执行代价。</p>
+    <ul>
+      <li>链条式写法：<code class="inl">A JOIN B ON … JOIN C ON … JOIN D ON …</code>，每张表紧跟自己的条件，最易读。</li>
+      <li><b>混用 LEFT 与 INNER 时顺序会影响结果</b>：LEFT JOIN 之后再 INNER JOIN 右表，会把补 NULL 的行过滤掉。</li>
+      <li>性能上，先连过滤后行数少的表、并保证连接列有索引，通常更快（见模块 09、10）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>multi-join.sql</div>
+      <pre><code>-- 四表连接：每个商品品类的销售额（口径：只统计 status = 'paid' 的订单）
+SELECT p.category AS 品类,
+       SUM(oi.qty * oi.unit_price) AS 销售额
+FROM order_items oi
+JOIN products  p ON oi.product_id = p.id
+JOIN orders    o ON oi.order_id   = o.id
+JOIN customers c ON o.customer_id = c.id
+WHERE o.status = 'paid'
+GROUP BY p.category
+ORDER BY 销售额 DESC;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>品类</th><th>销售额（paid 口径）</th><th>构成</th></tr></thead>
+      <tbody>
+        <tr><td>数码</td><td class="mono">7519.00</td><td>显示器 1299 + 键盘 499×5 + 鼠标 129×2</td></tr>
+        <tr><td>家居</td><td class="mono">515.00</td><td>保温杯 89×3 + 台灯 159×1</td></tr>
+        <tr><td>图书</td><td class="mono">177.00</td><td>笔记本 59×3</td></tr>
+        <tr><td>合计</td><td class="mono">8211.00</td><td>= 10 笔 paid 订单的金额总和</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13.5px;color:var(--muted)">口径提醒：上表只统计 <code class="inl">status = 'paid'</code> 的 10 笔订单（合计 8211.00）。若去掉 <code class="inl">WHERE</code>、按全部 12 笔订单统计，结果是数码 <b>7648.00</b> &gt; 家居 <b>833.00</b> &gt; 图书 <b>177.00</b>（合计 8658.00）——多出的 447 元来自退款单 1005（台灯 159×2 = 318）与取消单 1009（鼠标 129×1）。</p>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把 <code class="inl">LEFT JOIN</code> 和 <code class="inl">INNER JOIN</code> 混用时，条件顺序会改变结果集。需要「保留左表全部行」时，后续连接要么也用 LEFT JOIN，要么把过滤条件写进对应的 <code class="inl">ON</code>。</p></div>
+  </section>
+
+  <!-- ========== 知识点 7 ========== -->
+  <section class="topic" id="semi-anti">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>半连接 / 反连接（EXISTS 与 JOIN 互换）<span class="pt">semi-anti</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="joins::semi-anti"><span>已学会</span></label>
+    </div>
+    <p>很多时候我们只想知道「另一张表里<b>有没有</b>对应的行」，并不需要它的列。这种「只做存在性判断」的查询叫<b>半连接（semi join）</b>，它的反面（不存在）叫<b>反连接（anti join）</b>。</p>
+    <ul>
+      <li><b>半连接</b>：<code class="inl">WHERE EXISTS (子查询)</code> 或 <code class="inl">JOIN … + DISTINCT</code>。结果不会因右表多行而重复。</li>
+      <li><b>反连接</b>：<code class="inl">WHERE NOT EXISTS (子查询)</code> 是<b>安全</b>写法；<code class="inl">NOT IN</code> 遇到 NULL 会返回空结果。</li>
+      <li>优化器通常把 <code class="inl">EXISTS</code> 改写为半连接执行计划，二者性能相近，选可读性更好的写法。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>semi-anti.sql</div>
+      <pre><code>-- 半连接：有下单记录的客户（7 个）
+SELECT c.name FROM customers c
+WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+-- 等价写法：JOIN + DISTINCT（不 DISTINCT 会因为多订单而重复）
+SELECT DISTINCT c.name FROM customers c
+JOIN orders o ON o.customer_id = c.id;
+
+-- 反连接：从来没有下单的客户（1 个：周涛）——推荐写法
+SELECT c.name FROM customers c
+WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+-- 反连接的危险写法：一旦子查询结果里出现 NULL，整条查询返回空集
+SELECT c.name FROM customers c
+WHERE c.id NOT IN (SELECT customer_id FROM orders);</code></pre>
+    </div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>NULL 陷阱：</b><code class="inl">x NOT IN (1, 2, NULL)</code> 的结果永远不是 TRUE 也不是 FALSE，而是 <b>UNKNOWN</b>，因此过滤后一行都不剩。这是面试与生产事故的常客——反连接优先用 <code class="inl">NOT EXISTS</code>。</p></div>
+
+    <div id="demo-semi"></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用一条 SQL 列出「每个客户的订单数」，<b>包含订单数为 0 的客户</b>（提示：LEFT JOIN + COUNT 某个右表列）。</li>
+      <li>不查文档，说出 MySQL 里 <code class="inl">LEFT JOIN … ON a.id=b.aid AND b.status='paid'</code> 与把它写成 <code class="inl">WHERE b.status='paid'</code> 的结果差异，并用练习台验证。</li>
+      <li>用自连接找出 employees 表里「同一部门、工资相差不超过 2000」的员工对，并说明如何避免同一对被输出两次。</li>
+      <li>用 CROSS JOIN + 递归 CTE 生成 2024 年 1 月 1 日到 1 月 31 日的日期序列，再左连接 orders 统计每日订单数（含 0 的日期）。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">聚合、分组与过滤</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">子查询与集合运算</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "joins",
+  title: "多表连接",
+  eyebrow: "MODULE 04 · SQL / 数据库",
+  lead: "连接的三种视角：把两张表按条件配对（INNER/OUTER）、把一张表当两张用（自连接）、只判断「存不存在」（半连接/反连接）。本页用可点击的演示面板把行数变化直接摆在你面前。",
+  points: ["join-basic","inner-join","outer-join","self-join","cross-join","multi-join","semi-anti"],
+  prev: "03-aggregate-group.html",
+  next: "05-subquery-set.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"customers 表 8 行、orders 表 12 行。执行 `SELECT * FROM customers CROSS JOIN orders;` 会返回多少行？",
+    opts:["20 行","12 行","96 行","8 行"],
+    ans:2,
+    exp:"CROSS JOIN 是笛卡尔积，行数 = 8 × 12 = 96。20 是两表行数相加（那是 UNION ALL 且无重复时的量级），12 是加了 ON c.id = o.customer_id 之后的 INNER JOIN 行数，8 是左表行数。"
+  },
+  {
+    type:"quiz",
+    q:"对于 INNER JOIN，把过滤条件 `o.status = 'paid'` 写在 ON 里和写在 WHERE 里，结果如何？",
+    opts:["写在 ON 里结果更多","写在 WHERE 里结果更多","两者都会报错","结果完全相同"],
+    ans:3,
+    exp:"INNER JOIN 只保留配对成功的行，ON 与 WHERE 都是在结果上做过滤，语义等价。只有当连接类型是 LEFT/RIGHT/FULL 时，二者才会有明显差异。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪条语句<b>会丢失</b>「没有订单的客户」？",
+    sql:"-- A\nSELECT c.name FROM customers c LEFT JOIN orders o ON c.id=o.customer_id;\n-- B\nSELECT c.name FROM customers c LEFT JOIN orders o ON c.id=o.customer_id WHERE o.status='paid';\n-- C\nSELECT c.name FROM customers c LEFT JOIN orders o ON c.id=o.customer_id AND o.status='paid';",
+    opts:["A 和 B","只有 B","只有 C","B 和 C"],
+    ans:1,
+    exp:"B 把右表条件写进了 WHERE。对补 NULL 的行来说 o.status 是 NULL，条件不成立，整行被过滤掉，LEFT JOIN 实际退化为 INNER JOIN。C 把条件写在 ON 里，配对失败的客户仍然保留（右侧为 NULL），不会丢行。A 没有过滤，自然保留全部客户。"
+  },
+  {
+    type:"quiz",
+    q:"`SELECT c.name, o.id FROM customers c LEFT JOIN orders o ON c.id = o.customer_id;` 返回多少行？（customers 8 行、orders 12 行，其中 1 位客户没有订单）",
+    opts:["8 行","13 行","12 行","96 行"],
+    ans:1,
+    exp:"12 个订单各自配到 1 位客户，共 12 行；另有 1 位客户没有任何订单，LEFT JOIN 保留他并补 NULL，所以 12 + 1 = 13 行。"
+  },
+  {
+    type:"quiz",
+    q:"关于 `USING (col)`，下列说法正确的是：",
+    opts:["它要求两张表的连接列同名，且结果中该列只出现一次","它等价于 ON 1=1","它只能用于 CROSS JOIN","它必须配合 DISTINCT 使用"],
+    ans:0,
+    exp:"USING 是 ON a.col = b.col 的简写，前提是两表连接列同名；它会合并输出该列，因此只出现一次。它不改变连接类型，也不需要 DISTINCT。本例 customers.id 与 orders.customer_id 列名不同，所以不能用 USING。"
+  },
+  {
+    type:"quiz",
+    q:"要用自连接查「每位员工及其直属经理」，为什么必须给 employees 起两个别名？",
+    opts:["为了性能优化","因为 MySQL 不允许自连接","为了使用 USING","因为不区别名时数据库无法区分两张「同一张表」的引用，字段名会歧义"],
+    ans:3,
+    exp:"自连接的实质是把同一张表当成两个独立角色。不起别名，`name`、`id` 等列在两侧都出现，无法判断引用的是哪一侧，会报「字段名歧义」。别名让左右两侧各自可寻址。"
+  },
+  {
+    type:"quiz",
+    q:"下列哪一项是 CROSS JOIN 的合理用途？",
+    opts:["替代 LEFT JOIN 以提升性能","生成「每个客户 × 每个商品」的组合模板、补齐报表空缺","消除重复行","实现分页"],
+    ans:1,
+    exp:"CROSS JOIN 生成所有组合，典型用途是补齐维度组合（客户×月份、品类×渠道）或配合递归 CTE 生成序列。它不做匹配过滤，不能替代 LEFT JOIN，也不去重、不分页。"
+  },
+  {
+    type:"quiz",
+    q:"`SELECT c.name FROM customers c WHERE c.id NOT IN (SELECT customer_id FROM orders);` 在什么情况下会返回空结果？",
+    sql:"-- orders.customer_id 允许为 NULL（例如匿名下单）",
+    opts:["永远不会，语义正确","当 orders 表为空时","当子查询结果中出现 NULL 时","当 customers 表为空时"],
+    ans:2,
+    exp:"NOT IN 会被展开成 `c.id <> v1 AND c.id <> v2 AND …`。只要其中一个 v 是 NULL，`c.id <> NULL` 就是 UNKNOWN，整个 AND 链条不可能为 TRUE，结果为空。反连接应优先用 NOT EXISTS。"
+  },
+  {
+    type:"quiz",
+    q:"「半连接」的含义是：",
+    opts:["只返回左表列，仅判断右表是否存在匹配行，不因右表多行而重复","返回两表各一半的列","只连接前 50% 的行","把两表行数相加"],
+    ans:0,
+    exp:"半连接（semi join）只关心存在性，不输出右表的列，因此左表每行最多出现一次。EXISTS 天然是半连接语义；用 JOIN 模拟时必须加 DISTINCT，否则右表多行会让左表行重复。"
+  },
+  {
+    type:"interview",
+    q:"面试题：找出「从来没有下过订单」的客户。下面哪种写法在 customer_id 可能为 NULL 时依然<b>安全</b>？",
+    opts:["SELECT name FROM customers WHERE id NOT IN (SELECT customer_id FROM orders)","SELECT c.name FROM customers c JOIN orders o ON c.id = o.customer_id","SELECT c.name FROM customers c WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id)","SELECT c.name FROM customers c LEFT JOIN orders o ON c.id = o.customer_id WHERE o.id IS NOT NULL"],
+    ans:2,
+    exp:"NOT EXISTS 不受 NULL 影响，语义稳定，是反连接的首选。A 在子查询出现 NULL 时返回空集；B 是 INNER JOIN，只会返回有订单的客户，方向正好相反；D 用 WHERE o.id IS NOT NULL 过滤，同样只会留下有订单的客户。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：统计每个客户的订单数（没有订单的客户显示 0）。下列哪条 SQL 正确？",
+    sql:"-- A\nSELECT c.name, COUNT(*) FROM customers c LEFT JOIN orders o ON c.id=o.customer_id GROUP BY c.name;\n-- B\nSELECT c.name, COUNT(o.id) FROM customers c LEFT JOIN orders o ON c.id=o.customer_id GROUP BY c.name;\n-- C\nSELECT c.name, COUNT(*) FROM customers c JOIN orders o ON c.id=o.customer_id GROUP BY c.name;",
+    opts:["A 和 B 都对","只有 C 对","三条都对","只有 B 对"],
+    ans:3,
+    exp:"COUNT(*) 统计的是结果行数，LEFT JOIN 补 NULL 的那一行也会被计入，没有订单的客户会显示 1（错误）。COUNT(o.id) 只统计非 NULL 值，因此该客户显示 0（正确）。C 用的是 INNER JOIN，没有订单的客户根本不会出现。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 8.0 中想实现 FULL OUTER JOIN，通常怎么做？",
+    opts:["直接写 FULL OUTER JOIN 即可","用 CROSS JOIN 加 WHERE","用 LEFT JOIN 与 RIGHT JOIN 的结果做 UNION（去重）","用 INNER JOIN 加 DISTINCT"],
+    ans:2,
+    exp:"MySQL 不提供 FULL OUTER JOIN 关键字。标准做法是 `LEFT JOIN … UNION RIGHT JOIN …`（UNION 会去重，UNION ALL 会重复公共行）。CROSS JOIN + WHERE 得到的是内连接语义，INNER JOIN + DISTINCT 更不会补 NULL。"
+  }
+];
+
+/* 进度：与学习大纲共享 sql_outline_progress_v1 */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ============================================================
+   演示一：JOIN 可视化（切换连接类型，看行怎么配、结果长什么样）
+   ============================================================ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-join");
+  if(!host) return;
+  const C = SQLSandbox.SAMPLE.customers, O = SQLSandbox.SAMPLE.orders;
+  const ci = {}; C.columns.forEach((c,i)=>ci[c]=i);
+  const oi = {}; O.columns.forEach((c,i)=>oi[c]=i);
+  const cust = C.rows.map(r=>({id:r[ci.id], name:r[ci.name]}));
+  const ord  = O.rows.map(r=>({id:r[oi.id], cid:r[oi.customer_id], amt:r[oi.amount]}));
+
+  const TYPES = {
+    INNER: {label:"INNER JOIN", desc:"只保留两边都配上的行"},
+    LEFT:  {label:"LEFT JOIN",  desc:"保留左表全部行，右表没配上的补 NULL"},
+    RIGHT: {label:"RIGHT JOIN", desc:"保留右表全部行，左表没配上的补 NULL"},
+    FULL:  {label:"FULL OUTER", desc:"两边都保留（MySQL 需 UNION 模拟）"},
+    CROSS: {label:"CROSS JOIN", desc:"无条件全组合，行数 = 8 × 12 = 96"}
+  };
+
+  function build(type){
+    const rows = []; let matchedPairs = 0;
+    if(type === "CROSS"){
+      for(const c of cust) for(const o of ord) rows.push([c.name, o.id, o.amt, "组合"]);
+      return { rows: rows, matchedPairs: 0, note: "无匹配概念，全部为组合" };
+    }
+    const usedOrder = new Set();
+    for(const c of cust){
+      let hit = false;
+      for(const o of ord){
+        if(o.cid === c.id){ rows.push([c.name, o.id, o.amt, "匹配"]); hit = true; matchedPairs++; usedOrder.add(o.id); }
+      }
+      if(!hit && (type === "LEFT" || type === "FULL")) rows.push([c.name, null, null, "左表独有"]);
+    }
+    if(type === "RIGHT" || type === "FULL"){
+      for(const o of ord){
+        if(!usedOrder.has(o.id)) rows.push([null, o.id, o.amt, "右表独有"]);
+      }
+    }
+    return { rows: rows, matchedPairs: matchedPairs, note: "" };
+  }
+
+  function venn(type){
+    const light = "#e3dcc9", dark = "#1e5b4f", mid = "#3f8a76";
+    const aFill = (type==="LEFT"||type==="FULL"||type==="CROSS") ? dark : light;
+    const bFill = (type==="RIGHT"||type==="FULL"||type==="CROSS") ? dark : light;
+    const lensFill = (type==="CROSS") ? dark : mid;
+    const lensOp = (type==="CROSS") ? 1 : 0.95;
+    return `<svg class="venn" width="300" height="150" viewBox="0 0 280 150" role="img" aria-label="连接类型示意图">
+      <circle cx="110" cy="75" r="58" fill="${aFill}" opacity="${type==="INNER"?0.25:0.85}"/>
+      <circle cx="170" cy="75" r="58" fill="${bFill}" opacity="${type==="INNER"?0.25:0.85}"/>
+      <path d="M140,24.8 A58,58 0 0,1 140,125.2 A58,58 0 0,1 140,24.8 Z" fill="${lensFill}" opacity="${lensOp}"/>
+      <text x="60" y="140" font-size="11" fill="#514b3f" font-family="monospace">customers</text>
+      <text x="185" y="140" font-size="11" fill="#514b3f" font-family="monospace">orders</text>
+    </svg>`;
+  }
+
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：JOIN 类型 → 行怎么配</span><span class="hint">切换类型看结果变化</span></div>
+    <div class="db">
+      <div class="ctl" id="joinCtl">
+        <label>连接类型</label>
+        ${Object.keys(TYPES).map(k=>`<button class="b" data-jt="${k}">${TYPES[k].label}</button>`).join("")}
+      </div>
+      <div id="joinVenn"></div>
+      <div id="joinInfo"></div>
+      <div id="joinOut"></div>
+      <div class="foot">示例数据：customers 8 行（其中「周涛」无订单）、orders 12 行。</div>
+    </div>
+  </div>`;
+
+  const out = host.querySelector("#joinOut");
+  const info = host.querySelector("#joinInfo");
+  const vennBox = host.querySelector("#joinVenn");
+
+  function render(type){
+    const r = build(type);
+    host.querySelectorAll("#joinCtl .b").forEach(b=>b.classList.toggle("on", b.dataset.jt===type));
+    vennBox.innerHTML = venn(type);
+    const preview = r.rows.slice(0, 8);
+    info.innerHTML = `<div class="log">
+      <b>${TYPES[type].label}</b> — ${TYPES[type].desc}<br>
+      匹配到的组合数：<b>${r.matchedPairs}</b> &nbsp;·&nbsp; 结果行数：<b>${r.rows.length}</b>
+      ${r.note?`<br><span class="bad">${r.note}</span>`:""}
+    </div>`;
+    out.innerHTML = `<table class="dt">
+      <caption>结果预览（前 ${preview.length} 行 / 共 ${r.rows.length} 行）</caption>
+      <thead><tr><th>customers.name</th><th>orders.id</th><th>orders.amount</th><th>来源</th></tr></thead>
+      <tbody>${preview.map(x=>`<tr class="${x[3]==="匹配"?"match":(x[3]==="组合"?"dim":"hl")}">
+        ${x.map(v=>v===null?'<td class="null">NULL</td>':`<td>${SQLSandbox.esc(v)}</td>`).join("")}
+      </tr>`).join("")}</tbody></table>`;
+  }
+
+  host.querySelectorAll("#joinCtl .b").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.jt)));
+  render("INNER");
+})();
+
+/* ============================================================
+   演示二：ON 里的条件 vs WHERE 里的条件（LEFT JOIN 语义差异）
+   ============================================================ */
+SQLSandbox && SQLSandbox.mount(document.getElementById("demo-leftjoin"), {
+  query: "SELECT c.name, o.id AS order_id\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nORDER BY c.id;",
+  presets: [
+    {label:"LEFT JOIN（13 行）", sql:"SELECT c.name, o.id AS order_id\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nORDER BY c.id;"},
+    {label:"条件写在 ON 里", sql:"SELECT c.name, o.id AS order_id, o.status\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id AND o.status = 'paid'\nORDER BY c.id;"},
+    {label:"条件写在 WHERE 里（退化为 INNER）", sql:"SELECT c.name, o.id AS order_id, o.status\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nWHERE o.status = 'paid'\nORDER BY c.id;"},
+    {label:"对比 INNER JOIN", sql:"SELECT c.name, o.id AS order_id\nFROM customers c\nINNER JOIN orders o ON c.id = o.customer_id\nORDER BY c.id;"}
+  ]
+});
+
+/* ============================================================
+   演示三：半连接 / 反连接与 NOT IN 的 NULL 陷阱
+   ============================================================ */
+SQLSandbox && SQLSandbox.mount(document.getElementById("demo-semi"), {
+  query: "SELECT c.name FROM customers c\nWHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);",
+  presets: [
+    {label:"半连接 EXISTS（7 人）", sql:"SELECT c.name FROM customers c\nWHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);"},
+    {label:"反连接 NOT EXISTS（1 人）", sql:"SELECT c.name FROM customers c\nWHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);"},
+    {label:"JOIN + DISTINCT（等价半连接）", sql:"SELECT DISTINCT c.name\nFROM customers c JOIN orders o ON o.customer_id = c.id;"},
+    {label:"LEFT JOIN + IS NULL（反连接）", sql:"SELECT c.name\nFROM customers c\nLEFT JOIN orders o ON c.id = o.customer_id\nWHERE o.id IS NULL;"},
+    {label:"⚠ NOT IN 遇到 NULL 会返回空集", sql:"SELECT c.name FROM customers c\nWHERE c.id NOT IN (SELECT customer_id FROM orders);"}
+  ]
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>窗口函数 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 窗口函数：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">窗口函数</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 06 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">窗口函数</h1>
+    <p class="lead" id="pageLead"></p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能说清窗口函数与 <b>GROUP BY 聚合</b>的本质区别：一个不折叠行，一个折叠行。</li>
+      <li>会写 <code class="inl">函数() OVER (PARTITION BY … ORDER BY … [窗口帧])</code> 的完整骨架，并解释三个部分各管什么。</li>
+      <li>能按场景选对排名函数：<b>ROW_NUMBER / RANK / DENSE_RANK / NTILE</b>，并预判并列值下的结果。</li>
+      <li>会用 <b>LAG / LEAD / FIRST_VALUE / LAST_VALUE</b> 做同比环比、前后对比，并避开 LAST_VALUE 的默认帧陷阱。</li>
+      <li>能用窗口聚合算<b>累计值、组内占比、组内排名</b>，替代「先聚合再 JOIN 回明细」的老写法。</li>
+      <li>能写出<b>分组内 TopN / 每组取最新一条</b>的标准模板，并说明为什么不能直接在 WHERE 里过滤 <code class="inl">rn</code>。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：<code class="inl">SELECT / WHERE / ORDER BY</code>（模块 02）、聚合函数与 <code class="inl">GROUP BY / HAVING</code>（模块 03）、派生表与 CTE（模块 05）。窗口函数是 <b>MySQL 8.0</b> 才有的特性，本页示例全部为 8.0 语法，基于内置数据 <code class="inl">orders</code>（12 行）、<code class="inl">customers</code>（8 行）、<code class="inl">products</code>（6 行）、<code class="inl">employees</code>（9 行）。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">06</span>保留每一行，却能做分组计算<br>从 OVER() 骨架到分组 TopN 的完整套路</h2>
+  </section>
+
+  <!-- ========== 知识点 1 ========== -->
+  <section class="topic" id="win-concept">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>窗口函数 vs 聚合函数<span class="pt">win-concept · 不折叠行的「分组计算」</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="window::win-concept"><span>已学会</span></label>
+    </div>
+    <p><b>窗口函数（window function）</b>的写法是在普通函数后面加一个 <code class="inl">OVER (...)</code>，MySQL 里也叫<b>分析函数（analytic function）</b>。它和 <code class="inl">GROUP BY</code> 聚合最大的区别只有一句话：<b>GROUP BY 把多行折叠成一行，窗口函数一行都不减少</b>，只是给每一行额外算出一个「基于它所在那组行」的值。</p>
+    <p>这个「那组行」就是<b>窗口（window）</b>，由三部分描述：<code class="inl">PARTITION BY</code>（按谁分组，可省略）、<code class="inl">ORDER BY</code>（组内怎么排序）、<b>窗口帧（frame）</b>（在组内取哪一段行）。可以把 <code class="inl">OVER (...)</code> 读成「把这组行借过来算一下，但别把它们合掉」。</p>
+    <ul>
+      <li>语法骨架：<code class="inl">函数名(参数) OVER (PARTITION BY 列 ORDER BY 列 [窗口帧])</code>。</li>
+      <li>没有 <code class="inl">PARTITION BY</code> 时，整个查询结果就是一个分区；没有 <code class="inl">ORDER BY</code> 时，帧默认覆盖整个分区。</li>
+      <li>窗口函数只能出现在 <code class="inl">SELECT</code> 列表与 <code class="inl">ORDER BY</code> 中，<b>不能</b>出现在 <code class="inl">WHERE / GROUP BY / HAVING</code> 里。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>concept.sql</div>
+      <pre><code>-- ① 聚合：12 行订单被折叠成 1 行，明细消失
+SELECT SUM(amount) AS 总金额 FROM orders;
+
+-- ② 窗口函数：12 行全部保留，每行都能看到总额与自己的占比
+SELECT id,
+       amount,
+       SUM(amount) OVER ()                            AS 总金额,
+       ROUND(amount / SUM(amount) OVER () * 100, 1)   AS 占比百分比
+FROM orders
+ORDER BY id;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>对比维度</th><th>GROUP BY 聚合</th><th>窗口函数</th></tr></thead>
+      <tbody>
+        <tr><td>结果行数</td><td>每组 1 行，明细行消失</td><td>与原表行数完全相同</td></tr>
+        <tr><td>典型写法</td><td class="mono">SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id;</td><td class="mono">SELECT id, amount, SUM(amount) OVER (PARTITION BY customer_id) FROM orders;</td></tr>
+        <tr><td>能否同时看明细</td><td>不能，除非把聚合结果再 JOIN 回原表</td><td>能，明细与组内统计出现在同一行</td></tr>
+        <tr><td>过滤方式</td><td class="mono">HAVING</td><td>外层查询 / CTE 再过滤</td></tr>
+        <tr><td>逻辑执行阶段</td><td>WHERE 之后、HAVING 之前</td><td>HAVING 之后、SELECT 之前</td></tr>
+      </tbody>
+    </table>
+
+    <p>上面的 ② 返回 12 行，逐行预期结果如下（总金额 = 8658.00）：</p>
+    <table class="tbl">
+      <thead><tr><th>id</th><th>amount</th><th>总金额</th><th>占比百分比</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1001</td><td class="mono">247.00</td><td class="mono">8658.00</td><td class="mono">2.9</td></tr>
+        <tr><td class="mono">1002</td><td class="mono">1299.00</td><td class="mono">8658.00</td><td class="mono">15.0</td></tr>
+        <tr><td class="mono">1003</td><td class="mono">89.00</td><td class="mono">8658.00</td><td class="mono">1.0</td></tr>
+        <tr><td class="mono">1004</td><td class="mono">2297.00</td><td class="mono">8658.00</td><td class="mono">26.5</td></tr>
+        <tr><td class="mono">1005</td><td class="mono">318.00</td><td class="mono">8658.00</td><td class="mono">3.7</td></tr>
+        <tr><td class="mono">1006</td><td class="mono">59.00</td><td class="mono">8658.00</td><td class="mono">0.7</td></tr>
+        <tr><td class="mono">1007</td><td class="mono">998.00</td><td class="mono">8658.00</td><td class="mono">11.5</td></tr>
+        <tr><td class="mono">1008</td><td class="mono">89.00</td><td class="mono">8658.00</td><td class="mono">1.0</td></tr>
+        <tr><td class="mono">1009</td><td class="mono">129.00</td><td class="mono">8658.00</td><td class="mono">1.5</td></tr>
+        <tr><td class="mono">1010</td><td class="mono">1458.00</td><td class="mono">8658.00</td><td class="mono">16.8</td></tr>
+        <tr><td class="mono">1011</td><td class="mono">178.00</td><td class="mono">8658.00</td><td class="mono">2.1</td></tr>
+        <tr><td class="mono">1012</td><td class="mono">1497.00</td><td class="mono">8658.00</td><td class="mono">17.3</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>窗口函数 = 「不折叠行的分组计算」。它把「明细 + 组内统计」放在同一行，一次性省掉「先 GROUP BY 聚合、再 JOIN 回明细表」这一步，也因此成为占比、累计、排名这类指标的标准解法。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>版本提醒：</b>MySQL 5.7 及更早版本<b>不支持</b> <code class="inl">OVER()</code>，执行会直接报语法错误；MySQL 8.0 起原生支持。PostgreSQL、SQL Server、Oracle 也都支持窗口函数，但细节有差异（例如 MySQL 没有 <code class="inl">QUALIFY</code>、Oracle 没有 <code class="inl">LIMIT</code>），跨库迁移时务必逐条验证。</p></div>
+  </section>
+
+  <!-- ========== 知识点 2 ========== -->
+  <section class="topic" id="win-rank">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>ROW_NUMBER / RANK / DENSE_RANK / NTILE<span class="pt">win-rank · 四个排名函数怎么选</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="window::win-rank"><span>已学会</span></label>
+    </div>
+    <p>排名函数（ranking function）用来给分区内的行编号。它们都要写 <code class="inl">ORDER BY</code>，区别只在<b>遇到并列值时的处理方式</b>，而这个区别直接决定了「取第一名」时会不会多出几行。</p>
+    <ul>
+      <li><b>ROW_NUMBER()</b>：严格 1、2、3…… 即使值相同也强行分先后，序号唯一。</li>
+      <li><b>RANK()</b>：并列同名次，后续名次<b>跳号</b>（1、1、3）。</li>
+      <li><b>DENSE_RANK()</b>：并列同名次，后续名次<b>不跳号</b>（1、1、2）。</li>
+      <li><b>NTILE(n)</b>：把分区尽量平均地切成 n 个桶，桶号 1..n，常用于分位数与 AB 分组。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>rank.sql</div>
+      <pre><code>-- 9 名员工按工资降序排名（本例工资互不相同，所以 rn / rk / dr 一致）
+SELECT name, dept, salary,
+       ROW_NUMBER() OVER (ORDER BY salary DESC) AS rn,
+       RANK()       OVER (ORDER BY salary DESC) AS rk,
+       DENSE_RANK() OVER (ORDER BY salary DESC) AS dr,
+       NTILE(3)     OVER (ORDER BY salary DESC) AS nt
+FROM employees
+ORDER BY salary DESC;
+
+-- 分组内排名：各部门内部按工资排名（PARTITION BY 打开「每部门一个分区」）
+SELECT name, dept, salary,
+       RANK() OVER (PARTITION BY dept ORDER BY salary DESC) AS 部门内排名
+FROM employees
+ORDER BY dept, 部门内排名;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>name</th><th>dept</th><th>salary</th><th>rn</th><th>rk</th><th>dr</th><th>nt</th></tr></thead>
+      <tbody>
+        <tr><td>张伟</td><td>技术</td><td class="mono">35000</td><td class="mono">1</td><td class="mono">1</td><td class="mono">1</td><td class="mono">1</td></tr>
+        <tr><td>刘敏</td><td>市场</td><td class="mono">30000</td><td class="mono">2</td><td class="mono">2</td><td class="mono">2</td><td class="mono">1</td></tr>
+        <tr><td>李娜</td><td>技术</td><td class="mono">28000</td><td class="mono">3</td><td class="mono">3</td><td class="mono">3</td><td class="mono">1</td></tr>
+        <tr><td>王强</td><td>技术</td><td class="mono">26000</td><td class="mono">4</td><td class="mono">4</td><td class="mono">4</td><td class="mono">2</td></tr>
+        <tr><td>赵磊</td><td>财务</td><td class="mono">24000</td><td class="mono">5</td><td class="mono">5</td><td class="mono">5</td><td class="mono">2</td></tr>
+        <tr><td>孙悦</td><td>技术</td><td class="mono">22000</td><td class="mono">6</td><td class="mono">6</td><td class="mono">6</td><td class="mono">2</td></tr>
+        <tr><td>陈晨</td><td>市场</td><td class="mono">18000</td><td class="mono">7</td><td class="mono">7</td><td class="mono">7</td><td class="mono">3</td></tr>
+        <tr><td>周涛</td><td>市场</td><td class="mono">16500</td><td class="mono">8</td><td class="mono">8</td><td class="mono">8</td><td class="mono">3</td></tr>
+        <tr><td>吴迪</td><td>财务</td><td class="mono">15000</td><td class="mono">9</td><td class="mono">9</td><td class="mono">9</td><td class="mono">3</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>函数</th><th>遇到并列值</th><th>序号是否连续</th><th>典型用途</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">ROW_NUMBER()</td><td>强行分先后，序号唯一</td><td>连续 1..n</td><td>去重、每组取一条</td></tr>
+        <tr><td class="mono">RANK()</td><td>同名次，后续跳号</td><td>有空洞（1,1,3）</td><td>排行榜、允许并列的「第几名」</td></tr>
+        <tr><td class="mono">DENSE_RANK()</td><td>同名次，后续不跳号</td><td>无空洞（1,1,2）</td><td>等级、名次连续的场景</td></tr>
+        <tr><td class="mono">NTILE(n)</td><td>不受并列影响，按行数分桶</td><td>桶号 1..n</td><td>四分位、AB 分组、等频分箱</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「每组取第一名」优先用 <b>ROW_NUMBER</b>（保证唯一）；想保留并列冠军就用 RANK / DENSE_RANK，但要接受结果可能多于 1 行。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>当 <code class="inl">ORDER BY</code> 的列存在并列值时，<b>ROW_NUMBER 的先后顺序由执行计划决定</b>，同一查询两次运行可能给出不同结果。要让结果稳定可复现，必须追加唯一的第二排序键，例如 <code class="inl">ORDER BY amount DESC, id</code>。</p></div>
+
+    <div id="demo-rank"></div>
+  </section>
+
+  <!-- ========== 知识点 3 ========== -->
+  <section class="topic" id="win-offset">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>LAG / LEAD / FIRST_VALUE / LAST_VALUE<span class="pt">win-offset · 看前一行、后一行与首尾</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="window::win-offset"><span>已学会</span></label>
+    </div>
+    <p>这四个函数解决「跨行取值」问题：不写自连接，也能在同一行里看到上一行、下一行、分区首行或末行的值。<b>LAG</b> 取前面第 n 行，<b>LEAD</b> 取后面第 n 行，<b>FIRST_VALUE / LAST_VALUE</b> 取分区（或帧）的首尾值。它们是环比、同比增长、相邻事件间隔这类分析的标配。</p>
+    <ul>
+      <li><code class="inl">LAG(expr, 偏移量, 默认值)</code>：偏移量默认 1；边界处没有前一行时返回默认值，不写默认值则返回 <code class="inl">NULL</code>。</li>
+      <li><code class="inl">LEAD(expr, 偏移量, 默认值)</code>：方向相反，取后一行。</li>
+      <li><code class="inl">FIRST_VALUE(expr) / LAST_VALUE(expr)</code>：取<b>窗口帧</b>的首尾值——注意 LAST_VALUE 的默认帧只到当前行。</li>
+      <li>配合 <code class="inl">PARTITION BY customer_id</code> 就变成「每个客户内部的前后订单」，不会跨客户串行。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>lag-lead.sql</div>
+      <pre><code>-- 每笔订单的上一笔 / 下一笔金额（按订单日期排序）
+SELECT id, order_date, amount,
+       LAG(amount)       OVER (ORDER BY order_date) AS 上一笔,
+       LEAD(amount)      OVER (ORDER BY order_date) AS 下一笔,
+       LAG(amount, 1, 0) OVER (ORDER BY order_date) AS 上一笔_空填0,
+       amount - LAG(amount) OVER (ORDER BY order_date) AS 与上一笔差额
+FROM orders
+ORDER BY order_date;
+
+-- 首尾值：分区第一笔与最后一笔
+SELECT id, order_date, amount,
+       FIRST_VALUE(amount) OVER (ORDER BY order_date) AS 第一笔,
+       LAST_VALUE(amount)  OVER (ORDER BY order_date
+         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS 最后一笔
+FROM orders
+ORDER BY order_date;</code></pre>
+    </div>
+
+    <p>第一条查询按 <code class="inl">order_date</code> 升序返回 12 行，逐行预期结果（<code class="inl">上一笔_空填0</code> 与「与上一笔差额」可由表内两列直接推出）：</p>
+    <table class="tbl">
+      <thead><tr><th>id</th><th>order_date</th><th>amount</th><th>上一笔 LAG</th><th>下一笔 LEAD</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1001</td><td class="mono">2024-01-05</td><td class="mono">247.00</td><td class="null">NULL</td><td class="mono">89.00</td></tr>
+        <tr><td class="mono">1003</td><td class="mono">2024-01-08</td><td class="mono">89.00</td><td class="mono">247.00</td><td class="mono">1299.00</td></tr>
+        <tr><td class="mono">1002</td><td class="mono">2024-01-20</td><td class="mono">1299.00</td><td class="mono">89.00</td><td class="mono">2297.00</td></tr>
+        <tr><td class="mono">1004</td><td class="mono">2024-02-11</td><td class="mono">2297.00</td><td class="mono">1299.00</td><td class="mono">318.00</td></tr>
+        <tr><td class="mono">1005</td><td class="mono">2024-02-15</td><td class="mono">318.00</td><td class="mono">2297.00</td><td class="mono">59.00</td></tr>
+        <tr><td class="mono">1006</td><td class="mono">2024-02-20</td><td class="mono">59.00</td><td class="mono">318.00</td><td class="mono">998.00</td></tr>
+        <tr><td class="mono">1007</td><td class="mono">2024-03-01</td><td class="mono">998.00</td><td class="mono">59.00</td><td class="mono">89.00</td></tr>
+        <tr><td class="mono">1008</td><td class="mono">2024-03-12</td><td class="mono">89.00</td><td class="mono">998.00</td><td class="mono">129.00</td></tr>
+        <tr><td class="mono">1009</td><td class="mono">2024-03-18</td><td class="mono">129.00</td><td class="mono">89.00</td><td class="mono">1458.00</td></tr>
+        <tr><td class="mono">1010</td><td class="mono">2024-04-02</td><td class="mono">1458.00</td><td class="mono">129.00</td><td class="mono">178.00</td></tr>
+        <tr><td class="mono">1011</td><td class="mono">2024-04-15</td><td class="mono">178.00</td><td class="mono">1458.00</td><td class="mono">1497.00</td></tr>
+        <tr><td class="mono">1012</td><td class="mono">2024-04-22</td><td class="mono">1497.00</td><td class="mono">178.00</td><td class="null">NULL</td></tr>
+      </tbody>
+    </table>
+
+    <p>第二条查询里，<code class="inl">第一笔</code> 在 12 行中都是 <span class="mono">247.00</span>（分区第一行的金额），而显式写了完整帧的 <code class="inl">最后一笔</code> 在 12 行中都是 <span class="mono">1497.00</span>。如果去掉 <code class="inl">ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code>，LAST_VALUE 会退化成「当前行自己」（见知识点 7）。</p>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>LAG / LEAD 的第三个参数是默认值，用来替代边界处的 NULL。做环比时写 <code class="inl">LAG(amount, 1, 0)</code> 可以直接避免 <code class="inl">NULL</code> 参与算术运算后整行变成 NULL。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>LAG / LEAD 依赖 <code class="inl">ORDER BY</code>，排序不唯一时「上一笔」是哪个完全不确定；同时它们<b>不会</b>跨分区取行，忘了写 <code class="inl">PARTITION BY</code> 就会让不同客户/不同部门的记录串在一起。</p></div>
+
+    <div id="demo-step"></div>
+  </section>
+
+  <!-- ========== 知识点 4 ========== -->
+  <section class="topic" id="win-agg">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>窗口聚合与累计计算<span class="pt">win-agg · 累计、占比、组内统计</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="window::win-agg"><span>已学会</span></label>
+    </div>
+    <p>聚合函数（<code class="inl">SUM / COUNT / AVG / MIN / MAX</code>）加上 <code class="inl">OVER (...)</code> 就变成<b>窗口聚合</b>：既能保留每一行明细，又能在同一行里拿到「组内累计」「组内总额」「组内占比」「组内排名」等信息。</p>
+    <ul>
+      <li>带 <code class="inl">ORDER BY</code> 且不写帧 → 默认帧是 <code class="inl">RANGE UNBOUNDED PRECEDING AND CURRENT ROW</code>，也就是<b>累计到当前行</b>。</li>
+      <li>不带 <code class="inl">ORDER BY</code> → 帧覆盖整个分区，得到的是「组内总额」，每行都一样。</li>
+      <li>窗口聚合是「先过滤、再开窗」：<code class="inl">WHERE</code> 先执行，所以只对通过 WHERE 的行计算。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>window-agg.sql</div>
+      <pre><code>-- 已付款订单：客户内累计消费 + 客户总额 + 客户订单数 + 单笔占客户总额的比例
+SELECT o.id, o.customer_id, o.order_date, o.amount,
+       SUM(o.amount) OVER (PARTITION BY o.customer_id ORDER BY o.order_date) AS 客户累计,
+       SUM(o.amount) OVER (PARTITION BY o.customer_id)                        AS 客户总额,
+       COUNT(*)      OVER (PARTITION BY o.customer_id)                        AS 客户订单数,
+       ROUND(o.amount / SUM(o.amount) OVER (PARTITION BY o.customer_id) * 100, 1) AS 占客户比
+FROM orders o
+WHERE o.status = 'paid'
+ORDER BY o.customer_id, o.order_date;</code></pre>
+    </div>
+
+    <p>结果共 10 行（<code class="inl">status = 'paid'</code> 的订单），逐行预期结果如下：</p>
+    <table class="tbl">
+      <thead><tr><th>id</th><th>customer_id</th><th>order_date</th><th>amount</th><th>客户累计</th><th>客户总额</th><th>客户订单数</th><th>占客户比</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1001</td><td class="mono">1</td><td class="mono">2024-01-05</td><td class="mono">247.00</td><td class="mono">247.00</td><td class="mono">1546.00</td><td class="mono">2</td><td class="mono">16.0</td></tr>
+        <tr><td class="mono">1002</td><td class="mono">1</td><td class="mono">2024-01-20</td><td class="mono">1299.00</td><td class="mono">1546.00</td><td class="mono">1546.00</td><td class="mono">2</td><td class="mono">84.0</td></tr>
+        <tr><td class="mono">1003</td><td class="mono">2</td><td class="mono">2024-01-08</td><td class="mono">89.00</td><td class="mono">89.00</td><td class="mono">1586.00</td><td class="mono">2</td><td class="mono">5.6</td></tr>
+        <tr><td class="mono">1012</td><td class="mono">2</td><td class="mono">2024-04-22</td><td class="mono">1497.00</td><td class="mono">1586.00</td><td class="mono">1586.00</td><td class="mono">2</td><td class="mono">94.4</td></tr>
+        <tr><td class="mono">1004</td><td class="mono">3</td><td class="mono">2024-02-11</td><td class="mono">2297.00</td><td class="mono">2297.00</td><td class="mono">2297.00</td><td class="mono">1</td><td class="mono">100.0</td></tr>
+        <tr><td class="mono">1006</td><td class="mono">4</td><td class="mono">2024-02-20</td><td class="mono">59.00</td><td class="mono">59.00</td><td class="mono">59.00</td><td class="mono">1</td><td class="mono">100.0</td></tr>
+        <tr><td class="mono">1007</td><td class="mono">5</td><td class="mono">2024-03-01</td><td class="mono">998.00</td><td class="mono">998.00</td><td class="mono">1087.00</td><td class="mono">2</td><td class="mono">91.8</td></tr>
+        <tr><td class="mono">1008</td><td class="mono">5</td><td class="mono">2024-03-12</td><td class="mono">89.00</td><td class="mono">1087.00</td><td class="mono">1087.00</td><td class="mono">2</td><td class="mono">8.2</td></tr>
+        <tr><td class="mono">1010</td><td class="mono">7</td><td class="mono">2024-04-02</td><td class="mono">1458.00</td><td class="mono">1458.00</td><td class="mono">1636.00</td><td class="mono">2</td><td class="mono">89.1</td></tr>
+        <tr><td class="mono">1011</td><td class="mono">7</td><td class="mono">2024-04-15</td><td class="mono">178.00</td><td class="mono">1636.00</td><td class="mono">1636.00</td><td class="mono">2</td><td class="mono">10.9</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「累计 + 组内总额 + 组内占比」是窗口聚合的三件套。老写法要「GROUP BY 算总额 → 再 JOIN 回明细表」，现在一条 SQL 就能同时输出明细和统计值。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>窗口函数<b>不能</b>写在 <code class="inl">WHERE / HAVING</code> 里。想筛「客户累计消费超过 2000 的行」，必须把窗口计算放进 CTE 或派生表，在外层再过滤（见知识点 7）。另外 <code class="inl">COUNT(*)</code> 与 <code class="inl">COUNT(o.id)</code> 在窗口里同样有 NULL 差异：<code class="inl">COUNT(*)</code> 数行数，<code class="inl">COUNT(列)</code> 只数非 NULL。</p></div>
+  </section>
+
+  <!-- ========== 知识点 5 ========== -->
+  <section class="topic" id="win-frame">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>窗口帧 ROWS / RANGE 与滑动窗口<span class="pt">win-frame · 帧决定「算哪几行」</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="window::win-frame"><span>已学会</span></label>
+    </div>
+    <p><b>窗口帧（window frame）</b>规定在分区内部「取哪一段行」参与计算。同一份数据，帧不同，<code class="inl">SUM</code> 的结果就完全不同：累计、滑动平均、整分区合计，全靠帧来区分。</p>
+    <ul>
+      <li><b>ROWS</b> 按<b>物理行数</b>数：<code class="inl">ROWS BETWEEN 1 PRECEDING AND CURRENT ROW</code> 就是「上一行 + 当前行」。</li>
+      <li><b>RANGE</b> 按<b>排序值</b>算：<code class="inl">RANGE BETWEEN 1 PRECEDING AND CURRENT ROW</code> 会纳入所有「值在当前值 −1 到当前值之间」的行，并列值会被一起纳入。</li>
+      <li><b>默认帧规则</b>：有 <code class="inl">ORDER BY</code> 不写帧 → <code class="inl">RANGE UNBOUNDED PRECEDING AND CURRENT ROW</code>；没有 <code class="inl">ORDER BY</code> → 整个分区。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>frame.sql</div>
+      <pre><code>-- 同一份数据，四种帧 → 四种完全不同的 SUM
+SELECT id, order_date, amount,
+       SUM(amount) OVER (ORDER BY order_date
+         ROWS BETWEEN 1 PRECEDING AND CURRENT ROW)                  AS 两行滑动,
+       SUM(amount) OVER (ORDER BY order_date
+         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)          AS 累计,
+       SUM(amount) OVER (ORDER BY order_date
+         ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING)                  AS 五行居中,
+       AVG(amount) OVER (ORDER BY order_date
+         ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING)                  AS 三点均值
+FROM orders
+ORDER BY order_date;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>帧写法</th><th>覆盖范围</th><th>并列值的影响</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">ROWS BETWEEN 1 PRECEDING AND CURRENT ROW</td><td>前 1 行 + 当前行（最多 2 行）</td><td>按行数数，不受并列影响</td></tr>
+        <tr><td class="mono">ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</td><td>分区第一行 → 当前行</td><td>按行数数，逐行增长</td></tr>
+        <tr><td class="mono">RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</td><td>第一行 → 当前行 <b>及其所有并列行</b></td><td>并列值一起纳入，可能一次跳多行</td></tr>
+        <tr><td class="mono">ROWS BETWEEN 2 PRECEDING AND 2 FOLLOWING</td><td>前 2 行 → 后 2 行（最多 5 行）</td><td>滑动居中窗口，常用于移动平均</td></tr>
+        <tr><td class="mono">ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</td><td>整个分区</td><td>常用于 LAST_VALUE 取末行</td></tr>
+      </tbody>
+    </table>
+
+    <p>上面那条查询按 <code class="inl">order_date</code> 升序返回 12 行，逐行预期结果：</p>
+    <table class="tbl">
+      <thead><tr><th>id</th><th>amount</th><th>两行滑动</th><th>累计</th><th>五行居中</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1001</td><td class="mono">247.00</td><td class="mono">247.00</td><td class="mono">247.00</td><td class="mono">1635.00</td></tr>
+        <tr><td class="mono">1003</td><td class="mono">89.00</td><td class="mono">336.00</td><td class="mono">336.00</td><td class="mono">3932.00</td></tr>
+        <tr><td class="mono">1002</td><td class="mono">1299.00</td><td class="mono">1388.00</td><td class="mono">1635.00</td><td class="mono">4250.00</td></tr>
+        <tr><td class="mono">1004</td><td class="mono">2297.00</td><td class="mono">3596.00</td><td class="mono">3932.00</td><td class="mono">4062.00</td></tr>
+        <tr><td class="mono">1005</td><td class="mono">318.00</td><td class="mono">2615.00</td><td class="mono">4250.00</td><td class="mono">4971.00</td></tr>
+        <tr><td class="mono">1006</td><td class="mono">59.00</td><td class="mono">377.00</td><td class="mono">4309.00</td><td class="mono">3761.00</td></tr>
+        <tr><td class="mono">1007</td><td class="mono">998.00</td><td class="mono">1057.00</td><td class="mono">5307.00</td><td class="mono">1593.00</td></tr>
+        <tr><td class="mono">1008</td><td class="mono">89.00</td><td class="mono">1087.00</td><td class="mono">5396.00</td><td class="mono">2733.00</td></tr>
+        <tr><td class="mono">1009</td><td class="mono">129.00</td><td class="mono">218.00</td><td class="mono">5525.00</td><td class="mono">2852.00</td></tr>
+        <tr><td class="mono">1010</td><td class="mono">1458.00</td><td class="mono">1587.00</td><td class="mono">6983.00</td><td class="mono">3351.00</td></tr>
+        <tr><td class="mono">1011</td><td class="mono">178.00</td><td class="mono">1636.00</td><td class="mono">7161.00</td><td class="mono">3262.00</td></tr>
+        <tr><td class="mono">1012</td><td class="mono">1497.00</td><td class="mono">1675.00</td><td class="mono">8658.00</td><td class="mono">3133.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>帧的三个关键字记住就行：<code class="inl">PRECEDING</code>（向前）、<code class="inl">FOLLOWING</code>（向后）、<code class="inl">UNBOUNDED</code>（到边界）。<code class="inl">UNBOUNDED PRECEDING AND CURRENT ROW</code> = 累计，<code class="inl">1 PRECEDING AND 1 FOLLOWING</code> = 移动平均。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>ROWS 与 RANGE 在<b>没有并列值</b>时结果一样，一旦出现并列就分道扬镳。RANGE 会把所有排序值相同的行一起纳入，所以用 RANGE 做「累计」时，同一批并列的行会得到相同的累计值——这既是特性也是坑。</p></div>
+
+    <div id="demo-frame"></div>
+  </section>
+
+  <!-- ========== 知识点 6 ========== -->
+  <section class="topic" id="win-topn">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>分组内 TopN 与取最新一条<span class="pt">win-topn · 面试与报表的通用模板</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="window::win-topn"><span>已学会</span></label>
+    </div>
+    <p>「每个品类最贵的 2 个商品」「每位客户最近的一笔订单」「每个部门工资前 3 名」——这类<b>分组内 TopN</b> 问题，用 <code class="inl">ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...)</code> 加上外层过滤就能统一解决，模板只有三步：<b>① 在 CTE/派生表里算出排名 → ② 外层 <code class="inl">WHERE rn &lt;= N</code> → ③ 排序输出</b>。</p>
+    <ul>
+      <li>取 TopN 用 <code class="inl">rn &lt;= N</code>；取「最新一条 / 最贵一条」用 <code class="inl">rn = 1</code>。</li>
+      <li>排序键一定要加唯一的第二列（如 <code class="inl">id</code>），否则并列时结果不稳定。</li>
+      <li>想保留并列名次就换成 <code class="inl">RANK()</code> / <code class="inl">DENSE_RANK()</code>，代价是每组可能返回多于 N 行。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>topn.sql</div>
+      <pre><code>-- ① 每个品类取价格最高的 2 个商品
+WITH ranked AS (
+  SELECT id, name, category, price,
+         ROW_NUMBER() OVER (PARTITION BY category ORDER BY price DESC, id) AS rn
+  FROM products
+)
+SELECT category, id, name, price
+FROM ranked
+WHERE rn &lt;= 2
+ORDER BY category, rn;
+
+-- ② 每位客户取最新的一笔订单（每组取一条）
+WITH latest AS (
+  SELECT o.id, o.customer_id, o.order_date, o.amount,
+         ROW_NUMBER() OVER (PARTITION BY o.customer_id
+                            ORDER BY o.order_date DESC, o.id DESC) AS rn
+  FROM orders o
+)
+SELECT customer_id, id AS order_id, order_date, amount
+FROM latest
+WHERE rn = 1
+ORDER BY customer_id;</code></pre>
+    </div>
+
+    <p>① 的预期结果（共 5 行）：</p>
+    <table class="tbl">
+      <thead><tr><th>category</th><th>id</th><th>name</th><th>price</th><th>rn</th></tr></thead>
+      <tbody>
+        <tr><td>数码</td><td class="mono">3</td><td>显示器</td><td class="mono">1299.00</td><td class="mono">1</td></tr>
+        <tr><td>数码</td><td class="mono">1</td><td>机械键盘</td><td class="mono">499.00</td><td class="mono">2</td></tr>
+        <tr><td>家居</td><td class="mono">6</td><td>台灯</td><td class="mono">159.00</td><td class="mono">1</td></tr>
+        <tr><td>家居</td><td class="mono">5</td><td>保温杯</td><td class="mono">89.00</td><td class="mono">2</td></tr>
+        <tr><td>图书</td><td class="mono">4</td><td>笔记本</td><td class="mono">59.00</td><td class="mono">1</td></tr>
+      </tbody>
+    </table>
+
+    <p>② 的预期结果（共 7 行，customer_id = 8 的周涛没有订单，所以不出现）：</p>
+    <table class="tbl">
+      <thead><tr><th>customer_id</th><th>order_id</th><th>order_date</th><th>amount</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1</td><td class="mono">1002</td><td class="mono">2024-01-20</td><td class="mono">1299.00</td></tr>
+        <tr><td class="mono">2</td><td class="mono">1012</td><td class="mono">2024-04-22</td><td class="mono">1497.00</td></tr>
+        <tr><td class="mono">3</td><td class="mono">1005</td><td class="mono">2024-02-15</td><td class="mono">318.00</td></tr>
+        <tr><td class="mono">4</td><td class="mono">1006</td><td class="mono">2024-02-20</td><td class="mono">59.00</td></tr>
+        <tr><td class="mono">5</td><td class="mono">1008</td><td class="mono">2024-03-12</td><td class="mono">89.00</td></tr>
+        <tr><td class="mono">6</td><td class="mono">1009</td><td class="mono">2024-03-18</td><td class="mono">129.00</td></tr>
+        <tr><td class="mono">7</td><td class="mono">1011</td><td class="mono">2024-04-15</td><td class="mono">178.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>分组 TopN 的模板 = CTE 里 <code class="inl">ROW_NUMBER() OVER (PARTITION BY 组 ORDER BY 排序键 DESC, 唯一键)</code> + 外层 <code class="inl">WHERE rn &lt;= N</code>。这一套模板能覆盖面试里绝大多数「分组取前 N / 取最新」的题。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>方言差异：</b>Snowflake、BigQuery 等支持 <code class="inl">QUALIFY rn &lt;= 2</code>，可以省掉外层查询；<b>MySQL 没有 QUALIFY</b>，必须老老实实包一层 CTE 或派生表。另外窗口排序通常要建临时表，给 <code class="inl">(customer_id, order_date)</code> 这样的联合索引能减少排序代价。</p></div>
+  </section>
+
+  <!-- ========== 知识点 7 ========== -->
+  <section class="topic" id="win-pitfall">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>窗口函数常见坑与限制<span class="pt">win-pitfall · 执行顺序与默认帧</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="window::win-pitfall"><span>已学会</span></label>
+    </div>
+    <p>窗口函数最容易踩的坑，几乎都来自两件事：<b>它在执行顺序里的位置</b>，以及<b>不写窗口帧时的默认行为</b>。把这两点记牢，90% 的报错和「结果不对」都能立刻定位。</p>
+    <ul>
+      <li>逻辑执行顺序：<code class="inl">FROM → WHERE → GROUP BY → HAVING → 窗口函数 → SELECT → ORDER BY → LIMIT</code>。</li>
+      <li>因此 <code class="inl">WHERE / GROUP BY / HAVING</code> 里<b>不能</b>出现窗口函数，别名 <code class="inl">rn</code> 在 WHERE 里也不可见（但 <code class="inl">ORDER BY</code> 里可以用）。</li>
+      <li>MySQL 8.0 <b>不支持窗口函数嵌套</b>，如 <code class="inl">SUM(ROW_NUMBER() OVER (...)) OVER ()</code>，必须拆成两层查询。</li>
+      <li>不带 <code class="inl">ORDER BY</code> 时默认帧虽然覆盖整个分区，但「最后一行」是哪一行并不确定；真正容易踩的是<b>带 <code class="inl">ORDER BY</code> 却不写帧</b>——此时 <code class="inl">LAST_VALUE</code> 只取到当前行。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>pitfall.sql</div>
+      <pre><code>-- ✗ 错误：WHERE 在窗口函数之前执行，rn 还不存在 → 报错
+SELECT * FROM orders
+WHERE ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) = 1;
+
+-- ✓ 正确：先算，再在外层过滤
+WITH t AS (
+  SELECT id, customer_id, amount,
+         ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC, id) AS rn
+  FROM orders
+)
+SELECT * FROM t WHERE rn = 1 ORDER BY customer_id;
+
+-- ✗ 错误：窗口函数不能嵌套（MySQL 8.0 不支持）
+SELECT SUM(ROW_NUMBER() OVER (ORDER BY amount)) OVER () FROM orders;
+
+-- ✓ 正确：拆成两层
+SELECT SUM(rn) OVER () FROM (
+  SELECT ROW_NUMBER() OVER (ORDER BY amount) AS rn FROM orders
+) t;
+
+-- LAST_VALUE 的默认帧陷阱：不写帧时「最后一行」就是当前行
+SELECT id, amount,
+       LAST_VALUE(amount) OVER (ORDER BY id) AS 默认帧,
+       LAST_VALUE(amount) OVER (ORDER BY id
+         ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS 全帧
+FROM orders
+ORDER BY id;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>坑</th><th>错误写法</th><th>正确做法</th></tr></thead>
+      <tbody>
+        <tr><td>在 WHERE 里过滤排名</td><td class="mono">WHERE ROW_NUMBER() OVER (...) = 1</td><td>放进 CTE / 派生表，外层 <code class="inl">WHERE rn = 1</code></td></tr>
+        <tr><td>窗口函数嵌套</td><td class="mono">SUM(RANK() OVER (...)) OVER ()</td><td>拆成两层子查询，先算内层再开窗</td></tr>
+        <tr><td>LAST_VALUE 只到当前行</td><td class="mono">LAST_VALUE(x) OVER (ORDER BY d)</td><td>显式加 <code class="inl">ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING</code></td></tr>
+        <tr><td>ROW_NUMBER 结果不稳定</td><td class="mono">ORDER BY amount DESC</td><td>追加唯一键：<code class="inl">ORDER BY amount DESC, id</code></td></tr>
+        <tr><td>以为 MySQL 5.7 能用</td><td class="mono">5.7 直接执行 → 语法错误</td><td>升级到 8.0，或用自连接 / GROUP BY 变通</td></tr>
+        <tr><td>大分区上直接开窗</td><td>百万行全表开窗后再过滤</td><td>先用 WHERE 缩小范围，并让排序列有索引</td></tr>
+      </tbody>
+    </table>
+
+    <p>最后一条 <code class="inl">LAST_VALUE</code> 查询的逐行预期结果（<code class="inl">默认帧</code> 恒等于当前行的 amount，<code class="inl">全帧</code> 恒为 1497.00）：</p>
+    <table class="tbl">
+      <thead><tr><th>id</th><th>amount</th><th>默认帧</th><th>全帧</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">1001</td><td class="mono">247.00</td><td class="mono">247.00</td><td class="mono">1497.00</td></tr>
+        <tr><td class="mono">1002</td><td class="mono">1299.00</td><td class="mono">1299.00</td><td class="mono">1497.00</td></tr>
+        <tr><td class="mono">1003</td><td class="mono">89.00</td><td class="mono">89.00</td><td class="mono">1497.00</td></tr>
+        <tr><td class="mono">1004</td><td class="mono">2297.00</td><td class="mono">2297.00</td><td class="mono">1497.00</td></tr>
+        <tr><td class="mono">1005</td><td class="mono">318.00</td><td class="mono">318.00</td><td class="mono">1497.00</td></tr>
+        <tr><td class="mono">1006</td><td class="mono">59.00</td><td class="mono">59.00</td><td class="mono">1497.00</td></tr>
+        <tr><td colspan="4" style="color:var(--muted)">… 共 12 行，后 6 行规律相同</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code class="inl">WHERE</code> 里写窗口函数会直接报错，但把 <code class="inl">rn</code> 写进 <code class="inl">ORDER BY</code> 是允许的（MySQL 支持 ORDER BY 引用 SELECT 别名）。别因为「别名不能用在 WHERE」就以为别名到处都不能用。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>性能提醒：</b>窗口函数一般需要对分区排序，执行计划里常出现 <code class="inl">Using temporary; Using filesort</code>。原则是<b>先过滤、后开窗</b>：把 <code class="inl">WHERE</code> 能筛掉的行先筛掉，再让排序列（如 <code class="inl">customer_id, order_date</code>）走索引，代价会明显下降（详见模块 09、10）。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用窗口函数改写模块 04 里「比直属经理工资还高」的自连接写法（提示：<code class="inl">AVG(salary) OVER (PARTITION BY dept)</code> 或先把经理工资用 <code class="inl">MAX(CASE WHEN ...)</code> 拉过来），比较两种写法的可读性与代价。</li>
+      <li>算出每位客户「累计消费首次达到其总额 50%」的那一笔订单（提示：CTE 里算累计与总额，外层用 <code class="inl">WHERE 累计 &gt;= 总额 * 0.5</code> 再取每组第一行）。</li>
+      <li>用 <code class="inl">NTILE(4)</code> 把 9 名员工按工资分成 4 组，解释为什么第一组比最后一组多 1 人；再改用 <code class="inl">PERCENT_RANK()</code> 验证分位位置。</li>
+      <li>把窗口帧演示器里的帧换成 <code class="inl">ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING</code>，先手算出每一行的三点均值，再到真实 MySQL 8.0 里执行验证。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">子查询与集合运算</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">数据修改、事务与并发</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "window",
+  title: "窗口函数",
+  eyebrow: "MODULE 06 · SQL / 数据库",
+  lead: "窗口函数让「明细 + 组内统计」同时出现在一行：不折叠行就能做排名、累计、占比、前后对比与分组 TopN。本页用三个可点击面板把逐行计算过程摊开给你看。",
+  points: ["win-concept","win-rank","win-offset","win-agg","win-frame","win-topn","win-pitfall"],
+  prev: "05-subquery-set.html",
+  next: "07-dml-transaction.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于窗口函数与 GROUP BY 聚合的区别，下列说法正确的是：",
+    opts:[
+      "窗口函数会像 GROUP BY 一样把多行折叠成一行",
+      "窗口函数必须和 GROUP BY 一起使用，否则报错",
+      "窗口函数保留原有的行数，在每一行上附加一个基于窗口算出的值",
+      "窗口函数只能用在没有 WHERE 条件的查询上"
+    ],
+    ans:2,
+    exp:"窗口函数的核心就是「不折叠行」：输出行数与原表一致，只是每行多带一个组内计算值。选项 A 描述的是 GROUP BY 的行为；B 错误，窗口函数与 GROUP BY 可以各自独立使用，混用时语义要特别小心；D 错误，WHERE 先执行，窗口函数对通过 WHERE 的行计算，二者可以共存。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 从哪个版本开始原生支持窗口函数（OVER 子句）？",
+    opts:["5.5","5.6","5.7","8.0"],
+    ans:3,
+    exp:"窗口函数是 MySQL 8.0 引入的特性，5.7 及更早版本执行带 OVER 的语句会直接报语法错误。其余选项都是更早的版本，只能靠自连接、GROUP BY 或用户变量来变通实现类似效果。"
+  },
+  {
+    type:"quiz",
+    q:"某分区按金额降序排列为 1299、1299、998，RANK() 与 DENSE_RANK() 依次返回什么？",
+    sql:"-- 数据：1299, 1299, 998（ORDER BY amount DESC）",
+    opts:[
+      "1,2,3 与 1,2,3",
+      "1,1,3 与 1,1,2",
+      "1,1,2 与 1,1,3",
+      "1,2,2 与 1,1,2"
+    ],
+    ans:1,
+    exp:"RANK 遇到并列会给同名次，并把后续名次跳号，所以是 1,1,3；DENSE_RANK 给同名次但不跳号，所以是 1,1,2。选项 A 是 ROW_NUMBER 的行为（强行分先后）；C 把两者弄反了；D 的 RANK 写成 1,2,2 不符合定义。"
+  },
+  {
+    type:"quiz",
+    q:"要在每位客户的多笔订单里「取金额最高的一条」，并保证结果确定、每个客户只出一行，最合适的做法是：",
+    opts:[
+      "ROW_NUMBER() 后在外层取 rn = 1，并把 id 作为第二排序键保证结果确定",
+      "RANK() 后在外层取 rk = 1，无需其它处理",
+      "DENSE_RANK() 后在外层取 dr = 1，天然只返回一行",
+      "NTILE(1) 后在外层取桶号 = 1"
+    ],
+    ans:0,
+    exp:"ROW_NUMBER 保证序号唯一，即使金额并列也只会有一条 rn = 1；加上唯一键做第二排序键，结果就完全可复现。RANK 与 DENSE_RANK 在并列时会同时给出多个 1，每组可能返回多行。NTILE(1) 把所有行塞进同一个桶，没有任何筛选效果。"
+  },
+  {
+    type:"quiz",
+    q:"9 行数据用 NTILE(4) OVER (ORDER BY salary DESC) 分桶，四个桶的行数分布是：",
+    opts:["4,4,4,4","3,3,3,0","3,2,2,2","2,2,2,3"],
+    ans:2,
+    exp:"NTILE 尽量均分，余数优先分给前面的桶：9 ÷ 4 = 2 余 1，所以第一个桶 3 行，其余各 2 行，合计 9 行。它不会产生空桶，也不会因为除不尽而报错；桶内行数最多相差 1。"
+  },
+  {
+    type:"quiz",
+    q:"LAG(amount) OVER (ORDER BY order_date) 在分区第一行返回什么？想让它返回 0 该怎么写？",
+    opts:[
+      "返回第一行的 amount，无法改成 0",
+      "返回 0，LAG 的默认值就是 0",
+      "报错，必须显式指定偏移量和默认值",
+      "返回 NULL；写成 LAG(amount, 1, 0) 即可用 0 替代"
+    ],
+    ans:3,
+    exp:"LAG 在分区边界处没有前一行，返回 NULL。它的三个参数依次是「表达式、偏移量、默认值」，所以 LAG(amount, 1, 0) 会把边界处的 NULL 换成 0。默认值不会自动变成 0，也不允许省略偏移量只写默认值。"
+  },
+  {
+    type:"quiz",
+    q:"下面 SQL 里 last_amt 这一列的结果是什么？",
+    sql:"SELECT id, amount,\n       LAST_VALUE(amount) OVER (ORDER BY id) AS last_amt\nFROM orders;",
+    opts:[
+      "每行都等于当前行的 amount",
+      "每行都是最后一行的金额 1497.00",
+      "每行都是第一行的金额 247.00",
+      "报错，LAST_VALUE 必须配合 PARTITION BY 使用"
+    ],
+    ans:0,
+    exp:"省略窗口帧时，带 ORDER BY 的默认帧是 RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW，帧的右端就是当前行，因此 LAST_VALUE 取到的正是当前行的 amount。要取整个分区的最后一个值，必须显式写 ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING。"
+  },
+  {
+    type:"quiz",
+    q:"要同时输出每一行订单、以及该订单所属客户的累计消费额，正确写法是：",
+    opts:[
+      "SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id;",
+      "SELECT customer_id, SUM(amount) OVER (PARTITION BY customer_id ORDER BY order_date) FROM orders;",
+      "SELECT customer_id, SUM(amount) OVER (PARTITION BY customer_id) FROM orders GROUP BY customer_id;",
+      "SELECT customer_id, SUM(amount) OVER () FROM orders HAVING COUNT(*) &gt; 1;"
+    ],
+    ans:1,
+    exp:"选项 B 用 PARTITION BY 按客户分区、ORDER BY 定序，默认帧就是「累计到当前行」，同时保留每一行明细。A 是普通聚合，把行折叠成每客户一行，明细丢失；C 里窗口计算发生在 GROUP BY 之后，结果同样被折叠成每客户一行（一个客户只剩一行），不满足「同时输出每一行订单」的要求；D 的 HAVING 不能脱离 GROUP BY 使用，OVER () 也是全表窗口而非按客户分区。"
+  },
+  {
+    type:"quiz",
+    q:"SUM(amount) OVER (ORDER BY amount DESC) 与 SUM(amount) OVER (ORDER BY amount DESC ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) 的区别是：",
+    opts:[
+      "没有区别，两者结果相同",
+      "前者是整个分区，后者是累计到当前行",
+      "前者报错，必须显式写窗口帧",
+      "前者是从头累计到当前行（RANGE 会把并列值一并纳入），后者才是整个分区"
+    ],
+    ans:3,
+    exp:"带 ORDER BY 且不写帧时，默认帧是 RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW，即「从头累计到当前行」，且因为是 RANGE，排序值相同的并列行会一起纳入；显式写 UNBOUNDED FOLLOWING 才是整个分区。选项 B 把两者说反了，A 忽略了默认帧，C 不存在这种限制。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 8.0 里实现「每个品类取价格最高的 2 个商品」，正确的做法是：",
+    opts:[
+      "SELECT * FROM products WHERE ROW_NUMBER() OVER (PARTITION BY category ORDER BY price DESC) &lt;= 2;",
+      "SELECT * FROM products GROUP BY category ORDER BY price DESC LIMIT 2;",
+      "用 CTE 或派生表先算出 ROW_NUMBER() OVER (PARTITION BY category ORDER BY price DESC) AS rn，再在外层 WHERE rn &lt;= 2 过滤",
+      "SELECT * FROM products HAVING ROW_NUMBER() OVER (PARTITION BY category ORDER BY price DESC) &lt;= 2;"
+    ],
+    ans:2,
+    exp:"窗口函数在 WHERE / HAVING 之后才计算，所以不能在同一层的 WHERE 或 HAVING 里引用它，必须先把排名算在 CTE 或派生表里，外层再过滤。A、D 都会直接报错；B 的 GROUP BY + LIMIT 2 只返回全局前 2 行（而且 GROUP BY 里选 * 本身也不合法），不是每个品类各 2 行。"
+  },
+  {
+    type:"interview",
+    q:"面试题：为什么 SELECT * FROM orders WHERE ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY amount DESC) = 1; 会报错？正确的改写是什么？",
+    opts:[
+      "因为 WHERE 在窗口函数之前执行，此时 rn 还不存在；应把窗口计算放进 CTE/派生表，再在外层 WHERE 过滤",
+      "因为 MySQL 不支持 PARTITION BY；应改成 GROUP BY customer_id",
+      "因为窗口函数只能写在 ORDER BY 里；应改成 ORDER BY ROW_NUMBER() DESC LIMIT 1",
+      "因为 ROW_NUMBER() 必须与 DENSE_RANK() 同时使用"
+    ],
+    ans:0,
+    exp:"逻辑执行顺序是 FROM → WHERE → GROUP BY → HAVING → 窗口函数 → SELECT → ORDER BY → LIMIT，窗口计算晚于 WHERE，所以 WHERE 里不可能引用窗口结果。标准改写是 WITH t AS (SELECT ..., ROW_NUMBER() OVER (...) AS rn FROM orders) SELECT * FROM t WHERE rn = 1。MySQL 8.0 支持 PARTITION BY，窗口函数也能出现在 SELECT 列表里，ROW_NUMBER 无需搭配 DENSE_RANK。"
+  },
+  {
+    type:"quiz",
+    q:"数据按金额降序为 1299、1299、998。SUM(amount) OVER (ORDER BY amount DESC ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) 在第一行和第二行分别是多少？",
+    opts:[
+      "2598 和 2598（RANGE 才会这样）",
+      "1299 和 1299",
+      "1299 和 2598",
+      "2598 和 1299"
+    ],
+    ans:2,
+    exp:"ROWS 按物理行推进：第一行的帧只有它自己，得 1299；第二行包含前两行，得 1299 + 1299 = 2598。如果把 ROWS 换成 RANGE，第一行就会把并列的 1299 一起纳入，直接得到 2598——这正是 ROWS 与 RANGE 在并列值下的关键差别。"
+  }
+];
+
+/* 进度：与学习大纲共享 sql_outline_progress_v1 */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ============================================================
+   演示数据（三个面板共用）：6 名销售代表的业绩
+   金额取自 orders 中出现过的数值，并人为构造两组并列（1299 / 998），
+   目的就是让 RANK 与 DENSE_RANK 的差别显形。数据已按金额降序排列。
+   ============================================================ */
+const WDEMO = [
+  {nm:"甲", amt:1299},
+  {nm:"乙", amt:1299},
+  {nm:"丙", amt:998},
+  {nm:"丁", amt:998},
+  {nm:"戊", amt:318},
+  {nm:"己", amt:89}
+];
+
+/* ============================================================
+   演示一：排名函数对比器
+   ============================================================ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-rank");
+  if(!host) return;
+
+  const FNS = {
+    row_number: {label:"ROW_NUMBER()", note:"序号严格递增：并列的 1299 被强行分成 1 和 2（谁在前由执行计划决定）"},
+    rank:       {label:"RANK()",       note:"并列同名次 1、1，下一名直接跳到 3 —— 名次会跳号"},
+    dense_rank: {label:"DENSE_RANK()", note:"并列同名次 1、1，下一名是 2 —— 名次不跳号"},
+    ntile:      {label:"NTILE(2)",     note:"6 行平均切成 2 个桶：前 3 行桶号 1，后 3 行桶号 2，与并列无关"}
+  };
+
+  let rn = 0, rk = 0, dr = 0, last = null;
+  const rows = WDEMO.map((r,i)=>{
+    rn = i + 1;
+    if(r.amt !== last){ rk = i + 1; dr = dr + 1; last = r.amt; }
+    return { nm:r.nm, amt:r.amt, rn:rn, rk:rk, dr:dr, nt:(i < 3 ? 1 : 2), tie:(i > 0 && WDEMO[i-1].amt === r.amt) };
+  });
+
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示一：排名函数对比器</span><span class="hint">切换函数，看高亮列怎么变</span></div>
+    <div class="db">
+      <div class="ctl">
+        <label>排名函数</label>
+        ${Object.keys(FNS).map(k=>`<button class="b" data-fn="${k}">${FNS[k].label}</button>`).join("")}
+      </div>
+      <div id="rankTable"></div>
+      <div class="log" id="rankLog"></div>
+      <div class="foot">数据：6 名销售代表的业绩，含两组并列值（1299、998）。并列是为了让 RANK 与 DENSE_RANK 的差别一眼可见。</div>
+    </div>
+  </div>`;
+
+  const tb = host.querySelector("#rankTable");
+  const lg = host.querySelector("#rankLog");
+  const COLS = [
+    {k:"rn", t:"ROW_NUMBER()"},
+    {k:"rk", t:"RANK()"},
+    {k:"dr", t:"DENSE_RANK()"},
+    {k:"nt", t:"NTILE(2)"}
+  ];
+
+  function render(fn){
+    host.querySelectorAll(".ctl .b").forEach(b=>b.classList.toggle("on", b.dataset.fn === fn));
+    tb.innerHTML = `<table class="dt">
+      <caption>ORDER BY amt DESC（已按金额降序，并列行标黄）</caption>
+      <thead><tr><th>销售</th><th>amt</th>${COLS.map(c=>`<th${c.k === fn ? ' style="color:var(--amber)"' : ""}>${c.t}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map(r=>`<tr class="${r.tie ? "hl" : ""}">
+        <td>${SQLSandbox.esc(r.nm)}</td><td>${r.amt}</td>
+        ${COLS.map(c=>`<td class="${c.k === fn ? "key" : ""}">${r[c.k]}</td>`).join("")}
+      </tr>`).join("")}</tbody></table>`;
+    lg.innerHTML = `<b>${FNS[fn].label}</b> —— ${FNS[fn].note}<br>
+      并列行（甲/乙 = 1299、丙/丁 = 998）在 ROW_NUMBER 下被强制分先后，在 RANK / DENSE_RANK 下拿到相同名次，在 NTILE 下按行数分桶。`;
+  }
+
+  host.querySelectorAll(".ctl .b").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.fn)));
+  render("row_number");
+})();
+
+/* ============================================================
+   演示二：窗口函数逐行计算器（LAG / LEAD / 累计 SUM）
+   ============================================================ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-step");
+  if(!host) return;
+
+  const FNS = {
+    lag:  {label:"LAG(amt)",      title:"LAG(amt) OVER (ORDER BY 排名)"},
+    lead: {label:"LEAD(amt)",     title:"LEAD(amt) OVER (ORDER BY 排名)"},
+    cum:  {label:"累计 SUM(amt)", title:"SUM(amt) OVER (ORDER BY 排名 ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)"}
+  };
+  let fn = "lag", k = 0;
+
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示二：窗口函数逐行计算器</span><span class="hint">点「下一步」逐行推进</span></div>
+    <div class="db">
+      <div class="ctl">
+        <label>函数</label>
+        <select id="stepFn">
+          <option value="lag">LAG(amt)</option>
+          <option value="lead">LEAD(amt)</option>
+          <option value="cum">累计 SUM(amt)</option>
+        </select>
+        <button class="b" id="stepNext">▶ 下一步</button>
+        <button class="b" id="stepReset">↺ 重置</button>
+      </div>
+      <div id="stepTable"></div>
+      <div class="log" id="stepLog"></div>
+      <div class="foot">窗口函数按行推进：算某一行时只用到「当前行 + 它所在窗口里的其它行」，原始行数保持不变。</div>
+    </div>
+  </div>`;
+
+  const sel = host.querySelector("#stepFn");
+  const tb = host.querySelector("#stepTable");
+  const lg = host.querySelector("#stepLog");
+
+  function valueAt(i, f){
+    if(f === "lag") return i === 0 ? null : WDEMO[i-1].amt;
+    if(f === "lead") return i === WDEMO.length - 1 ? null : WDEMO[i+1].amt;
+    let s = 0;
+    for(let j = 0; j <= i; j++) s += WDEMO[j].amt;
+    return s;
+  }
+
+  function render(){
+    tb.innerHTML = `<table class="dt">
+      <caption>当前窗口：${FNS[fn].title}</caption>
+      <thead><tr><th>行号</th><th>销售</th><th>amt</th><th>计算结果</th></tr></thead>
+      <tbody>${WDEMO.map((r,i)=>{
+        const done = i <= k;
+        const v = done ? valueAt(i, fn) : null;
+        const cls = i === k ? "hl" : (done ? "" : "dim");
+        const cell = !done ? "—" : (v === null ? '<span style="color:var(--red)">NULL</span>' : v);
+        return `<tr class="${cls}"><td>${i+1}</td><td>${SQLSandbox.esc(r.nm)}</td><td>${r.amt}</td><td class="${done ? "key" : ""}">${cell}</td></tr>`;
+      }).join("")}</tbody></table>`;
+
+    const cur = WDEMO[k];
+    const v = valueAt(k, fn);
+    let formula;
+    if(fn === "lag"){
+      formula = k === 0 ? "第 1 行没有前一行 → 返回 NULL（可用 LAG(amt,1,0) 填 0）" : `${cur.amt} 的前一行是 ${WDEMO[k-1].amt}`;
+    } else if(fn === "lead"){
+      formula = k === WDEMO.length - 1 ? "最后一行没有后一行 → 返回 NULL" : `${cur.amt} 的后一行是 ${WDEMO[k+1].amt}`;
+    } else {
+      formula = `${WDEMO.slice(0, k+1).map(x=>x.amt).join(" + ")} = ${v}`;
+    }
+    lg.innerHTML = `当前行：第 <b>${k+1}</b> 行（${SQLSandbox.esc(cur.nm)}，amt = ${cur.amt}）<br>
+      ${FNS[fn].label} 结果：<b>${v === null ? "NULL" : v}</b><br>${formula}`;
+  }
+
+  sel.addEventListener("change", ()=>{ fn = sel.value; k = 0; render(); });
+  host.querySelector("#stepNext").addEventListener("click", ()=>{ k = (k + 1) % WDEMO.length; render(); });
+  host.querySelector("#stepReset").addEventListener("click", ()=>{ k = 0; render(); });
+  render();
+})();
+
+/* ============================================================
+   演示三：窗口帧演示器（ROWS / RANGE 与滑动窗口）
+   ============================================================ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-frame");
+  if(!host) return;
+
+  const FRAMES = {
+    rows1:    {label:"ROWS 1 PRECEDING",   sql:"ROWS BETWEEN 1 PRECEDING AND CURRENT ROW",  note:"只看上一行和当前行，最多 2 行"},
+    rowsUnb:  {label:"ROWS UNBOUNDED",     sql:"ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW", note:"从第一行累计到当前行，逐行增长"},
+    rangeUnb: {label:"RANGE UNBOUNDED",    sql:"RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW", note:"从第一行到当前行，但并列值会被一起纳入，所以可能一次跳多行"}
+  };
+  let fr = "rows1", k = 2;
+
+  function covered(f, i){
+    const all = WDEMO.map((_,j)=>j);
+    if(f === "rows1") return all.filter(j=>j === i || j === i - 1);
+    if(f === "rowsUnb") return all.filter(j=>j <= i);
+    let last = i;
+    while(last + 1 < WDEMO.length && WDEMO[last + 1].amt === WDEMO[i].amt) last++;
+    return all.filter(j=>j <= last);
+  }
+
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示三：窗口帧演示器</span><span class="hint">切换帧 / 点表格行换当前行</span></div>
+    <div class="db">
+      <div class="ctl">
+        <label>窗口帧</label>
+        ${Object.keys(FRAMES).map(x=>`<button class="b" data-fr="${x}">${FRAMES[x].label}</button>`).join("")}
+      </div>
+      <div id="frameTable"></div>
+      <div class="log" id="frameLog"></div>
+      <div class="foot">数据按 amt 降序排列。绿色行 = 当前帧覆盖的行，黄色行 = 当前行；点任意一行可把它设为当前行。</div>
+    </div>
+  </div>`;
+
+  const tb = host.querySelector("#frameTable");
+  const lg = host.querySelector("#frameLog");
+
+  function render(){
+    host.querySelectorAll(".ctl .b").forEach(b=>b.classList.toggle("on", b.dataset.fr === fr));
+    const cov = covered(fr, k);
+    tb.innerHTML = `<table class="dt">
+      <caption>SUM(amt) OVER (ORDER BY amt DESC ${FRAMES[fr].sql})</caption>
+      <thead><tr><th>行号</th><th>销售</th><th>amt</th><th>是否在帧内</th></tr></thead>
+      <tbody>${WDEMO.map((r,i)=>{
+        const isCur = i === k, inFrame = cov.indexOf(i) >= 0;
+        const cls = isCur ? "hl" : (inFrame ? "match" : "dim");
+        return `<tr class="${cls}" data-i="${i}" style="cursor:pointer">
+          <td>${i+1}</td><td>${SQLSandbox.esc(r.nm)}</td><td>${r.amt}</td>
+          <td>${isCur ? "当前行" : (inFrame ? "✓ 在帧内" : "—")}</td></tr>`;
+      }).join("")}</tbody></table>`;
+
+    const sum = cov.reduce((a,j)=>a + WDEMO[j].amt, 0);
+    lg.innerHTML = `<b>${FRAMES[fr].sql}</b><br>
+      当前行：第 ${k+1} 行（${SQLSandbox.esc(WDEMO[k].nm)}，amt = ${WDEMO[k].amt}）<br>
+      帧覆盖：${cov.map(j=>`第${j+1}行(${WDEMO[j].amt})`).join(" + ")} = <b>${sum}</b><br>
+      ${FRAMES[fr].note}`;
+
+    tb.querySelectorAll("tbody tr").forEach(tr=>tr.addEventListener("click", ()=>{
+      k = +tr.dataset.i;
+      render();
+    }));
+  }
+
+  host.querySelectorAll(".ctl .b").forEach(b=>b.addEventListener("click", ()=>{ fr = b.dataset.fr; render(); }));
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单表查询基础 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 单表查询基础：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 02 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">单表查询基础</h1>
+    <p class="lead" id="pageLead">从一张表里取数：投影、过滤、排序、分页、去重，以及 NULL 与逻辑执行顺序这两个最容易踩坑的地方。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能写出只取所需列、带别名的 <b>SELECT / FROM</b>，并说清 <code class="inl">SELECT *</code> 的代价。</li>
+      <li>能用 <b>WHERE</b> 配合比较与 <b>AND / OR / NOT</b> 过滤行，并熟练使用 <b>BETWEEN / IN / LIKE / IS NULL</b> 四类谓词。</li>
+      <li>能说清 <b>NULL 的三值逻辑</b>，知道什么时候必须用 <code class="inl">IS NULL</code> / <code class="inl">COALESCE</code>。</li>
+      <li>能写 <b>ORDER BY</b> 多列排序与 <b>LIMIT</b> 分页，识别「分页不稳定」与深分页的性能问题。</li>
+      <li>能解释 <b>DISTINCT</b> 是「整行组合去重」，并避开它与 ORDER BY 的冲突。</li>
+      <li>能背出 <b>SELECT 的逻辑执行顺序</b>，并用它解释「别名为什么不能在 WHERE 里用」。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：模块 01 里的表 / 行 / 列、主键与外键概念，以及 MySQL 客户端的基本连接与执行语句方式。本页所有示例基于内置示例数据 <code class="inl">customers</code>（8 行，其中 id=8 的 city / gender 为 NULL）与 <code class="inl">orders</code>（12 行，status 取 paid / refunded / cancelled）。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>从「取数据」到「筛、排、去重」<br>把一张表查得又准又稳</h2>
+  </section>
+
+  <!-- ========== 知识点 1 ========== -->
+  <section class="topic" id="select-basic">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>SELECT / FROM / 列别名 / 常量列<span class="pt">select-basic · 查询的地基：投影与数据源</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="select::select-basic"><span>已学会</span></label>
+    </div>
+    <p><b>SELECT</b> 是 SQL 里最常用的语句，它由两个核心子句组成：<b>FROM</b> 指明数据从哪张表来，<b>SELECT</b> 决定最终输出哪些列——这个动作叫<b>投影（projection）</b>。写法上 SELECT 在前、FROM 在后，但语义上 FROM 先执行（见本页最后一个知识点）。</p>
+    <p><b>列别名（alias）</b>用 <code class="inl">AS</code> 定义，AS 可以省略，但建议保留以提高可读性。别名只影响结果集的列标题以及后续对结果的引用，<b>不会改变表结构</b>。表达式（<code class="inl">amount * 2</code>）、函数调用、常量都必须起别名，否则结果列名会是一整串表达式，难以引用。</p>
+    <p><b>常量列（constant column）</b>指在 SELECT 列表里直接写死的字面量，例如标记数据来源或导出日期。它不来自任何表，因此每一行都相同。MySQL 还允许完全不带 FROM 的查询（如 <code class="inl">SELECT 1 + 1;</code>），Oracle 里则需要写成 <code class="inl">SELECT 1 + 1 FROM dual;</code>。</p>
+    <ul>
+      <li>SELECT 不改变存储的数据，只决定「返回什么」；FROM 决定「从哪来」。</li>
+      <li>列别名可以在 <code class="inl">ORDER BY</code> / <code class="inl">HAVING</code> 中引用，<b>不能在 WHERE 中引用</b>。</li>
+      <li>用 <code class="inl">*</code> 取全部列方便调试，生产代码应显式列出需要的列。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>select-basic.sql</div>
+      <pre><code>-- 1) 最基础：指定列，结果 8 行 3 列
+SELECT id, name, city FROM customers;
+
+-- 2) 列别名：结果列标题变成「客户姓名 / 城市 / 会员等级」
+SELECT name AS 客户姓名, city AS 城市, level AS 会员等级
+FROM customers;
+
+-- 3) 常量列与表达式列：每一行都带上同样的标记
+SELECT name, city, '2024 年度' AS 统计口径, 1 AS 是否有效
+FROM customers
+LIMIT 3;
+
+-- 4) 别名可以在 ORDER BY 里引用（但不能写在 WHERE 里）
+SELECT name AS 姓名, signup_date AS 注册日期
+FROM customers
+ORDER BY 注册日期 DESC;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>结果列标题</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">SELECT name FROM customers</td><td class="mono">name</td><td>原样输出列名</td></tr>
+        <tr><td class="mono">SELECT name AS 客户姓名 …</td><td class="mono">客户姓名</td><td>用 AS 起别名</td></tr>
+        <tr><td class="mono">SELECT name 客户姓名 …</td><td class="mono">客户姓名</td><td>省略 AS 也能跑，但可读性差</td></tr>
+        <tr><td class="mono">SELECT '2024 年度' AS 统计口径 …</td><td class="mono">统计口径</td><td>常量列，每行值相同</td></tr>
+        <tr><td class="mono">SELECT amount * 2 AS 双倍金额 …</td><td class="mono">双倍金额</td><td>表达式列必须起别名</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>SELECT 负责「输出什么」、FROM 负责「从哪来」；别名是给<b>结果集</b>起的名字，不是给表改列名。表达式一定要起别名。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code class="inl">SELECT *</code> 会把全部列都传回来——多传无用列、增加网络与内存开销、容易让覆盖索引（covering index）失效，列顺序变化时下游代码还可能错位。调试可以随手用，生产代码请显式列出列。</p></div>
+
+    <div id="demo-sandbox"></div>
+  </section>
+
+  <!-- ========== 知识点 2 ========== -->
+  <section class="topic" id="where-basic">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>WHERE 与比较、逻辑运算符<span class="pt">where-basic · 逐行过滤，只留符合条件的行</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="select::where-basic"><span>已学会</span></label>
+    </div>
+    <p><b>WHERE</b> 在 FROM 之后对每一行做判断，只有判断结果为 <code class="inl">TRUE</code> 的行才会进入后续步骤。判断由<b>比较运算符（comparison operator）</b>与<b>逻辑运算符（logical operator）</b>组合而成。</p>
+    <p>比较运算符有 <code class="inl">=</code>、<code class="inl">&lt;&gt;</code>（或 <code class="inl">!=</code>）、<code class="inl">&lt;</code>、<code class="inl">&lt;=</code>、<code class="inl">&gt;</code>、<code class="inl">&gt;=</code>。字符串与日期要用单引号包裹（MySQL 里双引号默认也是字符串，但受 <code class="inl">ANSI_QUOTES</code> 影响，建议统一用单引号）；数值不要加引号，否则会触发隐式类型转换。</p>
+    <p>逻辑运算符 <code class="inl">AND</code> / <code class="inl">OR</code> / <code class="inl">NOT</code> 的优先级是 <b>NOT &gt; AND &gt; OR</b>。不确定就加括号——这是本页最容易被扣分的细节，也是面试常问的点。</p>
+    <p>性能上，WHERE 里的列尽量保持「裸列」形式：对列做函数或运算（如 <code class="inl">YEAR(order_date) = 2024</code>）通常会让索引失效；等值比较的值的类型要与列定义一致，避免隐式转换。</p>
+    <ul>
+      <li>WHERE 只保留判断结果为 <b>TRUE</b> 的行；FALSE 与 UNKNOWN 都会被丢弃。</li>
+      <li>优先级 NOT &gt; AND &gt; OR，括号最可靠。</li>
+      <li>与 NULL 做比较的结果是 UNKNOWN，永远不会被 WHERE 保留。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>where-basic.sql</div>
+      <pre><code>-- 等值过滤：2 行（张伟、赵磊）
+SELECT id, name, city, level FROM customers WHERE city = '北京';
+
+-- 多条件 AND：4 行（1002 / 1004 / 1010 / 1012）
+SELECT id, amount, status FROM orders
+WHERE status = 'paid' AND amount &gt;= 1000;
+
+-- 不等号：5 行（不含 city 为 NULL 的周涛）
+SELECT id, name, level FROM customers WHERE level &lt;&gt; '普通';
+
+-- NOT：同样 5 行，因为 NOT UNKNOWN 还是 UNKNOWN
+SELECT id, name FROM customers WHERE NOT (city = '北京');
+
+-- 优先级演示：加括号 2 行，不加括号 3 行
+SELECT id, name, city, level FROM customers
+WHERE (city = '北京' OR city = '上海') AND level = '金卡';   -- 2 行
+
+SELECT id, name, city, level FROM customers
+WHERE city = '北京' OR city = '上海' AND level = '金卡';      -- 3 行：AND 先算</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>运算符</th><th>含义</th><th>示例</th><th>结果行数</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">=</td><td>等于</td><td class="mono">city = '北京'</td><td class="mono">2</td></tr>
+        <tr><td class="mono">&lt;&gt; / !=</td><td>不等于</td><td class="mono">level &lt;&gt; '普通'</td><td class="mono">5</td></tr>
+        <tr><td class="mono">&gt;=</td><td>大于等于</td><td class="mono">amount &gt;= 1000</td><td class="mono">4</td></tr>
+        <tr><td class="mono">AND</td><td>两边都真才为真</td><td class="mono">status = 'paid' AND amount &gt;= 1000</td><td class="mono">4</td></tr>
+        <tr><td class="mono">OR</td><td>一边为真即为真</td><td class="mono">city = '北京' OR city = '上海'</td><td class="mono">4</td></tr>
+        <tr><td class="mono">NOT</td><td>取反</td><td class="mono">NOT (city = '北京')</td><td class="mono">5</td></tr>
+        <tr><td class="mono">( )</td><td>改变优先级</td><td class="mono">(A OR B) AND C</td><td class="mono">2</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>记住三句话——WHERE 只留 TRUE；优先级 NOT &gt; AND &gt; OR；不确定就加括号。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code class="inl">WHERE city = NULL</code> 一行都返回不了，必须写 <code class="inl">IS NULL</code>；<code class="inl">WHERE amount = '1000'</code> 在 MySQL 里能跑（隐式转换），但会让索引失效（列做隐式类型转换后无法用于查找）。</p></div>
+  </section>
+
+  <!-- ========== 知识点 3 ========== -->
+  <section class="topic" id="where-special">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>BETWEEN / IN / LIKE / IS NULL<span class="pt">where-special · 四类专用谓词</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="select::where-special"><span>已学会</span></label>
+    </div>
+    <p>除了比较运算符，SQL 还提供四类语义更清晰的<b>谓词（predicate）</b>：<code class="inl">BETWEEN</code> 做区间判断、<code class="inl">IN</code> 做集合成员判断、<code class="inl">LIKE</code> 做模式匹配、<code class="inl">IS NULL</code> 判断空值。它们让条件更短更可读，但各有边界与性能特性。</p>
+    <p><code class="inl">BETWEEN a AND b</code> 是<b>闭区间</b>，包含 a 和 b 两个端点，等价于 <code class="inl">col &gt;= a AND col &lt;= b</code>。<code class="inl">NOT BETWEEN</code> 是它的反义，但遇到 NULL 同样返回 UNKNOWN。</p>
+    <p><code class="inl">IN (v1, v2, …)</code> 等价于一串 OR 等值比较，可读性更好，通常也能走索引；但 <code class="inl">NOT IN</code> 一旦子查询结果里出现 NULL，整条查询会返回空集（模块 05 详解）。<code class="inl">LIKE</code> 用 <code class="inl">%</code>（任意长度字符，含 0 个）和 <code class="inl">_</code>（恰好一个字符），前导通配符（如 <code class="inl">'%伟'</code>）会让 B-Tree 索引失效。</p>
+    <p><code class="inl">IS NULL</code> / <code class="inl">IS NOT NULL</code> 是判断空值的唯一正确方式，因为任何与 NULL 的比较都返回 UNKNOWN。MySQL 的 <code class="inl">LIKE</code> 默认不区分大小写（取决于列的排序规则 collation）；PostgreSQL 要用 <code class="inl">ILIKE</code> 才是忽略大小写。</p>
+    <ul>
+      <li>BETWEEN 是闭区间；日期范围要留意上界当天的边界。</li>
+      <li>IN 列表可写常量，也可写子查询；列表过长（几千个）会带来解析开销。</li>
+      <li>判断空值只能用 IS NULL / IS NOT NULL，<code class="inl">= NULL</code> 恒不成立。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>where-special.sql</div>
+      <pre><code>-- BETWEEN 闭区间：4 行（1002 / 1007 / 1010 / 1012）
+SELECT id, order_date, amount FROM orders WHERE amount BETWEEN 500 AND 1500;
+
+-- IN 集合成员：5 行
+SELECT id, name, city FROM customers WHERE city IN ('北京', '上海', '广州');
+
+-- NOT IN：3 行（周涛的 city 是 NULL，任何比较都不成立）
+SELECT id, name, city FROM customers WHERE city NOT IN ('北京', '上海');
+
+-- LIKE 前缀匹配：1 行（张伟）
+SELECT id, name FROM customers WHERE name LIKE '张%';
+
+-- LIKE 单字符通配：1 行（张伟）
+SELECT id, name FROM customers WHERE name LIKE '_伟';
+
+-- IS NULL：1 行（周涛）
+SELECT id, name, city FROM customers WHERE city IS NULL;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>谓词</th><th>语义</th><th>示例</th><th>结果行数</th><th>索引</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">BETWEEN</td><td>闭区间 [a, b]</td><td class="mono">amount BETWEEN 500 AND 1500</td><td class="mono">4</td><td>可走范围扫描</td></tr>
+        <tr><td class="mono">IN</td><td>集合成员</td><td class="mono">city IN ('北京','上海','广州')</td><td class="mono">5</td><td>可走索引</td></tr>
+        <tr><td class="mono">NOT IN</td><td>不在集合内</td><td class="mono">city NOT IN ('北京','上海')</td><td class="mono">3</td><td>子查询含 NULL 有陷阱</td></tr>
+        <tr><td class="mono">LIKE '张%'</td><td>前缀匹配</td><td class="mono">name LIKE '张%'</td><td class="mono">1</td><td>可走索引</td></tr>
+        <tr><td class="mono">LIKE '%伟'</td><td>后缀匹配</td><td class="mono">name LIKE '%伟'</td><td class="mono">1</td><td>前导通配符，通常全表扫描</td></tr>
+        <tr><td class="mono">IS NULL</td><td>空值判断</td><td class="mono">city IS NULL</td><td class="mono">1</td><td>视情况可走索引</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code class="inl">NOT IN</code> 的子查询只要出现一个 NULL，整条查询就返回空集。反连接（anti join）请优先用 <code class="inl">NOT EXISTS</code> 或 <code class="inl">LEFT JOIN … WHERE … IS NULL</code>。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>边界提醒：</b>对 DATETIME 列写 <code class="inl">BETWEEN '2024-01-01' AND '2024-03-31'</code> 会漏掉 3 月 31 日当天的时间部分（因为上界等价于当天 00:00:00）。更稳的写法是 <code class="inl">&gt;= '2024-01-01' AND &lt; '2024-04-01'</code>。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>选择原则——区间用 BETWEEN、离散集合用 IN、模糊匹配用 LIKE、空值用 IS NULL。</p></div>
+  </section>
+
+  <!-- ========== 知识点 4 ========== -->
+  <section class="topic" id="order-limit">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>ORDER BY 排序与 LIMIT 分页<span class="pt">order-limit · 让结果有序、可控</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="select::order-limit"><span>已学会</span></label>
+    </div>
+    <p>关系表是<b>无序集合</b>：不加 ORDER BY 时返回顺序由存储引擎与执行计划决定，不能依赖。<b>ORDER BY</b> 指定排序键，可以多列排序（前面的列值相同时才比较后面的列），每列可独立指定 <code class="inl">ASC</code>（升序，默认）或 <code class="inl">DESC</code>（降序）。</p>
+    <p><b>LIMIT</b> 用来截断结果，常用于「取 TopN」和分页。MySQL 支持 <code class="inl">LIMIT n OFFSET m</code> 与简写 <code class="inl">LIMIT m, n</code>——注意简写里 <b>m 是偏移量、n 是行数</b>，顺序最容易记反。</p>
+    <p>分页必须有确定的排序键，否则同一页的数据可能在两次查询之间漂移（出现重复或遗漏）。排序键最好能唯一确定顺序，例如在末尾追加 <code class="inl">id</code> 作为最后一级排序。</p>
+    <p>性能上，<code class="inl">LIMIT 100000, 20</code> 这类深分页会先扫描并丢弃前 10 万行，代价随偏移量线性增长。优化方向：<b>游标分页（keyset pagination）</b>——用 <code class="inl">WHERE id &gt; 上一页最后一个 id</code> 直接定位；或<b>延迟关联</b>——先用覆盖索引取主键，再回表取数据（模块 10 详解）。</p>
+    <ul>
+      <li>NULL 在 MySQL 的 ORDER BY 中：ASC 时排最前，DESC 时排最后（部分数据库相反）。</li>
+      <li>ORDER BY 可以引用列别名，也可以写 SELECT 列表里的序号（如 <code class="inl">ORDER BY 2 DESC</code>）。</li>
+      <li>LIMIT 不带 ORDER BY = 顺序不确定。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>order-limit.sql</div>
+      <pre><code>-- 单列排序：NULL 的周涛排最前（MySQL 中 ASC 时 NULL 最小）
+SELECT id, name, city FROM customers ORDER BY city;
+
+-- 多列排序：先按会员等级，等级相同时再按 id
+SELECT id, name, level FROM customers ORDER BY level, id;
+
+-- 取金额最高的 3 笔订单：1004(2297) / 1012(1497) / 1010(1458)
+SELECT id, amount FROM orders ORDER BY amount DESC LIMIT 3;
+
+-- 分页第 2 页（每页 3 条）：LIMIT 3 OFFSET 3 与 LIMIT 3, 3 等价
+SELECT id, amount FROM orders ORDER BY amount DESC LIMIT 3 OFFSET 3;
+SELECT id, amount FROM orders ORDER BY amount DESC LIMIT 3, 3;   -- 前一个 3 是偏移，后一个 3 是行数
+
+-- 跨库统一 NULL 位置：先排「是否为空」，再排值
+SELECT id, name, city FROM customers ORDER BY city IS NULL, city;
+
+-- 深分页优化：游标分页，直接定位到上一页最后一个 id
+-- SELECT id, amount FROM orders WHERE id &gt; 1005 ORDER BY id LIMIT 20;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>含义</th><th>结果（按 amount DESC）</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">LIMIT 3</td><td>取前 3 行</td><td class="mono">1004 / 1012 / 1010</td></tr>
+        <tr><td class="mono">LIMIT 0, 3</td><td>偏移 0 取 3 行（第 1 页）</td><td class="mono">1004 / 1012 / 1010</td></tr>
+        <tr><td class="mono">LIMIT 3 OFFSET 3</td><td>跳过 3 行取 3 行（第 2 页）</td><td class="mono">1002 / 1007 / 1005</td></tr>
+        <tr><td class="mono">LIMIT 3, 3</td><td>同上，MySQL 简写</td><td class="mono">1002 / 1007 / 1005</td></tr>
+        <tr><td class="mono">LIMIT 20 OFFSET 100000</td><td>深分页：先丢弃 10 万行</td><td style="color:var(--muted)">扫描量随偏移线性增长</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把 <code class="inl">LIMIT m, n</code> 理解成「第 m 页取 n 条」是高频错误——它是<b>偏移 m 行后取 n 行</b>。要取第 3 页（每页 10 条）应写 <code class="inl">LIMIT 20, 10</code>。另外 PostgreSQL 与 SQL Server 不支持这种逗号写法。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>跨库差异：</b>NULL 在排序中的位置由数据库决定——MySQL / SQL Server 中 NULL 最小（ASC 排最前），PostgreSQL / Oracle 中 NULL 最大（ASC 排最后）。要跨库一致，可显式写 <code class="inl">ORDER BY city IS NULL, city</code>。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>分页三要素——确定的 ORDER BY、正确的偏移语义、别忘了唯一排序键。</p></div>
+  </section>
+
+  <!-- ========== 知识点 5 ========== -->
+  <section class="topic" id="distinct">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>DISTINCT 去重与常见坑<span class="pt">distinct · 作用于整个 SELECT 列表</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="select::distinct"><span>已学会</span></label>
+    </div>
+    <p><b>DISTINCT</b> 写在 <code class="inl">SELECT</code> 之后，对<b>整行结果</b>去重：只有当 SELECT 列表里所有列的值都相同，两行才会被合并成一行。它在逻辑执行顺序中位于 SELECT 之后、ORDER BY 之前。</p>
+    <p>因此多列 DISTINCT 是「<b>组合去重</b>」，不是「按第一列去重」。「每个城市只保留一条记录」这种需求 DISTINCT 做不到，需要窗口函数（模块 06）或 GROUP BY（模块 03）。</p>
+    <p>NULL 在 DISTINCT 中被视为相同值：多行 NULL 只会保留一行 NULL。顺带一提，<code class="inl">COUNT(DISTINCT col)</code> 会忽略 NULL，这与 <code class="inl">COUNT(*)</code> 不同（模块 03）。</p>
+    <p>性能上，DISTINCT 需要排序或哈希去重，代价不低。如果结果本来就不会重复（例如查主键），加 DISTINCT 只是白花成本；如果是想消除 JOIN 带来的重复行，先检查连接条件是否写错。</p>
+    <ul>
+      <li>DISTINCT 作用于整个 SELECT 列表，多列即组合去重。</li>
+      <li>DISTINCT 与 ORDER BY 同用时，ORDER BY 的列必须出现在 SELECT 列表里，否则 MySQL 报错（ERROR 3065）。</li>
+      <li>DISTINCT 不能「按某一列去重、其他列随便取一行」。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>distinct.sql</div>
+      <pre><code>-- 单列去重：6 行（北京、上海、广州、深圳、杭州 + NULL）
+SELECT DISTINCT city FROM customers;
+
+-- 多列去重：是组合去重，本例 8 行（每对 (city, level) 都不同）
+SELECT DISTINCT city, level FROM customers ORDER BY city, level;
+
+-- 会员等级只有 3 种
+SELECT DISTINCT level FROM customers;
+
+-- 反例：MySQL 报错 ERROR 3065，ORDER BY 的列必须出现在 DISTINCT 的 SELECT 列表里
+-- SELECT DISTINCT city FROM customers ORDER BY id;
+
+-- 反例：以为按 city 去重，其实 (city, name) 组合都不重复，仍然 8 行
+SELECT DISTINCT city, name FROM customers;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>去重依据</th><th>结果行数</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">SELECT city FROM customers</td><td>不去重</td><td class="mono">8</td></tr>
+        <tr><td class="mono">SELECT DISTINCT city</td><td>city 的值</td><td class="mono">6</td></tr>
+        <tr><td class="mono">SELECT DISTINCT level</td><td>level 的值</td><td class="mono">3</td></tr>
+        <tr><td class="mono">SELECT DISTINCT city, level</td><td>(city, level) 组合</td><td class="mono">8</td></tr>
+        <tr><td class="mono">SELECT DISTINCT city, name</td><td>(city, name) 组合</td><td class="mono">8</td></tr>
+        <tr><td class="mono">SELECT DISTINCT city … ORDER BY id</td><td>列不在 SELECT 列表</td><td class="null">报错 3065</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>DISTINCT 不是「按列去重」的开关。<code class="inl">SELECT DISTINCT city, name FROM customers</code> 返回 8 行（因为 name 各不相同），而不是 6 行——这是初学者最常踩的坑。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>DISTINCT 是「整行去重」。要「每组只保留一条」，请用 <code class="inl">ROW_NUMBER()</code>（模块 06）或 <code class="inl">GROUP BY</code>（模块 03）。</p></div>
+  </section>
+
+  <!-- ========== 知识点 6 ========== -->
+  <section class="topic" id="null-logic">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>NULL 与三值逻辑<span class="pt">null-logic · UNKNOWN 不是 FALSE</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="select::null-logic"><span>已学会</span></label>
+    </div>
+    <p><b>NULL</b> 表示「未知（unknown）」或「不适用」，它不是 0、不是空字符串、也不等于另一个 NULL。任何与 NULL 参与的算术、比较、字符串拼接，结果通常都是 NULL。</p>
+    <p>SQL 采用<b>三值逻辑（three-valued logic）</b>：TRUE、FALSE、UNKNOWN。比较运算符遇到 NULL 返回 UNKNOWN；而 WHERE 只保留结果为 TRUE 的行，所以 UNKNOWN 与 FALSE 一样会被过滤掉。</p>
+    <p>逻辑运算的三值规则是：<code class="inl">AND</code> 只要有一边是 FALSE 就是 FALSE，否则有 UNKNOWN 就是 UNKNOWN；<code class="inl">OR</code> 只要有一边是 TRUE 就是 TRUE，否则有 UNKNOWN 就是 UNKNOWN；<code class="inl">NOT UNKNOWN</code> 仍然是 UNKNOWN。</p>
+    <p>实用推论：判断空值只能用 <code class="inl">IS NULL</code> / <code class="inl">IS NOT NULL</code>；聚合函数（SUM / AVG / MAX / MIN / COUNT(col)）会忽略 NULL，只有 <code class="inl">COUNT(*)</code> 不忽略；GROUP BY 把 NULL 当成一个分组；需要默认值时用 <code class="inl">COALESCE</code> 或 <code class="inl">IFNULL</code> 兜底。</p>
+    <ul>
+      <li><code class="inl">= NULL</code>、<code class="inl">&lt;&gt; NULL</code> 恒为 UNKNOWN，永远不满足 WHERE。</li>
+      <li><code class="inl">NOT UNKNOWN = UNKNOWN</code>，所以 <code class="inl">NOT (city = '北京')</code> 也会丢掉 city 为 NULL 的行。</li>
+      <li>CONCAT 遇到 NULL 会让整体变成 NULL；用 CONCAT_WS 或 COALESCE 规避。</li>
+      <li>MySQL 的唯一索引允许多个 NULL（因为 NULL 不等于 NULL）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>null-logic.sql</div>
+      <pre><code>-- 错误写法：0 行（city = NULL 永远是 UNKNOWN）
+SELECT id, name, city FROM customers WHERE city = NULL;
+
+-- 正确写法：1 行（周涛）
+SELECT id, name, city FROM customers WHERE city IS NULL;
+
+-- 三值逻辑一览：结果依次为 UNKNOWN / UNKNOWN / UNKNOWN / TRUE / UNKNOWN
+SELECT NULL = NULL AS 等, NULL &lt;&gt; NULL AS 不等,
+       NULL AND TRUE AS 与, NULL OR TRUE AS 或, NOT NULL AS 非;
+
+-- NULL 会「传染」：周涛这一行的拼接结果是 NULL
+SELECT name, city, CONCAT(city, '-', level) AS 标签 FROM customers;
+
+-- 兜底：把 NULL 显示成「未知」
+SELECT name, COALESCE(city, '未知') AS city FROM customers;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>表达式</th><th>结果</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">NULL = NULL</td><td class="null">UNKNOWN</td><td>NULL 不等于任何值，包括另一个 NULL</td></tr>
+        <tr><td class="mono">NULL AND TRUE</td><td class="null">UNKNOWN</td><td>一边未知，整体无法确定</td></tr>
+        <tr><td class="mono">NULL AND FALSE</td><td class="mono">FALSE</td><td>AND 只要有 FALSE 就是 FALSE</td></tr>
+        <tr><td class="mono">NULL OR TRUE</td><td class="mono">TRUE</td><td>OR 只要有 TRUE 就是 TRUE</td></tr>
+        <tr><td class="mono">NULL OR FALSE</td><td class="null">UNKNOWN</td><td>结果取决于未知的那一边</td></tr>
+        <tr><td class="mono">NOT NULL</td><td class="null">UNKNOWN</td><td>取反未知仍是未知</td></tr>
+        <tr><td class="mono">NULL IS NULL</td><td class="mono">TRUE</td><td>唯一能正确判断空值的写法</td></tr>
+        <tr><td class="mono">NULL + 1</td><td class="null">NULL</td><td>算术与拼接遇到 NULL 会传染</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code class="inl">WHERE col &lt;&gt; 'x'</code> 会漏掉 col 为 NULL 的行，因为 UNKNOWN 不是 TRUE。要让结果包含 NULL，必须写成 <code class="inl">WHERE col &lt;&gt; 'x' OR col IS NULL</code>。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>跨库差异：</b>PostgreSQL 的 <code class="inl">CONCAT()</code> 会忽略 NULL（MySQL 返回 NULL，但 <code class="inl">||</code> 返回 NULL）；Oracle 把空字符串 <code class="inl">''</code> 当作 NULL；SQL Server 的 ORDER BY 把 NULL 排最前。跨库迁移时这些差异最容易埋坑。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>NULL 的三条铁律——比较出 UNKNOWN、WHERE 只留 TRUE、判断用 IS NULL。</p></div>
+
+    <div id="demo-null"></div>
+  </section>
+
+  <!-- ========== 知识点 7 ========== -->
+  <section class="topic" id="exec-order">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>SELECT 的逻辑执行顺序<span class="pt">exec-order · 写在前面 ≠ 先执行</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="select::exec-order"><span>已学会</span></label>
+    </div>
+    <p>SQL 是<b>声明式（declarative）</b>语言：你写的是「想要什么」，而不是「怎么执行」。但为了理解语法限制，需要知道数据库处理 SELECT 的<b>逻辑执行顺序（logical processing order）</b>：<span class="mono">FROM → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT</span>。</p>
+    <p>这个顺序能解释很多「为什么」：WHERE 里不能引用 SELECT 的别名（那时别名还没产生）；HAVING 里可以引用聚合结果；ORDER BY 可以引用别名（它在 SELECT 之后）；LIMIT 永远在最后，所以它截断的是排好序的结果。</p>
+    <p>逻辑顺序不等于物理执行顺序。优化器（optimizer）会做谓词下推、连接重排、索引选择等改写，实际执行计划可能完全不同（模块 09、10）。但对写 SQL 的人来说，逻辑顺序就是判断「语法是否合法、结果是否符合预期」的依据。</p>
+    <p>窗口函数（window function）在 SELECT 阶段求值，窗口的计算发生在 HAVING 之后、ORDER BY / LIMIT 之前（模块 06）。这也是为什么窗口函数不能直接写在 WHERE 里——要过滤窗口结果，必须套一层子查询或 CTE（模块 05、06）。</p>
+
+    <div class="mermaid">
+flowchart LR
+  A["FROM<br/>加载表 / 连接"] --> B["WHERE<br/>行过滤"]
+  B --> C["GROUP BY<br/>分组"]
+  C --> D["HAVING<br/>组过滤"]
+  D --> E["SELECT<br/>投影 / 计算"]
+  E --> F["DISTINCT<br/>整行去重"]
+  F --> G["ORDER BY<br/>排序"]
+  G --> H["LIMIT<br/>截断返回"]
+    </div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>exec-order.sql</div>
+      <pre><code>-- 书写顺序：SELECT → FROM → WHERE → ORDER BY → LIMIT
+-- 逻辑顺序：FROM → WHERE → (GROUP BY → HAVING) → SELECT → DISTINCT → ORDER BY → LIMIT
+SELECT id, amount
+FROM orders
+WHERE status = 'paid'
+ORDER BY amount DESC
+LIMIT 3;            -- 结果：1004(2297) / 1012(1497) / 1010(1458)
+
+-- 报错示范：WHERE 阶段别名还不存在（ERROR 1054 Unknown column）
+-- SELECT amount * 2 AS double_amount FROM orders WHERE double_amount &gt; 2000;
+
+-- 正确写法一：在 WHERE 里重复表达式
+SELECT amount * 2 AS double_amount FROM orders WHERE amount * 2 &gt; 2000;   -- 4 行
+
+-- 正确写法二：用派生表让别名先产生（模块 05）
+SELECT * FROM (SELECT amount * 2 AS double_amount FROM orders) t
+WHERE double_amount &gt; 2000;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>步骤</th><th>作用</th><th>能否用 SELECT 别名</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">FROM</td><td>加载表、做连接</td><td>不适用</td></tr>
+        <tr><td class="mono">WHERE</td><td>行过滤</td><td class="null">不能（别名尚未产生）</td></tr>
+        <tr><td class="mono">GROUP BY</td><td>分组</td><td>MySQL 允许（非标准扩展）</td></tr>
+        <tr><td class="mono">HAVING</td><td>组过滤</td><td>能（可引用聚合别名）</td></tr>
+        <tr><td class="mono">SELECT</td><td>计算表达式、投影</td><td>—</td></tr>
+        <tr><td class="mono">DISTINCT</td><td>整行去重</td><td>不适用</td></tr>
+        <tr><td class="mono">ORDER BY</td><td>排序</td><td>能</td></tr>
+        <tr><td class="mono">LIMIT</td><td>截断结果</td><td>不适用</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>背下顺序 <span class="mono">FROM → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT</span>。所有「为什么这里不能用别名」的问题，都由它回答。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>逻辑顺序 ≠ 物理顺序。优化器会重写查询，<code class="inl">EXPLAIN</code> 看到的是实际执行计划；但语法校验与结果语义仍然按逻辑顺序理解。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>面试点：</b>窗口函数在 SELECT 阶段求值，所以不能直接出现在 WHERE 中。面试里被问到「为什么 WHERE 里不能用 ROW_NUMBER()」时，答案就是这个执行顺序。</p></div>
+
+    <div id="demo-order"></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用一条 SQL 找出「状态为 paid 且金额大于 1000」的订单，按金额降序取前 3 笔，并解释去掉 <code class="inl">ORDER BY</code> 后结果是否还能复现。</li>
+      <li>在不使用窗口函数的前提下，尝试「每个城市只保留一位客户」。写不出来时，说明为什么 <code class="inl">DISTINCT</code> 做不到这件事（提示：需要 <code class="inl">ROW_NUMBER()</code>，见模块 06）。</li>
+      <li>写出三条结果都是 UNKNOWN 的表达式，再用 <code class="inl">COALESCE</code> 或 <code class="inl">IS NULL</code> 把它们改造成能真正过滤出 NULL 行的条件。</li>
+      <li>用练习台对比 <code class="inl">WHERE city &lt;&gt; '北京'</code>、<code class="inl">WHERE NOT (city = '北京')</code> 与 <code class="inl">WHERE city IS NULL</code>，解释为什么前两条都不包含周涛，并写出能包含周涛的正确写法。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">数据库与 SQL 全景</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">聚合、分组与过滤</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "select",
+  title: "单表查询基础",
+  eyebrow: "MODULE 02 · SQL / 数据库",
+  lead: "单表查询是全部 SQL 的地基：SELECT / FROM 决定取什么，WHERE 决定留什么，ORDER BY 与 LIMIT 决定怎么看，DISTINCT 与 NULL 三值逻辑决定结果对不对。本页用三个可交互面板把行数变化直接摆在你面前。",
+  points: ["select-basic","where-basic","where-special","order-limit","distinct","null-logic","exec-order"],
+  prev: "01-db-sql-overview.html",
+  next: "03-aggregate-group.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于列别名（alias），下面说法正确的是？",
+    opts:["列别名只影响结果集的列标题，可以在 ORDER BY 中引用","列别名可以在 WHERE 子句中直接引用","列别名会永久修改表中的真实列名","列别名必须用双引号包裹才有效"],
+    ans:0,
+    exp:"别名只是给结果集的列起个名字，不改变表结构。因为 WHERE 在 SELECT 之前执行，此时别名还不存在，所以在 WHERE 里引用别名会报 ERROR 1054；而 ORDER BY 在 SELECT 之后，可以引用别名。MySQL 里别名可以用单引号或双引号包裹，但双引号的含义受 ANSI_QUOTES 影响，不是必须。"
+  },
+  {
+    type:"quiz",
+    q:"执行 `SELECT name AS 姓名, '2024' AS 年度 FROM customers;`（customers 有 8 行），返回结果是多少列多少行？",
+    opts:["1 列 8 行","2 列 1 行","8 列 2 行","2 列 8 行"],
+    ans:3,
+    exp:"SELECT 列表里有 2 个输出项（一个来自表的 name 列，一个常量列 '2024'），所以是 2 列；FROM customers 有 8 行，且没有 WHERE 过滤，所以是 8 行。常量列不会因为只有一行而合并，它对每一行都出现。"
+  },
+  {
+    type:"quiz",
+    q:"`WHERE city = '北京' OR city = '上海' AND level = '金卡'` 的实际含义是？",
+    opts:["（北京 或 上海）且 金卡","北京 且 上海 且 金卡","北京 或 （上海 且 金卡）","语法错误，OR 与 AND 混用必须加括号"],
+    ans:2,
+    exp:"SQL 的逻辑运算符优先级是 NOT > AND > OR，所以 AND 先结合：等价于 city = '北京' OR (city = '上海' AND level = '金卡')。示例数据下这样是 3 行（张伟、赵磊、孙悦）；加括号写成 (city='北京' OR city='上海') AND level='金卡' 才是 2 行。OR 与 AND 混用不报错，但结果常与直觉不符，所以建议显式加括号。"
+  },
+  {
+    type:"quiz",
+    q:"`SELECT name FROM customers WHERE NOT (city = '北京');` 会返回哪些客户？（customers 共 8 行，其中「周涛」的 city 为 NULL）",
+    opts:["除「张伟、赵磊」与「周涛」之外的 5 位客户","全部 8 位客户","只有「周涛」1 位客户","0 行"],
+    ans:0,
+    exp:"周涛的 city 是 NULL，city = '北京' 得到 UNKNOWN，NOT UNKNOWN 仍是 UNKNOWN，而 WHERE 只保留 TRUE 的行，所以周涛被过滤掉。剩下的 5 位（李娜、王强、刘敏、陈晨、孙悦）city 都不是北京，比较结果为 FALSE，取反得 TRUE，因此保留。"
+  },
+  {
+    type:"quiz",
+    q:"`WHERE amount BETWEEN 500 AND 1500` 等价于下面哪一项？",
+    opts:["amount >= 500 AND amount <= 1500","amount > 500 AND amount < 1500","amount >= 500 AND amount < 1500","amount IN (500, 1500)"],
+    ans:0,
+    exp:"BETWEEN 是闭区间，包含两个端点，等价于 >= 下界 AND <= 上界。写成开区间会漏掉正好等于 500 或 1500 的行。amount IN (500, 1500) 只匹配这两个具体数值，与区间语义完全不同。"
+  },
+  {
+    type:"quiz",
+    q:"关于 LIKE，下面哪一种说法是<b>错误</b>的？",
+    opts:["% 匹配任意长度（含 0 个）字符，_ 匹配恰好一个字符","LIKE '%伟' 因为前导通配符，通常无法使用 B-Tree 索引","LIKE '张%' 可以利用索引做前缀扫描","LIKE 中 % 只能出现在模式的末尾"],
+    ans:3,
+    exp:"% 可以出现在模式的任意位置，甚至多个：'%伟%' 表示「包含『伟』」，'_伟%' 表示「第二个字是『伟』」。正因为如此，前导 % 让数据库无法用索引定位起点，只能全表扫描。_ 匹配恰好一个字符、% 匹配任意长度（含 0 个）都是正确的通配符语义。"
+  },
+  {
+    type:"quiz",
+    q:"`SELECT id FROM orders ORDER BY amount DESC LIMIT 3, 5;` 返回的是？",
+    opts:["跳过前 5 行后取 3 行","跳过前 3 行后取 5 行","取第 3 到第 5 行，共 3 行","返回排序后的前 5 行"],
+    ans:1,
+    exp:"MySQL 的逗号写法 LIMIT m, n 中 m 是偏移量、n 是行数，等价于 LIMIT 5 OFFSET 3，即跳过前 3 行再取 5 行。容易记反成「第 m 页取 n 条」，实际要取第 3 页（每页 10 条）应写 LIMIT 20, 10。另外这种逗号写法 PostgreSQL 和 SQL Server 不支持。"
+  },
+  {
+    type:"quiz",
+    q:"`SELECT DISTINCT city, level FROM customers;` 的语义是？",
+    opts:["按 (city, level) 组合去重","只按 city 去重，level 保留第一次出现的值","只按 level 去重，city 保留任意值","报错，DISTINCT 只能用于单列"],
+    ans:0,
+    exp:"DISTINCT 作用于整个 SELECT 列表，多列时按「组合」判断重复：只有 city 与 level 都相同才算重复行。想要「每个 city 只留一条、其余列随便取一行」，DISTINCT 无法表达，必须用 ROW_NUMBER()（模块 06）或 GROUP BY（模块 03）。"
+  },
+  {
+    type:"quiz",
+    q:"`SELECT DISTINCT city FROM customers;` 返回多少行？（customers 共 8 行，city 有北京、上海、广州、深圳、杭州 5 个不同值，另有 1 行为 NULL）",
+    opts:["8 行","5 行","7 行","6 行"],
+    ans:3,
+    exp:"DISTINCT 把多个 NULL 视为同一个值，只保留一行 NULL，所以结果是 5 个城市 + 1 个 NULL = 6 行。选 5 行是漏掉了 NULL 这一组；选 8 行是没去重；选 7 行是把 NULL 当成多行分别保留。"
+  },
+  {
+    type:"quiz",
+    q:"`SELECT id, name FROM customers WHERE city = NULL;` 的结果是？",
+    opts:["所有 city 为 NULL 的行","报语法错误","0 行，因为 city = NULL 的结果是 UNKNOWN","所有 8 行"],
+    ans:2,
+    exp:"任何与 NULL 的比较都返回 UNKNOWN，而不是 TRUE 或 FALSE；WHERE 只保留 TRUE，所以这条查询永远返回 0 行。要查出 city 为空的行，必须写 IS NULL。SQL 不会因为「NULL 表示未知」就自动帮你做等值判断。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪一项是 SELECT 的逻辑执行顺序？",
+    opts:["SELECT → FROM → WHERE → ORDER BY → LIMIT","FROM → WHERE → GROUP BY → HAVING → SELECT → DISTINCT → ORDER BY → LIMIT","FROM → SELECT → WHERE → GROUP BY → ORDER BY → LIMIT","FROM → WHERE → SELECT → GROUP BY → HAVING → ORDER BY → LIMIT"],
+    ans:1,
+    exp:"逻辑顺序是先确定数据源（FROM）、再过滤行（WHERE）、再分组（GROUP BY）与过滤组（HAVING），然后才计算输出列（SELECT）、去重（DISTINCT）、排序（ORDER BY）、截断（LIMIT）。这个顺序解释了为什么 WHERE 不能用别名、HAVING 与 ORDER BY 可以。注意它是语义顺序，不是优化器真正的物理执行顺序。"
+  },
+  {
+    type:"interview",
+    q:"面试题：为什么 `SELECT amount * 2 AS double_amount FROM orders WHERE double_amount > 1000;` 会报错？",
+    opts:["因为 MySQL 不支持在 SELECT 里写算术表达式","因为这条查询缺少 GROUP BY","因为别名不能用于数值类型的列","因为 WHERE 在 SELECT 之前执行，此时别名 double_amount 还不存在"],
+    ans:3,
+    exp:"按照逻辑执行顺序 FROM → WHERE → SELECT，WHERE 阶段只处理 FROM 产出的行，SELECT 里的别名要到下一步才产生，所以 WHERE 引用它会报 ERROR 1054 Unknown column。两种修正：在 WHERE 里重复写表达式（WHERE amount * 2 > 1000），或用派生表 / CTE 先算出别名再在外层过滤。这与「MySQL 不支持表达式」无关，也和 GROUP BY 无关。"
+  }
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1），
+   键内元素形如 "模块id::知识点id"。在详解页勾选 = 大纲同步打勾。
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   演示一：SQL 练习台（SELECT / WHERE / LIKE / ORDER BY / LIMIT / DISTINCT 对比）
+   ------------------------------------------------------------ */
+SQLSandbox && SQLSandbox.mount(document.getElementById("demo-sandbox"), {
+  query: "SELECT id, name, city FROM customers;",
+  presets: [
+    {label:"指定列 + 别名", sql:"SELECT name AS 客户姓名, city AS 城市, level AS 会员等级 FROM customers;"},
+    {label:"常量列与表达式列", sql:"SELECT name, city, '2024 年度' AS 统计口径, 1 AS 标记 FROM customers LIMIT 3;"},
+    {label:"WHERE 等值过滤（2 行）", sql:"SELECT id, name, city, level FROM customers WHERE city = '北京';"},
+    {label:"AND / OR 优先级（3 行）", sql:"SELECT id, name, city, level FROM customers WHERE city = '北京' OR city = '上海' AND level = '金卡';"},
+    {label:"LIKE 前缀匹配（1 行）", sql:"SELECT id, name FROM customers WHERE name LIKE '张%';"},
+    {label:"ORDER BY + LIMIT（前 3 笔）", sql:"SELECT id, amount FROM orders ORDER BY amount DESC LIMIT 3;"},
+    {label:"LIMIT 分页（偏移 3 取 3）", sql:"SELECT id, amount FROM orders ORDER BY amount DESC LIMIT 3, 3;"},
+    {label:"DISTINCT 去重（6 行）", sql:"SELECT DISTINCT city FROM customers;"}
+  ]
+});
+
+/* ------------------------------------------------------------
+   演示二：SELECT 逻辑执行顺序分步器
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("demo-order");
+  if(!host || !window.SQLSandbox) return;
+  const STEPS = ["FROM","WHERE","GROUP BY","HAVING","SELECT","DISTINCT","ORDER BY","LIMIT"];
+  const DESC = {
+    "FROM":"从数据源读取全部行，还没有任何过滤",
+    "WHERE":"逐行判断条件，只保留结果为 TRUE 的行",
+    "GROUP BY":"按分组键把行装进桶里，输出的单位变成「组」",
+    "HAVING":"对「组」做过滤（注意过滤的是组，不是行）",
+    "SELECT":"计算表达式并投影成结果列，别名在这一步才产生",
+    "DISTINCT":"对整行结果去重",
+    "ORDER BY":"排序，这一步可以引用 SELECT 的别名",
+    "LIMIT":"最后截断，只把需要的行返回给客户端"
+  };
+  const QUERIES = [
+    {
+      label:"WHERE + DISTINCT + ORDER BY + LIMIT",
+      sql:"SELECT DISTINCT city FROM customers WHERE level <> '普通' ORDER BY city LIMIT 3;",
+      steps:{
+        "FROM":"SELECT * FROM customers;",
+        "WHERE":"SELECT * FROM customers WHERE level <> '普通';",
+        "SELECT":"SELECT city FROM customers WHERE level <> '普通';",
+        "DISTINCT":"SELECT DISTINCT city FROM customers WHERE level <> '普通';",
+        "ORDER BY":"SELECT DISTINCT city FROM customers WHERE level <> '普通' ORDER BY city;",
+        "LIMIT":"SELECT DISTINCT city FROM customers WHERE level <> '普通' ORDER BY city LIMIT 3;"
+      }
+    },
+    {
+      label:"GROUP BY + HAVING（组过滤）",
+      sql:"SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city HAVING COUNT(*) >= 2 ORDER BY cnt DESC LIMIT 1;",
+      steps:{
+        "FROM":"SELECT * FROM customers;",
+        "GROUP BY":"SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city;",
+        "HAVING":"SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city HAVING COUNT(*) >= 2;",
+        "SELECT":"SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city HAVING COUNT(*) >= 2;",
+        "ORDER BY":"SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city HAVING COUNT(*) >= 2 ORDER BY cnt DESC;",
+        "LIMIT":"SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city HAVING COUNT(*) >= 2 ORDER BY cnt DESC LIMIT 1;"
+      }
+    },
+    {
+      label:"WHERE + ORDER BY + LIMIT",
+      sql:"SELECT id, amount FROM orders WHERE status = 'paid' ORDER BY amount DESC LIMIT 2;",
+      steps:{
+        "FROM":"SELECT * FROM orders;",
+        "WHERE":"SELECT * FROM orders WHERE status = 'paid';",
+        "SELECT":"SELECT id, amount FROM orders WHERE status = 'paid';",
+        "ORDER BY":"SELECT id, amount FROM orders WHERE status = 'paid' ORDER BY amount DESC;",
+        "LIMIT":"SELECT id, amount FROM orders WHERE status = 'paid' ORDER BY amount DESC LIMIT 2;"
+      }
+    }
+  ];
+
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：SELECT 逻辑执行顺序分步器</span><span class="hint">点「下一步」逐步执行</span></div>
+    <div class="db">
+      <div class="ctl">
+        <label>查询</label>
+        <select id="ordSel">${QUERIES.map((q,i)=>`<option value="${i}">${SQLSandbox.esc(q.label)}</option>`).join("")}</select>
+        <button class="b" id="ordNext">▶ 下一步</button>
+        <button class="b" id="ordReset">↺ 重来</button>
+      </div>
+      <div id="ordSteps"></div>
+      <div id="ordOut"></div>
+      <div class="log" id="ordLog"></div>
+      <div class="foot">每一步的「输出行数」由迷你 SQL 引擎真实执行该阶段的等价语句得到；本查询未用到的阶段显示为「跳过」。</div>
+    </div>
+  </div>`;
+
+  const sel = host.querySelector("#ordSel");
+  const stepBox = host.querySelector("#ordSteps");
+  const outBox = host.querySelector("#ordOut");
+  const logBox = host.querySelector("#ordLog");
+  const nextBtn = host.querySelector("#ordNext");
+  const resetBtn = host.querySelector("#ordReset");
+  let qi = 0, cur = 0, counts = [];
+
+  function buildCounts(){
+    const q = QUERIES[qi];
+    counts = STEPS.map(s => {
+      if(!q.steps[s]) return null;
+      const r = SQLSandbox.run(q.steps[s]);
+      return r.error ? 0 : r.rows.length;
+    });
+  }
+
+  function render(){
+    const q = QUERIES[qi];
+    stepBox.innerHTML = `<table class="dt">
+      <caption>逻辑执行顺序（当前步骤高亮）</caption>
+      <thead><tr><th>#</th><th>步骤</th><th>输出行数</th></tr></thead>
+      <tbody>${STEPS.map((s,i)=>{
+        const cls = i < cur ? "match" : (i === cur ? "hl" : "dim");
+        const v = counts[i] === null ? "跳过" : (i <= cur ? counts[i] : "—");
+        return `<tr class="${cls}"><td>${i+1}</td><td class="key">${s}</td><td>${v}</td></tr>`;
+      }).join("")}</tbody></table>`;
+
+    const step = STEPS[cur];
+    const sql = q.steps[step];
+    if(!sql){
+      outBox.innerHTML = "";
+      logBox.innerHTML = `第 <b>${cur+1}</b> 步 · <b>${step}</b>：${DESC[step]}。<br>本查询没有用到这个阶段，直接<span class="bad">跳过</span>。`;
+      return;
+    }
+    const r = SQLSandbox.run(sql);
+    const rows = r.rows.slice(0, 6);
+    outBox.innerHTML = `<table class="dt">
+      <caption>第 ${cur+1} 步 · ${step} 的中间结果（前 ${rows.length} 行 / 共 ${r.rows.length} 行）</caption>
+      <thead><tr>${r.columns.map(c=>`<th>${SQLSandbox.esc(c)}</th>`).join("")}</tr></thead>
+      <tbody>${rows.map(row=>`<tr>${row.map(v=>v===null||v===undefined?'<td class="null">NULL</td>':`<td>${SQLSandbox.esc(v)}</td>`).join("")}</tr>`).join("")}</tbody>
+    </table>`;
+    logBox.innerHTML = `第 <b>${cur+1}</b> 步 · <b>${step}</b>：${DESC[step]}。<br>本步输出 <b>${r.rows.length}</b> 行${cur === 0 ? "（这就是 FROM 之后的原始行数）" : ""}。<br><span style="color:var(--muted)">等价语句：${SQLSandbox.esc(sql)}</span>`;
+  }
+
+  function reset(){
+    qi = +sel.value; cur = 0;
+    buildCounts();
+    nextBtn.disabled = false;
+    nextBtn.textContent = "▶ 下一步";
+    render();
+  }
+
+  sel.addEventListener("change", reset);
+  resetBtn.addEventListener("click", reset);
+  nextBtn.addEventListener("click", ()=>{
+    if(cur >= STEPS.length - 1){ return; }
+    cur++;
+    if(cur === STEPS.length - 1){ nextBtn.disabled = true; nextBtn.textContent = "✓ 已完成"; }
+    render();
+  });
+  reset();
+})();
+
+/* ------------------------------------------------------------
+   演示三：NULL 三值逻辑真值表
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("demo-null");
+  if(!host) return;
+  const EXPRS = [
+    {label:"NULL = NULL", sql:"SELECT NULL = NULL AS r;", val:"UNKNOWN", note:"两个「未知」之间无法判断相等，结果是 UNKNOWN 而不是 TRUE。"},
+    {label:"NULL <> NULL", sql:"SELECT NULL <> NULL AS r;", val:"UNKNOWN", note:"同理，NULL 也不「不相等」——比较结果依然未知。"},
+    {label:"1 = NULL", sql:"SELECT 1 = NULL AS r;", val:"UNKNOWN", note:"确定值 1 与未知值比较，整体仍然无法确定。"},
+    {label:"NULL AND TRUE", sql:"SELECT NULL AND TRUE AS r;", val:"UNKNOWN", op:"AND", a:"UNKNOWN", b:"TRUE", note:"AND 有一边未知，另一边又是 TRUE，整体无法确定。"},
+    {label:"NULL AND FALSE", sql:"SELECT NULL AND FALSE AS r;", val:"FALSE", op:"AND", a:"UNKNOWN", b:"FALSE", note:"AND 只要有一边是 FALSE，结果一定是 FALSE（短路）。"},
+    {label:"NULL OR TRUE", sql:"SELECT NULL OR TRUE AS r;", val:"TRUE", op:"OR", a:"UNKNOWN", b:"TRUE", note:"OR 只要有一边是 TRUE，结果一定是 TRUE。"},
+    {label:"NULL OR FALSE", sql:"SELECT NULL OR FALSE AS r;", val:"UNKNOWN", op:"OR", a:"UNKNOWN", b:"FALSE", note:"OR 的另一边是 FALSE，结果完全取决于未知的那一边。"},
+    {label:"NOT NULL", sql:"SELECT NOT NULL AS r;", val:"UNKNOWN", note:"对未知取反，还是未知。"},
+    {label:"NULL IS NULL", sql:"SELECT NULL IS NULL AS r;", val:"TRUE", note:"IS NULL 永远返回 TRUE / FALSE，是判断空值的唯一正确方式。"},
+    {label:"NULL + 1", sql:"SELECT NULL + 1 AS r;", val:"NULL", note:"算术与字符串拼接遇到 NULL 会「传染」，结果直接是 NULL。"}
+  ];
+  const TRIPLE = ["TRUE","FALSE","UNKNOWN"];
+  const AND_M = { "TRUE":{TRUE:"TRUE",FALSE:"FALSE",UNKNOWN:"UNKNOWN"}, "FALSE":{TRUE:"FALSE",FALSE:"FALSE",UNKNOWN:"FALSE"}, "UNKNOWN":{TRUE:"UNKNOWN",FALSE:"FALSE",UNKNOWN:"UNKNOWN"} };
+  const OR_M  = { "TRUE":{TRUE:"TRUE",FALSE:"TRUE",UNKNOWN:"TRUE"}, "FALSE":{TRUE:"TRUE",FALSE:"FALSE",UNKNOWN:"UNKNOWN"}, "UNKNOWN":{TRUE:"TRUE",FALSE:"UNKNOWN",UNKNOWN:"UNKNOWN"} };
+  const COLOR = { TRUE:"#1e5b4f", FALSE:"#514b3f", UNKNOWN:"#b8392a", NULL:"#b8392a" };
+
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：NULL 三值逻辑真值表</span><span class="hint">换表达式看结果</span></div>
+    <div class="db">
+      <div class="ctl">
+        <label>表达式</label>
+        <select id="nullSel">${EXPRS.map((e,i)=>`<option value="${i}">${SQLSandbox.esc(e.label)}</option>`).join("")}</select>
+      </div>
+      <div id="nullBadge"></div>
+      <div id="nullTable"></div>
+      <div class="log" id="nullLog"></div>
+      <div class="foot">UNKNOWN 在 WHERE 里与 FALSE 一样会被丢弃——这就是 <code class="inl">col &lt;&gt; 'x'</code> 会漏掉 NULL 行的原因。</div>
+    </div>
+  </div>`;
+
+  const sel = host.querySelector("#nullSel");
+  const badgeBox = host.querySelector("#nullBadge");
+  const tableBox = host.querySelector("#nullTable");
+  const logBox = host.querySelector("#nullLog");
+
+  function matrix(name, M, a, b){
+    return `<table class="dt"><caption>${name} 真值表（高亮单元格为上面表达式）</caption>
+      <thead><tr><th>${name}</th>${TRIPLE.map(c=>`<th>${c}</th>`).join("")}</tr></thead>
+      <tbody>${TRIPLE.map(r=>`<tr class="${r===a?"match":""}"><td class="key">${r}</td>${TRIPLE.map(c=>`<td class="${r===a&&c===b?"hl":""}">${M[r][c]}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
+  }
+
+  function render(){
+    const e = EXPRS[+sel.value];
+    let actual = "";
+    try {
+      const r = SQLSandbox.run(e.sql);
+      if(r.error){ actual = "引擎报错：" + r.error; }
+      else {
+        const v = r.rows[0][0];
+        actual = (v === null || v === undefined) ? "NULL" : (v === true ? "TRUE" : (v === false ? "FALSE" : String(v)));
+      }
+    } catch(err){ actual = "引擎不可用"; }
+    badgeBox.innerHTML = `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:4px 0 10px">
+      <span class="mono" style="font-size:13px;color:var(--muted)">${SQLSandbox.esc(e.label)}</span>
+      <span style="font-family:var(--font-mono);font-weight:700;font-size:15px;color:${COLOR[e.val]||"#231f18"};border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:5px 16px">${e.val}</span>
+      <span class="mono" style="font-size:12px;color:var(--muted)">引擎实际返回：${SQLSandbox.esc(actual)}</span>
+    </div>`;
+    tableBox.innerHTML = e.op ? matrix(e.op, e.op === "AND" ? AND_M : OR_M, e.a, e.b) : "";
+    logBox.innerHTML = `<b>${SQLSandbox.esc(e.label)}</b> → <b>${e.val}</b><br>${SQLSandbox.esc(e.note)}<br><span class="bad">WHERE 只保留 TRUE</span>：所以结果为 ${e.val} 的行会被过滤掉。`;
+  }
+
+  sel.addEventListener("change", render);
+  render();
+})();
+</script>
+</body>
+</html>

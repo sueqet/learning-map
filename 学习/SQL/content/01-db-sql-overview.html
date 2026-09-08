@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据库与 SQL 全景 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 数据库与 SQL 全景：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 00 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">这里是本模块的一句话引言，用来说明你将学到什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能用自己的话说清「数据库 / DBMS / 关系模型」三者的分工，并指出一张表里主键、外键各承担什么职责。</li>
+      <li>能准确把一条 SQL 语句归入 DDL / DML / DQL / DCL / TCL 中的一类，并说出它的典型代表语句。</li>
+      <li>能在本机把 MySQL 8.0 跑起来，用命令行或图形客户端成功连接并执行 <code>SELECT VERSION()</code>。</li>
+      <li>能为「客户—订单—商品」场景选对数据类型（金额用 DECIMAL、时间用 DATETIME/TIMESTAMP 等），并说出选错的后果。</li>
+      <li>能独立写出「建库 → 建表 → 插入 → 查询」的第一条完整 SQL，并读懂查询结果的行数与列含义。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">会基本电脑操作；知道「表格 = 行 + 列」的直观概念；无需任何编程或数据库经验，本页从零开始。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>先建立地图：数据库是什么，SQL 又分成哪几类</h2>
+  </section>
+
+  <section class="topic" id="db-concept">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>数据库、DBMS 与关系模型<span class="pt">database · 数据放在哪里、以什么形状存放</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="overview::db-concept"><span>已学会</span></label>
+    </div>
+    <p><strong>数据库（database）</strong>是按照一定结构组织起来、能被高效读写的数据集合；<strong>数据库管理系统（DBMS, Database Management System）</strong>则是管理这些数据的软件，例如 MySQL、PostgreSQL、Oracle、SQL Server、SQLite。你平时说的「装了个数据库」，其实装的是 DBMS，数据文件由它替你保管。两者是「内容」与「管家」的关系，不是同义词。</p>
+    <p>目前应用最广的一类是<strong>关系型数据库（RDBMS）</strong>，它基于 1970 年 E. F. Codd 提出的<strong>关系模型（relational model）</strong>：数据以二维表的形式存放，表与表之间通过「值相等」建立联系。关系模型把「数据长什么样」和「数据怎么存」分开了——你只需用声明式语言 SQL 描述想要什么，不必关心磁盘上怎么找，这正是它统治企业数据几十年的原因。</p>
+    <p>关系模型有一套严格术语，日常叫法和学术叫法要对得上号，否则读文档和面试时会卡住。下面这张表是必备对照：</p>
+
+    <table class="tbl">
+      <thead><tr><th>日常叫法</th><th>关系模型术语</th><th>含义</th><th>本站示例</th></tr></thead>
+      <tbody>
+        <tr><td>数据库</td><td>database / schema</td><td>一组相关表的集合</td><td>库名 <code>shop</code></td></tr>
+        <tr><td>表</td><td>关系 relation</td><td>同结构记录的集合，二维表</td><td><code>customers</code>、<code>orders</code></td></tr>
+        <tr><td>行</td><td>元组 tuple / 记录 record</td><td>一条完整记录</td><td>一位客户、一笔订单</td></tr>
+        <tr><td>列</td><td>属性 attribute / 字段 field</td><td>同一种数据项，有固定类型</td><td><code>name</code>、<code>amount</code></td></tr>
+        <tr><td>取值</td><td>域 domain</td><td>列允许的取值范围</td><td><code>status</code> ∈ {paid, refunded, cancelled}</td></tr>
+        <tr><td>行数</td><td>基数 cardinality</td><td>表中有多少条记录</td><td><code>orders</code> 有 12 行</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>explore.sql</div>
+      <pre><code>-- 看看 DBMS 里都有哪些库（MySQL 8.0）
+SHOW DATABASES;
+
+-- 查看某个库里的表，以及表的结构（列名、类型、键、默认值）
+USE shop;
+SHOW TABLES;
+DESC customers;
+
+-- 真正取数据：关系模型里「一次查询返回的也是一张表」
+SELECT id, name, city, level
+FROM customers
+ORDER BY id;</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>数据库是「数据集合」，DBMS 是「管理它的软件」；关系模型的四大要素是表（关系）、行（元组）、列（属性）、域（取值范围）。SQL 查询的输入和输出都是表——这是后面学 JOIN、子查询的思维基础。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>关系模型里的「关系」不是「表之间有关联」的意思，它就是「表」本身；「主键」也不是「主要的那个键」，而是唯一标识一行的约束。把日常语义套到术语上，是初学者最容易翻车的地方。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：关系模型点选面板</span><span class="hint">点表名，看字段与主外键关系</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>选择表</label>
+          <button class="b" data-t="customers">customers</button>
+          <button class="b" data-t="orders">orders</button>
+          <button class="b" data-t="products">products</button>
+          <button class="b" data-t="order_items">order_items</button>
+          <button class="b" data-t="employees">employees</button>
+        </div>
+        <div id="modelOut"></div>
+        <div class="log" id="modelLog"></div>
+        <div class="foot">提示：PK = 主键（唯一标识一行），FK = 外键（指向另一张表的主键）。全站示例数据都用这 5 张表。</div>
+      </div>
+    </div>
+
+    <div class="mermaid">
+erDiagram
+  CUSTOMERS ||--o{ ORDERS : "下单"
+  ORDERS ||--o{ ORDER_ITEMS : "包含"
+  PRODUCTS ||--o{ ORDER_ITEMS : "被包含"
+  EMPLOYEES }o--o| EMPLOYEES : "汇报给"
+    </div>
+  </section>
+
+  <section class="topic" id="sql-family">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>SQL 语言分类（DDL/DML/DQL/DCL/TCL）<span class="pt">sql-family · 一条语句属于哪一类，决定了它能不能回滚</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="overview::sql-family"><span>已学会</span></label>
+    </div>
+    <p><strong>SQL（Structured Query Language，结构化查询语言）</strong>是关系型数据库的标准语言。按「操作对象」和「是否受事务控制」的不同，习惯上分成五类：DDL（数据定义）、DML（数据操纵）、DQL（数据查询）、DCL（数据控制）、TCL（事务控制）。分类不是学术游戏——它直接决定了这条语句能不能被 <code>ROLLBACK</code> 撤销、会不会隐式提交。</p>
+    <p>最容易记混的是 DQL 与 DML。严格说 <code>SELECT</code> 只读不写，所以单列一类叫 DQL；但在很多资料和面试语境里，DQL 会被并入 DML，两种说法都算对，你答的时候说明清楚即可。另一个高频点是 <code>TRUNCATE</code>：它长得像 DML，实际是 DDL。</p>
+    <p>下面这张表把五类的代表语句、作用对象和事务特性一次说清：</p>
+
+    <table class="tbl">
+      <thead><tr><th>分类</th><th>全称</th><th>作用对象</th><th>代表语句</th><th>能否 ROLLBACK</th></tr></thead>
+      <tbody>
+        <tr><td>DDL</td><td>Data Definition Language</td><td>库、表、索引等结构</td><td><code>CREATE</code>、<code>ALTER</code>、<code>DROP</code>、<code>TRUNCATE</code>、<code>RENAME</code></td><td>不能（隐式提交）</td></tr>
+        <tr><td>DML</td><td>Data Manipulation Language</td><td>表中的行</td><td><code>INSERT</code>、<code>UPDATE</code>、<code>DELETE</code>、<code>REPLACE</code></td><td>能（事务内）</td></tr>
+        <tr><td>DQL</td><td>Data Query Language</td><td>表中的行（只读）</td><td><code>SELECT</code></td><td>不需要</td></tr>
+        <tr><td>DCL</td><td>Data Control Language</td><td>用户权限</td><td><code>GRANT</code>、<code>REVOKE</code></td><td>不能（隐式提交）</td></tr>
+        <tr><td>TCL</td><td>Transaction Control Language</td><td>事务边界</td><td><code>BEGIN</code>、<code>COMMIT</code>、<code>ROLLBACK</code>、<code>SAVEPOINT</code></td><td>本身就是事务控制</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>five-families.sql</div>
+      <pre><code>-- DDL：定义结构（隐式提交，执行后无法 ROLLBACK）
+CREATE TABLE customers (
+  id          INT PRIMARY KEY AUTO_INCREMENT,
+  name        VARCHAR(50) NOT NULL,
+  city        VARCHAR(30),
+  gender      CHAR(1),
+  signup_date DATE,
+  level       VARCHAR(10)
+);
+
+-- DML：操纵数据（事务内可回滚）
+INSERT INTO customers (name, city, gender, signup_date, level)
+VALUES ('赵敏', '北京', 'F', '2024-03-01', '金卡');
+
+UPDATE customers SET level = '银卡' WHERE id = 9;
+DELETE FROM customers WHERE id = 9;
+
+-- DQL：只读查询
+SELECT level, COUNT(*) AS 人数 FROM customers GROUP BY level;
+
+-- DCL：控制权限
+GRANT SELECT ON shop.* TO 'report'@'%';
+
+-- TCL：控制事务边界
+BEGIN;
+UPDATE orders SET status = 'paid' WHERE id = 1;
+ROLLBACK;   -- 上面的 UPDATE 被撤销</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>记两条分界线就够了：①「动结构 = DDL，动数据 = DML，只读 = DQL」；② DDL/DCL 会<strong>隐式提交</strong>当前事务，所以 <code>TRUNCATE</code>、<code>DROP</code> 一旦执行，前面的未提交修改也会一起落地。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>别以为「能写 WHERE 的就是 DML」——<code>TRUNCATE TABLE</code> 属于 DDL，它<strong>不能带 WHERE</strong>，只能整表清空，而且 MySQL 的 InnoDB 里它按数据页删除，速度快但不可回滚。想删部分行，只能用 <code>DELETE ... WHERE</code>。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：SQL 语句分类器</span><span class="hint">点语句，看它属于哪一类</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>点一条语句</label>
+          <button class="b" data-s="CREATE TABLE">CREATE TABLE</button>
+          <button class="b" data-s="ALTER TABLE">ALTER TABLE</button>
+          <button class="b" data-s="DROP TABLE">DROP TABLE</button>
+          <button class="b" data-s="TRUNCATE TABLE">TRUNCATE TABLE</button>
+          <button class="b" data-s="INSERT">INSERT</button>
+          <button class="b" data-s="UPDATE">UPDATE</button>
+          <button class="b" data-s="DELETE">DELETE</button>
+          <button class="b" data-s="SELECT">SELECT</button>
+          <button class="b" data-s="GRANT">GRANT</button>
+          <button class="b" data-s="COMMIT">COMMIT</button>
+        </div>
+        <div id="clsOut"></div>
+        <div class="log" id="clsLog"></div>
+        <div class="foot">提示：注意 TRUNCATE 虽然「清数据」，但它归在 DDL，不能带 WHERE、不能回滚。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>把环境跑起来：连接数据库，理解表的结构</h2>
+  </section>
+
+  <section class="topic" id="env-setup">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>环境搭建：MySQL 安装、连接与客户端<span class="pt">env-setup · 从零到能跑第一条语句</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="overview::env-setup"><span>已学会</span></label>
+    </div>
+    <p>学 SQL 的第一道门槛不是语法，而是「把数据库跑起来并能连上」。完整链路是：安装 MySQL 8.0 → 启动服务（Windows 上是 <code>MySQL80</code> 服务，macOS/Linux 常用 <code>brew services start mysql</code> 或 <code>systemctl start mysqld</code>）→ 用客户端连接 → 验证版本与字符集。</p>
+    <p>连接需要五个要素：<strong>主机（host）、端口（port）、用户名（user）、密码（password）、库名（database）</strong>。MySQL 默认监听 <code>3306</code> 端口，本地地址写作 <code>127.0.0.1</code> 或 <code>localhost</code>。命令行客户端 <code>mysql</code> 是最轻量的验证工具；日常开发更常用图形客户端，见下表。</p>
+    <p>搭环境时最容易忽略的是<strong>字符集</strong>。MySQL 8.0 默认字符集已是 <code>utf8mb4</code>（能存 4 字节的 emoji），但老版本或手工建的库可能是 <code>utf8</code>（实际只有 3 字节），一旦存 emoji 就会报 <code>Incorrect string value</code>（因为 <code>utf8</code> 这个别名只支持 3 字节的 utf8mb3）。建库时显式写清楚最省事。</p>
+
+    <table class="tbl">
+      <thead><tr><th>客户端</th><th>形态</th><th>适合场景</th><th>备注</th></tr></thead>
+      <tbody>
+        <tr><td><code>mysql</code> 命令行</td><td>终端</td><td>快速验证、脚本化、服务器上运维</td><td>MySQL 自带，最稳</td></tr>
+        <tr><td>MySQL Workbench</td><td>图形</td><td>官方全套工具、ER 图、建表向导</td><td>Oracle 官方免费</td></tr>
+        <tr><td>DBeaver</td><td>图形</td><td>多数据库通用、免费开源</td><td>支持 MySQL/PG/Oracle 等</td></tr>
+        <tr><td>DataGrip / Navicat</td><td>图形</td><td>商业开发，SQL 补全与调试强</td><td>付费</td></tr>
+        <tr><td>Python + PyMySQL</td><td>代码</td><td>程序里连库做分析或 ETL</td><td>需安装驱动</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>connect.sh</div>
+      <pre><code># 1) 命令行连接：-h 主机  -P 端口  -u 用户  -p 表示「回车后再输密码」
+mysql -h 127.0.0.1 -P 3306 -u root -p
+
+# 2) 连上后先做三件体检
+SELECT VERSION();                                        -- 期望 8.0.x
+SHOW VARIABLES LIKE 'character_set_server';              -- 期望 utf8mb4
+SELECT user, host FROM mysql.user;                       -- 看有哪些账号
+
+# 3) 建库时显式指定字符集与排序规则
+CREATE DATABASE shop
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_0900_ai_ci;
+
+# 4) 一次性执行脚本文件（不进入交互界面）
+mysql -h 127.0.0.1 -u root -p shop < init.sql</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>连接五要素「主机 + 端口 + 用户 + 密码 + 库名」；MySQL 默认端口 <code>3306</code>，8.0 默认字符集 <code>utf8mb4</code>。装完先跑 <code>SELECT VERSION()</code>，能返回版本号就说明环境通了。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① 不要把 <code>root</code> 账号和空密码暴露到公网——<code>root@'%'</code> 是常见入侵入口，生产应建最小权限账号；② 命令行里 <code>-p</code> 后面<strong>不要空格再加密码</strong>（会明文进 shell 历史），正确写法是只写 <code>-p</code> 然后回车输入；③ 报 <code>Can't connect to MySQL server on '127.0.0.1'</code> 多半是服务没启动或端口被占用，先查服务状态再改配置。</p></div>
+  </section>
+
+  <section class="topic" id="table-model">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>表、行、列：主键与外键<span class="pt">table-model · 约束是数据正确性的第一道闸门</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="overview::table-model"><span>已学会</span></label>
+    </div>
+    <p>一张表由列定义和行数据组成，但光有列和行还不够——必须加<strong>约束（constraint）</strong>，数据库才能替你把住数据质量。<strong>主键（primary key）</strong>是唯一标识一行的列或列组合，它必须<strong>非空且唯一</strong>，一张表最多只能有一个主键（可以是多列组成的复合主键）。有了主键，你才能可靠地「定位某一行」。</p>
+    <p><strong>外键（foreign key）</strong>是另一张表的主键在本表中的引用，用来维护<strong>引用完整性（referential integrity）</strong>。例如 <code>orders.customer_id</code> 指向 <code>customers.id</code>，数据库就会拒绝插入一个不存在的客户编号，避免出现「孤儿订单」。外键还可以声明 <code>ON DELETE CASCADE</code>（父行删除时子行跟着删）或 <code>ON DELETE RESTRICT</code>（有子行时禁止删除父行）。</p>
+    <p>设计上还有一个常考取舍：用自增整数做<strong>代理键（surrogate key）</strong>，还是用身份证号、订单号这类<strong>自然键（natural key）</strong>？主流做法是用代理键做技术主键，把自然键加上唯一索引——因为自然键可能变长、可能变更，改起来代价很高。</p>
+
+    <table class="tbl">
+      <thead><tr><th>对比项</th><th>主键 primary key</th><th>外键 foreign key</th></tr></thead>
+      <tbody>
+        <tr><td>作用</td><td>唯一标识本表的一行</td><td>引用另一张表的主键，维护引用完整性</td></tr>
+        <tr><td>数量限制</td><td>一张表最多 1 个（可复合）</td><td>一张表可以有多个</td></tr>
+        <tr><td>能否为 NULL</td><td>不能</td><td>可以（表示「暂无关联」）</td></tr>
+        <tr><td>自动索引</td><td>会创建主键索引（聚簇索引）</td><td>InnoDB 要求有索引，没有就自动建一个</td></tr>
+        <tr><td>跨表影响</td><td>无</td><td>插入/删除子表行时会被父表校验</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>constraints.sql</div>
+      <pre><code>CREATE TABLE customers (
+  id   INT PRIMARY KEY AUTO_INCREMENT,   -- 代理主键：自增整数
+  name VARCHAR(50) NOT NULL,
+  city VARCHAR(30),
+  UNIQUE KEY uk_name (name)              -- 自然键上的唯一约束
+) ENGINE=InnoDB;
+
+CREATE TABLE orders (
+  id          INT PRIMARY KEY AUTO_INCREMENT,
+  customer_id INT NOT NULL,
+  order_date  DATETIME NOT NULL,
+  amount      DECIMAL(10,2) NOT NULL,
+  status      VARCHAR(12) NOT NULL DEFAULT 'paid',
+  CONSTRAINT fk_orders_customer
+    FOREIGN KEY (customer_id) REFERENCES customers(id)
+    ON DELETE RESTRICT ON UPDATE CASCADE,   -- 有订单的客户不允许被删
+  KEY idx_customer (customer_id),
+  CONSTRAINT ck_amount CHECK (amount &gt;= 0)  -- 金额不允许为负
+) ENGINE=InnoDB;
+
+-- 外键生效的验证：customer_id = 999 不存在，这条 INSERT 会直接报错
+INSERT INTO orders (customer_id, order_date, amount, status)
+VALUES (999, '2024-05-01 10:00:00', 199.00, 'paid');</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>主键 = 唯一 + 非空 + 一张表最多一个；外键 = 指向别的表的主键 + 可以为 NULL + 可以有多个。外键是「数据库帮你兜底」的引用完整性，而不是性能优化手段。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① 主键为 NULL 是不允许的，但唯一索引（UNIQUE）允许多个 NULL；② 复合主键 <code>PRIMARY KEY(order_id, product_id)</code> 保证的是「组合唯一」，单独一列仍可重复；③ 外键会带来写入开销，很多互联网公司选择在应用层保证一致性而不用物理外键——这是权衡，不是「外键没用」。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>把字段类型选对，再写下第一条 SQL</h2>
+  </section>
+
+  <section class="topic" id="data-types">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>常用数据类型与选型<span class="pt">data-types · 类型选错，后面再改要付代价</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="overview::data-types"><span>已学会</span></label>
+    </div>
+    <p>数据类型（data type）决定了三件事：能存什么值、占多少空间、能做什么运算。它属于 DDL 的一部分，建表时定下来，之后再改（<code>ALTER TABLE ... MODIFY</code>）往往要重建表，大表上代价很高，所以一开始就要选对。</p>
+    <p>选型的基本原则是：<strong>够用就好、语义清晰、避免隐式转换</strong>。数值分整数（<code>TINYINT</code>/<code>INT</code>/<code>BIGINT</code>）与精确/近似小数（<code>DECIMAL</code> vs <code>FLOAT/DOUBLE</code>）；字符串分定长 <code>CHAR</code> 与变长 <code>VARCHAR</code>，超长文本用 <code>TEXT</code>；时间分 <code>DATE</code>、<code>DATETIME</code>、<code>TIMESTAMP</code>。用字符串存数字，会让索引失效、排序变成字典序（<code>'10' &lt; '9'</code>），是最常见的性能与正确性双杀。</p>
+    <p>一个真实的高频坑：用 <code>FLOAT</code> 存金额。<code>FLOAT/DOUBLE</code> 是二进制浮点，<code>0.1 + 0.2</code> 不等于 <code>0.3</code>，对账时会出现 0.01 元的偏差。金额一律用 <code>DECIMAL(M,D)</code> 精确小数。</p>
+
+    <table class="tbl">
+      <thead><tr><th>场景</th><th>推荐类型</th><th>原因</th><th>不要用</th></tr></thead>
+      <tbody>
+        <tr><td>订单金额、单价</td><td><code>DECIMAL(10,2)</code></td><td>精确十进制，不会出现浮点误差</td><td><code>FLOAT</code> / <code>DOUBLE</code></td></tr>
+        <tr><td>自增主键</td><td><code>INT</code> / <code>BIGINT</code></td><td>有序、占位小，适合做聚簇索引</td><td><code>VARCHAR(32)</code> 的 UUID</td></tr>
+        <tr><td>姓名、城市</td><td><code>VARCHAR(n)</code></td><td>变长，按实际长度存储</td><td><code>CHAR(255)</code> 定长浪费</td></tr>
+        <tr><td>性别、状态码</td><td><code>CHAR(1)</code> / <code>TINYINT</code></td><td>长度固定，读取快</td><td><code>TEXT</code></td></tr>
+        <tr><td>下单时间</td><td><code>DATETIME</code></td><td>原样存储，不随时区变化，范围到 9999 年</td><td>存字符串 <code>'2024-05-01'</code></td></tr>
+        <tr><td>创建/更新时间戳</td><td><code>TIMESTAMP</code></td><td>按 UTC 存储、自动随会话时区换算</td><td>用来存 2038 年后的时间</td></tr>
+        <tr><td>布尔标记</td><td><code>TINYINT(1)</code></td><td>MySQL 里 <code>BOOLEAN</code> 就是它的别名</td><td><code>CHAR(1)</code> 存 'Y'/'N'</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>types.sql</div>
+      <pre><code>CREATE TABLE products (
+  id       INT PRIMARY KEY AUTO_INCREMENT,
+  name     VARCHAR(60)   NOT NULL,          -- 变长字符串，按需分配
+  category VARCHAR(20)   NOT NULL,          -- 分类名，短且固定取值
+  price    DECIMAL(10,2) NOT NULL,          -- 金额：精确小数，共 10 位、2 位小数
+  stock    INT UNSIGNED  NOT NULL DEFAULT 0,-- 库存不能为负
+  is_active TINYINT(1)   NOT NULL DEFAULT 1,-- 布尔标记
+  created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+                         ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB;
+
+-- 浮点误差演示：结果不是 0.3
+SELECT 0.1 + 0.2 AS float_result;          -- 0.30000000000000004
+SELECT CAST(0.1 AS DECIMAL(5,2)) + CAST(0.2 AS DECIMAL(5,2)) AS decimal_result; -- 0.30
+
+-- 查看某列的真实类型与字节数
+SELECT COLUMN_NAME, DATA_TYPE, COLUMN_TYPE, NUMERIC_PRECISION, NUMERIC_SCALE
+FROM information_schema.COLUMNS
+WHERE TABLE_SCHEMA = 'shop' AND TABLE_NAME = 'products';</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>三条选型铁律：金额用 <code>DECIMAL</code>、时间用 <code>DATETIME/TIMESTAMP</code>（别存字符串）、短定长用 <code>CHAR</code>、其他用 <code>VARCHAR</code>。类型一致才能用上索引，也才不会出现「数字按字典序排」这类诡异结果。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① <code>TIMESTAMP</code> 在 MySQL 中范围只到 <code>2038-01-19</code>，且会随服务器时区换算，跨时区业务容易「时间漂移」，长期存储建议用 <code>DATETIME</code>；② <code>VARCHAR(255)</code> 不是越大越好，过长的定义会影响索引长度和内存临时表；③ MySQL 8.0 的 <code>utf8mb4</code> 下 <code>VARCHAR(n)</code> 的 n 是<strong>字符数</strong>而非字节数。</p></div>
+  </section>
+
+  <section class="topic" id="first-sql">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>第一条 SQL：建库建表与插入数据<span class="pt">first-sql · 打通「定义 → 写入 → 读出」的闭环</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="overview::first-sql"><span>已学会</span></label>
+    </div>
+    <p>现在把前面几块拼起来，走完一条完整链路：<code>CREATE DATABASE</code>（建库）→ <code>USE</code>（切换库）→ <code>CREATE TABLE</code>（建表）→ <code>INSERT</code>（写数据）→ <code>SELECT</code>（读数据）。这五步是每个 SQL 项目的起点，也是你验证环境是否正常的标准动作。</p>
+    <p>写 <code>INSERT</code> 时强烈建议<strong>显式列出列名</strong>：<code>INSERT INTO customers (name, city) VALUES (...)</code>。省略列名依赖表的列顺序，一旦表结构变化（加列、调序）就会静默写错数据。同理，<code>SELECT</code> 也建议写清需要的列而不是 <code>SELECT *</code>。</p>
+    <p>最后要养成的习惯是：每写一条查询，都能预判它<strong>返回几行、关键值是什么</strong>。本站的交互练习台内置了统一示例数据（<code>customers</code> 8 行、<code>orders</code> 12 行、<code>products</code> 6 行、<code>order_items</code> 15 行、<code>employees</code> 9 行），你可以直接改查询、立刻看结果对照。</p>
+
+    <table class="tbl">
+      <thead><tr><th>步骤</th><th>语句</th><th>预期结果</th></tr></thead>
+      <tbody>
+        <tr><td>1 建库</td><td><code>CREATE DATABASE shop ...</code></td><td>库创建成功，字符集 utf8mb4</td></tr>
+        <tr><td>2 选库</td><td><code>USE shop;</code></td><td>提示 <code>Database changed</code></td></tr>
+        <tr><td>3 建表</td><td><code>CREATE TABLE customers (...)</code></td><td><code>Query OK</code>，可用 <code>DESC customers</code> 验证</td></tr>
+        <tr><td>4 插入</td><td><code>INSERT INTO customers ...</code></td><td><code>Query OK, 1 row affected</code></td></tr>
+        <tr><td>5 查询</td><td><code>SELECT ... FROM customers</code></td><td>返回对应行数的结果集</td></tr>
+      </tbody>
+    </table>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>first-sql.sql</div>
+      <pre><code>-- 1) 建库（显式字符集，避免中文与 emoji 乱码）
+CREATE DATABASE IF NOT EXISTS shop
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE shop;
+
+-- 2) 建表
+CREATE TABLE IF NOT EXISTS customers (
+  id          INT PRIMARY KEY AUTO_INCREMENT,
+  name        VARCHAR(50) NOT NULL,
+  city        VARCHAR(30),
+  gender      CHAR(1),
+  signup_date DATE,
+  level       VARCHAR(10) DEFAULT '普通'
+) ENGINE=InnoDB;
+
+-- 3) 插入：显式列出列名，city/gender 允许为 NULL
+INSERT INTO customers (name, city, gender, signup_date, level) VALUES
+  ('张伟', '北京', 'M', '2024-01-05', 'gold'),
+  ('李娜', '上海', 'F', '2024-02-11', 'silver'),
+  ('王强', '广州', 'M', '2024-03-20', 'normal');
+
+-- 4) 查询：先看全部，再按条件过滤
+SELECT id, name, city, level FROM customers ORDER BY id;
+SELECT name, city FROM customers WHERE level = 'gold';
+SELECT COUNT(*) AS 客户数 FROM customers;
+SELECT level, COUNT(*) AS 人数 FROM customers GROUP BY level ORDER BY 人数 DESC;</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>第一条 SQL 的闭环是「建库 → 选库 → 建表 → 插入 → 查询」。<code>INSERT</code> 与 <code>SELECT</code> 都显式写列名，是专业习惯；<code>CREATE</code> 语句加 <code>IF NOT EXISTS</code>，脚本可以反复执行不报错。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① 忘了 <code>USE shop;</code> 或建表时没写库名，会把表建到别的库里；② 中文字符串必须用单引号（双引号在 MySQL 默认模式下是标识符，不是字符串）；③ 下面的练习台<strong>只支持查询（SELECT）</strong>，<code>CREATE/INSERT/UPDATE/DELETE</code> 等写操作请到真实数据库执行。</p></div>
+
+    <div id="demo-first-sql"></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>在本地建一个 <code>shop</code> 库，把 <code>customers</code> / <code>orders</code> / <code>products</code> / <code>order_items</code> / <code>employees</code> 五张表按内置数据集的结构建出来（含主键、外键、CHECK），再插满示例数据。</li>
+      <li>把 <code>products.price</code> 从 <code>DECIMAL(10,2)</code> 改成 <code>FLOAT</code>，插入 <code>0.1</code> 与 <code>0.2</code> 并求和，观察结果；然后改回 <code>DECIMAL</code> 再算一次，写出结论。</li>
+      <li>故意执行 <code>INSERT INTO orders (customer_id, ...) VALUES (999, ...)</code>，记录报错信息（外键约束名与错误码），再解释 MySQL 是在哪一步拦截它的。</li>
+      <li>用 <code>information_schema</code> 查出 <code>shop</code> 库里所有表的主键列名与行数，写出一条能一次输出「表名 / 主键列 / 行数」的查询。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "overview",
+  title: "数据库与 SQL 全景",
+  eyebrow: "MODULE 01 · SQL / 数据库",
+  lead: "从「数据库是什么」讲到「写下第一条 SQL」：搞清关系模型与主外键、分清 DDL/DML/DQL/DCL/TCL、把 MySQL 8.0 环境跑起来、选对数据类型，并完成建库建表插入查询的完整闭环。",
+  points: ["db-concept","sql-family","env-setup","table-model","data-types","first-sql"],
+  prev: "",
+  next: "02-basic-select.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于「数据库」与「DBMS」的关系，下列说法正确的是哪一项？",
+    opts:[
+      "数据库是管理数据的软件，DBMS 是磁盘上的数据文件集合",
+      "数据库是按一定结构组织的数据集合，DBMS 是管理这些数据的软件",
+      "两者是同义词，只是中文叫法不同",
+      "关系模型里一个数据库对应一行，一个 DBMS 对应一列"
+    ],
+    ans:1,
+    exp:"解析：数据库是「内容」，DBMS（如 MySQL、PostgreSQL）是「管家」，负责存储、查询、并发、恢复。A 把两者说反了；C 混淆了概念层次——同一套数据可以换 DBMS 管理；D 把数据库/DBMS 硬套到行与列上，行与列是表内部的术语，与它们无关。"
+  },
+  {
+    type:"quiz",
+    q:"下列语句中，属于 DDL（数据定义语言）的是哪一条？",
+    sql:"A. SELECT * FROM customers;\nB. UPDATE orders SET status = 'paid' WHERE id = 1;\nC. CREATE TABLE customers (id INT PRIMARY KEY);\nD. COMMIT;",
+    opts:["A","B","C","D"],
+    ans:2,
+    exp:"解析：CREATE TABLE 定义的是表结构，属于 DDL。A 是只读查询，通常归 DQL；B 修改表中的行，属于 DML；D 控制事务边界，属于 TCL。分类的意义在于 DDL 会隐式提交，不能像 DML 那样在事务里回滚。"
+  },
+  {
+    type:"quiz",
+    q:"关于 DELETE 与 TRUNCATE 的区别，下列说法正确的是？",
+    opts:[
+      "TRUNCATE 属于 DDL，按数据页快速清空整表、不能带 WHERE 也不能按行回滚；DELETE 属于 DML，可带 WHERE、按行记录日志",
+      "DELETE 属于 DDL，TRUNCATE 属于 DML，两者只是速度不同",
+      "两者都属于 DML，区别仅在于 TRUNCATE 更快",
+      "TRUNCATE 可以带 WHERE 条件删除表中部分行"
+    ],
+    ans:0,
+    exp:"解析：TRUNCATE 是 DDL，清空整表且不能加 WHERE，执行时隐式提交，所以无法用 ROLLBACK 撤销；DELETE 是 DML，支持 WHERE、逐行删除并写 undo 日志，事务内可回滚。B 和 C 把分类搞反或抹平了；D 是典型误解——想删部分行只能用 DELETE ... WHERE。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 的默认监听端口，以及 MySQL 8.0 推荐的字符集，分别是？",
+    opts:[
+      "5432 / utf8mb4",
+      "1433 / latin1",
+      "3306 / latin1",
+      "3306 / utf8mb4"
+    ],
+    ans:3,
+    exp:"解析：MySQL 默认端口是 3306，8.0 默认字符集是 utf8mb4（可存 4 字节字符如 emoji）。5432 是 PostgreSQL、1433 是 SQL Server 的默认端口；utf8/latin1 都存在中文或 emoji 的兼容问题，建库时显式指定 utf8mb4 最稳妥。"
+  },
+  {
+    type:"quiz",
+    q:"命令行连接 MySQL 时使用的参数 -P（大写）表示什么？",
+    sql:"mysql -h 127.0.0.1 -P 3306 -u root -p",
+    opts:[
+      "登录密码",
+      "端口号",
+      "通信协议",
+      "用户名"
+    ],
+    ans:1,
+    exp:"解析：-h 是主机、-P 是端口（大写）、-u 是用户名、-p 是小写且表示「交互式输入密码」。若把小写 -p 后面直接跟密码，密码会留在命令历史里，属于安全隐患；-P 与 -p 大小写含义完全不同，是连接命令最常见的笔误。"
+  },
+  {
+    type:"quiz",
+    q:"关于主键（primary key）约束，下列说法正确的是？",
+    opts:[
+      "主键列可以为 NULL，只要保证不重复即可",
+      "一张表可以定义多个主键，分别指向不同的业务字段",
+      "主键必须唯一且非空，一张表最多只能有一个主键（可以由多列组成复合主键）",
+      "主键只能是自增整数，其他类型都不允许"
+    ],
+    ans:2,
+    exp:"解析：主键的核心是「唯一 + 非空」，且一张表最多一个（多列组合即为复合主键，保证的是组合唯一）。A 错在允许 NULL——主键不允许 NULL，唯一索引才允许多个 NULL；B 混淆了主键与唯一索引，多业务字段应加 UNIQUE；D 太绝对，字符串、日期甚至复合列都可以做主键，自增整数只是常用选择。"
+  },
+  {
+    type:"quiz",
+    q:"在 orders 表上定义 FOREIGN KEY (customer_id) REFERENCES customers(id)，它最主要的作用是什么？",
+    opts:[
+      "保证 customer_id 的值必须在 customers.id 中存在，防止出现「孤儿订单」",
+      "保证 orders.customer_id 在同一张表内不重复",
+      "自动把 customers 表的字段复制到 orders 表里",
+      "删除 orders 表时会连带删除 customers 表"
+    ],
+    ans:0,
+    exp:"解析：外键维护的是引用完整性——子表的值必须能在父表主键中找到，否则插入或更新会被数据库拒绝。B 描述的是唯一约束；C 外键只存引用值，不会复制字段（需要复制应显式写 JOIN 查询或冗余列）；D 是方向反了，级联删除是删父表时影响子表，且必须显式声明 ON DELETE CASCADE。"
+  },
+  {
+    type:"quiz",
+    q:"存储订单金额（例如 99.90 元）时，最合适的数据类型是？",
+    opts:[
+      "FLOAT",
+      "DOUBLE",
+      "VARCHAR(20)",
+      "DECIMAL(10,2)"
+    ],
+    ans:3,
+    exp:"解析：DECIMAL 是精确十进制类型，(10,2) 表示最多 10 位、其中 2 位小数，适合金额。FLOAT/DOUBLE 是二进制浮点，0.1+0.2 会得到 0.30000000000000004，对账会出现分位偏差；VARCHAR 存数字会导致排序按字典序（'10' < '9'）、比较时发生隐式转换，还会让索引失效。"
+  },
+  {
+    type:"quiz",
+    q:"关于 DATETIME 与 TIMESTAMP，下列说法正确的是？",
+    opts:[
+      "DATETIME 会随服务器时区自动换算，TIMESTAMP 不会",
+      "TIMESTAMP 按 UTC 存储、受会话时区影响，范围只到 2038 年；DATETIME 原样存储，范围到 9999 年",
+      "两者完全等价，只是名字不同",
+      "TIMESTAMP 只能存日期，不能存时分秒"
+    ],
+    ans:1,
+    exp:"解析：TIMESTAMP 内部存的是 UTC 时间戳，读取时按会话时区换算，因此跨时区更「聪明」，但范围受 32 位限制只到 2038-01-19；DATETIME 原样保存字面值，范围到 9999 年，适合长期归档。A 把两者特性说反了；C 忽略时区与范围差异；D 错，TIMESTAMP 包含日期和时间，只存日期的是 DATE。"
+  },
+  {
+    type:"quiz",
+    q:"内置数据集里 products 表原有 6 行，执行下面这段 SQL 后，最后一条 SELECT 返回的数字是多少？",
+    sql:"INSERT INTO products (name, category, price, stock)\nVALUES ('机械键盘', '外设', 199.00, 50);\nSELECT COUNT(*) AS 商品数 FROM products;",
+    opts:["5","6","7","语句报错，没有结果"],
+    ans:2,
+    exp:"解析：INSERT 成功插入 1 行，原 6 行变成 7 行，所以 COUNT(*) 返回 7。COUNT(*) 统计的是行数，与列是否为 NULL 无关；A、B 分别对应「删除一行」和「没插入成功」的假设；D 不成立——这里列名与值一一对应，语句合法。"
+  },
+  {
+    type:"interview",
+    q:"面试官问：为什么生产环境不推荐使用 SELECT *？",
+    opts:[
+      "因为 MySQL 8.0 已经不支持 SELECT * 语法",
+      "因为 SELECT * 无法与 WHERE 一起使用",
+      "因为 SELECT * 会返回所有行，无法限制返回行数",
+      "因为它会多读多传不需要的列、让覆盖索引失效，且表结构变更会悄悄改变结果契约"
+    ],
+    ans:3,
+    exp:"解析：SELECT * 的问题有三层：① 传输与反序列化成本——不需要的大字段（TEXT/BLOB）也会被读出；② 覆盖索引（covering index）失效，本来只需读索引就能拿到的查询被迫回表；③ 契约脆弱——别人给表加了列，你的程序或下游 ETL 会突然多出字段，甚至因列顺序变化出错。A、B 是事实错误；C 描述的是缺少 LIMIT 的问题，与 SELECT * 无关。"
+  }
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1），
+   键内元素形如 "模块id::知识点id"。在详解页勾选 = 大纲同步打勾。
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   演示面板 1：关系模型点选（点表名 → 字段、主外键关系）
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("modelOut");
+  const log = document.getElementById("modelLog");
+  if(!host) return;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const TABLES = {
+    customers: {
+      rows:[
+        ["id","INT","PK","客户编号，自增主键"],
+        ["name","VARCHAR(50)","","客户姓名"],
+        ["city","VARCHAR(30)","","城市，id=8 的行为 NULL"],
+        ["gender","CHAR(1)","","M / F，可为 NULL"],
+        ["signup_date","DATE","","注册日期"],
+        ["level","VARCHAR(10)","","normal / silver / gold"]
+      ],
+      note:"customers 共 8 行。主键 id 被 orders.customer_id 引用；id=8 的客户 city 与 gender 为 NULL，且没有任何订单。"
+    },
+    orders: {
+      rows:[
+        ["id","INT","PK","订单编号"],
+        ["customer_id","INT","FK → customers.id","下单客户，非空"],
+        ["order_date","DATETIME","","下单时间"],
+        ["amount","DECIMAL(10,2)","","订单金额，精确小数"],
+        ["status","VARCHAR(12)","","paid / refunded / cancelled"]
+      ],
+      note:"orders 共 12 行，是典型的「多」端：一个客户可以有多笔订单。customer_id 外键保证不会出现不存在的客户编号。"
+    },
+    products: {
+      rows:[
+        ["id","INT","PK","商品编号"],
+        ["name","VARCHAR(60)","","商品名称"],
+        ["category","VARCHAR(20)","","商品分类"],
+        ["price","DECIMAL(10,2)","","售价，金额必须用 DECIMAL"],
+        ["stock","INT UNSIGNED","","库存，不允许为负"]
+      ],
+      note:"products 共 6 行。它的主键被 order_items.product_id 引用，同一件商品可以出现在多张订单里。"
+    },
+    order_items: {
+      rows:[
+        ["id","INT","PK","明细行编号"],
+        ["order_id","INT","FK → orders.id","所属订单"],
+        ["product_id","INT","FK → products.id","商品"],
+        ["qty","INT","","数量"],
+        ["unit_price","DECIMAL(10,2)","","下单时的单价（快照）"]
+      ],
+      note:"order_items 共 15 行，是订单与商品之间的「多对多」桥接表：它同时持有两个外键。注意 unit_price 是下单快照，不能直接读 products.price。"
+    },
+    employees: {
+      rows:[
+        ["id","INT","PK","员工编号"],
+        ["name","VARCHAR(50)","","姓名"],
+        ["dept","VARCHAR(20)","","部门"],
+        ["manager_id","INT","FK → employees.id","上级，NULL 表示顶层"],
+        ["salary","DECIMAL(10,2)","","月薪"],
+        ["hire_date","DATE","","入职日期"]
+      ],
+      note:"employees 共 9 行。它是自引用表：manager_id 指向本表的 id，NULL 表示没有上级。这类结构后面用自连接查询层级。"
+    }
+  };
+  function render(key){
+    document.querySelectorAll("button[data-t]").forEach(b=>b.classList.toggle("on", b.dataset.t===key));
+    const d = TABLES[key];
+    host.innerHTML = `<table class="dt"><thead><tr><th>列名</th><th>类型</th><th>键</th><th>说明</th></tr></thead><tbody>` +
+      d.rows.map(r=>`<tr class="${r[2]==="PK"?"match":""}">` +
+        `<td class="${r[2]==="PK"?"key":""}">${esc(r[0])}</td><td>${esc(r[1])}</td>` +
+        `<td>${r[2]?esc(r[2]):"—"}</td><td>${esc(r[3])}</td></tr>`).join("") +
+      `</tbody></table>`;
+    log.innerHTML = `<b>${esc(key)}</b>：${esc(d.note)}`;
+  }
+  document.querySelectorAll("button[data-t]").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.t)));
+  render("customers");
+})();
+
+/* ------------------------------------------------------------
+   演示面板 2：SQL 语句分类器
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("clsOut");
+  const log = document.getElementById("clsLog");
+  if(!host) return;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const DATA = {
+    "CREATE TABLE":{cat:"DDL",full:"Data Definition Language",sample:"CREATE TABLE customers (id INT PRIMARY KEY, name VARCHAR(50));",note:"定义表结构；执行时隐式提交，不能 ROLLBACK。"},
+    "ALTER TABLE":{cat:"DDL",full:"Data Definition Language",sample:"ALTER TABLE customers ADD COLUMN phone VARCHAR(20);",note:"修改表结构（加列/改类型/加索引）；大表上可能重建表，需谨慎。"},
+    "DROP TABLE":{cat:"DDL",full:"Data Definition Language",sample:"DROP TABLE IF EXISTS tmp_orders;",note:"删除整张表（结构 + 数据），不可回滚，务必先备份。"},
+    "TRUNCATE TABLE":{cat:"DDL",full:"Data Definition Language",sample:"TRUNCATE TABLE orders;",note:"清空整表数据、保留结构；不能带 WHERE，按数据页删除，速度快但不可回滚。"},
+    "INSERT":{cat:"DML",full:"Data Manipulation Language",sample:"INSERT INTO customers (name, city) VALUES ('赵敏','北京');",note:"写入新行；事务内可回滚，建议显式列出列名。"},
+    "UPDATE":{cat:"DML",full:"Data Manipulation Language",sample:"UPDATE orders SET status = 'refunded' WHERE id = 3;",note:"修改已有行；忘记 WHERE 会更新全表，是最常见的事故来源。"},
+    "DELETE":{cat:"DML",full:"Data Manipulation Language",sample:"DELETE FROM orders WHERE status = 'cancelled';",note:"按行删除并写 undo 日志，事务内可回滚，可带 WHERE。"},
+    "SELECT":{cat:"DQL",full:"Data Query Language",sample:"SELECT city, COUNT(*) FROM customers GROUP BY city;",note:"只读查询，不修改数据；输入与输出都是表。"},
+    "GRANT":{cat:"DCL",full:"Data Control Language",sample:"GRANT SELECT ON shop.* TO 'report'@'%';",note:"授予权限；隐式提交，属于安全边界操作。"},
+    "COMMIT":{cat:"TCL",full:"Transaction Control Language",sample:"BEGIN; UPDATE ...; COMMIT;",note:"提交事务，使修改永久生效；与 ROLLBACK / SAVEPOINT 同属 TCL。"}
+  };
+  const COLOR = {DDL:"#e0654b", DML:"#1e5b4f", DQL:"#2a6fa8", DCL:"#8a6d1f", TCL:"#7a4b8f"};
+  function render(key){
+    document.querySelectorAll("button[data-s]").forEach(b=>b.classList.toggle("on", b.dataset.s===key));
+    const d = DATA[key];
+    host.innerHTML = `<table class="dt"><thead><tr><th>语句</th><th>分类</th><th>全称</th><th>示例</th></tr></thead><tbody>` +
+      `<tr class="match"><td class="key">${esc(key)}</td>` +
+      `<td style="color:${COLOR[d.cat]};font-weight:700">${esc(d.cat)}</td>` +
+      `<td>${esc(d.full)}</td><td>${esc(d.sample)}</td></tr></tbody></table>`;
+    log.innerHTML = `<b>${esc(key)}</b> → <b style="color:${COLOR[d.cat]}">${esc(d.cat)}</b>：${esc(d.note)}`;
+  }
+  document.querySelectorAll("button[data-s]").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.s)));
+  render("TRUNCATE TABLE");
+})();
+
+/* ------------------------------------------------------------
+   演示面板 3：SQL 练习台（只支持查询，DDL 请到真实数据库执行）
+   ------------------------------------------------------------ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-first-sql");
+  if(!host) return;
+SQLSandbox.mount(host, {
+  query: "SELECT id, name, city, level FROM customers ORDER BY id;",
+  presets: [
+    {label:"全部客户", sql:"SELECT id, name, city, gender, level FROM customers ORDER BY id;"},
+    {label:"按等级分组", sql:"SELECT level, COUNT(*) AS 人数 FROM customers GROUP BY level ORDER BY 人数 DESC;"},
+    {label:"客户 + 订单", sql:"SELECT c.name, o.order_date, o.amount, o.status FROM customers c JOIN orders o ON c.id = o.customer_id ORDER BY o.amount DESC LIMIT 5;"},
+    {label:"无订单的客户", sql:"SELECT c.id, c.name FROM customers c LEFT JOIN orders o ON c.id = o.customer_id WHERE o.id IS NULL;"},
+    {label:"城市为 NULL", sql:"SELECT id, name, city, gender FROM customers WHERE city IS NULL;"}
+  ]
+});
+})();
+</script>
+</body>
+</html>

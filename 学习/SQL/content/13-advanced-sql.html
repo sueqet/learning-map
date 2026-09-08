@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高级函数与特性 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 高级函数与特性：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 13 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">高级函数与特性</h1>
+    <p class="lead" id="pageLead">掌握字符串、日期、数值函数与条件表达式，学会用条件聚合做行列转换、用递归 CTE 处理树形结构，并了解 JSON 类型与存储程序的边界。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能用字符串、日期时间、数值三类内置函数完成清洗、格式化与取整，并说清「对列用函数会让索引失效」的后果。</li>
+      <li>能用 CASE WHEN 与 IF / IFNULL / COALESCE / NULLIF 写条件逻辑，并正确处理 NULL 的传播规则。</li>
+      <li>能用条件聚合把「月份 × 品类 × 金额」窄表转成宽表，并解释 MySQL 为什么没有 PIVOT 关键字。</li>
+      <li>能写出带锚点与终止条件的递归 CTE，用于组织架构树与连续序列，并说明如何防止无限递归。</li>
+      <li>能读懂 MySQL 8.0 的 JSON 类型与 <code>-&gt;</code> / <code>-&gt;&gt;</code> / JSON_TABLE，判断什么时候该用 JSON 列、什么时候必须拆成普通列。</li>
+      <li>能说明存储过程 / 函数 / 触发器的适用场景与代价，知道它们在 MySQL 中的能力边界。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要已经掌握 <code>SELECT / WHERE / GROUP BY / ORDER BY</code>、多表连接与基本子查询，理解 NULL 的三值逻辑（UNKNOWN 不等于 TRUE 也不等于 FALSE），并能读懂简单的 CTE（<code>WITH ... AS</code>）。如果这些还不熟，先回看模块 02–05。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>内置函数三件套<br>字符串 · 日期时间 · 数值与类型转换</h2>
+  </section>
+
+  <!-- 知识点 1 -->
+  <section class="topic" id="fn-string">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>字符串函数<span class="pt">string functions · 清洗、拼接与截取</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::fn-string"><span>已学会</span></label>
+    </div>
+    <p>字符串函数（string functions）是 SQL 里最常用的「数据清洗工具箱」：把大小写统一、把两列拼成展示用的字符串、把一段文本截成需要的部分、把多余空格去掉。它们出现在 <code>SELECT</code> 里做展示与导出，也出现在 <code>WHERE</code> 与 <code>GROUP BY</code> 里做归一化比较。</p>
+    <p>最关键的一点是「字符」和「字节」不是一回事。MySQL 的 <code>LENGTH()</code> 返回<strong>字节数</strong>，<code>CHAR_LENGTH()</code> 返回<strong>字符数</strong>；在 utf8mb4 下一个汉字占 3 字节，一个 emoji 占 4 字节。用 <code>LENGTH()</code> 去做「名字不超过 10 个字」这类校验，几乎必然出错。</p>
+    <ul>
+      <li>拼接优先用 <code>CONCAT</code>，但 <code>CONCAT</code> 一旦遇到 NULL，整个结果就是 NULL——要跳过 NULL 用 <code>CONCAT_WS</code>，或先 <code>COALESCE</code>。</li>
+      <li><code>SUBSTR(str, pos, len)</code> 的位置从 1 开始（不是 0），越界不会报错，只返回能取到的部分。</li>
+      <li>函数写在<strong>列上</strong>会让索引失效（非 sargable），能改写成范围条件或前缀 <code>LIKE</code> 就不要用函数。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>string-fn.sql</div>
+      <pre><code>-- 客户姓名与等级字段的清洗（内置 customers 表，8 行）
+SELECT id,
+       UPPER(name)                AS 姓名大写,
+       LENGTH(name)               AS 字节数,
+       CHAR_LENGTH(name)          AS 字符数,
+       CONCAT(city, '-', level)   AS 城市等级,
+       CONCAT_WS('/', city, level, name) AS 拼接跳过NULL,
+       LEFT(name, 1)              AS 姓氏,
+       RIGHT(level, 1)            AS 等级末字,
+       TRIM('  北京  ')            AS 去首尾空格,
+       REPLACE(level, '卡', '')   AS 等级数字,
+       INSTR('abc-def', '-')      AS 分隔符位置
+FROM customers
+WHERE city IS NOT NULL
+ORDER BY id;</code></pre>
+    </div>
+    <p>预期结果：7 行（id=8 的 city 为 NULL 被过滤）。其中 <code>LENGTH('张伟')</code> 得 6、<code>CHAR_LENGTH('张伟')</code> 得 2；<code>REPLACE('金卡','卡','')</code> 得 <code>金</code>；<code>INSTR('abc-def','-')</code> 得 4。</p>
+
+    <table class="tbl">
+      <thead><tr><th>函数</th><th>作用</th><th>示例</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td><code>UPPER(s)</code> / <code>LOWER(s)</code></td><td>转大写 / 转小写</td><td><code>UPPER('mysql')</code></td><td><code>'MYSQL'</code></td></tr>
+        <tr><td><code>LENGTH(s)</code></td><td>字节长度</td><td><code>LENGTH('数据库')</code></td><td>9（utf8mb4）</td></tr>
+        <tr><td><code>CHAR_LENGTH(s)</code></td><td>字符个数</td><td><code>CHAR_LENGTH('数据库')</code></td><td>3</td></tr>
+        <tr><td><code>CONCAT(a, b, …)</code></td><td>拼接，任一参数为 NULL 则整体为 NULL</td><td><code>CONCAT('北京','-','金卡')</code></td><td><code>'北京-金卡'</code></td></tr>
+        <tr><td><code>CONCAT_WS(sep, …)</code></td><td>用分隔符拼接，自动跳过 NULL</td><td><code>CONCAT_WS('-','北京',NULL)</code></td><td><code>'北京'</code></td></tr>
+        <tr><td><code>SUBSTR(s, pos, len)</code></td><td>取子串，pos 从 1 开始</td><td><code>SUBSTR('2024-04-22',1,7)</code></td><td><code>'2024-04'</code></td></tr>
+        <tr><td><code>LEFT(s,n)</code> / <code>RIGHT(s,n)</code></td><td>取左 / 右 n 个字符</td><td><code>LEFT('张伟',1)</code></td><td><code>'张'</code></td></tr>
+        <tr><td><code>TRIM(s)</code></td><td>去掉首尾空格（还有 LTRIM / RTRIM）</td><td><code>TRIM('  北京  ')</code></td><td><code>'北京'</code></td></tr>
+        <tr><td><code>REPLACE(s,a,b)</code></td><td>把 a 全部替换成 b</td><td><code>REPLACE('金卡','卡','')</code></td><td><code>'金'</code></td></tr>
+        <tr><td><code>INSTR(s, sub)</code></td><td>子串首次出现位置，找不到返回 0</td><td><code>INSTR('abc-def','-')</code></td><td>4</td></tr>
+        <tr><td><code>LPAD(s,n,p)</code> / <code>RPAD</code></td><td>左 / 右填充到 n 个字符</td><td><code>LPAD('7',3,'0')</code></td><td><code>'007'</code></td></tr>
+        <tr><td><code>SUBSTRING_INDEX(s,d,n)</code></td><td>按分隔符取第 n 段（负数从右数）</td><td><code>SUBSTRING_INDEX('a-b-c','-',2)</code></td><td><code>'a-b'</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><code>LENGTH()</code> 是字节、<code>CHAR_LENGTH()</code> 是字符；<code>CONCAT()</code> 遇 NULL 全为 NULL。这两个坑在数据清洗与报表里出现频率最高。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把函数套在索引列上会直接放弃索引，例如 <code>WHERE SUBSTR(phone,1,3)='138'</code> 只能全表扫描；应改写成 <code>WHERE phone LIKE '138%'</code> 或范围条件。PostgreSQL 可用函数索引缓解，MySQL 8.0 需要改用生成列 + 索引。</p></div>
+
+    <!-- 交互演示面板 ①：函数实验室 -->
+    <div class="demo" id="demo-fnlab">
+      <div class="dh"><span class="t">🖥 演示：函数实验室</span><span class="hint">选函数 + 改参数 → 真跑 SQL</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>函数</label>
+          <select id="fnSel"></select>
+        </div>
+        <div class="ctl" id="fnArgs"></div>
+        <div class="log" id="fnSql"></div>
+        <div id="fnOut"></div>
+        <div class="log" id="fnLog"></div>
+        <div class="foot">提示：面板用 <code>SQLSandbox.run()</code> 真的执行 <code>SELECT 函数(...)</code>，结果由练习台引擎算出，不是提前写死的数字；换函数、改参数都会立刻重算。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 知识点 2 -->
+  <section class="topic" id="fn-date">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>日期时间函数<span class="pt">date &amp; time functions · 截断、求差与格式化</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::fn-date"><span>已学会</span></label>
+    </div>
+    <p>日期时间函数解决三类问题：<strong>把时间粒度降下来</strong>（按天 / 月 / 季度分组）、<strong>求两个时间点的间隔</strong>（账期、留存、工龄）、<strong>按指定格式输出</strong>（报表与导出）。它们几乎总与 <code>GROUP BY</code> 一起出现。</p>
+    <p>选类型时先想清楚语义：<code>DATETIME</code> 存「墙上时间」，不随时区变化；<code>TIMESTAMP</code> 按 UTC 存储、按会话时区展示，范围只到 2038 年；<code>DATE</code> 只存日期。跨时区的系统用 <code>TIMESTAMP</code> 更省心，但要知道它的范围限制。</p>
+    <ul>
+      <li><code>DATEDIFF(a, b)</code> 算的是 <code>a - b</code> 的天数，单位固定为天，不按「整月」算；要按月用 <code>TIMESTAMPDIFF(MONTH, a, b)</code>。</li>
+      <li><code>DATE_FORMAT()</code> 适合展示，不适合过滤——过滤请用范围条件保留索引可用性。</li>
+      <li>做「补零」的连续日期序列要靠递归 CTE 或日历表，而不是靠日期函数。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>date-fn.sql</div>
+      <pre><code>-- 按月统计订单数与金额（内置 orders 表，2024-01 ~ 2024-04）
+SELECT DATE_FORMAT(order_date, '%Y-%m') AS 月份,
+       COUNT(*)                         AS 订单数,
+       SUM(amount)                      AS 金额
+FROM orders
+WHERE order_date &gt;= '2024-01-01'
+  AND order_date &lt;  '2024-05-01'
+GROUP BY DATE_FORMAT(order_date, '%Y-%m')
+ORDER BY 月份;</code></pre>
+    </div>
+    <p>预期结果（4 行）：<code>2024-01 / 3 单 / 1635</code>、<code>2024-02 / 3 单 / 2674</code>、<code>2024-03 / 3 单 / 1216</code>、<code>2024-04 / 3 单 / 3133</code>。注意 <code>WHERE</code> 用的是对<strong>常量</strong>的范围比较，<code>order_date</code> 上的索引仍然可用。</p>
+
+    <table class="tbl">
+      <thead><tr><th>函数</th><th>作用</th><th>示例</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td><code>NOW()</code> / <code>CURDATE()</code></td><td>当前时间 / 当前日期</td><td><code>CURDATE()</code></td><td><code>'2024-05-01'</code></td></tr>
+        <tr><td><code>YEAR(d)</code> <code>MONTH(d)</code> <code>DAY(d)</code></td><td>取年 / 月 / 日</td><td><code>MONTH('2024-04-22')</code></td><td>4</td></tr>
+        <tr><td><code>DATE(d)</code></td><td>取日期部分，丢掉时分秒</td><td><code>DATE('2024-04-22 15:30:00')</code></td><td><code>'2024-04-22'</code></td></tr>
+        <tr><td><code>DATE_FORMAT(d, fmt)</code></td><td>按格式输出</td><td><code>DATE_FORMAT('2024-04-22','%Y-%m')</code></td><td><code>'2024-04'</code></td></tr>
+        <tr><td><code>DATEDIFF(a, b)</code></td><td>相差天数 = a − b</td><td><code>DATEDIFF('2024-04-22','2024-04-02')</code></td><td>20</td></tr>
+        <tr><td><code>TIMESTAMPDIFF(u, a, b)</code></td><td>按单位 u 求差（秒/分/时/日/月/年）</td><td><code>TIMESTAMPDIFF(MONTH,'2024-01-05','2024-04-22')</code></td><td>3</td></tr>
+        <tr><td><code>DATE_ADD(d, INTERVAL n u)</code></td><td>加时间，<code>DATE_SUB</code> 为减</td><td><code>DATE_ADD('2024-01-31', INTERVAL 1 MONTH)</code></td><td><code>'2024-02-29'</code></td></tr>
+        <tr><td><code>LAST_DAY(d)</code></td><td>当月最后一天</td><td><code>LAST_DAY('2024-02-11')</code></td><td><code>'2024-02-29'</code></td></tr>
+        <tr><td><code>STR_TO_DATE(s, fmt)</code></td><td>字符串按格式转日期</td><td><code>STR_TO_DATE('22/04/2024','%d/%m/%Y')</code></td><td><code>'2024-04-22'</code></td></tr>
+        <tr><td><code>EXTRACT(u FROM d)</code></td><td>抽取某个部分</td><td><code>EXTRACT(QUARTER FROM '2024-04-22')</code></td><td>2</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>过滤用范围（<code>&gt;=</code> 起点 <code>AND &lt;</code> 下一个起点），展示才用 <code>DATE_FORMAT</code>。半年 / 季度这类「不存在的日期」由 <code>DATE_ADD</code> 自动收敛（1 月 31 日 + 1 月 = 2 月 29 日）。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>WHERE DATE_FORMAT(order_date,'%Y-%m')='2024-03'</code> 会让 <code>order_date</code> 上的索引失效，只能逐行求值；写成 <code>order_date &gt;= '2024-03-01' AND order_date &lt; '2024-04-01'</code> 才能用索引区间定位。</p></div>
+  </section>
+
+  <!-- 知识点 3 -->
+  <section class="topic" id="fn-numeric">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>数值函数与类型转换<span class="pt">numeric functions &amp; casting · 取整、取余与精度</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::fn-numeric"><span>已学会</span></label>
+    </div>
+    <p>数值函数负责取整、取余、绝对值与四舍五入，常出现在金额分摊、分页、分桶与奇偶判断里。比函数更重要的，是<strong>类型选择</strong>：金额、税率、汇率这类「必须精确」的数值一律用 <code>DECIMAL(p,s)</code>，不要用 <code>FLOAT</code> / <code>DOUBLE</code>——后者是二进制浮点，<code>0.1 + 0.2</code> 不等于 <code>0.3</code>，累加多次后误差会显形。</p>
+    <p>类型转换分显式与隐式。显式用 <code>CAST(x AS type)</code> 或 <code>CONVERT(x, type)</code>；隐式转换发生在比较、拼接、函数参数里，看着方便，实则危险：字符串转数字时非法内容会变成 0，数字与字符串比较时可能整列转类型从而放弃索引。</p>
+    <ul>
+      <li><code>ROUND(x, d)</code> 保留 d 位小数；<code>TRUNCATE(x, d)</code> 直接截断不进位，两者语义不同。</li>
+      <li><code>FLOOR</code> 向 −∞ 取整、<code>CEIL</code> 向 +∞ 取整，负数上表现与「去掉小数」不同：<code>FLOOR(-2.5) = -3</code>。</li>
+      <li><code>MOD(a,b)</code> 的符号跟随被除数；整除用 <code>DIV</code>（<code>7 DIV 2 = 3</code>）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>numeric.sql</div>
+      <pre><code>-- 订单明细的取整、分摊与奇偶判断（内置 order_items / products）
+SELECT oi.id,
+       oi.qty * oi.unit_price                       AS 小计,
+       ROUND(oi.qty * oi.unit_price, 1)             AS 保留一位,
+       FLOOR(oi.qty * oi.unit_price)                AS 向下取整,
+       CEIL(oi.qty * oi.unit_price / 3)             AS 三等分向上,
+       MOD(oi.order_id, 2)                          AS 订单号奇偶,
+       CAST(oi.qty AS DECIMAL(10,2)) / 3            AS 精确三等分
+FROM order_items oi
+WHERE oi.order_id = 1001
+ORDER BY oi.id;</code></pre>
+    </div>
+    <p>预期结果（2 行）：id=1 小计 129、三等分向上 43；id=2 小计 118、三等分向上 40。<code>MOD(1001,2)=1</code> 表示订单号为奇数。<code>CAST(... AS DECIMAL)</code> 后再除，得到精确小数而不是浮点近似值。</p>
+
+    <table class="tbl">
+      <thead><tr><th>函数</th><th>作用</th><th>示例</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td><code>ROUND(x, d)</code></td><td>四舍五入到 d 位小数</td><td><code>ROUND(2.567,2)</code></td><td>2.57</td></tr>
+        <tr><td><code>TRUNCATE(x, d)</code></td><td>截断到 d 位，不进位</td><td><code>TRUNCATE(2.567,2)</code></td><td>2.56</td></tr>
+        <tr><td><code>FLOOR(x)</code> / <code>CEIL(x)</code></td><td>向下 / 向上取整</td><td><code>FLOOR(-2.5)</code> / <code>CEIL(-2.5)</code></td><td>−3 / −2</td></tr>
+        <tr><td><code>ABS(x)</code></td><td>绝对值</td><td><code>ABS(-12.5)</code></td><td>12.5</td></tr>
+        <tr><td><code>MOD(a, b)</code></td><td>取余，符号随 a</td><td><code>MOD(1009,2)</code></td><td>1</td></tr>
+        <tr><td><code>DIV</code></td><td>整数除法</td><td><code>7 DIV 2</code></td><td>3</td></tr>
+        <tr><td><code>CAST(x AS type)</code></td><td>显式转换类型</td><td><code>CAST('12.5' AS DECIMAL(10,1))</code></td><td>12.5</td></tr>
+        <tr><td><code>CONVERT(x, type)</code></td><td>显式转换（也可转字符集）</td><td><code>CONVERT('2024-04-22', DATE)</code></td><td><code>'2024-04-22'</code></td></tr>
+        <tr><td><code>GREATEST(...)</code> / <code>LEAST(...)</code></td><td>多值中的最大 / 最小</td><td><code>GREATEST(3,9,5)</code></td><td>9</td></tr>
+        <tr><td><code>DECIMAL(p,s)</code></td><td>定点数，p 位有效、s 位小数</td><td><code>DECIMAL(10,2)</code></td><td>精确到分，金额首选</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>金额、税率一律 <code>DECIMAL</code>；取整要选对方向（<code>FLOOR</code> / <code>CEIL</code> / <code>ROUND</code> / <code>TRUNCATE</code> 四种语义）；<code>CAST</code> 是显式表达意图，比隐式转换可读也可控。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>ROUND</code> 的进位行为与数据类型有关，<code>FLOAT</code> / <code>DOUBLE</code> 上的结果可能与 <code>DECIMAL</code> 不同；<code>CAST('abc' AS SIGNED)</code> 得到 0 而不报错，脏数据会被静默当成 0 参与统计。其它数据库提示：PostgreSQL 用 <code>x::numeric</code> 转换，SQL Server 用 <code>CONVERT(numeric, x)</code>。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>条件表达式与结果重塑<br>CASE WHEN · 行列转换</h2>
+  </section>
+
+  <!-- 知识点 4 -->
+  <section class="topic" id="fn-case">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>CASE WHEN 与条件表达式<span class="pt">case expression · SQL 里的 if-else</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::fn-case"><span>已学会</span></label>
+    </div>
+    <p><code>CASE</code> 是 SQL 的条件表达式，相当于 if-else 链，有两种写法：<strong>搜索式</strong> <code>CASE WHEN 条件 THEN 值 … END</code> 逐条判断布尔条件；<strong>简单式</strong> <code>CASE 表达式 WHEN 值 THEN 值 … END</code> 等价于对表达式做等值比较。它不仅能放在 <code>SELECT</code> 里做标签，还能放进 <code>WHERE</code>、<code>GROUP BY</code>、<code>ORDER BY</code> 做动态分组与自定义排序。</p>
+    <p>与 <code>CASE</code> 配套的还有四个常用函数：<code>IF(cond,a,b)</code> 三元表达式、<code>IFNULL(x,y)</code> 处理单层 NULL、<code>COALESCE(a,b,c)</code> 取第一个非 NULL、<code>NULLIF(a,b)</code> 在相等时返回 NULL（常用于避免除零）。</p>
+    <ul>
+      <li><code>CASE</code> 只会命中<strong>第一个</strong>为真的分支，条件顺序决定结果；没有 <code>ELSE</code> 时返回 NULL。</li>
+      <li>判断 NULL 只能用 <code>IS NULL</code>；<code>WHEN NULL</code> 与 <code>WHEN city = NULL</code> 永远不成立，因为结果是 UNKNOWN。</li>
+      <li>条件聚合是 <code>CASE</code> 最有价值的用法：<code>SUM(CASE WHEN … THEN x ELSE 0 END)</code> 能把「行」折叠成「列」，这正是下一节行列转换的基础。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>case-when.sql</div>
+      <pre><code>-- 客户城市补全 + 订单金额分档 + 状态中文化（customers JOIN orders）
+SELECT c.id,
+       c.name,
+       COALESCE(c.city, '未知城市')                       AS 城市,
+       CASE
+         WHEN o.amount &gt;= 1000 THEN '大额'
+         WHEN o.amount &gt;= 100  THEN '中额'
+         ELSE '小额'
+       END                                                AS 金额档,
+       CASE o.status
+         WHEN 'paid'      THEN '已支付'
+         WHEN 'refunded'  THEN '已退款'
+         WHEN 'cancelled' THEN '已取消'
+         ELSE '其它'
+       END                                                AS 状态中文
+FROM customers c
+JOIN orders o ON c.id = o.customer_id
+ORDER BY o.amount DESC;</code></pre>
+    </div>
+    <p>预期结果：12 行（orders 全部 12 条都能匹配到客户；id=8 的客户没有订单，内连接后不出现）。最大一笔是 2297 的「大额 / 已支付」，最小一笔 59 是「小额 / 已支付」。</p>
+
+    <table class="tbl">
+      <thead><tr><th>表达式</th><th>作用</th><th>示例</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td><code>CASE WHEN 条件 THEN a ELSE b END</code></td><td>搜索式，条件为真取 a</td><td><code>CASE WHEN 2 &gt; 1 THEN 'Y' ELSE 'N' END</code></td><td><code>'Y'</code></td></tr>
+        <tr><td><code>CASE expr WHEN 值 THEN a END</code></td><td>简单式，等价等值比较</td><td><code>CASE 'paid' WHEN 'paid' THEN '已支付' END</code></td><td><code>'已支付'</code></td></tr>
+        <tr><td><code>IF(cond, a, b)</code></td><td>三元表达式</td><td><code>IF(1 = 1,'是','否')</code></td><td><code>'是'</code></td></tr>
+        <tr><td><code>IFNULL(x, y)</code></td><td>x 为 NULL 时取 y（只接两个参数）</td><td><code>IFNULL(NULL,'未知')</code></td><td><code>'未知'</code></td></tr>
+        <tr><td><code>COALESCE(a, b, c)</code></td><td>返回第一个非 NULL 值</td><td><code>COALESCE(NULL, NULL, 'x')</code></td><td><code>'x'</code></td></tr>
+        <tr><td><code>NULLIF(a, b)</code></td><td>a 等于 b 时返回 NULL</td><td><code>1 / NULLIF(0,0)</code></td><td>NULL（避免除零报错）</td></tr>
+        <tr><td><code>CASE WHEN x IS NULL …</code></td><td>NULL 判断的唯一正确写法</td><td><code>CASE WHEN city IS NULL THEN '未知' ELSE city END</code></td><td>id=8 得到 <code>'未知'</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b><code>CASE</code> 顺序敏感、无 <code>ELSE</code> 返回 NULL；条件聚合里用 <code>ELSE 0</code> 还是省略 <code>ELSE</code> 会影响 <code>COUNT</code>（NULL 不被计数），但 <code>SUM</code> 通常不受影响。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>CASE city WHEN NULL THEN '未知' ELSE city END</code> 永远走 <code>ELSE</code>，因为 <code>city = NULL</code> 是 UNKNOWN 而不是 TRUE。SQL Server 的 <code>ISNULL(x,y)</code> 只接两个参数、Oracle 的 <code>NVL</code> 同理，跨库时优先用标准的 <code>COALESCE</code>。</p></div>
+  </section>
+
+  <!-- 知识点 5 -->
+  <section class="topic" id="fn-pivot">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>行列转换（PIVOT）<span class="pt">pivot / unpivot · 窄表与宽表互转</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::fn-pivot"><span>已学会</span></label>
+    </div>
+    <p>数据库里存的是<strong>窄表</strong>（long format）：一行一个「月份 + 品类 + 金额」，方便写入与聚合；而报表和看板要的是<strong>宽表</strong>（wide format）：一行一个月，品类各占一列。把窄变宽就叫行列转换，也就是 PIVOT；反向的宽变窄叫 UNPIVOT。</p>
+    <p>MySQL <strong>没有</strong> <code>PIVOT</code> 关键字（SQL Server、Oracle 有，PostgreSQL 用 <code>crosstab</code>）。MySQL 的标准做法是<strong>条件聚合</strong>：用 <code>CASE WHEN</code> 把不属于当前列的值变成 0，再 <code>SUM</code> 起来，配合 <code>GROUP BY</code> 得到一行一个维度。</p>
+    <ul>
+      <li>列数固定时手写 <code>CASE WHEN</code> 最直接；列数不固定（品类会新增）需要动态 SQL：先用 <code>GROUP_CONCAT</code> 查出列清单，再 <code>PREPARE</code> + <code>EXECUTE</code> 拼语句。</li>
+      <li><code>ELSE 0</code> 让「该月没有这个品类」显示 0 而不是 NULL；如果业务上「没有」和「为 0」含义不同，就省略 <code>ELSE</code> 保留 NULL。</li>
+      <li>宽表列数一旦随数据变化，就不是稳定的表结构——大多数情况下更该在应用层或 BI 工具里做透视。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>pivot.sql</div>
+      <pre><code>-- 窄表 → 宽表：月份 × 品类 × 金额（orders + order_items + products）
+SELECT DATE_FORMAT(o.order_date, '%m')                                     AS 月份,
+       SUM(CASE WHEN p.category = '数码' THEN oi.qty * oi.unit_price ELSE 0 END) AS 数码,
+       SUM(CASE WHEN p.category = '图书' THEN oi.qty * oi.unit_price ELSE 0 END) AS 图书,
+       SUM(CASE WHEN p.category = '家居' THEN oi.qty * oi.unit_price ELSE 0 END) AS 家居,
+       SUM(oi.qty * oi.unit_price)                                         AS 合计
+FROM orders o
+JOIN order_items oi ON oi.order_id = o.id
+JOIN products p     ON p.id = oi.product_id
+GROUP BY DATE_FORMAT(o.order_date, '%m')
+ORDER BY 月份;</code></pre>
+    </div>
+    <p>预期结果（4 行 × 5 列）：<code>01 / 1428 / 118 / 89 / 1635</code>、<code>02 / 2297 / 59 / 318 / 2674</code>、<code>03 / 1127 / 0 / 89 / 1216</code>、<code>04 / 2796 / 0 / 337 / 3133</code>。3 月和 4 月没有卖出「图书」，靠 <code>ELSE 0</code> 显示为 0。</p>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>作用</th><th>示例</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td><code>SUM(CASE WHEN … THEN x ELSE 0 END)</code></td><td>条件聚合，窄表转宽表（列固定）</td><td><code>SUM(CASE WHEN category='数码' THEN qty*unit_price ELSE 0 END)</code></td><td>数码一列求和</td></tr>
+        <tr><td><code>COUNT(CASE WHEN … THEN 1 END)</code></td><td>统计满足条件的行数</td><td><code>COUNT(CASE WHEN status='paid' THEN 1 END)</code></td><td>10</td></tr>
+        <tr><td><code>GROUP_CONCAT(DISTINCT …)</code></td><td>把多行值合并成一个字符串（可用于生成动态列清单）</td><td><code>GROUP_CONCAT(DISTINCT category)</code></td><td><code>'数码,图书,家居'</code></td></tr>
+        <tr><td><code>UNION ALL</code></td><td>宽表转窄表，每列一段 SELECT</td><td><code>SELECT 月份,'数码',数码 FROM t UNION ALL SELECT 月份,'图书',图书 FROM t</code></td><td>长表</td></tr>
+        <tr><td><code>GROUP BY … WITH ROLLUP</code></td><td>在结果里追加汇总行</td><td><code>GROUP BY 月份 WITH ROLLUP</code></td><td>末尾一行合计</td></tr>
+        <tr><td><code>PREPARE / EXECUTE</code></td><td>动态 SQL，列数不固定时拼语句</td><td><code>SET @s = CONCAT('SELECT …', @cols, ' …');</code></td><td>运行时确定列</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>MySQL 的行列转换 = <strong>条件聚合</strong>：<code>GROUP BY</code> 定行、<code>CASE WHEN</code> 定列、<code>SUM</code> 定值。别去搜索 MySQL 的 <code>PIVOT</code> 语法，它不存在。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>漏掉 <code>GROUP BY</code> 会只出一行；品类值写错（比如数据里是 <code>'数码 '</code> 带空格）会让整列变成 0——排查时先 <code>GROUP BY p.category</code> 看真实取值。另外聚合列越多，SQL 越难维护，品类超过十来个就该考虑动态 SQL 或 BI 层透视。</p></div>
+
+    <!-- 交互演示面板 ②：行列转换演示器 -->
+    <div class="demo" id="demo-pivot">
+      <div class="dh"><span class="t">🖥 演示：行列转换（PIVOT）</span><span class="hint">点按钮切换窄表 / 宽表</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>视图</label>
+          <button class="b" data-pv="wide">▶ 转成宽表（CASE WHEN 聚合）</button>
+          <button class="b" data-pv="narrow">↺ 看原始窄表</button>
+        </div>
+        <div id="pvOut"></div>
+        <div class="log" id="pvSql"></div>
+        <div class="log" id="pvLog"></div>
+        <div class="foot">提示：窄表数据来自内置 <code>orders + order_items + products</code> 的连接结果（月份 × 品类 × 金额）。宽表由面板用与 SQL 相同的「条件聚合」逻辑算出，可以直接和上面的 <code>pivot.sql</code> 结果对照。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>递归 CTE 与 JSON<br>树形结构 · 半结构化数据</h2>
+  </section>
+
+  <!-- 知识点 6 -->
+  <section class="topic" id="cte-recursive">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>递归 CTE（树形结构 / 生成序列）<span class="pt">recursive CTE · 自己引用自己的查询</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::cte-recursive"><span>已学会</span></label>
+    </div>
+    <p>递归 CTE（recursive common table expression）用 <code>WITH RECURSIVE</code> 定义，由两部分拼成：<strong>锚点成员</strong>（anchor，产生第一批行，不引用自己）和<strong>递归成员</strong>（recursive member，引用 CTE 自身，不断用上一轮的结果算出下一轮），两者用 <code>UNION ALL</code> 连接。执行时先算锚点，再反复执行递归成员，直到某一轮不再产生新行。</p>
+    <p>它主要解决两类问题：<strong>树形 / 图结构</strong>——组织架构、商品类目、评论回复、物料 BOM；<strong>生成序列</strong>——连续日期、数字区间、补零用的日历表。这些用普通 <code>JOIN</code> 写不出来，因为层级深度事先不知道。</p>
+    <ul>
+      <li>递归必须有终止条件（<code>WHERE n &lt; 10</code>）或数据本身无环，否则会一直迭代。</li>
+      <li>MySQL 默认 <code>cte_max_recursion_depth = 1000</code>，超过会报错 <code>Recursive query aborted after 1001 iterations</code>；需要更深可 <code>SET SESSION cte_max_recursion_depth = 100000</code>。</li>
+      <li>维护一个 <code>path</code> 字符串列既方便展示层级，也是断环的常用手段。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>recursive-cte.sql</div>
+      <pre><code>-- ① 生成 1..10 的连续序列
+WITH RECURSIVE seq(n) AS (
+  SELECT 1                                  -- 锚点成员
+  UNION ALL
+  SELECT n + 1 FROM seq WHERE n &lt; 10         -- 递归成员 + 终止条件
+)
+SELECT n FROM seq ORDER BY n;
+
+-- ② 员工上下级树（employees.manager_id 为 NULL 表示顶层）
+WITH RECURSIVE tree AS (
+  SELECT id, name, manager_id, 1 AS lvl,
+         CAST(name AS CHAR(200)) AS path
+  FROM employees
+  WHERE manager_id IS NULL
+  UNION ALL
+  SELECT e.id, e.name, e.manager_id, t.lvl + 1,
+         CONCAT(t.path, ' &gt; ', e.name)
+  FROM employees e
+  JOIN tree t ON e.manager_id = t.id
+)
+SELECT lvl, name, path FROM tree ORDER BY lvl, id;</code></pre>
+    </div>
+    <p>预期结果：① 10 行，<code>1 … 10</code>；② 9 行，按层级排列——第 1 层 3 人（张伟、刘敏、赵磊），第 2 层 5 人（李娜、王强、陈晨、周涛、吴迪），第 3 层 1 人（孙悦，路径 <code>张伟 &gt; 李娜 &gt; 孙悦</code>）。</p>
+
+    <div class="mermaid">
+flowchart TD
+  A["锚点成员：manager_id IS NULL"] --> B["结果集 R1"]
+  B --> C["递归成员：JOIN tree ON e.manager_id = t.id"]
+  C --> D{"是否产生新行"}
+  D -- 是 --> B
+  D -- 否 --> E["递归终止，返回全部层级"]
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>关键点</th><th>作用</th><th>写法示例</th><th>结果 / 说明</th></tr></thead>
+      <tbody>
+        <tr><td>锚点成员</td><td>产生初始行，不引用 CTE</td><td><code>SELECT 1</code></td><td>一行：1</td></tr>
+        <tr><td>递归成员</td><td>引用 CTE 自身，逐层展开</td><td><code>SELECT n + 1 FROM seq WHERE n &lt; 10</code></td><td>2, 3, …, 10</td></tr>
+        <tr><td><code>UNION ALL</code></td><td>连接锚点与递归成员，保留重复行</td><td>必须写在两者之间</td><td>用 <code>UNION</code> 会额外去重，通常更慢</td></tr>
+        <tr><td><code>cte_max_recursion_depth</code></td><td>递归深度上限，默认 1000</td><td><code>SET SESSION cte_max_recursion_depth = 5000;</code></td><td>超限报错中止</td></tr>
+        <tr><td>路径列 <code>path</code></td><td>记录访问轨迹，用于展示与断环</td><td><code>CONCAT(t.path,' &gt; ',e.name)</code></td><td><code>'张伟 &gt; 李娜'</code></td></tr>
+        <tr><td>日期序列</td><td>生成连续日期做补零</td><td><code>DATE_ADD(dt, INTERVAL 1 DAY)</code></td><td><code>2024-01-01 … 2024-01-31</code></td></tr>
+        <tr><td>反向递归</td><td>从叶子往上找祖先</td><td><code>JOIN tree t ON e.id = t.manager_id</code></td><td>自底向上</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>锚点只执行一次，递归成员反复执行到「没有新行」为止。写的时候先问两句：起点是谁？下一轮怎么来？——再加上终止条件，递归 CTE 就成型了。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>数据里有环（A 的上级是 B、B 的上级又是 A）会导致无限递归直到触发深度上限报错。MySQL 8.0 没有 SQL 标准的 <code>CYCLE</code> 子句（PostgreSQL 14+ 才有），要在递归成员里用路径列 + <code>LOCATE</code> / <code>FIND_IN_SET</code> 排除已访问节点。练习台不支持 <code>WITH</code>，请到真实数据库验证。</p></div>
+
+    <!-- 交互演示面板 ③：递归 CTE 演示器 -->
+    <div class="demo" id="demo-rec">
+      <div class="dh"><span class="t">🖥 演示：递归 CTE 逐层展开</span><span class="hint">点「展开下一层」看每轮新增行</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>场景</label>
+          <select id="rcSel">
+            <option value="seq">生成 1..8 序列</option>
+            <option value="tree">员工上下级树</option>
+          </select>
+          <button class="b" id="rcStep">▶ 展开下一层</button>
+          <button class="b" id="rcReset">↺ 重来</button>
+        </div>
+        <div id="rcOut"></div>
+        <div class="log" id="rcLog"></div>
+        <div class="foot">提示：绿色行是本轮递归成员新产生的行。序列场景的终止条件是 <code>WHERE n &lt; 8</code>；员工树场景终止于「递归成员匹配不到任何行」，说明数据没有环。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 知识点 7 -->
+  <section class="topic" id="json-type">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>JSON 类型与函数<span class="pt">JSON type · 半结构化数据的存取</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::json-type"><span>已学会</span></label>
+    </div>
+    <p>MySQL 5.7 起提供原生 <code>JSON</code> 类型：写入时校验合法性，内部用二进制格式存储（读取比字符串解析快），并提供一整套函数与 <code>-&gt;</code> / <code>-&gt;&gt;</code> 运算符。8.0 又补上了 <code>JSON_TABLE</code>（把 JSON 数组展开成行）与多值索引（8.0.17+，可给数组元素建索引）。</p>
+    <p>它适合<strong>稀疏、易变、整块读写</strong>的属性：第三方回调原文、埋点事件参数、商品的可变规格。它不适合替代规范化列：高频过滤、连接、聚合的字段如果塞进 JSON，每次查询都要解析，而且普通索引用不上——只有「生成列 + 索引」或「多值索引」才能救回来。</p>
+    <ul>
+      <li><code>-&gt;</code> 等价于 <code>JSON_EXTRACT</code>，返回 JSON 类型，字符串值带双引号；<code>-&gt;&gt;</code> 再套一层 <code>JSON_UNQUOTE</code>，返回纯字符串。</li>
+      <li>路径语法：<code>$</code> 根、<code>$.key</code> 取字段、<code>$.arr[0]</code> 取数组元素、<code>$[*]</code> 匹配全部元素。</li>
+      <li>需要按 JSON 里的字段过滤时，加一个 <code>GENERATED ALWAYS AS (... STORED</code> 生成列再建索引，查询才能走索引。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>json.sql</div>
+      <pre><code>-- 客户扩展属性放在 JSON 列里，用生成列 + 索引支撑按城市过滤
+CREATE TABLE customer_profile (
+  customer_id BIGINT PRIMARY KEY,
+  info JSON NOT NULL,
+  city VARCHAR(32) GENERATED ALWAYS AS (info-&gt;&gt;'$.city') STORED,
+  KEY idx_city (city)
+);
+
+INSERT INTO customer_profile (customer_id, info) VALUES
+  (1, '{"city":"北京","tags":["高价值","活跃"],"vip":true}');
+
+-- 取值：-&gt; 返回带引号的 JSON，-&gt;&gt; 返回纯字符串
+SELECT info-&gt;'$.city'                          AS 带引号,
+       info-&gt;&gt;'$.city'                         AS 纯字符串,
+       JSON_EXTRACT(info, '$.tags[0]')         AS 首个标签,
+       JSON_UNQUOTE(JSON_EXTRACT(info, '$.vip')) AS 是否VIP,
+       JSON_LENGTH(info, '$.tags')             AS 标签个数
+FROM customer_profile;
+
+-- 把 JSON 数组展开成多行，再和普通表连接
+SELECT cp.customer_id, jt.tag
+FROM customer_profile cp
+JOIN JSON_TABLE(cp.info, '$.tags[*]' COLUMNS (tag VARCHAR(32) PATH '$')) jt
+WHERE cp.customer_id = 1;</code></pre>
+    </div>
+    <p>预期结果：第一段查询 1 行，<code>带引号 = "北京"</code>、<code>纯字符串 = 北京</code>、<code>首个标签 = "高价值"</code>、<code>是否VIP = true</code>、<code>标签个数 = 2</code>；第二段查询 2 行：<code>高价值</code>、<code>活跃</code>。</p>
+
+    <table class="tbl">
+      <thead><tr><th>函数 / 运算符</th><th>作用</th><th>示例</th><th>结果</th></tr></thead>
+      <tbody>
+        <tr><td><code>-&gt;</code></td><td>取 JSON 值，保留引号（= JSON_EXTRACT）</td><td><code>info-&gt;'$.city'</code></td><td><code>"北京"</code></td></tr>
+        <tr><td><code>-&gt;&gt;</code></td><td>取值并去掉引号（= JSON_UNQUOTE + JSON_EXTRACT）</td><td><code>info-&gt;&gt;'$.city'</code></td><td><code>北京</code></td></tr>
+        <tr><td><code>JSON_OBJECT(k, v, …)</code></td><td>构造 JSON 对象</td><td><code>JSON_OBJECT('city','北京')</code></td><td><code>{"city": "北京"}</code></td></tr>
+        <tr><td><code>JSON_ARRAY(…)</code></td><td>构造 JSON 数组</td><td><code>JSON_ARRAY(1,2)</code></td><td><code>[1, 2]</code></td></tr>
+        <tr><td><code>JSON_VALID(s)</code></td><td>校验是否为合法 JSON</td><td><code>JSON_VALID('{')</code></td><td>0</td></tr>
+        <tr><td><code>JSON_SET</code> / <code>JSON_REMOVE</code></td><td>修改 / 删除指定路径</td><td><code>JSON_SET('{"a":1}','$.b',2)</code></td><td><code>{"a": 1, "b": 2}</code></td></tr>
+        <tr><td><code>JSON_CONTAINS</code></td><td>判断是否包含某个值</td><td><code>JSON_CONTAINS('["a","b"]','"a"')</code></td><td>1</td></tr>
+        <tr><td><code>JSON_TABLE(doc, path …)</code></td><td>把 JSON 数组展开成行</td><td><code>JSON_TABLE(info,'$.tags[*]' COLUMNS(tag VARCHAR(32) PATH '$'))</code></td><td>每个标签一行</td></tr>
+        <tr><td><code>JSON_LENGTH(d)</code></td><td>数组 / 对象元素个数</td><td><code>JSON_LENGTH('[1,2,3]')</code></td><td>3</td></tr>
+        <tr><td><code>JSON_TYPE(v)</code></td><td>返回 JSON 值的类型名</td><td><code>JSON_TYPE('123')</code></td><td><code>'INTEGER'</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>JSON 列本身不能直接建普通索引；要按内部字段过滤，用 <strong>生成列（STORED）+ 索引</strong>，或 8.0.17+ 的多值索引。判断标准很简单：这个字段会被频繁过滤 / 连接 / 聚合吗？会，就拆成普通列。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>-&gt;</code> 和 <code>-&gt;&gt;</code> 差一个字符，返回的东西不同——拿 <code>-&gt;</code> 的结果去和普通字符串比较会因带引号而匹配失败。另外 JSON 列存大文档会让行变宽、缓冲池利用率下降。练习台不支持 JSON 函数，请到真实数据库验证。</p></div>
+
+    <!-- 交互演示面板 ④：JSON 路径提取 -->
+    <div class="demo" id="demo-json">
+      <div class="dh"><span class="t">🖥 演示：JSON 路径提取器</span><span class="hint">选路径或自己输入</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>路径</label>
+          <select id="jpSel"></select>
+          <input type="text" id="jpInput" value="$.city" style="width:200px;padding:5px 10px;border:1px solid #d3c9b0;border-radius:8px;font-family:'JetBrains Mono',Consolas,monospace;font-size:12.5px">
+        </div>
+        <div class="log" id="jpDoc"></div>
+        <div id="jpOut"></div>
+        <div class="log" id="jpLog"></div>
+        <div class="foot">提示：练习台不支持 JSON 函数，这个面板用同样的路径语义<strong>手工解析</strong>一份 JSON 文档，帮你建立「路径 → 值」的直觉；<code>info-&gt;'$.x'</code> 列是带引号的 JSON 文本，<code>info-&gt;&gt;'$.x'</code> 列是去掉引号后的字符串。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">04</span>选学 · 数据库编程<br>存储过程 · 函数 · 触发器</h2>
+  </section>
+
+  <!-- 知识点 8 -->
+  <section class="topic" id="proc">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>存储过程 / 函数 / 触发器（选学）<span class="pt">stored program · 把逻辑放进数据库</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="advanced::proc"><span>已学会</span></label>
+    </div>
+    <p>存储程序（stored program）是把一段逻辑保存在数据库里并由数据库执行的对象：<strong>存储过程</strong>用 <code>CALL</code> 调用、可以带流程控制与事务、能返回多个结果集；<strong>函数</strong>返回一个标量值，可以直接出现在 <code>SELECT</code> 里；<strong>触发器</strong>没有调用入口，在 <code>INSERT</code> / <code>UPDATE</code> / <code>DELETE</code> 前后自动执行，通过 <code>NEW</code> / <code>OLD</code> 访问行数据。</p>
+    <p>它们的价值在于<strong>把一次网络往返变成一次数据库内调用</strong>：批量数据迁移、复杂校验、审计留痕、定时任务都合适。代价同样明显——难单元测试、难版本管理、调试手段弱、跨数据库迁移成本高。所以业界更常见的做法是：业务逻辑放应用层，数据库层只保留<strong>数据完整性</strong>（约束、触发器做审计）与必要的批处理。</p>
+    <ul>
+      <li>能用一条集合 SQL 解决的，不要写逐行循环；游标逐行处理是性能与可维护性的双重负担。</li>
+      <li>存储过程里的显式事务要自己 <code>START TRANSACTION</code> / <code>COMMIT</code> / <code>ROLLBACK</code>，异常路径必须回滚。</li>
+      <li>触发器里出错会连带回滚触发它的那条语句，排查困难；审计类触发器要尽量简单、不要做重活。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>procedure.sql</div>
+      <pre><code>-- 存储过程：按部门整体调薪，无匹配则回滚
+DELIMITER //
+CREATE PROCEDURE raise_salary(IN p_dept VARCHAR(32), IN p_pct DECIMAL(5,2))
+BEGIN
+  DECLARE v_rows INT DEFAULT 0;
+  START TRANSACTION;
+  UPDATE employees
+     SET salary = ROUND(salary * (1 + p_pct / 100), 2)
+   WHERE dept = p_dept;
+  SET v_rows = ROW_COUNT();
+  IF v_rows = 0 THEN
+    ROLLBACK;
+    SELECT '未匹配到员工，已回滚' AS msg;
+  ELSE
+    COMMIT;
+    SELECT CONCAT('已调整 ', v_rows, ' 人') AS msg;
+  END IF;
+END //
+DELIMITER ;
+
+CALL raise_salary('技术', 5);
+
+-- 函数：只返回标量，可放进 SELECT 列表
+DELIMITER //
+CREATE FUNCTION order_level(p_amount DECIMAL(10,2)) RETURNS VARCHAR(8)
+  DETERMINISTIC
+BEGIN
+  RETURN CASE WHEN p_amount &gt;= 1000 THEN '大额'
+              WHEN p_amount &gt;= 100  THEN '中额'
+              ELSE '小额' END;
+END //
+DELIMITER ;
+
+SELECT id, amount, order_level(amount) AS 金额档 FROM orders ORDER BY amount DESC;
+
+-- 触发器：审计订单金额变更
+CREATE TABLE orders_audit (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  order_id BIGINT, old_amount DECIMAL(10,2),
+  new_amount DECIMAL(10,2), changed_at DATETIME
+);
+
+CREATE TRIGGER trg_orders_audit
+AFTER UPDATE ON orders
+FOR EACH ROW
+INSERT INTO orders_audit (order_id, old_amount, new_amount, changed_at)
+VALUES (OLD.id, OLD.amount, NEW.amount, NOW());</code></pre>
+    </div>
+    <p>预期结果：<code>CALL raise_salary('技术', 5)</code> 调整 4 名技术员工（张伟、李娜、王强、孙悦）并提交；<code>order_level</code> 把 12 条订单分成 4 个大额、5 个中额与 3 个小额；触发器在每次 <code>UPDATE orders</code> 后写入一行审计记录。</p>
+
+    <table class="tbl">
+      <thead><tr><th>对象</th><th>作用</th><th>示例</th><th>结果 / 特点</th></tr></thead>
+      <tbody>
+        <tr><td>存储过程</td><td>封装可带流程控制的逻辑，可返回多个结果集</td><td><code>CALL raise_salary('技术',5);</code></td><td>用 <code>CALL</code> 调用，参数支持 IN / OUT / INOUT</td></tr>
+        <tr><td>函数</td><td>返回单个标量值</td><td><code>SELECT order_level(1299);</code></td><td><code>'大额'</code>，可嵌入 <code>SELECT</code></td></tr>
+        <tr><td>触发器</td><td>在 DML 前后自动执行</td><td><code>AFTER UPDATE ON orders</code></td><td>用 <code>NEW</code> / <code>OLD</code> 访问行，无法主动回滚业务</td></tr>
+        <tr><td>事件</td><td>定时任务</td><td><code>CREATE EVENT … ON SCHEDULE EVERY 1 DAY</code></td><td>需 <code>event_scheduler = ON</code></td></tr>
+        <tr><td>游标</td><td>逐行处理结果集</td><td><code>DECLARE cur CURSOR FOR SELECT …</code></td><td>逐行慢，能集合运算就别用</td></tr>
+        <tr><td><code>DELIMITER</code></td><td>客户端指令，临时改语句结束符</td><td><code>DELIMITER //</code></td><td>不是服务器语法，只在命令行 / 客户端有效</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>存储程序是「把计算搬到数据旁边」的优化手段，不是架构必需。用它的三条理由：批处理省往返、需要数据库内事务、要强制审计；除此之外优先放在应用层。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>MySQL 的函数只能返回<strong>标量</strong>，不能像 PostgreSQL 那样 <code>SELECT * FROM fn()</code> 返回一张表；函数若参与复制或严格模式，应声明 <code>DETERMINISTIC</code> 或 <code>READS SQL DATA</code>，否则开启 <code>log_bin_trust_function_creators</code> 才允许创建。练习台不支持 DDL 与存储程序，请到真实数据库验证。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用递归 CTE 生成 2024-01-01 到 2024-12-31 的连续日期，再 <code>LEFT JOIN</code> orders 按天统计订单数，让没有订单的日期显示 0——这是典型的「补零」需求。</li>
+      <li>把 <code>pivot.sql</code> 改造成动态版本：先用 <code>GROUP_CONCAT(DISTINCT category)</code> 生成列清单，再用 <code>PREPARE</code> + <code>EXECUTE</code> 拼出完整语句，使新增品类时不用改 SQL。</li>
+      <li>给 employees 表加一条「张伟的 manager_id 指向孙悦」的数据，用路径列 + <code>LOCATE</code> 写出能自动断环的递归 CTE，验证它不会无限递归。</li>
+      <li>把客户的可变属性（例如 <code>tags</code> 数组）分别用「JSON 列 + 多值索引」和「子表 + 普通索引」两种方案实现，比较写入成本、查询写法与统计难度。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+/* ============================================================
+   CONFIG / QUZ —— 本页唯一的配置改动点
+   ============================================================ */
+const CONFIG = {
+  moduleId: "advanced",
+  title: "高级函数与特性",
+  eyebrow: "MODULE 13 · SQL / 数据库",
+  lead: "掌握字符串、日期、数值函数与条件表达式，学会用条件聚合做行列转换、用递归 CTE 处理树形结构，并了解 JSON 类型与存储程序的边界。",
+  points: ["fn-string","fn-date","fn-numeric","fn-case","fn-pivot","cte-recursive","json-type","proc"],
+  prev: "12-data-modeling.html",
+  next: "14-ops-security.html",
+};
+
+/* 考核题目 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"在 utf8mb4 字符集下执行下面这条语句，两个结果分别是多少？",
+    sql:"SELECT LENGTH('数据库'), CHAR_LENGTH('数据库');",
+    opts:["3 和 3","9 和 3","3 和 9","12 和 3"],
+    ans:1,
+    exp:"解析：LENGTH() 返回字节数，utf8mb4 下每个汉字占 3 字节，'数据库' 共 9 字节；CHAR_LENGTH() 返回字符个数，为 3。选项 A 把两者当成一回事；选项 C 把顺序弄反了；选项 D 误以为汉字占 4 字节——4 字节是 utf8mb4 里 emoji 的长度。"
+  },
+  {
+    type:"quiz",
+    q:"DATEDIFF('2024-04-22','2024-04-02') 的结果是？",
+    opts:["20","-20","19","2024"],
+    ans:0,
+    exp:"解析：DATEDIFF(expr1, expr2) 计算 expr1 − expr2 的天数，单位固定为天，所以是 20。选项 B 把两个参数顺序颠倒了；选项 C 误以为是「相隔几个整天再减一」；选项 D 是 YEAR() 之类函数的返回形式，与 DATEDIFF 无关。要按整月求差应改用 TIMESTAMPDIFF(MONTH, a, b)。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 中下面三个表达式的结果依次是？",
+    sql:"SELECT ROUND(2.5), ROUND(-2.5), ROUND(2.45, 1);",
+    opts:["2, -2, 2.4","2, -3, 2.5","3, -2, 2.4","3, -3, 2.5"],
+    ans:3,
+    exp:"解析：MySQL 对精确值采用「四舍五入远离零」的规则，所以 ROUND(2.5)=3、ROUND(-2.5)=-3；ROUND(2.45,1) 保留一位小数进位为 2.5。选项 A、C 把 2.5 当成银行家舍入（四舍六入五成双）得到 2，那是 Python 等语言的行为；选项 B、C 对负数的处理不正确。注意 DECIMAL 与 FLOAT/DOUBLE 上的结果可能不同。"
+  },
+  {
+    type:"quiz",
+    q:"客户 id=8 的 city 为 NULL，想把它显示成「未知」，下面哪一句能正确做到？",
+    opts:[
+      "CASE city WHEN NULL THEN '未知' ELSE city END",
+      "CASE WHEN city = NULL THEN '未知' ELSE city END",
+      "CASE WHEN city IS NULL THEN '未知' ELSE city END",
+      "IFNULL(city = NULL, '未知')"
+    ],
+    ans:2,
+    exp:"解析：NULL 只能用 IS NULL 判断，CASE WHEN city IS NULL 是唯一正确写法。选项 A 的简单 CASE 本质是等值比较 city = NULL，结果永远是 UNKNOWN，只会走 ELSE；选项 B 同样因为 = NULL 恒为 UNKNOWN 而失效；选项 D 写法本身就不对——IFNULL 的第一个参数是待判断的值，把布尔比较表达式塞进去既不能判空，返回结果也不是期望的 city 值。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 8.0 要把「月份 × 品类 × 金额」的窄表转成每个品类一列的宽表，正确做法是？",
+    opts:[
+      "用 CASE WHEN 品类='数码' THEN 金额 END 配合 SUM() + GROUP BY 月份",
+      "直接写 PIVOT(SUM(金额) FOR 品类 IN (…))",
+      "用 UNION ALL 把三行拼成三列",
+      "用 GROUP_CONCAT 把金额拼成逗号串就是宽表"
+    ],
+    ans:0,
+    exp:"解析：MySQL 没有 PIVOT 关键字，行列转换的标准写法是条件聚合——GROUP BY 决定行、CASE WHEN 决定列、SUM 决定值。选项 B 是 SQL Server / Oracle 的语法，在 MySQL 里会直接语法报错；选项 C 的 UNION ALL 是宽转窄（行数变多），无法把不同品类对齐到同一行的不同列；选项 D 得到的只是一个字符串，既不能继续参与计算，也不是多列结构。"
+  },
+  {
+    type:"quiz",
+    q:"下面两句统计出的 a 与 b 为什么不同？",
+    sql:"SELECT COUNT(CASE WHEN status='paid' THEN 1 END) AS a,\n       COUNT(CASE WHEN status='paid' THEN 1 ELSE 0 END) AS b\nFROM orders;",
+    opts:[
+      "两句结果相同，都是 10",
+      "a 得 10，b 得 12，因为 0 不是 NULL，COUNT 会把它一起计数",
+      "a 得 10，b 得 12，因为 COUNT 会忽略 CASE 的 ELSE 分支",
+      "a 会报错，COUNT 里不允许写 CASE 表达式"
+    ],
+    ans:1,
+    exp:"解析：orders 共 12 行，其中 paid 有 10 行。a 省略 ELSE，不匹配的行得到 NULL，COUNT 跳过 NULL，所以 a=10；b 写了 ELSE 0，不匹配的行是 0（非 NULL），COUNT 照样计数，所以 b=12。选项 A 忽略了 NULL 与 0 的区别；选项 C 的说法反了——COUNT 忽略的是 NULL 而不是 ELSE 分支；选项 D 不成立，COUNT 里完全可以写 CASE，这也是条件统计的常用写法。"
+  },
+  {
+    type:"quiz",
+    q:"关于 MySQL 8.0 的递归 CTE，下面说法正确的是？",
+    opts:[
+      "递归成员必须写在锚点成员之前",
+      "递归部分必须用 UNION（去重）而不能用 UNION ALL，否则一定无限递归",
+      "锚点成员先产生初始行，递归成员反复引用 CTE 自身直到不再产生新行",
+      "递归深度没有上限，可以放心生成任意长度的序列"
+    ],
+    ans:2,
+    exp:"解析：递归 CTE 由锚点成员与递归成员组成，锚点在前、递归成员在后，后者引用 CTE 自身逐轮展开，直到某一轮不再产生新行，这正是选项 C 的描述。选项 A 把顺序说反了；选项 B 也反了——标准写法是 UNION ALL，改成 UNION 只是额外去重、代价更高，而且并不能保证终止；选项 D 错误，MySQL 受 cte_max_recursion_depth 限制（默认 1000），超出会报错中止。"
+  },
+  {
+    type:"quiz",
+    q:"在 MySQL 8.0 中，info->'$.city' 与 info->>'$.city' 的区别是？",
+    opts:[
+      "->> 会去掉结果的 JSON 引号，-> 返回带引号的 JSON 值",
+      "->> 只能用于数组，-> 只能用于对象",
+      "两者完全等价，只是写法不同",
+      "->> 返回二进制，-> 返回文本"
+    ],
+    ans:0,
+    exp:"解析：-> 等价于 JSON_EXTRACT，返回 JSON 类型的值，字符串会带双引号；->> 在此基础上再套一层 JSON_UNQUOTE，返回去掉引号的普通字符串，所以可以直接和普通字符串比较。选项 B 编造了使用范围限制，两者对字段和数组元素都能用；选项 C 忽略了引号差异，拿 -> 的结果去等值比较字符串会匹配失败；选项 D 描述的是存储格式而不是这两个运算符的差别。"
+  },
+  {
+    type:"quiz",
+    q:"关于 MySQL 的存储过程、函数与触发器，下面说法错误的是？",
+    opts:[
+      "存储过程用 CALL 调用，函数可以直接出现在 SELECT 列表里",
+      "函数若要用于复制或严格模式，建议声明 DETERMINISTIC 或 READS SQL DATA",
+      "触发器没有返回值，通过 NEW / OLD 访问被修改的行数据",
+      "MySQL 的函数可以像 PostgreSQL 那样直接返回一张表，用 SELECT * FROM fn() 调用"
+    ],
+    ans:3,
+    exp:"解析：选项 D 是错误说法——MySQL 的函数只能返回一个标量值，要返回结果集必须用存储过程（或视图），SELECT * FROM fn() 是 PostgreSQL 集合返回函数的写法。选项 A 正确，CALL 与 SELECT 中的函数是两种不同的调用方式；选项 B 正确，声明确定性有助于二进制日志复制与严格模式下的创建；选项 C 也正确，触发器没有返回值，用 NEW（新行）与 OLD（旧行）访问数据。"
+  },
+  {
+    type:"interview",
+    q:"面试题：用递归 CTE 查员工上下级时，如果数据里出现环（A 的上级是 B、B 的上级又是 A），怎样避免无限递归？",
+    opts:[
+      "把 cte_max_recursion_depth 设为 0，直接关闭深度限制",
+      "在递归成员里维护一个路径字符串，用 LOCATE / FIND_IN_SET 判断当前 id 是否已在路径中，已存在就不再展开",
+      "给 manager_id 加索引，递归执行时会自动检测并断开环",
+      "把 UNION ALL 改成 UNION，就能自动断环"
+    ],
+    ans:1,
+    exp:"解析：MySQL 8.0 没有 SQL 标准的 CYCLE 子句（PostgreSQL 14+ 才有），通用做法是用 CAST(id AS CHAR) 之类累积一条路径，在递归成员里排除已经出现在路径中的节点。选项 A 既没有意义又掩盖了问题——把深度限制调小或关掉只会让错误更晚被发现；选项 C 混淆了目的，索引只影响查找速度，不会改变递归的终止条件；选项 D 的去重只在「整行完全相同」时生效，而路径不同意味着行不同，环依然会继续展开。"
+  },
+  {
+    type:"interview",
+    q:"面试题：为什么 WHERE DATE_FORMAT(order_date,'%Y-%m')='2024-03' 往往比范围条件慢很多？",
+    opts:[
+      "DATE_FORMAT 在三月可能返回 NULL，导致全表被过滤掉",
+      "前者是字符串比较，字符串比较天生比日期比较慢",
+      "两者的执行计划其实相同，只是前者写起来更短",
+      "对列做了函数运算后索引失效，只能逐行计算再比较；改写成范围条件才能让 B+ 树索引参与定位"
+    ],
+    ans:3,
+    exp:"解析：索引里存的是列的原始值，一旦列被函数包裹（条件变成非 sargable），优化器就无法用索引做区间定位，只能全表扫描并逐行求值。改写成 order_date >= '2024-03-01' AND order_date < '2024-04-01'，把运算放在常量一侧，索引区间扫描即可生效。选项 A 不成立，三月有订单数据，DATE_FORMAT 不会返回 NULL；选项 B 只是表象，根因是索引不可用；选项 C 与事实相反，两者的执行计划差别很大。"
+  }
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1）
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   演示面板 ①：函数实验室（选函数 + 改参数 → SQLSandbox.run 真跑）
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("demo-fnlab");
+  if(!host || !window.SQLSandbox) return;
+  const sel = document.getElementById("fnSel"),
+        argsBox = document.getElementById("fnArgs"),
+        sqlBox = document.getElementById("fnSql"),
+        out = document.getElementById("fnOut"),
+        log = document.getElementById("fnLog");
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const lit = s => { const t = String(s).trim(); return /^null$/i.test(t) ? "NULL" : "'" + String(s).replace(/'/g,"''") + "'"; };
+  const num = s => { const v = parseFloat(String(s).trim()); return isFinite(v) ? v : 0; };
+
+  const FN = [
+    {label:"UPPER(str) — 转大写", args:[{l:"字符串", d:"mysql"}], f:v=>`UPPER(${lit(v[0])})`},
+    {label:"LOWER(str) — 转小写", args:[{l:"字符串", d:"MySQL"}], f:v=>`LOWER(${lit(v[0])})`},
+    {label:"LENGTH(str) — 字节长度", args:[{l:"字符串", d:"数据库"}], f:v=>`LENGTH(${lit(v[0])})`},
+    {label:"CONCAT(a,b) — 拼接", args:[{l:"a", d:"北京"},{l:"b", d:"-金卡"}], f:v=>`CONCAT(${lit(v[0])},${lit(v[1])})`},
+    {label:"SUBSTR(s,pos,len) — 取子串", args:[{l:"字符串", d:"2024-04-22"},{l:"起始位置", d:"1"},{l:"长度", d:"7"}], f:v=>`SUBSTR(${lit(v[0])},${num(v[1])},${num(v[2])})`},
+    {label:"TRIM(str) — 去首尾空格", args:[{l:"字符串", d:"  北京  "}], f:v=>`TRIM(${lit(v[0])})`},
+    {label:"REPLACE(s,a,b) — 替换", args:[{l:"字符串", d:"金卡"},{l:"查找", d:"卡"},{l:"替换为", d:""}], f:v=>`REPLACE(${lit(v[0])},${lit(v[1])},${lit(v[2])})`},
+    {label:"LEFT(s,n) — 取左 n 个", args:[{l:"字符串", d:"张伟"},{l:"n", d:"1"}], f:v=>`LEFT(${lit(v[0])},${num(v[1])})`},
+    {label:"RIGHT(s,n) — 取右 n 个", args:[{l:"字符串", d:"金卡"},{l:"n", d:"1"}], f:v=>`RIGHT(${lit(v[0])},${num(v[1])})`},
+    {label:"INSTR(s,sub) — 子串位置", args:[{l:"字符串", d:"abc-def"},{l:"子串", d:"-"}], f:v=>`INSTR(${lit(v[0])},${lit(v[1])})`},
+    {label:"ROUND(x,d) — 四舍五入", args:[{l:"数值", d:"2.567"},{l:"小数位", d:"2"}], f:v=>`ROUND(${num(v[0])},${num(v[1])})`},
+    {label:"ABS(x) — 绝对值", args:[{l:"数值", d:"-12.5"}], f:v=>`ABS(${num(v[0])})`},
+    {label:"CEIL(x) — 向上取整", args:[{l:"数值", d:"2.1"}], f:v=>`CEIL(${num(v[0])})`},
+    {label:"FLOOR(x) — 向下取整", args:[{l:"数值", d:"2.9"}], f:v=>`FLOOR(${num(v[0])})`},
+    {label:"MOD(a,b) — 取余", args:[{l:"a", d:"1009"},{l:"b", d:"2"}], f:v=>`MOD(${num(v[0])},${num(v[1])})`},
+    {label:"COALESCE(a,b) — 首个非 NULL", args:[{l:"a（可填 NULL）", d:"NULL"},{l:"b", d:"未知"}], f:v=>`COALESCE(${lit(v[0])},${lit(v[1])})`},
+    {label:"IFNULL(x,y) — x 为 NULL 取 y", args:[{l:"x（可填 NULL）", d:"NULL"},{l:"y", d:"未知"}], f:v=>`IFNULL(${lit(v[0])},${lit(v[1])})`},
+    {label:"IF(cond,a,b) — 三元表达式", args:[{l:"条件", d:"1=1", opts:["1=1","1=2","NULL IS NULL"]},{l:"真值", d:"是"},{l:"假值", d:"否"}], f:v=>`IF(${v[0]},${lit(v[1])},${lit(v[2])})`},
+    {label:"NULLIF(a,b) — 相等返回 NULL", args:[{l:"a", d:"0"},{l:"b", d:"0"}], f:v=>`NULLIF(${num(v[0])},${num(v[1])})`},
+    {label:"YEAR(d) — 取年份", args:[{l:"日期", d:"2024-04-22"}], f:v=>`YEAR(${lit(v[0])})`},
+    {label:"MONTH(d) — 取月份", args:[{l:"日期", d:"2024-04-22"}], f:v=>`MONTH(${lit(v[0])})`},
+    {label:"DAY(d) — 取日", args:[{l:"日期", d:"2024-04-22"}], f:v=>`DAY(${lit(v[0])})`},
+    {label:"DATE(d) — 取日期部分", args:[{l:"日期时间", d:"2024-04-22 15:30:00"}], f:v=>`DATE(${lit(v[0])})`},
+    {label:"DATE_FORMAT(d,fmt) — 格式化", args:[{l:"日期", d:"2024-04-22"},{l:"格式", d:"%Y-%m", opts:["%Y-%m","%Y年%m月%d日","%m/%d","%Y-%m-%d"]}], f:v=>`DATE_FORMAT(${lit(v[0])},${lit(v[1])})`},
+    {label:"DATEDIFF(a,b) — 相差天数", args:[{l:"日期 a", d:"2024-04-22"},{l:"日期 b", d:"2024-04-02"}], f:v=>`DATEDIFF(${lit(v[0])},${lit(v[1])})`},
+    {label:"NOW() — 当前日期时间", args:[], f:()=>"NOW()"}
+  ];
+
+  FN.forEach((fn,i)=>{
+    const op = document.createElement("option");
+    op.value = String(i); op.textContent = fn.label;
+    sel.appendChild(op);
+  });
+
+  function buildArgs(){
+    const fn = FN[+sel.value];
+    argsBox.innerHTML = "";
+    fn.args.forEach((a,i)=>{
+      const lab = document.createElement("label");
+      lab.textContent = a.l;
+      let ctl;
+      if(a.opts){
+        ctl = document.createElement("select");
+        a.opts.forEach(o=>{
+          const op = document.createElement("option");
+          op.value = o; op.textContent = o;
+          if(o === a.d) op.selected = true;
+          ctl.appendChild(op);
+        });
+      } else {
+        ctl = document.createElement("input");
+        ctl.type = "text"; ctl.value = a.d; ctl.dataset.ai = String(i);
+        ctl.style.cssText = "width:130px;padding:5px 9px;border:1px solid #d3c9b0;border-radius:8px;font-family:'JetBrains Mono',Consolas,monospace;font-size:12.5px";
+      }
+      ctl.dataset.ai = String(i);
+      ctl.addEventListener("input", run);
+      ctl.addEventListener("change", run);
+      argsBox.appendChild(lab);
+      argsBox.appendChild(ctl);
+    });
+  }
+
+  function run(){
+    const fn = FN[+sel.value];
+    const vals = [...argsBox.querySelectorAll("[data-ai]")].map(el=>el.value);
+    const expr = fn.f(vals);
+    const sql = "SELECT " + expr + " AS result";
+    sqlBox.textContent = sql;
+    const r = SQLSandbox.run(sql);
+    if(r.error){
+      out.innerHTML = `<table class="dt"><thead><tr><th>表达式</th><th>结果</th></tr></thead><tbody><tr><td>${esc(expr)}</td><td class="null">引擎报错：${esc(r.error)}</td></tr></tbody></table>`;
+      log.textContent = "这条表达式练习台执行不了，请到真实数据库验证。";
+      return;
+    }
+    const row = r.rows[0] || [];
+    const cells = row.map(v=>v === null ? '<td class="null">NULL</td>' : `<td>${esc(v)}</td>`).join("");
+    out.innerHTML = `<table class="dt"><thead><tr><th>表达式</th>${r.columns.map(c=>`<th>${esc(c)}</th>`).join("")}</tr></thead><tbody><tr><td>${esc(expr)}</td>${cells}</tr></tbody></table>`;
+    log.textContent = "练习台已执行：" + sql + " → " + row.map(v=>v===null?"NULL":String(v)).join(", ");
+  }
+
+  sel.addEventListener("change", ()=>{ buildArgs(); run(); });
+  buildArgs();
+  run();
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ②：行列转换演示器（窄表 ⇄ 宽表，模式 B）
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("demo-pivot");
+  if(!host) return;
+  const out = document.getElementById("pvOut"),
+        sqlBox = document.getElementById("pvSql"),
+        log = document.getElementById("pvLog");
+
+  // 窄表：orders ⋈ order_items ⋈ products 按「月份 × 品类」聚合出的金额
+  const NARROW = [
+    ["01","数码",1428],["01","图书",118],["01","家居",89],
+    ["02","数码",2297],["02","图书",59],["02","家居",318],
+    ["03","数码",1127],["03","家居",89],
+    ["04","数码",2796],["04","家居",337]
+  ];
+  const CATS = ["数码","图书","家居"];
+  const MONTHS = ["01","02","03","04"];
+
+  function toWide(){
+    return MONTHS.map(m=>{
+      const cells = CATS.map(c=>{
+        let s = 0;
+        NARROW.forEach(r=>{ if(r[0]===m && r[1]===c) s += r[2]; });
+        return s;
+      });
+      const total = cells.reduce((a,b)=>a+b,0);
+      return [m].concat(cells, [total]);
+    });
+  }
+
+  function render(mode){
+    document.querySelectorAll("[data-pv]").forEach(b=>b.classList.toggle("on", b.dataset.pv===mode));
+    if(mode === "narrow"){
+      out.innerHTML = `<table class="dt"><thead><tr><th>月份</th><th>品类</th><th>金额</th></tr></thead><tbody>` +
+        NARROW.map(r=>`<tr><td class="key">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("") +
+        `</tbody></table>`;
+      sqlBox.textContent = "SELECT DATE_FORMAT(o.order_date,'%m') AS 月份, p.category, SUM(oi.qty*oi.unit_price) AS 金额 FROM orders o JOIN order_items oi ON oi.order_id=o.id JOIN products p ON p.id=oi.product_id GROUP BY 1,2 ORDER BY 1,2;";
+      log.textContent = "窄表（long format）：" + NARROW.length + " 行，每月 × 每品类一行。新增品类只会多出几行，表结构不用改。";
+      return;
+    }
+    const wide = toWide();
+    out.innerHTML = `<table class="dt"><thead><tr><th>月份</th>${CATS.map(c=>`<th>${c}</th>`).join("")}<th>合计</th></tr></thead><tbody>` +
+      wide.map(r=>`<tr><td class="key">${r[0]}</td>${r.slice(1,-1).map(v=>v===0?'<td class="null">0</td>':`<td>${v}</td>`).join("")}<td><b>${r[r.length-1]}</b></td></tr>`).join("") +
+      `</tbody></table>`;
+    sqlBox.textContent = "SELECT DATE_FORMAT(o.order_date,'%m') AS 月份, " + CATS.map(c=>`SUM(CASE WHEN p.category='${c}' THEN oi.qty*oi.unit_price ELSE 0 END) AS ${c}`).join(", ") + ", SUM(oi.qty*oi.unit_price) AS 合计 FROM orders o JOIN order_items oi ON oi.order_id=o.id JOIN products p ON p.id=oi.product_id GROUP BY DATE_FORMAT(o.order_date,'%m') ORDER BY 月份;";
+    log.textContent = "宽表（wide format）：" + NARROW.length + " 行压成 " + wide.length + " 行 × " + (CATS.length+2) + " 列；CASE WHEN 决定列、SUM 决定值、GROUP BY 月份决定行。空组合显示为 0（红色），来自 ELSE 0。";
+  }
+
+  document.querySelectorAll("[data-pv]").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.pv)));
+  render("wide");
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ③：递归 CTE 逐层展开（模式 C）
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("demo-rec");
+  if(!host) return;
+  const sel = document.getElementById("rcSel"),
+        stepBtn = document.getElementById("rcStep"),
+        resetBtn = document.getElementById("rcReset"),
+        out = document.getElementById("rcOut"),
+        log = document.getElementById("rcLog");
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const SEQ_N = 8;
+
+  const TREE = [
+    [1,"张伟","技术","—","张伟"],
+    [1,"刘敏","市场","—","刘敏"],
+    [1,"赵磊","财务","—","赵磊"],
+    [2,"李娜","技术","张伟","张伟 > 李娜"],
+    [2,"王强","技术","张伟","张伟 > 王强"],
+    [2,"陈晨","市场","刘敏","刘敏 > 陈晨"],
+    [2,"周涛","市场","刘敏","刘敏 > 周涛"],
+    [2,"吴迪","财务","赵磊","赵磊 > 吴迪"],
+    [3,"孙悦","技术","李娜","张伟 > 李娜 > 孙悦"]
+  ];
+
+  function seqSteps(){
+    const st = [];
+    for(let n=1;n<=SEQ_N;n++){
+      st.push({
+        rows: Array.from({length:n},(_,i)=>[i+1]),
+        fresh: 1,
+        note: n === 1
+          ? "锚点成员 SELECT 1 产生第 1 行"
+          : "递归成员 SELECT n + 1 FROM seq WHERE n < " + SEQ_N + " 产生第 " + n + " 行"
+      });
+    }
+    st.push({
+      rows: Array.from({length:SEQ_N},(_,i)=>[i+1]),
+      fresh: 0,
+      note: "第 " + SEQ_N + " 轮之后 WHERE n < " + SEQ_N + " 不再成立 → 递归终止，共 " + SEQ_N + " 行"
+    });
+    return st;
+  }
+
+  function treeSteps(){
+    const st = [];
+    let acc = [];
+    [1,2,3].forEach(lv=>{
+      const add = TREE.filter(r=>r[0]===lv);
+      acc = acc.concat(add);
+      st.push({
+        rows: acc.slice(),
+        fresh: add.length,
+        note: lv === 1
+          ? "锚点成员 WHERE manager_id IS NULL 产生 3 个顶层员工"
+          : "递归成员 JOIN tree ON e.manager_id = t.id 展开第 " + lv + " 层，新增 " + add.length + " 行"
+      });
+    });
+    st.push({
+      rows: acc.slice(),
+      fresh: 0,
+      note: "递归成员匹配不到任何行 → 递归终止，共 " + acc.length + " 行（说明数据里没有环）"
+    });
+    return st;
+  }
+
+  let mode = "seq", STEPS = seqSteps(), i = 0;
+
+  function render(){
+    const st = STEPS[Math.min(i, STEPS.length-1)];
+    const isSeq = mode === "seq";
+    const head = isSeq
+      ? "<tr><th>层级</th><th>n</th></tr>"
+      : "<tr><th>层级</th><th>姓名</th><th>部门</th><th>上级</th><th>path</th></tr>";
+    const start = st.rows.length - st.fresh;
+    const body = st.rows.map((r,k)=>{
+      const cls = k >= start && st.fresh > 0 ? ' class="match"' : "";
+      return "<tr" + cls + ">" + r.map((c,ci)=>ci === 0 ? `<td class="key">${esc(c)}</td>` : `<td>${esc(c)}</td>`).join("") + "</tr>";
+    }).join("");
+    out.innerHTML = `<table class="dt"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+    log.innerHTML = "<b>第 " + (Math.min(i, STEPS.length-1)+1) + " 轮</b>：" + esc(st.note);
+    stepBtn.disabled = i >= STEPS.length-1;
+  }
+
+  stepBtn.addEventListener("click", ()=>{ i = Math.min(i+1, STEPS.length-1); render(); });
+  resetBtn.addEventListener("click", ()=>{ i = 0; render(); });
+  sel.addEventListener("change", ()=>{
+    mode = sel.value;
+    STEPS = mode === "seq" ? seqSteps() : treeSteps();
+    i = 0;
+    render();
+  });
+  render();
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ④：JSON 路径提取器（练习台不支持 JSON，手工解析演示）
+   ------------------------------------------------------------ */
+(function(){
+  const host = document.getElementById("demo-json");
+  if(!host) return;
+  const sel = document.getElementById("jpSel"),
+        inp = document.getElementById("jpInput"),
+        docBox = document.getElementById("jpDoc"),
+        out = document.getElementById("jpOut"),
+        log = document.getElementById("jpLog");
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const DOC = {"customer_id":1,"city":"北京","level":"金卡","tags":["高价值","活跃"],"vip":true,"orders":[{"id":1001,"amount":247},{"id":1002,"amount":1299}]};
+  const PATHS = ["$.city","$.level","$.vip","$.tags[0]","$.tags[1]","$.tags","$.orders[0].amount","$.orders[1].id","$.customer_id","$.missing"];
+
+  docBox.textContent = "info = " + JSON.stringify(DOC);
+
+  PATHS.forEach(p=>{
+    const op = document.createElement("option");
+    op.value = p; op.textContent = p;
+    sel.appendChild(op);
+  });
+
+  function brief(v){
+    const s = typeof v === "string" ? v : JSON.stringify(v);
+    return s && s.length > 28 ? s.slice(0,28) + "…" : s;
+  }
+
+  function walk(path){
+    const p = String(path).trim();
+    if(p === "$") return {ok:true, val:DOC, steps:["$ → 根对象"]};
+    if(p.charAt(0) !== "$") return {ok:false, err:"路径必须以 $ 开头"};
+    const parts = p.slice(1).match(/\.[A-Za-z_][A-Za-z0-9_]*|\[\d+\]/g) || [];
+    let cur = DOC;
+    const steps = ["$ → 根对象"];
+    for(const part of parts){
+      if(part.charAt(0) === "."){
+        const key = part.slice(1);
+        if(cur === null || typeof cur !== "object" || !(key in cur)){
+          return {ok:true, val:undefined, steps: steps.concat([part + " → 不存在"])};
+        }
+        cur = cur[key];
+        steps.push(part + " → " + brief(cur));
+      } else {
+        const idx = parseInt(part.slice(1,-1), 10);
+        if(!Array.isArray(cur) || idx >= cur.length){
+          return {ok:true, val:undefined, steps: steps.concat([part + " → 越界"])};
+        }
+        cur = cur[idx];
+        steps.push(part + " → " + brief(cur));
+      }
+    }
+    return {ok:true, val:cur, steps:steps};
+  }
+
+  function cell(v){
+    if(v === undefined) return '<td class="null">NULL</td>';
+    return "<td>" + esc(typeof v === "string" ? v : JSON.stringify(v)) + "</td>";
+  }
+
+  function jsonCell(v){
+    if(v === undefined) return '<td class="null">NULL</td>';
+    return "<td>" + esc(JSON.stringify(v)) + "</td>";
+  }
+
+  function render(){
+    const custom = inp.value.trim();
+    const list = PATHS.slice();
+    if(custom && list.indexOf(custom) < 0) list.push(custom);
+    const active = custom || sel.value;
+
+    out.innerHTML = `<table class="dt"><thead><tr><th>路径</th><th>info->'路径'（JSON 值）</th><th>info->>'路径'（去引号字符串）</th></tr></thead><tbody>` +
+      list.map(p=>{
+        const r = walk(p);
+        const cls = p === active ? ' class="hl"' : "";
+        if(!r.ok) return `<tr${cls}><td class="key">${esc(p)}</td><td class="null" colspan="2">${esc(r.err)}</td></tr>`;
+        return `<tr${cls}><td class="key">${esc(p)}</td>${jsonCell(r.val)}${cell(r.val)}</tr>`;
+      }).join("") +
+      `</tbody></table>`;
+
+    const cur = walk(active);
+    if(!cur.ok){ log.textContent = "路径不合法：" + cur.err; return; }
+    log.textContent = "取值过程：" + cur.steps.join("  →  ") +
+      (cur.val === undefined ? "；该路径不存在，MySQL 中返回 NULL。" : "；最终值 " + (typeof cur.val === "string" ? cur.val : JSON.stringify(cur.val)));
+  }
+
+  sel.addEventListener("change", ()=>{ inp.value = sel.value; render(); });
+  inp.addEventListener("input", render);
+  inp.value = PATHS[0];
+  render();
+})();
+</script>
+</body>
+</html>

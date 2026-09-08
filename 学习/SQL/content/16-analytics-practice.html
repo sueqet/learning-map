@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据分析实战 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 数据分析实战：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 00 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">这里是本模块的一句话引言，用来说明你将学到什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能用 SQL 把业务过程拆成漏斗，算清每一步的环节转化率与整体转化率，并指出流失最大的一环。</li>
+      <li>能说清留存率的三要素口径（新增定义、活跃定义、时间粒度），并写出同期群（cohort）分析 SQL。</li>
+      <li>能按实验分组汇总核心指标，计算绝对差与相对提升，并用 z 检验判断差异是否显著。</li>
+      <li>能写出同比（YoY）、环比（MoM）与累计（YTD）指标，并用 NULLIF / COALESCE 处理基期缺失与除零。</li>
+      <li>能按 R / F / M 三个维度把用户分成 8 类，并为每一类给出对应的运营动作。</li>
+      <li>能把分析 SQL 组织成可复用、可对账、可定时调度的报表，并知道幂等重跑的做法。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握 SELECT / WHERE / GROUP BY / HAVING / ORDER BY、多表 JOIN 与子查询（模块 02–05），以及聚合函数与日期函数（模块 13）。本页示例统一跑在内置的 customers / orders / products / order_items / employees 上；漏斗一节额外补充了一张 events 事件表。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>增长分析：漏斗 · 留存 · 实验</h2>
+  </section>
+
+  <!-- ================= 知识点 1：漏斗分析 ================= -->
+  <section class="topic" id="biz-funnel">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>漏斗分析<span class="pt">funnel analysis · 定位每一步的流失</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="analytics::biz-funnel"><span>已学会</span></label>
+    </div>
+
+    <p>漏斗分析（funnel analysis）把用户完成一个目标的全过程拆成<strong>有序的若干环节</strong>，统计每个环节的到达人数与转化率，从而把「转化率低」这种模糊结论，变成「加购到下单掉了 33%，主要流失在这一步」这种可执行的结论。电商最典型的漏斗是：浏览商品 → 加入购物车 → 提交订单 → 支付成功。</p>
+
+    <p>写好漏斗 SQL 的前提是把口径定死，一共三件事：<strong>窗口期</strong>（同一次会话内、7 天内还是 30 天内完成算一次漏斗）、<strong>去重粒度</strong>（按 user_id 去重，而不是数事件条数）、<strong>顺序</strong>（必须按时间先后完成，不能只看「各环节各自有多少人」）。口径一变，漏斗数字会完全不同，所以报表里必须写明窗口与去重方式。</p>
+
+    <ul>
+      <li>环节转化率 = 本环节人数 ÷ 上一环节人数；整体转化率 = 末环节人数 ÷ 首环节人数，两者含义不同，不要混用。</li>
+      <li>用 <code>COUNT(*)</code> 统计环节人数会把同一用户重复触发的事件算多次，导致人数虚高；漏斗里应当用 <code>COUNT(DISTINCT user_id)</code>。</li>
+      <li>严格漏斗必须先取每个用户每个环节的最早时间，再判断时间是否单调递增；「各环节独立去重人数」只是它的上界。</li>
+    </ul>
+
+    <p>下面的 <code>events</code> 表是本页补充的事件表，字段含义：<code>user_id</code> 用户 id（对应 customers.id）、<code>step</code> 环节（view 浏览 / cart 加购 / order 提交订单 / pay 支付成功）、<code>day</code> 相对天数（1 表示第 1 天，用于判断顺序）。表中 10 个用户产生 24 条事件，其中用户 1 重复浏览了两次，正好用来对比去重与否的差别。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>funnel.sql</div>
+      <pre><code>-- ① 各环节去重人数（漏斗的第一步）
+SELECT step,
+       COUNT(*)                AS 事件数,      -- 会被重复事件放大
+       COUNT(DISTINCT user_id) AS 去重人数     -- 漏斗应该看这个
+FROM events
+GROUP BY step;
+
+-- ② 严格「有序漏斗」：先取每个用户每个环节的最早时间，再判断时间单调递增
+--    练习台不支持窗口函数与 WITH，请到真实 MySQL 8.0 验证
+WITH f AS (
+  SELECT user_id,
+         MIN(CASE WHEN step = 'view'  THEN day END) AS t_view,
+         MIN(CASE WHEN step = 'cart'  THEN day END) AS t_cart,
+         MIN(CASE WHEN step = 'order' THEN day END) AS t_order,
+         MIN(CASE WHEN step = 'pay'   THEN day END) AS t_pay
+  FROM events
+  GROUP BY user_id
+)
+SELECT COUNT(*)                                          AS 浏览人数,
+       SUM(t_cart  IS NOT NULL AND t_cart  &gt;= t_view)   AS 加购人数,
+       SUM(t_order IS NOT NULL AND t_order &gt;= t_cart)   AS 下单人数,
+       SUM(t_pay   IS NOT NULL AND t_pay   &gt;= t_order)  AS 支付人数
+FROM f;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>环节</th><th>去重人数</th><th>环节转化率</th><th>累计转化率</th><th>流失人数</th></tr></thead>
+      <tbody>
+        <tr><td>view 浏览商品</td><td>10</td><td>—</td><td>100.0%</td><td>—</td></tr>
+        <tr><td>cart 加入购物车</td><td>6</td><td>60.0%</td><td>60.0%</td><td>4</td></tr>
+        <tr><td>order 提交订单</td><td>4</td><td>66.7%</td><td>40.0%</td><td>2</td></tr>
+        <tr><td>pay 支付成功</td><td>3</td><td>75.0%</td><td>30.0%</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>漏斗 = 口径（窗口 + 去重 + 顺序）+ 两个转化率（环节转化率看单步健康度，整体转化率看全链路效率）。报数字时必须连口径一起报，否则数字没有意义。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>用「各环节独立人数」当漏斗（如 10 → 6 → 4 → 3）会忽略顺序，真实数据里会有用户先加购、后浏览甚至只支付不浏览，导致人数被高估；正确做法是先按用户取各环节最早时间再校验单调。另外 <code>COUNT(*)</code> 会把重复事件算进去，本页数据里浏览环节会从 10 虚高到 11。</p></div>
+
+    <p><b>性能提示：</b><code>events</code> 表建议在 <code>(step, user_id)</code> 或 <code>(user_id, day)</code> 上建索引，并按时间做分区；漏斗查询通常只需扫最近 7–30 天的分区，避免全表扫描。</p>
+
+    <div id="demo-funnel"></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：漏斗转化计算器</span><span class="hint">改人数 → 实时重算各步转化率</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>浏览</label><input type="number" id="fn1" value="1000" min="0" max="99999" style="width:88px">
+          <label>加购</label><input type="number" id="fn2" value="600" min="0" max="99999" style="width:88px">
+          <label>下单</label><input type="number" id="fn3" value="240" min="0" max="99999" style="width:88px">
+          <label>支付</label><input type="number" id="fn4" value="180" min="0" max="99999" style="width:88px">
+        </div>
+        <div id="funnelOut"></div>
+        <div id="funnelTable"></div>
+        <div class="log" id="funnelLog"></div>
+        <div class="foot">提示：环节转化率 = 本环节人数 ÷ 上一环节人数；累计转化率 = 本环节人数 ÷ 首环节人数。改一个数字，两个转化率会同时变化。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 知识点 2：留存与同期群 ================= -->
+  <section class="topic" id="biz-retention">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>留存与同期群分析<span class="pt">retention &amp; cohort · 看长期价值</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="analytics::biz-retention"><span>已学会</span></label>
+    </div>
+
+    <p>留存（retention）衡量的是「某批用户在之后的时间里还有多少比例继续使用产品」；同期群分析（cohort analysis）则是把用户<strong>按首次行为的时间分组</strong>，分别追踪每一组的留存曲线。它的价值在于：整体留存率会被「新用户占比」这种结构变化污染，而同期群把不同批次的用户分开看，趋势才是干净的。</p>
+
+    <p>算留存之前必须先回答三个口径问题：<strong>新增怎么定义</strong>（注册、首次下单还是首次活跃）、<strong>活跃怎么定义</strong>（登录、下单还是打开 App）、<strong>时间粒度</strong>（日 / 周 / 月）。最常用的两个数字是 <b>D1 次留</b>（首日后第 1 天仍活跃人数 ÷ 首日新增人数）和 <b>D7 七留</b>，它们反映的是新用户第一次体验的质量。</p>
+
+    <ul>
+      <li>留存矩阵的行是同期群、列是第 N 天，右上角天然是空的（还没观测到），比较时只能比同一列。</li>
+      <li>累计留存（截至第 N 天有过活跃）只增不减；同期群留存（恰好第 N 天活跃）可升可降，两者别混。</li>
+      <li>把老用户混进「新增」、或拿「当日活跃 ÷ 当日新增」当留存，都是最常见的数据事故。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>retention.sql</div>
+      <pre><code>-- ① 以「首单月」为同期群，统计同期群规模与「首单后再次购买」的人数
+SELECT DATE_FORMAT(f.first_day, '%Y-%m')       AS 同期群,
+       COUNT(DISTINCT f.customer_id)           AS 同期群人数,
+       COUNT(*)                                AS 累计订单数,
+       COUNT(DISTINCT CASE WHEN o.order_date &gt; f.first_day
+                           THEN o.customer_id END) AS 复购人数
+FROM (SELECT customer_id, MIN(order_date) AS first_day
+      FROM orders
+      WHERE status = 'paid'
+      GROUP BY customer_id) f
+JOIN orders o
+  ON o.customer_id = f.customer_id
+ AND o.status = 'paid'
+GROUP BY DATE_FORMAT(f.first_day, '%Y-%m');
+
+-- ② 日粒度留存矩阵（首日新增 → D1 / D7）
+--    练习台不支持窗口函数，请到真实 MySQL 8.0 验证
+SELECT DATE(login_time)                                        AS 首日,
+       COUNT(DISTINCT user_id)                                 AS 新增人数,
+       COUNT(DISTINCT CASE WHEN DATEDIFF(login_time, first_day) = 1 THEN user_id END) AS D1,
+       COUNT(DISTINCT CASE WHEN DATEDIFF(login_time, first_day) = 7 THEN user_id END) AS D7
+FROM (SELECT user_id, login_time,
+             MIN(DATE(login_time)) OVER (PARTITION BY user_id) AS first_day
+      FROM user_login) t
+GROUP BY DATE(first_day)
+ORDER BY 首日;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>指标</th><th>口径定义</th><th>本页数据结果</th><th>常见误用</th></tr></thead>
+      <tbody>
+        <tr><td>同期群人数</td><td>首单落在该月的去重客户数</td><td>2024-01：2 人；2024-02：2 人；2024-03：2 人；2024-04：1 人</td><td>用注册月却按订单月筛选，口径错位</td></tr>
+        <tr><td>复购人数</td><td>该同期群中在首单之后仍有 paid 订单的人数</td><td>2024-01：2；2024-02：0；2024-03：1；2024-04：1</td><td>把 refunded / cancelled 订单也算作复购</td></tr>
+        <tr><td>累计复购率</td><td>复购人数 ÷ 同期群人数</td><td>整体 4 / 6 = 66.7%</td><td>用累计复购率冒充 D1 次留</td></tr>
+        <tr><td>D1 次留</td><td>首日后第 1 天仍活跃 ÷ 首日新增</td><td>玩具数据量太小，需用下方计算器模拟</td><td>分母用「当日活跃」而非「当日新增」</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>留存三问——新增是谁、活跃是什么、粒度多细。答不上来这三个问题，留存率一定算错。同期群分析的作用是让不同批次的用户可比，而不是让留存率变高。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>上面的同期群 SQL 里 <code>o.order_date &gt; f.first_day</code> 必须用<strong>严格大于</strong>，否则首单当天会被算成复购（用户 1 的首单 2024-01-05 与第二单 2024-01-20 都在 1 月，属于同月复购而非次日留存）。另外 2024-02 同期群复购为 0，是因为客户 3 的第二单 2024-02-15 状态是 refunded，被 <code>status = 'paid'</code> 过滤掉了——过滤条件必须与口径一致。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：同期群留存矩阵计算器</span><span class="hint">拖动滑块 → 实时生成 Cohort 表</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>首日新增</label><input type="range" id="rtSize" min="200" max="5000" step="100" value="1000" style="width:140px"><span class="log" id="rtSizeV" style="margin:0;padding:4px 10px"></span>
+          <label>次留率</label><input type="range" id="rtD1" min="5" max="80" value="38" style="width:140px"><span class="log" id="rtD1V" style="margin:0;padding:4px 10px"></span>
+          <label>7 留率</label><input type="range" id="rtD7" min="1" max="60" value="18" style="width:140px"><span class="log" id="rtD7V" style="margin:0;padding:4px 10px"></span>
+        </div>
+        <div id="rtOut"></div>
+        <div id="rtBars"></div>
+        <div class="log" id="rtLog"></div>
+        <div class="foot">提示：D0 恒为 100%（首日新增当天即活跃）；D1 是次留、D7 是七留，已在表头标 ★。中间天数按 D1→D7 几何衰减插值，真实数据里每个同期群的曲线并不相同。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 知识点 3：AB 实验 ================= -->
+  <section class="topic" id="biz-abtest">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>AB 实验与指标统计<span class="pt">A/B test · 用数据做决策</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="analytics::biz-abtest"><span>已学会</span></label>
+    </div>
+
+    <p>AB 实验（A/B test）把用户随机分成对照组与实验组，只改变一个变量（比如按钮颜色、推荐算法），然后比较两组的核心指标差异。它解决的是「改了之后到底有没有用」这个问题——没有对照组，任何涨幅都可能只是大盘波动或季节性造成的。</p>
+
+    <p>指标口径上有两个必须区分：<strong>核心指标</strong>（转化率、人均金额，用来判断成功与否）和<strong>护栏指标</strong>（退款率、崩溃率、客诉量，用来防止「赢了指标、输了体验」）。分子分母必须来自同一批用户、同一时间窗口，否则比较没有意义。</p>
+
+    <ul>
+      <li>绝对差（百分点）= 实验组转化率 − 对照组转化率；相对提升（lift）= 绝对差 ÷ 对照组转化率。</li>
+      <li>判断显著性常用两比例 z 检验：z = (p₁ − p₀) ÷ √(p̄(1 − p̄)(1/n₀ + 1/n₁))，p̄ 为合并转化率。</li>
+      <li>上线前先看分组比例（SRM）是否接近设计值，再看显著性，最后看业务收益是否值得。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>abtest.sql</div>
+      <pre><code>-- 用 customers.id 的奇偶模拟随机分桶（真实实验应使用实验平台的随机分组结果表）
+SELECT CASE WHEN c.id % 2 = 0 THEN 'A 实验组' ELSE 'B 对照组' END AS 分组,
+       COUNT(DISTINCT c.id)                                        AS 用户数,
+       COUNT(DISTINCT o.customer_id)                               AS 下单用户数,
+       ROUND(COUNT(DISTINCT o.customer_id)
+             / COUNT(DISTINCT c.id), 4)                            AS 转化率,
+       ROUND(SUM(o.amount) / COUNT(DISTINCT c.id), 2)              AS 人均金额,
+       ROUND(STDDEV_SAMP(o.amount), 2)                             AS 金额标准差
+FROM customers c
+LEFT JOIN orders o
+       ON o.customer_id = c.id
+      AND o.status = 'paid'
+GROUP BY CASE WHEN c.id % 2 = 0 THEN 'A 实验组' ELSE 'B 对照组' END;
+
+-- 护栏指标：两组退款率（用全部订单做分母，退款做分子）
+SELECT CASE WHEN c.id % 2 = 0 THEN 'A 实验组' ELSE 'B 对照组' END AS 分组,
+       COUNT(*)                                                    AS 订单数,
+       SUM(o.status = 'refunded')                                  AS 退款单数,
+       ROUND(SUM(o.status = 'refunded') / COUNT(*), 4)             AS 退款率
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+GROUP BY CASE WHEN c.id % 2 = 0 THEN 'A 实验组' ELSE 'B 对照组' END;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>分组</th><th>用户数</th><th>下单用户数</th><th>转化率</th><th>人均金额</th></tr></thead>
+      <tbody>
+        <tr><td>A 实验组（id 为偶数）</td><td>4</td><td>2</td><td>50.0%</td><td>411.25 元</td></tr>
+        <tr><td>B 对照组（id 为奇数）</td><td>4</td><td>4</td><td>100.0%</td><td>1641.50 元</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>先看分组比例，再看显著性，最后看业务价值。上表 A 组比 B 组低 50 个百分点，但每组只有 4 人——这种量级的差异完全是随机噪声，不能得出「实验组更差」的结论，这正是 AB 实验必须做显著性检验的原因。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>①只看相对提升不看绝对差：转化率 1%→1.2% 是「相对提升 20%」，但绝对只涨 0.2 个百分点，业务上可能毫无意义；②中途偷看结果就停止实验（peeking），会让假阳性大幅上升；③同一个用户被分到两组（分桶键不稳定）；④护栏指标恶化仍坚持上线。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：AB 实验显著性计算器</span><span class="hint">改样本量 / 转化数 → 实时算 z 值与 p 值</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>对照组人数</label><input type="number" id="abN0" value="2000" min="1" style="width:90px">
+          <label>转化数</label><input type="number" id="abX0" value="200" min="0" style="width:80px">
+          <label>实验组人数</label><input type="number" id="abN1" value="2000" min="1" style="width:90px">
+          <label>转化数</label><input type="number" id="abX1" value="240" min="0" style="width:80px">
+        </div>
+        <div id="abOut"></div>
+        <div class="log" id="abLog"></div>
+        <div class="foot">提示：p 值用正态近似（Abramowitz-Stegun 公式）计算，仅用于教学演示；生产环境请用双样本比例检验的精确实现。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>时间维度与用户分层</h2>
+  </section>
+
+  <!-- ================= 知识点 4：同比环比 ================= -->
+  <section class="topic" id="biz-yoy">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>同比环比与累计指标<span class="pt">YoY / MoM / YTD · 把趋势说清楚</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="analytics::biz-yoy"><span>已学会</span></label>
+    </div>
+
+    <p><strong>同比</strong>（YoY, year over year）是与去年同一期比，能剔除季节性；<strong>环比</strong>（MoM / QoQ）是与上一个相邻期比，反映短期波动。<strong>累计指标</strong>（YTD, year to date）是年初至今的累计值，用来看年度目标进度。三者回答的是不同问题，报表里通常要同时给出。</p>
+
+    <p>实现思路很统一：先用 <code>GROUP BY</code> 把数据按期间汇总成一张「期间汇总表」，再让它与「上一期」或「去年同期」的汇总表做自关联。这样每个月只有一行，避免把明细行直接关联导致金额被重复累加。</p>
+
+    <ul>
+      <li>增长率 = (本期 − 基期) ÷ 基期；基期为 0 时必须用 <code>NULLIF(基期, 0)</code> 保护，否则会得到 NULL 或报错。</li>
+      <li>基期没有数据时用 <code>COALESCE(基期, 0)</code> 保留行，但增长率应显示为「—」而不是 0%，因为 0% 和「无基期」含义完全不同。</li>
+      <li>对比不完整的月份（比如本月只过了 15 天）必须做天数对齐，否则同比环比都会被低估。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>yoy_mom.sql</div>
+      <pre><code>-- ① 月度汇总 + 同比增长率（自关联去年同期）
+SELECT m.ym                                      AS 月份,
+       m.amount                                  AS 本月金额,
+       COALESCE(y.amount, 0)                     AS 去年同期,
+       ROUND((m.amount - COALESCE(y.amount, 0))
+             / NULLIF(y.amount, 0) * 100, 1)     AS 同比增长率
+FROM (SELECT DATE_FORMAT(order_date, '%Y-%m') AS ym, SUM(amount) AS amount
+      FROM orders WHERE status = 'paid'
+      GROUP BY DATE_FORMAT(order_date, '%Y-%m')) m
+LEFT JOIN (SELECT DATE_FORMAT(order_date, '%Y-%m') AS ym, SUM(amount) AS amount
+           FROM orders WHERE status = 'paid'
+           GROUP BY DATE_FORMAT(order_date, '%Y-%m')) y
+       ON y.ym = DATE_FORMAT(DATE_SUB(CONCAT(m.ym, '-01'), INTERVAL 1 YEAR), '%Y-%m')
+ORDER BY m.ym;
+
+-- ② 环比：与上一期自关联（把上面的 INTERVAL 1 YEAR 换成 1 MONTH 即可）
+-- ③ 年初至今累计：练习台不支持窗口函数，用相关子查询代替
+SELECT a.ym AS 月份, a.amount AS 本月金额,
+       (SELECT SUM(b.amount)
+        FROM (SELECT DATE_FORMAT(order_date, '%Y-%m') AS ym, SUM(amount) AS amount
+              FROM orders WHERE status = 'paid'
+              GROUP BY DATE_FORMAT(order_date, '%Y-%m')) b
+        WHERE b.ym &lt;= a.ym) AS 年初至今累计
+FROM (SELECT DATE_FORMAT(order_date, '%Y-%m') AS ym, SUM(amount) AS amount
+      FROM orders WHERE status = 'paid'
+      GROUP BY DATE_FORMAT(order_date, '%Y-%m')) a
+ORDER BY a.ym;
+
+-- ④ 窗口函数写法（更简洁，但练习台不支持，请到真实 MySQL 8.0 验证）
+-- SELECT DATE_FORMAT(order_date, '%Y-%m') AS 月份, SUM(amount) AS 本月金额,
+--        SUM(SUM(amount)) OVER (ORDER BY DATE_FORMAT(order_date, '%Y-%m')) AS 年初至今累计
+-- FROM orders WHERE status = 'paid'
+-- GROUP BY DATE_FORMAT(order_date, '%Y-%m');</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>月份</th><th>本月金额</th><th>环比增长率</th><th>去年同期</th><th>同比增长率</th><th>年初至今累计</th></tr></thead>
+      <tbody>
+        <tr><td>2024-01</td><td>1635.00</td><td>—</td><td>0.00</td><td>—</td><td>1635.00</td></tr>
+        <tr><td>2024-02</td><td>2356.00</td><td>+44.1%</td><td>0.00</td><td>—</td><td>3991.00</td></tr>
+        <tr><td>2024-03</td><td>1087.00</td><td>−53.9%</td><td>0.00</td><td>—</td><td>5078.00</td></tr>
+        <tr><td>2024-04</td><td>3133.00</td><td>+188.2%</td><td>0.00</td><td>—</td><td>8211.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>先把明细聚合成「期间汇总表」，再自关联做对比——这是同比 / 环比 / 累计的通用骨架。基期为 0 或缺失时，增长率返回 NULL 并用 <code>NULLIF</code> 保护，绝不要让它变成 0% 或除零错误。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>本页数据只有 2024 年，所以「同比增长率」全是 NULL（去年同期金额为 0），这不是 SQL 写错了，而是<strong>基期缺失</strong>；报表上应显示「—」并注明原因。另一个坑是把明细表与汇总表直接关联，例如 <code>JOIN</code> 月度汇总表后仍按明细行求和，金额会被放大成原来的 N 倍。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：同比 / 环比计算器</span><span class="hint">改三个数字 → 实时算增长率</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>本期金额</label><input type="number" id="yyCur" value="3133" style="width:90px">
+          <label>上期金额</label><input type="number" id="yyPrev" value="1087" style="width:90px">
+          <label>去年同期</label><input type="number" id="yyLast" value="0" style="width:90px">
+        </div>
+        <div id="yyOut"></div>
+        <div class="log" id="yyLog"></div>
+        <div class="foot">提示：把「去年同期」改成 0 或负数，观察 NULLIF 保护下增长率如何变成 NULL——这比返回一个假的 0% 安全得多。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= 知识点 5：RFM ================= -->
+  <section class="topic" id="biz-rfm">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>用户分层（RFM）<span class="pt">RFM segmentation · 把用户分对群</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="analytics::biz-rfm"><span>已学会</span></label>
+    </div>
+
+    <p>RFM 模型用三个维度刻画客户价值：<strong>R</strong>（Recency，最近一次消费距今天数，越小越好）、<strong>F</strong>（Frequency，统计窗口内的消费频次，越大越好）、<strong>M</strong>（Monetary，统计窗口内的消费金额，越大越好）。每个维度按业务阈值分成高 / 低两档，组合起来正好是 2×2×2 = 8 类人群，每一类对应一套运营动作。</p>
+
+    <p>分档方式有两种：按<strong>业务阈值</strong>（如「30 天内买过算高 R」）或按<strong>分位数</strong>（如 NTILE(5) 五等分）。阈值法可解释性强、跨月可比；分位数法自动适应数据分布，但每期边界会漂移，做趋势对比时要小心。无论用哪种，都要固定一个统计窗口（例如近 90 天）并写进口径文档。</p>
+
+    <ul>
+      <li>R 的方向容易记反：天数越小越「高」，所以判断条件写 <code>r_days &lt;= 30</code>。</li>
+      <li>从未购买的用户 F = 0、M = 0，应单独归入「一般挽留客户」或新建「未转化」群，不要塞进活跃客户里。</li>
+      <li>RFM 是「当前状态快照」，不是永久标签；建议按月重算并保留历史，才能看用户在不同层级间的迁移。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>rfm.sql</div>
+      <pre><code>-- RFM 打标：先算 R / F / M，再用 CASE WHEN 分 8 类
+-- 统计日取 2024-05-01，阈值：R &lt;= 30 天、F &gt;= 2 次、M &gt;= 1500 元
+SELECT t.name                                        AS 客户,
+       t.r_days                                      AS R天数,
+       t.f_cnt                                       AS F频次,
+       t.m_amt                                       AS M金额,
+       CASE
+         WHEN t.r_days &lt;= 30 AND t.f_cnt &gt;= 2 AND t.m_amt &gt;= 1500 THEN '重要价值客户'
+         WHEN t.r_days &gt;  30 AND t.f_cnt &gt;= 2 AND t.m_amt &gt;= 1500 THEN '重要保持客户'
+         WHEN t.r_days &lt;= 30 AND t.f_cnt &lt;  2 AND t.m_amt &gt;= 1500 THEN '重要发展客户'
+         WHEN t.r_days &gt;  30 AND t.f_cnt &lt;  2 AND t.m_amt &gt;= 1500 THEN '重要挽留客户'
+         WHEN t.r_days &lt;= 30 AND t.f_cnt &gt;= 2 AND t.m_amt &lt;  1500 THEN '一般价值客户'
+         WHEN t.r_days &gt;  30 AND t.f_cnt &gt;= 2 AND t.m_amt &lt;  1500 THEN '一般保持客户'
+         WHEN t.r_days &lt;= 30 AND t.f_cnt &lt;  2 AND t.m_amt &lt;  1500 THEN '一般发展客户'
+         ELSE '一般挽留客户'
+       END                                           AS 分层
+FROM (
+  SELECT c.id, c.name,
+         COALESCE(DATEDIFF('2024-05-01', MAX(o.order_date)), 999) AS r_days,
+         COUNT(o.id)                                              AS f_cnt,
+         COALESCE(SUM(o.amount), 0)                               AS m_amt
+  FROM customers c
+  LEFT JOIN orders o
+         ON o.customer_id = c.id
+        AND o.status = 'paid'
+  GROUP BY c.id, c.name
+) t
+ORDER BY t.m_amt DESC;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>客户</th><th>R 天数</th><th>F 频次</th><th>M 金额</th><th>分层结果</th></tr></thead>
+      <tbody>
+        <tr><td>李娜</td><td>9</td><td>2</td><td>1586.00</td><td>重要价值客户</td></tr>
+        <tr><td>孙悦</td><td>16</td><td>2</td><td>1636.00</td><td>重要价值客户</td></tr>
+        <tr><td>张伟</td><td>102</td><td>2</td><td>1546.00</td><td>重要保持客户</td></tr>
+        <tr><td>王强</td><td>80</td><td>1</td><td>2297.00</td><td>重要挽留客户</td></tr>
+        <tr><td>陈晨</td><td>50</td><td>2</td><td>1087.00</td><td>一般保持客户</td></tr>
+        <tr><td>刘敏</td><td>71</td><td>1</td><td>59.00</td><td>一般挽留客户</td></tr>
+        <tr><td>赵磊</td><td>999</td><td>0</td><td>0.00</td><td>一般挽留客户</td></tr>
+        <tr><td>周涛</td><td>999</td><td>0</td><td>0.00</td><td>一般挽留客户</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>RFM 的判断条件是「R 小、F 大、M 大 = 重要价值客户」。分层的意义在于差异化运营：重要价值客户做忠诚度维护，重要挽留客户做召回券，一般发展客户做频次激励，未购买用户做首单转化。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>①把 R 判成「越大越好」，导致流失客户被误判为高价值；②用 <code>INNER JOIN</code> 算 RFM，会把从未下单的客户（周涛）整行丢掉；这里必须用 <code>LEFT JOIN</code> + <code>COALESCE</code>，让 R 变成 999 天、F / M 变成 0；③忘记过滤 <code>status = 'paid'</code>，退款和取消的订单会虚增 F 与 M。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：RFM 分层器</span><span class="hint">拖动三个阈值 → 实时重新分群</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>R 阈值</label><input type="range" id="rfmR" min="7" max="180" step="1" value="30" style="width:150px"><span class="log" id="rfmRV" style="margin:0;padding:4px 10px"></span>
+          <label>F 阈值</label><input type="range" id="rfmF" min="1" max="5" step="1" value="2" style="width:120px"><span class="log" id="rfmFV" style="margin:0;padding:4px 10px"></span>
+          <label>M 阈值</label><input type="range" id="rfmM" min="100" max="3000" step="100" value="1500" style="width:150px"><span class="log" id="rfmMV" style="margin:0;padding:4px 10px"></span>
+        </div>
+        <div id="rfmOut"></div>
+        <div class="log" id="rfmLog"></div>
+        <div class="foot">提示：数据来自内置 customers + orders（统计日 2024-05-01，只统计 paid 订单）。未购买的周涛、赵磊 R 记为 999 天，拖动 M 阈值观察他们所在分群的变化。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>工程化落地</h2>
+  </section>
+
+  <!-- ================= 知识点 6：报表 SQL 与自动化 ================= -->
+  <section class="topic" id="biz-report">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>报表 SQL 与自动化<span class="pt">reporting &amp; scheduling · 让数字每天准时出现</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="analytics::biz-report"><span>已学会</span></label>
+    </div>
+
+    <p>分析 SQL 写对只是第一步，真正交付的是<strong>稳定可复用的报表</strong>。报表 SQL 的三条原则：<strong>口径固定</strong>（过滤条件、时间窗口、去重方式写进视图或注释，任何人跑出来都一样）、<strong>可复用</strong>（明细层 → 汇总层 → 报表层分层建模，避免每次从明细重算）、<strong>可验证</strong>（有对账 SQL，明细总额 = 报表总额）。</p>
+
+    <p>自动化指的是让报表按计划自己跑：MySQL 自带事件调度器（EVENT）可以做轻量定时任务，生产环境通常用 Airflow / DolphinScheduler 等外部调度器编排依赖。无论哪种，都要保证<strong>幂等</strong>——同一天重跑多次，结果必须一致，不能重复插入。</p>
+
+    <ul>
+      <li>幂等的两种常见做法：按日期分区「先删后插」，或给汇总表加日期唯一键并配合 <code>ON DUPLICATE KEY UPDATE</code>。</li>
+      <li>重算窗口要留缓冲：结算延迟、退款、跨时区都可能让昨天的数据在今天就变了，建议每次回刷最近 3–7 天。</li>
+      <li>报表必须带对账与监控：行数、金额、空值率异常就告警，而不是等业务方发现数字不对。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>report.sql</div>
+      <pre><code>-- ① 汇总表：按日期存每日销售
+CREATE TABLE daily_sales (
+  stat_date  DATE          NOT NULL PRIMARY KEY,
+  order_cnt  INT           NOT NULL,
+  amount     DECIMAL(12,2) NOT NULL
+);
+
+-- ② 幂等重跑：先删掉当天分区，再插入（同一天跑多少次结果都一样）
+START TRANSACTION;
+DELETE FROM daily_sales WHERE stat_date = '2024-04-30';
+INSERT INTO daily_sales (stat_date, order_cnt, amount)
+SELECT DATE(order_date), COUNT(*), SUM(amount)
+FROM orders
+WHERE status = 'paid'
+  AND order_date &gt;= '2024-04-30'
+  AND order_date &lt;  '2024-05-01'
+GROUP BY DATE(order_date);
+COMMIT;
+
+-- ③ 另一种幂等方式：唯一键 + ON DUPLICATE KEY UPDATE
+--    MySQL 8.0.20+ 起 VALUES() 已弃用，推荐行别名写法
+INSERT INTO daily_sales (stat_date, order_cnt, amount)
+SELECT DATE(order_date), COUNT(*), SUM(amount)
+FROM orders WHERE status = 'paid'
+GROUP BY DATE(order_date)
+ON DUPLICATE KEY UPDATE
+  order_cnt = VALUES(order_cnt),
+  amount    = VALUES(amount);
+
+-- ④ 对账：明细总额必须等于报表总额，否则报表不可信
+SELECT (SELECT SUM(amount) FROM orders WHERE status = 'paid') AS 明细总额,
+       (SELECT SUM(amount) FROM daily_sales)                  AS 报表总额;
+
+-- ⑤ 定时调度：每天 02:00 重算（需开启 event_scheduler）
+CREATE EVENT ev_daily_sales
+ON SCHEDULE EVERY 1 DAY
+STARTS '2024-05-01 02:00:00'
+DO CALL sp_build_daily_sales();</code></pre>
+    </div>
+
+    <div class="mermaid">
+flowchart LR
+  A["明细层<br/>orders / order_items / events"] --> B["汇总层<br/>daily_sales"]
+  B --> C["报表层<br/>report_monthly"]
+  C --> D["看板 / 邮件 / API"]
+  E["调度器<br/>EVENT 或 Airflow"] -.触发.-> B
+  E -.触发.-> C
+  F["对账与告警"] -.校验.-> C
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>层级</th><th>职责</th><th>本页示例</th><th>关键约定</th></tr></thead>
+      <tbody>
+        <tr><td>明细层</td><td>保留最细粒度、不做业务聚合</td><td>orders / order_items</td><td>只做字段清洗，不改口径</td></tr>
+        <tr><td>汇总层</td><td>按主题与时间粒度预聚合</td><td>daily_sales（stat_date 唯一键）</td><td>可重跑、可幂等、可回刷</td></tr>
+        <tr><td>报表层</td><td>面向看板 / 邮件的一次性查询</td><td>月度金额、RFM 分层、漏斗</td><td>口径注释齐全，结果可对账</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>报表的可靠性来自三件事：口径写死、重跑幂等、结果对账。只要有一条缺失，数字迟早会「莫名其妙对不上」，而且没人能立刻定位原因。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>①用 <code>TRUNCATE</code> + 全量重跑代替分区重算，一旦中途失败报表就空了；②忘了 <code>ON DUPLICATE KEY UPDATE</code> 或唯一键，重跑会插入重复行，金额翻倍；③<code>BETWEEN '2024-04-30' AND '2024-05-01'</code> 这类写法对带时间的字段会多算一天，日期范围请用 <code>&gt;= 起点 AND &lt; 终点</code>。</p></div>
+
+    <div id="demo-report"></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>把 <code>events</code> 表补上 <code>ts</code> 时间字段，用「先取每个用户每步最早时间再校验单调」的方式重写严格漏斗，并对比与「各环节独立去重人数」的差异。</li>
+      <li>写一份「月留存矩阵」报表：行是首单月同期群，列是 M0–M6，用 <code>LEFT JOIN</code> 保证没有复购的同期群也出现在结果里（提示：基表用同期群，而不是用订单表）。</li>
+      <li>设计一个 AB 实验：给出核心指标与两个护栏指标的口径定义，并说明需要多少样本量才能检出 5% 的相对提升。</li>
+      <li>把 RFM 改成按分位数分档（<code>NTILE(5)</code>），说明与固定阈值法相比，在做「跨月趋势对比」时各自的风险。</li>
+      <li>给 <code>daily_sales</code> 增加「近 7 日回刷 + 对账告警」的调度方案，写出失败重试与幂等保证的要点。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "analytics",
+  title: "数据分析实战",
+  eyebrow: "MODULE 16 · SQL / 数据库",
+  lead: "把学过的查询能力组装成真实业务分析：漏斗、留存、AB 实验、同比环比、RFM 分层与报表自动化，全部用 MySQL 8.0 口径化 SQL 落地。",
+  points: ["biz-funnel","biz-retention","biz-abtest","biz-yoy","biz-rfm","biz-report"],
+  prev: "15-interview-patterns.html",
+  next: "17-capstone-project.html",
+};
+
+/* 考核题目 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"某漏斗：浏览 1000 人 → 加购 400 人 → 下单 100 人。下列说法正确的是？",
+    opts:["整体转化率 40%","整体转化率 10%","整体转化率 25%","整体转化率 4%"],
+    ans:1,
+    exp:"解析：整体转化率 = 末环节人数 ÷ 首环节人数 = 100 ÷ 1000 = 10%。40% 是第一步的环节转化率（加购 ÷ 浏览），25% 是把三档简单平均得到的假数字，4% 既不是环节转化率也不是整体转化率，属于典型的口算错误。"
+  },
+  {
+    type:"quiz",
+    q:"用 COUNT(*) 统计漏斗各环节人数，最主要的问题是什么？",
+    sql:"SELECT step, COUNT(*) AS 事件数\nFROM events\nGROUP BY step;",
+    opts:["会漏掉 step 为 NULL 的事件","会把金额算错，但不影响人数","查询会直接报错","会把同一用户重复触发的事件重复计数，人数虚高"],
+    ans:3,
+    exp:"解析：COUNT(*) 数的是事件条数，同一用户多次浏览会被算多次，本页 events 表里浏览环节就会从 10 人虚高到 11 人；漏斗关心「有多少人到达」，应使用 COUNT(DISTINCT user_id)。漏掉 NULL 是 COUNT(列名) 的特性而不是 COUNT(*)；金额与人数无关；该语句语法完全合法，不会报错。"
+  },
+  {
+    type:"quiz",
+    q:"某日新增 1000 人，次日回访 300 人，第 7 日回访 150 人。次留率与 7 留率分别是？",
+    opts:["次留 15%，7 留 30%","次留 30%，7 留 3%","次留 30%，7 留 15%","次留 3%，7 留 1.5%"],
+    ans:2,
+    exp:"解析：次留率 = 次日回访 ÷ 首日新增 = 300 ÷ 1000 = 30%；7 留率 = 第 7 日回访 ÷ 首日新增 = 150 ÷ 1000 = 15%。两个指标的分母都是「首日新增」而不是「前一日活跃」，把分母换成前一日活跃得到的是回访率而不是留存率；15% 与 30% 互换、3% 与 1.5% 都是把分母写错的结果。"
+  },
+  {
+    type:"quiz",
+    q:"同期群（cohort）分析最核心的价值是什么？",
+    opts:["把用户按首次行为时间分组，排除新增结构变化对留存率的干扰","能让留存率自动变高","能减少需要扫描的数据量","可以完全替代漏斗分析"],
+    ans:0,
+    exp:"解析：同期群把不同批次的用户分开追踪，这样「整体留存下滑」到底是产品变差还是新增结构变化（比如大量低质渠道涌入）就能分辨。它不会改变留存率本身的高低，也不以减少数据量或替代漏斗为目的——漏斗看单次转化路径，留存看长期回访，两者互补。"
+  },
+  {
+    type:"quiz",
+    q:"AB 实验：对照组转化率 10%，实验组 12%。下面哪种判断最恰当？",
+    opts:["绝对提升 2 个百分点，可以直接全量上线","相对提升 20%，但仍需做显著性检验并结合样本量判断","相对提升 2%，提升太小没有讨论价值","实验组更高就说明改动与转化之间存在因果关系"],
+    ans:1,
+    exp:"解析：相对提升 = (12% − 10%) ÷ 10% = 20%，绝对提升是 2 个百分点——两个说法都对，但都只是描述，不能直接等同于「可以上线」，还需要显著性检验、样本量与护栏指标。相对提升 2% 算错了基数；实验组更高也不能直接推出因果，随机分组不均衡或同期其它活动都可能造成差异。"
+  },
+  {
+    type:"interview",
+    q:"面试：一个 AB 实验显示核心指标显著提升，上线前你还会检查什么？",
+    opts:["只要 p 值小于 0.05 就可以直接上线，其它不用管","只看核心指标，护栏指标可以忽略不计","先查分组比例（SRM）与样本量，再看核心指标与护栏指标，最后评估显著性与业务收益","样本量越小越容易做出显著结果，所以应该尽早停止实验"],
+    ans:2,
+    exp:"解析：标准流程是四步——① 查分组比例是否符合设计（SRM 说明分桶或埋点有问题，结果不可信）；② 查样本量是否达到检验效能要求；③ 看核心指标是否显著且效应量在业务上有意义；④ 看护栏指标（退款率、崩溃率、客诉）有没有恶化。提前停止（peeking）会显著抬高假阳性率，是本末倒置；只看 p 值或忽略护栏指标都会带来线上风险。"
+  },
+  {
+    type:"quiz",
+    q:"本月金额 3133 元，上月 1087 元。环比增长率约为？",
+    opts:["65.3%","34.7%","288.2%","188.2%"],
+    ans:3,
+    exp:"解析：环比增长率 = (本期 − 上期) ÷ 上期 = (3133 − 1087) ÷ 1087 ≈ 188.2%。65.3% 是上期 ÷ 本期算出来的比例，34.7% 是 1 − 上期 ÷ 本期，288.2% 是把本期 ÷ 上期当成增长率（那是倍数而非增长率）。记住分母永远是基期。"
+  },
+  {
+    type:"quiz",
+    q:"同比增长率里为什么要写 NULLIF(去年同期, 0)？",
+    sql:"SELECT ROUND((本月 - COALESCE(去年同期, 0))\n       / NULLIF(去年同期, 0) * 100, 1) AS 同比增长率\nFROM monthly_sales;",
+    opts:["避免分母为 0 时出现除零异常，结果为 NULL","把 NULL 转成 0 方便前端展示","让字符串类型的金额也能参与运算","可以提升查询的执行速度"],
+    ans:0,
+    exp:"解析：NULLIF(x, 0) 在 x 等于 0 时返回 NULL，而 MySQL 中任何数与 NULL 运算结果都是 NULL，于是「基期为 0」就自然得到 NULL 而不是报错或无穷大。把 NULL 转成 0 是 COALESCE 的作用（本句里 COALESCE 用在分子上）；NULLIF 不做类型转换，也不影响执行计划，与性能无关。"
+  },
+  {
+    type:"quiz",
+    q:"RFM 模型中 R 的含义与方向是？",
+    opts:["Recency：注册距今天数，越大越有价值","Recency：消费频次，越大越有价值","Recency：最近一次消费距今天数，越小越有价值","Recency：累计消费金额，越大越有价值"],
+    ans:2,
+    exp:"解析：R 是 Recency，指最近一次消费距今的天数，天数越少说明用户越活跃，所以「高 R」对应的是较小的天数，判断条件写 r_days <= 30。把 R 说成注册时长或消费频次是常见混淆：注册时长没有行为含义，消费频次是 F，累计消费金额是 M。"
+  },
+  {
+    type:"quiz",
+    q:"某客户 R = 102 天、F = 2 次、M = 1546 元。阈值设定为 R ≤ 30 天、F ≥ 2 次、M ≥ 1500 元，他属于哪一类？",
+    sql:"-- 阈值：R ≤ 30 天、F ≥ 2 次、M ≥ 1500 元\nSELECT CASE\n  WHEN r_days &lt;= 30 AND f_cnt &gt;= 2 AND m_amt &gt;= 1500 THEN '重要价值客户'\n  WHEN r_days &gt;  30 AND f_cnt &gt;= 2 AND m_amt &gt;= 1500 THEN '重要保持客户'\n  ELSE '其它' END AS 分层\nFROM rfm WHERE name = '张伟';",
+    opts:["重要价值客户","重要保持客户","重要挽留客户","一般保持客户"],
+    ans:1,
+    exp:"解析：R = 102 天大于 30 天，所以 R 判为低；F = 2 ≥ 2 判为高；M = 1546 ≥ 1500 判为高。低 R + 高 F + 高 M 对应「重要保持客户」——曾经高价值但近期不再活跃，运营重点是召回。重要价值客户要求 R 也高（近期还买过），重要挽留客户要求 F 低，一般保持客户要求 M 低，都不符合。"
+  },
+  {
+    type:"quiz",
+    q:"要让报表任务可以安全地重复执行（幂等），下面哪种做法正确？",
+    opts:["按日期先删后插，或用唯一键配合 ON DUPLICATE KEY UPDATE","每次 TRUNCATE 整表后全量重跑","把结果导出到 Excel 手工粘贴进看板","给报表字段加上索引"],
+    ans:0,
+    exp:"解析：幂等意味着同一天重跑多次结果一致。按日期分区「先删后插」或依赖唯一键 + ON DUPLICATE KEY UPDATE 都能做到。TRUNCATE 后全量重跑虽然也能得到结果，但任务中途失败会让报表处于空表状态，风险极高；手工粘贴无法审计也不可重复；加索引只影响查询性能，与幂等无关。"
+  },
+  {
+    type:"interview",
+    q:"面试：业务方发现报表数字和上月对不上，你会怎么排查？",
+    opts:["先让业务方确认是不是自己看错了，没问题就结案","口径变了就直接改数，不用通知下游","把口径写在个人笔记里，等别人来问再说","先核对口径是否变更，再查上游数据与对账结果，确认后同步下游并回刷历史"],
+    ans:3,
+    exp:"解析：排查顺序通常是——① 口径（过滤条件、时间窗口、去重方式、币种 / 时区）有没有改；② 上游明细数据是否延迟或补数；③ 用对账 SQL 比对明细总额与报表总额，定位到具体环节；④ 确认原因后同步下游并回刷历史数据。直接怀疑业务方看错、私自改数或把口径留在个人笔记里，都会让问题反复出现且无人可追溯。"
+  },
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1）
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   交互演示面板挂载区
+   ------------------------------------------------------------ */
+
+/* ① 漏斗：SQL 练习台（补充 events 表） */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-funnel");
+  if(!host) return;
+  SQLSandbox.mount(host, {
+    query: "SELECT step, COUNT(*) AS 事件数, COUNT(DISTINCT user_id) AS 去重人数\nFROM events\nGROUP BY step;",
+    presets: [
+      {label:"各环节人数（去重）", sql:"SELECT step, COUNT(DISTINCT user_id) AS 去重人数\nFROM events\nGROUP BY step;"},
+      {label:"不去重的陷阱", sql:"SELECT step, COUNT(*) AS 事件数\nFROM events\nGROUP BY step;"},
+      {label:"事件明细", sql:"SELECT * FROM events;"}
+    ],
+    tables: {
+      events: {
+        columns: ["user_id","step","day"],
+        rows: [
+          [1,"view",1],[1,"view",1],[2,"view",1],[3,"view",1],[4,"view",1],[5,"view",1],
+          [6,"view",1],[7,"view",2],[8,"view",2],[9,"view",3],[10,"view",3],
+          [1,"cart",1],[2,"cart",1],[3,"cart",1],[4,"cart",2],[5,"cart",2],[6,"cart",2],
+          [1,"order",1],[2,"order",1],[3,"order",2],[4,"order",2],
+          [1,"pay",1],[2,"pay",2],[3,"pay",3]
+        ]
+      }
+    }
+  });
+})();
+
+/* ② 漏斗转化计算器（模式 D） */
+(function(){
+  const NAMES = ["浏览商品","加入购物车","提交订单","支付成功"];
+  const ids = ["fn1","fn2","fn3","fn4"];
+  const out = document.getElementById("funnelOut");
+  if(!out) return;
+  const tb = document.getElementById("funnelTable");
+  const log = document.getElementById("funnelLog");
+  const els = ids.map(i=>document.getElementById(i));
+  const pct = (a,b) => b > 0 ? a / b * 100 : 0;
+  function render(){
+    const v = els.map(e => Math.max(0, parseInt(e.value,10) || 0));
+    const first = v[0];
+    let worst = 0, worstLost = -1;
+    for(let i=1;i<v.length;i++){ const l = v[i-1]-v[i]; if(l > worstLost){ worstLost = l; worst = i; } }
+    out.innerHTML = `<div class="bars">` + NAMES.map((nm,i)=>
+      `<div class="bar"><span class="nm">${nm}</span><span class="track"><span style="width:${pct(v[i],first).toFixed(1)}%"></span></span><span class="val">${v[i]} 人</span></div>`
+    ).join("") + `</div>`;
+    let rows = "";
+    for(let i=0;i<NAMES.length;i++){
+      const stepRate = i===0 ? null : pct(v[i], v[i-1]);
+      const cum = pct(v[i], first);
+      const lost = i===0 ? null : v[i-1]-v[i];
+      rows += `<tr class="${i===NAMES.length-1?'hl':''}"><td>${NAMES[i]}</td><td>${v[i]}</td>` +
+              `<td>${stepRate===null?'—':stepRate.toFixed(1)+'%'}</td>` +
+              `<td>${cum.toFixed(1)}%</td>` +
+              `<td>${lost===null?'—':lost}</td></tr>`;
+    }
+    tb.innerHTML = `<table class="dt"><thead><tr><th>环节</th><th>人数</th><th>环节转化率</th><th>累计转化率</th><th>流失人数</th></tr></thead><tbody>${rows}</tbody></table>`;
+    log.innerHTML = `整体转化率 = ${v[0]} → ${v[3]}，即 <b>${pct(v[3],first).toFixed(1)}%</b>；流失最多的一步是「${NAMES[worst]}」，流失 ${Math.max(0,worstLost)} 人。`;
+  }
+  els.forEach(e=>e.addEventListener("input", render));
+  render();
+})();
+
+/* ③ 同期群留存矩阵计算器（模式 D） */
+(function(){
+  const sizeEl = document.getElementById("rtSize");
+  const out = document.getElementById("rtOut");
+  if(!out || !sizeEl) return;
+  const d1El = document.getElementById("rtD1"), d7El = document.getElementById("rtD7");
+  const bars = document.getElementById("rtBars"), log = document.getElementById("rtLog");
+  const COHORTS = [
+    {label:"2024-08 同期群", f:1,    s:1},
+    {label:"2024-09 同期群", f:0.92, s:0.9},
+    {label:"2024-10 同期群", f:1.06, s:1.1},
+    {label:"2024-11 同期群", f:0.97, s:1.02}
+  ];
+  function render(){
+    const size = +sizeEl.value, d1 = +d1El.value/100, d7 = +d7El.value/100;
+    document.getElementById("rtSizeV").textContent = size + " 人";
+    document.getElementById("rtD1V").textContent = (d1*100).toFixed(0) + "%";
+    document.getElementById("rtD7V").textContent = (d7*100).toFixed(0) + "%";
+    const r1 = Math.min(1, Math.max(0.005, d1)), r7 = Math.min(1, Math.max(0.002, d7));
+    const rows = COHORTS.map(c=>{
+      const a = Math.min(1, r1*c.f), b = Math.min(1, r7*c.f);
+      const cells = [];
+      for(let d=0; d<=7; d++){
+        const rate = d===0 ? 1 : a * Math.pow(b/a, (d-1)/6);
+        cells.push(Math.min(1, Math.max(0, rate)));
+      }
+      return {c, n: Math.round(size*c.s), cells};
+    });
+    let head = "<tr><th>同期群</th><th>新增人数</th>";
+    for(let d=0; d<=7; d++) head += `<th>D${d}${d===1?" ★次留":(d===7?" ★7留":"")}</th>`;
+    head += "</tr>";
+    const body = rows.map(r=>{
+      let tds = `<td>${r.c.label}</td><td>${r.n}</td>`;
+      r.cells.forEach((rate,d)=>{
+        tds += `<td${(d===1||d===7)?' class="key"':''}>${(rate*100).toFixed(1)}%</td>`;
+      });
+      return `<tr class="${r.c.f===1?'hl':''}">${tds}</tr>`;
+    }).join("");
+    out.innerHTML = `<table class="dt"><thead>${head}</thead><tbody>${body}</tbody></table>`;
+
+    const avg = [];
+    for(let d=0; d<=7; d++) avg.push(rows.reduce((s,r)=>s+r.cells[d],0)/rows.length);
+    bars.innerHTML = `<div class="bars">` + avg.map((r,d)=>
+      `<div class="bar"><span class="nm">D${d}</span><span class="track"><span style="width:${(r*100).toFixed(1)}%"></span></span><span class="val">${(r*100).toFixed(1)}%</span></div>`
+    ).join("") + `</div>`;
+    log.innerHTML = `平均次留 <b>${(avg[1]*100).toFixed(1)}%</b>（约 ${Math.round(size*avg[1])} 人），平均 7 留 <b>${(avg[7]*100).toFixed(1)}%</b>（约 ${Math.round(size*avg[7])} 人）。D1→D7 衰减最快，说明首日体验决定长期留存。`;
+  }
+  [sizeEl,d1El,d7El].forEach(e=>e.addEventListener("input", render));
+  render();
+})();
+
+/* ④ AB 显著性计算器（模式 D） */
+(function(){
+  const first = document.getElementById("abN0");
+  const out = document.getElementById("abOut");
+  if(!out || !first) return;
+  const els = ["abN0","abX0","abN1","abX1"].map(id=>document.getElementById(id));
+  const log = document.getElementById("abLog");
+  function ncf(z){
+    const t = 1/(1+0.2316419*Math.abs(z));
+    const d = 0.3989422804014327*Math.exp(-z*z/2);
+    const p = d*t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));
+    return z > 0 ? 1-p : p;
+  }
+  function render(){
+    const n0 = Math.max(1, +els[0].value || 1), x0 = Math.min(Math.max(0, +els[1].value || 0), n0);
+    const n1 = Math.max(1, +els[2].value || 1), x1 = Math.min(Math.max(0, +els[3].value || 0), n1);
+    const p0 = x0/n0, p1 = x1/n1, pool = (x0+x1)/(n0+n1);
+    const se = Math.sqrt(pool*(1-pool)*(1/n0+1/n1));
+    const z = se > 0 ? (p1-p0)/se : 0;
+    const p = Math.max(0, Math.min(1, 2*(1-ncf(Math.abs(z)))));
+    const absDiff = (p1-p0)*100, rel = p0 > 0 ? (p1-p0)/p0*100 : 0;
+    out.innerHTML = `<table class="dt"><thead><tr><th>指标</th><th>对照组</th><th>实验组</th></tr></thead><tbody>
+      <tr><td>样本量</td><td>${n0}</td><td>${n1}</td></tr>
+      <tr><td>转化数</td><td>${x0}</td><td>${x1}</td></tr>
+      <tr class="hl"><td>转化率</td><td>${(p0*100).toFixed(2)}%</td><td>${(p1*100).toFixed(2)}%</td></tr>
+      <tr><td>绝对差（百分点）</td><td colspan="2">${absDiff>=0?"+":""}${absDiff.toFixed(2)}</td></tr>
+      <tr><td>相对提升 lift</td><td colspan="2">${rel>=0?"+":""}${rel.toFixed(1)}%</td></tr>
+      <tr><td>z 值</td><td colspan="2">${z.toFixed(3)}</td></tr>
+      <tr><td>双侧 p 值（近似）</td><td colspan="2">${p.toFixed(4)}</td></tr>
+      </tbody></table>`;
+    if(p < 0.05){
+      log.innerHTML = `α = 0.05 下差异<b>统计显著</b>（p = ${p.toFixed(4)}）；仍需确认分组比例正常、护栏指标没有恶化，再看收益是否值得上线。`;
+    } else {
+      log.innerHTML = `α = 0.05 下差异<b>不显著</b>（p = ${p.toFixed(4)}），不能据此上线；先确认样本量是否足够、效应量在业务上是否值得追求。`;
+    }
+  }
+  els.forEach(e=>e.addEventListener("input", render));
+  render();
+})();
+
+/* ⑤ 同比 / 环比计算器（模式 D） */
+(function(){
+  const cur = document.getElementById("yyCur");
+  const out = document.getElementById("yyOut");
+  if(!out || !cur) return;
+  const prev = document.getElementById("yyPrev"), last = document.getElementById("yyLast");
+  const log = document.getElementById("yyLog");
+  const fmt = x => (x>=0?"+":"") + x.toFixed(1) + "%";
+  function render(){
+    const c = +cur.value || 0, p = +prev.value || 0, l = +last.value || 0;
+    const mom = p !== 0 ? (c-p)/p*100 : null;
+    const yoy = l !== 0 ? (c-l)/l*100 : null;
+    out.innerHTML = `<table class="dt"><thead><tr><th>项目</th><th>数值</th></tr></thead><tbody>
+      <tr class="hl"><td>本期金额</td><td>${c}</td></tr>
+      <tr><td>上期金额</td><td>${p}</td></tr>
+      <tr><td>去年同期金额</td><td>${l}</td></tr>
+      <tr><td>环比增长率</td><td>${mom===null?'<span class="null">NULL（上期为 0）</span>':fmt(mom)}</td></tr>
+      <tr><td>同比增长率</td><td>${yoy===null?'<span class="null">NULL（去年同期为 0）</span>':fmt(yoy)}</td></tr>
+      <tr><td>环比增量</td><td>${(c-p).toFixed(2)}</td></tr>
+      </tbody></table>`;
+    log.innerHTML = `环比看短期波动：${mom===null?"基期为 0，用 NULLIF 保护后返回 NULL":"<b>"+fmt(mom)+"</b>"}；同比看长期趋势：${yoy===null?"基期缺失，应显示「—」并注明原因":"<b>"+fmt(yoy)+"</b>"}。`;
+  }
+  [cur,prev,last].forEach(e=>e.addEventListener("input", render));
+  render();
+})();
+
+/* ⑥ RFM 分层器（模式 D） */
+(function(){
+  const rEl = document.getElementById("rfmR");
+  const out = document.getElementById("rfmOut");
+  if(!out || !rEl) return;
+  const fEl = document.getElementById("rfmF"), mEl = document.getElementById("rfmM");
+  const log = document.getElementById("rfmLog");
+  const CUST = [
+    {name:"张伟", r:102, f:2, m:1546},
+    {name:"李娜", r:9,   f:2, m:1586},
+    {name:"王强", r:80,  f:1, m:2297},
+    {name:"刘敏", r:71,  f:1, m:59},
+    {name:"陈晨", r:50,  f:2, m:1087},
+    {name:"赵磊", r:999, f:0, m:0},
+    {name:"孙悦", r:16,  f:2, m:1636},
+    {name:"周涛", r:999, f:0, m:0}
+  ];
+  const CATS = ["重要价值客户","重要保持客户","重要发展客户","重要挽留客户","一般价值客户","一般保持客户","一般发展客户","一般挽留客户"];
+  const ACTION = {
+    "重要价值客户":"VIP 服务、专属权益、新品优先",
+    "重要保持客户":"流失预警、召回券、唤醒触达",
+    "重要发展客户":"频次激励、满减凑单、品类扩展",
+    "重要挽留客户":"高额召回券、电话回访、专属客服",
+    "一般价值客户":"维持现状、轻量会员权益",
+    "一般保持客户":"低频唤醒、低成本触达",
+    "一般发展客户":"首单复购券、试用装引导",
+    "一般挽留客户":"低预算短信召回、观察名单"
+  };
+  function classify(c, rT, fT, mT){
+    const hiR = c.r <= rT, hiF = c.f >= fT, hiM = c.m >= mT;
+    if(hiR && hiF && hiM) return 0;
+    if(!hiR && hiF && hiM) return 1;
+    if(hiR && !hiF && hiM) return 2;
+    if(!hiR && !hiF && hiM) return 3;
+    if(hiR && hiF && !hiM) return 4;
+    if(!hiR && hiF && !hiM) return 5;
+    if(hiR && !hiF && !hiM) return 6;
+    return 7;
+  }
+  function render(){
+    const rT = +rEl.value, fT = +fEl.value, mT = +mEl.value;
+    document.getElementById("rfmRV").textContent = "≤ " + rT + " 天";
+    document.getElementById("rfmFV").textContent = "≥ " + fT + " 次";
+    document.getElementById("rfmMV").textContent = "≥ " + mT + " 元";
+    const counts = CATS.map(()=>0);
+    const tagged = CUST.map(c=>{ const k = classify(c, rT, fT, mT); counts[k]++; return {c, k}; });
+    const total = CUST.length;
+    let sum = `<table class="dt"><thead><tr><th>分层</th><th>人数</th><th>占比</th><th>建议动作</th></tr></thead><tbody>`;
+    CATS.forEach((nm,i)=>{
+      sum += `<tr class="${i===0?'hl':''}"><td>${nm}</td><td>${counts[i]}</td><td>${(counts[i]/total*100).toFixed(1)}%</td><td>${ACTION[nm]}</td></tr>`;
+    });
+    sum += "</tbody></table>";
+    let det = `<table class="dt"><thead><tr><th>客户</th><th>R 距今天数</th><th>F 频次</th><th>M 金额</th><th>分层</th></tr></thead><tbody>`;
+    tagged.forEach(o=>{
+      const c = o.c;
+      const cls = o.k===0 ? "match" : (o.k===7 ? "dim" : "");
+      det += `<tr class="${cls}"><td>${c.name}</td><td>${c.r>=999?'<span class="null">未购买</span>':c.r}</td><td>${c.f}</td><td>${c.m}</td><td>${CATS[o.k]}</td></tr>`;
+    });
+    det += "</tbody></table>";
+    out.innerHTML = sum + det;
+    log.innerHTML = `当前阈值：R ≤ ${rT} 天、F ≥ ${fT} 次、M ≥ ${mT} 元 → 重要价值客户 <b>${counts[0]}</b> 人（${(counts[0]/total*100).toFixed(1)}%），一般挽留客户 ${counts[7]} 人。调高 M 阈值会把「重要挽留」降级为「一般挽留」。`;
+  }
+  [rEl,fEl,mEl].forEach(e=>e.addEventListener("input", render));
+  render();
+})();
+
+/* ⑦ 报表：SQL 练习台（金额分档汇总） */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-report");
+  if(!host) return;
+  SQLSandbox.mount(host, {
+    query: "SELECT 金额档, COUNT(*) AS 订单数, SUM(amount) AS 金额\nFROM (SELECT CASE WHEN amount >= 1000 THEN '大额' WHEN amount >= 100 THEN '中额' ELSE '小额' END AS 金额档, amount\n      FROM orders WHERE status = 'paid') t\nGROUP BY 金额档;",
+    presets: [
+      {label:"金额分档汇总", sql:"SELECT 金额档, COUNT(*) AS 订单数, SUM(amount) AS 金额\nFROM (SELECT CASE WHEN amount >= 1000 THEN '大额' WHEN amount >= 100 THEN '中额' ELSE '小额' END AS 金额档, amount\n      FROM orders WHERE status = 'paid') t\nGROUP BY 金额档;"},
+      {label:"只看已支付订单", sql:"SELECT id, customer_id, order_date, amount\nFROM orders\nWHERE status = 'paid'\nORDER BY amount DESC;"},
+      {label:"月度汇总（报表底表）", sql:"SELECT DATE_FORMAT(order_date, '%Y-%m') AS 月份, COUNT(*) AS 订单数, SUM(amount) AS 金额\nFROM orders WHERE status = 'paid'\nGROUP BY DATE_FORMAT(order_date, '%Y-%m');"}
+    ]
+  });
+})();
+</script>
+</body>
+</html>

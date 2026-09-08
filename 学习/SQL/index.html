@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>数据结构与算法 · 学习大纲（可交互）</title>
-<meta name="description" content="数据结构与算法学习大纲：分模块进度可打勾、可搜索、可跳转到每个知识点的详细学习网页，含学习目标、讲解、考核与答题。">
+<title>SQL / 数据库 · 学习大纲（可交互）</title>
+<meta name="description" content="SQL 与数据库学习大纲：分阶段进度可打勾、可搜索、可跳转到每个知识点的详细学习网页，含学习目标、讲解、交互演示面板、考核与答题。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
@@ -70,7 +70,7 @@
   .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(36px,6vw,62px);line-height:1.08;margin:20px 0 8px;letter-spacing:-.02em}
   .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
   .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:7px;height:11px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
-  .hero p.lead{font-size:clamp(15px,1.8vw,18px);color:var(--ink-soft);max-width:760px;margin:0 0 24px}
+  .hero p.lead{font-size:clamp(15px,1.8vw,18px);color:var(--ink-soft);max-width:780px;margin:0 0 24px}
   .hero p.lead b{color:var(--ink)}
 
   .stats{display:flex;flex-wrap:wrap;gap:14px;margin-top:6px}
@@ -106,7 +106,7 @@
   .stage .sh .tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:4px 11px;border-radius:999px;color:#fff}
   .stage .sh h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3.2vw,30px);margin:0;letter-spacing:-.01em}
   .stage .sh .dn{font-size:13px;color:var(--muted)}
-  .stage .desc{color:var(--ink-soft);max-width:760px;margin:6px 0 0;font-size:14.5px}
+  .stage .desc{color:var(--ink-soft);max-width:780px;margin:6px 0 0;font-size:14.5px}
 
   /* 模块卡片 */
   .modules{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px}
@@ -117,6 +117,7 @@
   .mod .mh .tt{flex:1;min-width:0}
   .mod .mh .tt h3{margin:0;font-size:17.5px;font-weight:800;letter-spacing:-.01em}
   .mod .mh .tt .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .mod .mh .tt .demotag{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-family:var(--font-mono);font-size:10.5px;color:var(--blue);background:var(--blue-soft);border:1px solid #cfe0dc;border-radius:999px;padding:2px 8px}
   .mod .mp{margin-left:auto;flex:none;text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
   .mod .mp b{color:var(--st,var(--green));font-size:14px}
   .mod .mp .bar{width:64px;height:6px;background:var(--line);border-radius:999px;margin-top:5px;overflow:hidden;margin-left:auto}
@@ -153,14 +154,12 @@
   .totop{position:fixed;right:22px;bottom:22px;width:46px;height:46px;border-radius:50%;border:1px solid var(--line-2);background:var(--ink);color:var(--paper);font-size:19px;cursor:pointer;opacity:0;pointer-events:none;transition:.25s;box-shadow:var(--shadow);z-index:60}
   .totop.show{opacity:1;pointer-events:auto}
   .totop:hover{background:var(--green);transform:translateY(-2px)}
-
-  .stg{opacity:0}
 </style>
 </head>
 <body>
 <nav class="topnav">
   <div class="wrap">
-    <span class="brand"><span class="dot"></span>数据结构与算法</span>
+    <span class="brand"><span class="dot"></span>SQL / 数据库</span>
     <span class="navprog">进度 <b id="navDone">0</b>/<b id="navTotal">0</b></span>
     <input class="search" id="searchTop" type="text" placeholder="🔍 搜索知识点 / 模块…">
     <button class="reset" id="resetBtn" title="清空所有打勾进度">重置</button>
@@ -169,12 +168,13 @@
 
 <div class="hero">
   <div class="wrap">
-    <span class="eyebrow"><span class="dot"></span>DSA LEARNING MAP · 学习大纲</span>
-    <h1>数据结构与算法<br><span class="accent">学习地图</span></h1>
-    <p class="lead">一份可对勾、可搜索、可跳转的<b>交互式学习大纲</b>。每个知识点都对应一个<b>详解网页</b>（含学习目标、讲解、考核与答题）。学完一个就在前面打勾，进度会保存在本机浏览器，随时回来接着学。</p>
+    <span class="eyebrow"><span class="dot"></span>SQL LEARNING MAP · 学习大纲</span>
+    <h1>SQL / 数据库<br><span class="accent">学习地图</span></h1>
+    <p class="lead">一份可对勾、可搜索、可跳转的<b>交互式学习大纲</b>。从「会用」到「用好」再到「面试与实战」，每个知识点都对应一个<b>详解网页</b>（含学习目标、讲解、<b>可动手的交互演示面板</b>、考核与答题）。学完一个就在前面打勾，进度存在本机浏览器，随时回来接着学。</p>
     <div class="stats">
       <div class="stat"><div class="num" id="nMod">—</div><div class="lab">知识模块</div></div>
       <div class="stat"><div class="num" id="nPt">—</div><div class="lab">知识点</div></div>
+      <div class="stat"><div class="num small" id="nDemo">—</div><div class="lab">含交互演示</div></div>
       <div class="stat"><div class="num small" id="nDone">—</div><div class="lab">已完成</div></div>
       <div class="stat"><div class="num small" id="nPct">—</div><div class="lab">完成率</div></div>
     </div>
@@ -182,13 +182,13 @@
       <div class="head"><span class="title">整体学习进度</span><span class="pct" id="bigPct">0%</span></div>
       <div class="bar"><span id="bigBar" style="width:0%"></span></div>
       <div class="tagbar" id="stagelong"></div>
-      <div class="tip" id="progTip">勾选任意知识点，进度会自动更新。建议按「基础 → 数据结构 → 算法思想」顺序推进。</div>
+      <div class="tip" id="progTip">勾选任意知识点，进度会自动更新。建议按「基础 → 进阶 → 实战」顺序推进。</div>
     </div>
     <div class="filters" id="filters">
       <button class="chip active" data-stage="all">全部<span class="cnt" id="cAll"></span></button>
       <button class="chip" data-stage="base">基础篇<span class="cnt" id="cBase"></span></button>
-      <button class="chip" data-stage="ds">数据结构篇<span class="cnt" id="cDs"></span></button>
-      <button class="chip" data-stage="algo">算法思想篇<span class="cnt" id="cAlgo"></span></button>
+      <button class="chip" data-stage="adv">进阶篇<span class="cnt" id="cAdv"></span></button>
+      <button class="chip" data-stage="practice">实战篇<span class="cnt" id="cPractice"></span></button>
     </div>
     <input class="msearch" id="searchMob" type="text" placeholder="🔍 搜索知识点 / 模块…">
   </div>
@@ -204,16 +204,17 @@
       <div class="b">
         <h4>📖 本学习地图使用说明</h4>
         <ul>
-          <li>点击知识点后面的 <b>“去学习 →”</b> 或知识点标题，会跳到对应的 <b>详解网页</b>。</li>
-          <li>勾选知识点前的方框即可 <b>记录已完成</b>，进度会保存在<b>本机浏览器</b>（localStorage），刷新/关闭后不会丢。</li>
-          <li>详解网页末尾有「✎ 考核 · 答题」，完成后回到大纲在此打勾。</li>
-          <li>熟练程度建议：能独立推导、能写代码、能讲清复杂度。过不了就回看详解再测一次。</li>
+          <li>点击知识点后面的 <b>“去学习 →”</b> 或知识点标题，会跳到对应的 <b>详解网页</b>（自动定位到该知识点）。</li>
+          <li>勾选知识点前的方框即可 <b>记录已完成</b>，进度保存在<b>本机浏览器</b>（localStorage），刷新/关闭后不会丢。</li>
+          <li>详解网页里每个知识点也有自己的 <b>“已学会”</b> 勾选框，和大纲<b>双向同步</b>；页面末尾还有「✎ 考核 · 答题」。</li>
+          <li>带 <b>🖥 交互演示</b> 标记的模块，详解页里可以直接<b>动手试</b>：改查询看结果、切换 JOIN 看行怎么配、模拟并发看隔离级别等。</li>
+          <li>熟练标准：能<b>手写</b>出查询、能说清<b>执行顺序</b>与<b>索引是否生效</b>、能讲出<b>性能差异</b>。过不了就回看详解再测一次。</li>
         </ul>
       </div>
       <div class="b">
         <h4>🗂 说明</h4>
         <p style="font-size:13.5px;color:var(--ink-soft);margin:0 0 10px">本文件为 <b>index.html</b>，详细网页统一放在 <code>content/</code> 目录并按数字编号。想新增知识点，改下面 <code>MODULES</code> 数组并同步新建 <code>content/</code> 里的详解页即可。</p>
-        <p style="font-size:12.5px;color:var(--muted);margin:0">学习顺序建议：先有编程基础（Python 或 C++），再按本大纲推进；核心是先啃懂复杂度分析与常用结构，再攻排序、搜索与动态规划。</p>
+        <p style="font-size:12.5px;color:var(--muted);margin:0">示例全部基于 <b>MySQL 8.0</b> 语法（其他数据库的差异会在页内注明）。练习用数据集统一为「电商场景」：<code>customers</code> / <code>orders</code> / <code>order_items</code> / <code>products</code> / <code>employees</code>，各页数据集一致，学完能连成一条线。</p>
       </div>
     </div>
   </div>
@@ -222,173 +223,182 @@
 <script>
 /* ============================================================
    MODULES —— 学习大纲数据（可维护区）
-   新增知识点：往对应模块的 pts 数组加一项 {id, title, diff, href}
+   新增知识点：往对应模块的 pts 数组加一项 {id, title, diff}
    href 指向 content/ 下的详解页 + 锚点。
    锚点 id 必须与详解页正文里 <section class="topic" id="...">
    的 id 一致，才能正确跳转到该知识点。
+   demo: true 表示该模块详解页含交互演示面板。
    ============================================================ */
 const STAGES = {
-  base:{ name:"基础篇", color:"#1e5b4f", desc:"先建立复杂度意识与最常用的线性结构：复杂度分析、数组、链表、栈与队列。" },
-  ds:{ name:"数据结构篇", color:"#3a6b8f", desc:"沉淀会用到的核心数据结构：字符串、二分、树、堆、图、哈希、并查集。" },
-  algo:{ name:"算法思想篇", color:"#b7791f", desc:"掌握通用算法设计策略：排序、递归分治、贪心、动态规划、回溯与解题模板。" },
+  base:{ name:"基础篇", color:"#1e5b4f", desc:"先做到「会用」：搞清关系模型与 SQL 分类，把查询、聚合、连接、子查询、窗口函数、增删改事务、建表范式这七块基本功打扎实。" },
+  adv:{ name:"进阶篇", color:"#3a6b8f", desc:"再做到「用得好」：理解索引与执行计划、会调慢 SQL、懂锁与 MVCC、会做数据建模与数仓分层，掌握高级函数与运维安全。" },
+  practice:{ name:"实战篇", color:"#b7791f", desc:"最后做到「用得上」：把面试高频题型练成套路，用 SQL 做业务指标分析，并完整走一遍项目实战。" },
 };
 
 const MODULES = [
-  { id:"intro", no:"01", stage:"base", title:"绪论与算法复杂度分析", sub:"打地基：先会分析好坏", file:"01-绪论与算法分析.html", href:"content/01-绪论与算法分析.html",
+  { id:"overview", no:"01", stage:"base", title:"数据库与 SQL 全景", sub:"关系模型 · SQL 分类 · 环境搭建", file:"01-db-sql-overview.html", href:"content/01-db-sql-overview.html", demo:true,
     pts:[
-      {id:"intro-basics", title:"算法的基本概念与特性", diff:1},
-      {id:"intro-time", title:"时间复杂度的定义与分析", diff:1},
-      {id:"intro-calc", title:"复杂度的计算与技巧", diff:1},
-      {id:"intro-space", title:"空间复杂度", diff:1},
-      {id:"intro-growth", title:"增长率与常见复杂度阶", diff:2},
-      {id:"intro-recurrence", title:"递归式分析与主定理（选学）", diff:3},
+      {id:"db-concept", title:"数据库、DBMS 与关系模型", diff:1},
+      {id:"sql-family", title:"SQL 语言分类（DDL/DML/DQL/DCL/TCL）", diff:1},
+      {id:"env-setup", title:"环境搭建：MySQL 安装、连接与客户端", diff:1},
+      {id:"table-model", title:"表、行、列：主键与外键", diff:1},
+      {id:"data-types", title:"常用数据类型与选型", diff:2},
+      {id:"first-sql", title:"第一条 SQL：建库建表与插入数据", diff:1},
     ]},
-  { id:"array", no:"02", stage:"base", title:"线性表 · 数组与顺序表", sub:"最常用的线性结构", file:"02-数组与顺序表.html", href:"content/02-数组与顺序表.html",
+  { id:"select", no:"02", stage:"base", title:"单表查询基础", sub:"SELECT · WHERE · 排序分页 · NULL", file:"02-basic-select.html", href:"content/02-basic-select.html", demo:true,
     pts:[
-      {id:"array-storage", title:"顺序表的存储结构（连续存储/地址）", diff:1},
-      {id:"array-random", title:"随机访问与性能", diff:1},
-      {id:"array-ops", title:"插入与删除（复杂度本质）", diff:1},
-      {id:"array-dynamic", title:"动态数组与扩容策略（均摊分析）", diff:2},
-      {id:"array-app", title:"典型应用（前缀和·差分·双指针）", diff:2},
-      {id:"array-multi", title:"多维数组与存储方式", diff:2},
+      {id:"select-basic", title:"SELECT / FROM / 列别名 / 常量列", diff:1},
+      {id:"where-basic", title:"WHERE 与比较、逻辑运算符", diff:1},
+      {id:"where-special", title:"BETWEEN / IN / LIKE / IS NULL", diff:1},
+      {id:"order-limit", title:"ORDER BY 排序与 LIMIT 分页", diff:1},
+      {id:"distinct", title:"DISTINCT 去重与常见坑", diff:1},
+      {id:"null-logic", title:"NULL 与三值逻辑", diff:2},
+      {id:"exec-order", title:"SELECT 的逻辑执行顺序", diff:2},
     ]},
-  { id:"linklist", no:"03", stage:"base", title:"线性表 · 链表", sub:"指针与节点操作", file:"03-链表.html", href:"content/03-链表.html",
+  { id:"aggregate", no:"03", stage:"base", title:"聚合、分组与过滤", sub:"GROUP BY · HAVING · 聚合陷阱", file:"03-aggregate-group.html", href:"content/03-aggregate-group.html", demo:true,
     pts:[
-      {id:"ll-concept", title:"链表概念与节点结构", diff:1},
-      {id:"ll-singly", title:"单链表基本操作（插入/删除/遍历）", diff:1},
-      {id:"ll-patterns", title:"经典设计题（反转/找环/中点/倒数第k）", diff:2},
-      {id:"ll-doubly", title:"双向链表", diff:2},
-      {id:"ll-circular", title:"循环链表", diff:2},
-      {id:"ll-compare", title:"链表 vs 数组对比", diff:1},
+      {id:"agg-func", title:"聚合函数 COUNT / SUM / AVG / MAX / MIN", diff:1},
+      {id:"group-by", title:"GROUP BY 分组语义", diff:1},
+      {id:"having", title:"HAVING 与 WHERE 的区别", diff:2},
+      {id:"group-pitfall", title:"分组常见陷阱（非聚合列）", diff:2},
+      {id:"count-distinct", title:"去重计数与多列分组", diff:2},
+      {id:"group-ext", title:"GROUP BY 扩展（ROLLUP / 过滤分组）", diff:3},
     ]},
-  { id:"stackque", no:"04", stage:"base", title:"栈与队列", sub:"LIFO / FIFO 与滑动窗口", file:"04-栈与队列.html", href:"content/04-栈与队列.html",
+  { id:"joins", no:"04", stage:"base", title:"多表连接", sub:"INNER/LEFT/RIGHT · 自连接 · 半连接", file:"04-joins.html", href:"content/04-joins.html", demo:true,
     pts:[
-      {id:"sq-stack", title:"栈的定义与实现（顺序/链式）", diff:1},
-      {id:"sq-stackapp", title:"栈的应用（括号匹配、表达式求值）", diff:2},
-      {id:"sq-monostack", title:"单调栈（下一个更大元素）", diff:2},
-      {id:"sq-queue", title:"队列与循环队列", diff:1},
-      {id:"sq-monoqueue", title:"单调队列（滑动窗口最值）", diff:2},
-      {id:"sq-convert", title:"用栈实现队列 / 用队列实现栈", diff:2},
+      {id:"join-basic", title:"连接的本质与笛卡尔积", diff:1},
+      {id:"inner-join", title:"INNER JOIN 与 ON / USING", diff:1},
+      {id:"outer-join", title:"LEFT / RIGHT / FULL OUTER JOIN", diff:2},
+      {id:"self-join", title:"自连接（同一张表多次使用）", diff:2},
+      {id:"cross-join", title:"CROSS JOIN 与生成序列", diff:2},
+      {id:"multi-join", title:"多表连接与连接顺序", diff:2},
+      {id:"semi-anti", title:"半连接 / 反连接（EXISTS 与 JOIN 互换）", diff:3},
     ]},
-  { id:"string", no:"05", stage:"ds", title:"串与字符串匹配", sub:"KMP 与字符串哈希", file:"05-串与字符串匹配.html", href:"content/05-串与字符串匹配.html",
+  { id:"subquery", no:"05", stage:"base", title:"子查询与集合运算", sub:"IN/EXISTS · CTE · UNION", file:"05-subquery-set.html", href:"content/05-subquery-set.html", demo:true,
     pts:[
-      {id:"str-basic", title:"串的基本概念与存储", diff:1},
-      {id:"str-naive", title:"朴素匹配算法", diff:1},
-      {id:"str-kmp", title:"KMP 算法与 next（前缀函数）", diff:3},
-      {id:"str-kmpapp", title:"KMP 应用与变体", diff:3},
-      {id:"str-hash", title:"字符串哈希（滚动哈希）", diff:2},
-      {id:"str-tips", title:"常用字符串处理技巧", diff:2},
+      {id:"sub-scalar", title:"标量、列、行、表子查询", diff:1},
+      {id:"sub-in-exists", title:"IN / EXISTS / ANY / ALL 的语义差异", diff:2},
+      {id:"sub-correlated", title:"相关子查询与执行方式", diff:2},
+      {id:"sub-derived", title:"派生表与 FROM 子查询", diff:2},
+      {id:"cte", title:"CTE（WITH）与可读性重构", diff:2},
+      {id:"set-ops", title:"UNION / UNION ALL / INTERSECT / EXCEPT", diff:2},
     ]},
-  { id:"bsearch", no:"06", stage:"ds", title:"查找 · 二分查找", sub:"区间不变量与二分答案", file:"06-二分查找.html", href:"content/06-二分查找.html",
+  { id:"window", no:"06", stage:"base", title:"窗口函数", sub:"排名 · 累计 · 滑动窗口 · TopN", file:"06-window-functions.html", href:"content/06-window-functions.html", demo:true,
     pts:[
-      {id:"bs-basic", title:"二分查找的基本思想与前提", diff:1},
-      {id:"bs-boundary", title:"区间不变量与边界写法", diff:2},
-      {id:"bs-variants", title:"变体：第一个/最后一个/插入位置", diff:2},
-      {id:"bs-answer", title:"二分答案（对结果二分+判定）", diff:2},
-      {id:"bs-pitfalls", title:"常见错误与死循环排查", diff:2},
-      {id:"bs-ext", title:"扩展：三分/牛顿法/平方根（选学）", diff:3},
+      {id:"win-concept", title:"窗口函数 vs 聚合函数", diff:2},
+      {id:"win-rank", title:"ROW_NUMBER / RANK / DENSE_RANK / NTILE", diff:2},
+      {id:"win-offset", title:"LAG / LEAD / FIRST_VALUE / LAST_VALUE", diff:2},
+      {id:"win-agg", title:"窗口聚合与累计计算", diff:2},
+      {id:"win-frame", title:"窗口帧 ROWS / RANGE 与滑动窗口", diff:3},
+      {id:"win-topn", title:"分组内 TopN 与取最新一条", diff:3},
+      {id:"win-pitfall", title:"窗口函数常见坑与限制", diff:2},
     ]},
-  { id:"tree", no:"07", stage:"ds", title:"树与二叉树", sub:"遍历、BST、AVL、哈夫曼", file:"07-树与二叉树.html", href:"content/07-树与二叉树.html",
+  { id:"dml", no:"07", stage:"base", title:"数据修改、事务与并发", sub:"INSERT/UPDATE/DELETE · ACID · 隔离级别", file:"07-dml-transaction.html", href:"content/07-dml-transaction.html", demo:true,
     pts:[
-      {id:"tree-basic", title:"树的定义与基本术语", diff:1},
-      {id:"tree-btree", title:"二叉树的性质与存储", diff:1},
-      {id:"tree-traversal", title:"二叉树遍历（前/中/后序·层序）", diff:2},
-      {id:"tree-apply", title:"遍历应用（重建·深度·序列化）", diff:2},
-      {id:"tree-bst", title:"二叉搜索树（查找/插入/删除）", diff:2},
-      {id:"tree-avl", title:"平衡二叉树 AVL（旋转）", diff:3},
-      {id:"tree-huffman", title:"哈夫曼树与哈夫曼编码", diff:2},
+      {id:"dml-insert", title:"INSERT 与批量插入 / INSERT ... SELECT", diff:1},
+      {id:"dml-update", title:"UPDATE 与安全更新", diff:1},
+      {id:"dml-delete", title:"DELETE / TRUNCATE / DROP 的区别", diff:1},
+      {id:"upsert", title:"幂等写入（ON DUPLICATE KEY / REPLACE）", diff:2},
+      {id:"txn-acid", title:"事务与 ACID", diff:2},
+      {id:"txn-isolation", title:"隔离级别与并发异常（脏读/不可重复读/幻读）", diff:3},
+      {id:"txn-practice", title:"事务实践：回滚、保存点、长事务危害", diff:2},
     ]},
-  { id:"heap", no:"08", stage:"ds", title:"堆与优先队列", sub:"O(log n) 顶/最值与 topK", file:"08-堆与优先队列.html", href:"content/08-堆与优先队列.html",
+  { id:"schema", no:"08", stage:"base", title:"表设计、约束与范式", sub:"DDL · 约束 · 索引初识 · 1NF→3NF", file:"08-schema-design.html", href:"content/08-schema-design.html", demo:true,
     pts:[
-      {id:"heap-basic", title:"堆的定义与性质", diff:1},
-      {id:"heap-ops", title:"插入、删除与建堆（上浮/下沉）", diff:2},
-      {id:"heap-apply", title:"堆排序与 TopK / 第 K 大", diff:2},
-      {id:"heap-pq", title:"优先队列实现与标准库使用", diff:1},
-      {id:"heap-ext", title:"对顶堆（动态中位数）等（选学）", diff:3},
-      {id:"heap-problems", title:"堆应用实战（合并K个有序链表等）", diff:2},
+      {id:"ddl-basic", title:"CREATE / ALTER / DROP / TRUNCATE", diff:1},
+      {id:"constraint", title:"主键 / 外键 / 唯一 / 非空 / 默认 / CHECK", diff:1},
+      {id:"key-choice", title:"自增主键 vs 业务主键 vs UUID", diff:2},
+      {id:"index-intro", title:"索引初识：什么时候该加索引", diff:2},
+      {id:"view", title:"视图与物化视图", diff:2},
+      {id:"er-model", title:"ER 建模与表关系（1:1 / 1:N / M:N）", diff:2},
+      {id:"norm-123", title:"范式：1NF / 2NF / 3NF", diff:2},
+      {id:"norm-bcnf", title:"BCNF 与反范式权衡", diff:3},
     ]},
-  { id:"graph", no:"09", stage:"ds", title:"图", sub:"存储、遍历、最短路、MST、拓扑", file:"09-图.html", href:"content/09-图.html",
+  { id:"index", no:"09", stage:"adv", title:"索引原理与执行计划", sub:"B+树 · 最左前缀 · 回表 · EXPLAIN", file:"09-index-explain.html", href:"content/09-index-explain.html", demo:true,
     pts:[
-      {id:"graph-basic", title:"图的定义与术语", diff:1},
-      {id:"graph-store", title:"图的存储（邻接矩阵/邻接表）", diff:1},
-      {id:"graph-traverse", title:"图的遍历 DFS 与 BFS", diff:2},
-      {id:"graph-dijkstra", title:"最短路径 · Dijkstra", diff:3},
-      {id:"graph-other", title:"最短路径 · Floyd 与 Bellman-Ford", diff:3},
-      {id:"graph-mst", title:"最小生成树 · Prim / Kruskal", diff:3},
-      {id:"graph-topo", title:"拓扑排序与判环", diff:2},
-      {id:"graph-conn", title:"连通性（并查/桥/强连通）（选学）", diff:3},
+      {id:"idx-btree", title:"B+ 树索引结构", diff:2},
+      {id:"idx-clustered", title:"聚簇索引与二级索引", diff:2},
+      {id:"idx-composite", title:"联合索引与最左前缀原则", diff:2},
+      {id:"idx-covering", title:"覆盖索引与回表", diff:2},
+      {id:"idx-explain", title:"EXPLAIN 执行计划解读", diff:2},
+      {id:"idx-fail", title:"索引失效的常见场景", diff:2},
+      {id:"idx-design", title:"索引设计原则与代价", diff:3},
     ]},
-  { id:"hash", no:"10", stage:"ds", title:"哈希表", sub:"O(1) 查询与冲突处理", file:"10-哈希表.html", href:"content/10-哈希表.html",
+  { id:"tuning", no:"10", stage:"adv", title:"查询优化与慢 SQL", sub:"慢日志 · 重写 · JOIN 算法 · 深分页", file:"10-query-tuning.html", href:"content/10-query-tuning.html", demo:true,
     pts:[
-      {id:"hash-basic", title:"哈希表基本思想（平均 O(1)）", diff:1},
-      {id:"hash-func", title:"哈希函数设计", diff:2},
-      {id:"hash-collision", title:"冲突解决（链地址/开放定址）", diff:2},
-      {id:"hash-load", title:"负载因子与扩容（rehash）", diff:2},
-      {id:"hash-usage", title:"哈希集合/映射与计数去重", diff:1},
-      {id:"hash-problems", title:"设计题与应用（两数之和/最长连续）", diff:2},
+      {id:"tune-slowlog", title:"慢查询日志与问题定位", diff:2},
+      {id:"tune-rewrite", title:"SQL 重写技巧", diff:2},
+      {id:"tune-join-algo", title:"JOIN 算法（NLJ / BNL / Hash Join）", diff:3},
+      {id:"tune-paging", title:"深分页优化", diff:2},
+      {id:"tune-count", title:"COUNT 与统计信息", diff:2},
+      {id:"tune-batch", title:"批量操作与大事务拆分", diff:2},
+      {id:"tune-flow", title:"优化流程与效果验证", diff:2},
     ]},
-  { id:"uf", no:"11", stage:"ds", title:"并查集", sub:"连通性利器", file:"11-并查集.html", href:"content/11-并查集.html",
+  { id:"storage", no:"11", stage:"adv", title:"存储引擎、锁与 MVCC", sub:"InnoDB · 三种日志 · 行锁 · 死锁", file:"11-storage-locks.html", href:"content/11-storage-locks.html", demo:true,
     pts:[
-      {id:"uf-basic", title:"并查集基本操作（find/union）", diff:1},
-      {id:"uf-opt", title:"路径压缩与按秩/大小合并", diff:2},
-      {id:"uf-weight", title:"带权并查集（相对关系/到根距离）", diff:3},
-      {id:"uf-app", title:"并查集的应用", diff:2},
+      {id:"eng-innodb", title:"InnoDB vs MyISAM 与引擎选择", diff:1},
+      {id:"log-redo-undo", title:"redo / undo / binlog 三种日志", diff:3},
+      {id:"mvcc", title:"MVCC 与 Read View", diff:3},
+      {id:"lock-type", title:"行锁 / 表锁 / 意向锁 / 间隙锁", diff:3},
+      {id:"lock-deadlock", title:"死锁成因与排查", diff:2},
+      {id:"lock-practice", title:"加锁实践与避免锁等待", diff:2},
     ]},
-  { id:"sort", no:"12", stage:"algo", title:"排序算法", sub:"八大排序与复杂度对比", file:"12-排序算法.html", href:"content/12-排序算法.html",
+  { id:"modeling", no:"12", stage:"adv", title:"数据建模与数仓", sub:"维度建模 · 数仓分层 · SCD", file:"12-data-modeling.html", href:"content/12-data-modeling.html", demo:true,
     pts:[
-      {id:"sort-basic", title:"排序概念与稳定性", diff:1},
-      {id:"sort-simple", title:"插入/选择/冒泡（含希尔）", diff:1},
-      {id:"sort-quick", title:"快速排序与 partition", diff:2},
-      {id:"sort-merge", title:"归并排序", diff:2},
-      {id:"sort-heap", title:"堆排序", diff:2},
-      {id:"sort-noncompare", title:"计数/基数/桶排序（非比较）", diff:2},
-      {id:"sort-compare", title:"各排序复杂度与稳定性对比", diff:1},
+      {id:"model-dim", title:"维度建模：事实表与维度表", diff:2},
+      {id:"model-star", title:"星型模型与雪花模型", diff:2},
+      {id:"model-layer", title:"数仓分层（ODS / DWD / DWS / ADS）", diff:2},
+      {id:"model-scd", title:"缓慢变化维 SCD", diff:3},
+      {id:"model-metrics", title:"指标口径与宽表设计", diff:2},
+      {id:"model-case", title:"建模实战案例", diff:3},
     ]},
-  { id:"recursion", no:"13", stage:"algo", title:"递归与分治", sub:"递归思维与主定理", file:"13-递归与分治.html", href:"content/13-递归与分治.html",
+  { id:"advanced", no:"13", stage:"adv", title:"高级函数与特性", sub:"函数库 · CASE · 行列转换 · 递归 CTE", file:"13-advanced-sql.html", href:"content/13-advanced-sql.html", demo:true,
     pts:[
-      {id:"rec-basic", title:"递归思想与三要素", diff:1},
-      {id:"rec-analysis", title:"递归式复杂度分析", diff:2},
-      {id:"rec-divide", title:"分治思想（分解/解决/合并）", diff:2},
-      {id:"rec-master", title:"主定理与常见递推", diff:3},
-      {id:"rec-problems", title:"典型分治题（最大子段和/逆序对）", diff:3},
-      {id:"rec-opt", title:"尾递归与递归改迭代", diff:2},
+      {id:"fn-string", title:"字符串函数", diff:1},
+      {id:"fn-date", title:"日期时间函数", diff:2},
+      {id:"fn-numeric", title:"数值函数与类型转换", diff:1},
+      {id:"fn-case", title:"CASE WHEN 与条件表达式", diff:1},
+      {id:"fn-pivot", title:"行列转换（PIVOT）", diff:2},
+      {id:"cte-recursive", title:"递归 CTE（树形结构 / 生成序列）", diff:3},
+      {id:"json-type", title:"JSON 类型与函数", diff:2},
+      {id:"proc", title:"存储过程 / 函数 / 触发器（选学）", diff:2},
     ]},
-  { id:"greedy", no:"14", stage:"algo", title:"贪心算法", sub:"每步取当前最优", file:"14-贪心算法.html", href:"content/14-贪心算法.html",
+  { id:"ops", no:"14", stage:"adv", title:"运维、安全与分布式", sub:"备份恢复 · 权限 · 主从 · 分库分表", file:"14-ops-security.html", href:"content/14-ops-security.html", demo:true,
     pts:[
-      {id:"greedy-basic", title:"贪心思想与策略", diff:1},
-      {id:"greedy-proof", title:"正确性证明（交换/反证）", diff:3},
-      {id:"greedy-classic", title:"经典贪心问题", diff:2},
-      {id:"greedy-vsdp", title:"贪心与动态规划的区别", diff:2},
-      {id:"greedy-cond", title:"适用条件与贪心反例", diff:2},
+      {id:"ops-backup", title:"备份与恢复", diff:2},
+      {id:"ops-user", title:"用户、权限与最小授权", diff:1},
+      {id:"ops-replica", title:"主从复制与读写分离", diff:2},
+      {id:"ops-shard", title:"分库分表与水平拆分", diff:3},
+      {id:"sec-injection", title:"SQL 注入原理与防护", diff:2},
+      {id:"sec-audit", title:"审计、脱敏与合规", diff:2},
     ]},
-  { id:"dp", no:"15", stage:"algo", title:"动态规划", sub:"最优子结构 + 重叠子问题", file:"15-动态规划.html", href:"content/15-动态规划.html",
+  { id:"interview", no:"15", stage:"practice", title:"面试高频 SQL 题型", sub:"TopN · 连续N天 · 排名 · 去重取最新", file:"15-interview-patterns.html", href:"content/15-interview-patterns.html", demo:true,
     pts:[
-      {id:"dp-basic", title:"DP 思想（最优子结构/重叠子问题）", diff:2},
-      {id:"dp-state", title:"状态定义·转移·边界·遍历顺序", diff:3},
-      {id:"dp-1d", title:"一维 DP（爬楼梯/打家劫舍/子序和）", diff:2},
-      {id:"dp-subseq", title:"子序列问题（LIS / LCS）", diff:3},
-      {id:"dp-knapsack", title:"背包问题（0-1/完全/分组）", diff:3},
-      {id:"dp-advanced", title:"区间 DP 与树形 DP 简介", diff:3},
-      {id:"dp-memo", title:"记忆化搜索", diff:2},
-      {id:"dp-opt", title:"DP 常见优化（滚动数组等）", diff:3},
+      {id:"itv-topn", title:"TopN 与分组 TopN", diff:2},
+      {id:"itv-rank", title:"排名与并列处理", diff:2},
+      {id:"itv-consecutive", title:"连续 N 天 / 连续区间", diff:3},
+      {id:"itv-dedup", title:"去重与保留最新", diff:2},
+      {id:"itv-compare", title:"自连接比较类（环比 / 上一条）", diff:2},
+      {id:"itv-pivot", title:"行列转换与报表题", diff:2},
+      {id:"itv-trap", title:"NULL 与边界陷阱题", diff:2},
     ]},
-  { id:"backtrack", no:"16", stage:"algo", title:"回溯算法", sub:"选择→递归→撤销", file:"16-回溯算法.html", href:"content/16-回溯算法.html",
+  { id:"analytics", no:"16", stage:"practice", title:"数据分析实战", sub:"漏斗 · 留存 · AB 实验 · RFM", file:"16-analytics-practice.html", href:"content/16-analytics-practice.html", demo:true,
     pts:[
-      {id:"bt-basic", title:"回溯思想（选择/递归/撤销）", diff:2},
-      {id:"bt-perm", title:"全排列/组合/子集（含去重）", diff:2},
-      {id:"bt-prune", title:"剪枝优化", diff:2},
-      {id:"bt-grid", title:"棋盘与网格类（N皇后/数独/岛屿）", diff:3},
-      {id:"bt-vs", title:"回溯 vs 分支限界", diff:2},
+      {id:"biz-funnel", title:"漏斗分析", diff:2},
+      {id:"biz-retention", title:"留存与同期群分析", diff:3},
+      {id:"biz-abtest", title:"AB 实验与指标统计", diff:3},
+      {id:"biz-yoy", title:"同比环比与累计指标", diff:2},
+      {id:"biz-rfm", title:"用户分层（RFM）", diff:2},
+      {id:"biz-report", title:"报表 SQL 与自动化", diff:2},
     ]},
-  { id:"techniques", no:"17", stage:"algo", title:"常用解题技巧与模板", sub:"模板套路速刷：双指针、滑动窗口…", file:"17-常用解题技巧.html", href:"content/17-常用解题技巧.html",
+  { id:"capstone", no:"17", stage:"practice", title:"综合项目实战", sub:"需求 → 建模 → 查询 → 优化 → 交付", file:"17-capstone-project.html", href:"content/17-capstone-project.html", demo:true,
     pts:[
-      {id:"tech-twopointer", title:"双指针（对撞/快慢）", diff:1},
-      {id:"tech-sliding", title:"滑动窗口（含模板）", diff:2},
-      {id:"tech-prefix", title:"前缀和与差分", diff:2},
-      {id:"tech-mono", title:"单调栈/单调队列速览", diff:2},
-      {id:"tech-bit", title:"位运算技巧", diff:2},
-      {id:"tech-freq", title:"频率统计与计数", diff:1},
-      {id:"tech-keep", title:"常用数据结构与技巧速查表", diff:1},
+      {id:"cap-design", title:"需求分析与表设计", diff:2},
+      {id:"cap-etl", title:"数据导入与清洗", diff:2},
+      {id:"cap-query", title:"核心分析查询实现", diff:2},
+      {id:"cap-optimize", title:"性能优化与索引落地", diff:2},
+      {id:"cap-review", title:"代码规范与交付", diff:1},
+      {id:"cap-next", title:"下一步学习路线", diff:1},
     ]},
 ];
 </script>
@@ -398,20 +408,15 @@ const MODULES = [
    渲染 + 进度（无需改动，除非你理解它是干什么的）
    ============================================================ */
 (function(){
-  const KEY = "dsa_outline_progress_v1";
+  const KEY = "sql_outline_progress_v1";
   let done = new Set();
   try{ done = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){}
 
-  // 组件点唯一键
-  const uk = m=>id=> m.id+"::"+id;
   const allPts = MODULES.flatMap(m=>m.pts.map(p=>({m:m, p:p, key:m.id+"::"+p.id})));
   const total = allPts.length;
 
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify([...done])); }catch(e){} renderProgress(); }
 
-  function stageName(s){ return STAGES[s].name; }
-
-  // 章节头 + 模块卡片
   function renderStage(stageId){
     const st = STAGES[stageId];
     const mods = MODULES.filter(m=>m.stage===stageId);
@@ -433,14 +438,14 @@ const MODULES = [
       return `<article class="mod" style="--st:${st.color}">
         <div class="mh">
           <span class="no" style="background:${st.color}">${m.no}</span>
-          <div class="tt"><h3>${m.title}</h3><div class="sub">${m.sub}</div></div>
+          <div class="tt"><h3>${m.title}</h3><div class="sub">${m.sub}</div>${m.demo?'<div class="demotag">🖥 含交互演示</div>':''}</div>
           <div class="mp"><b>${mdone}/${m.pts.length}</b><div class="bar"><span style="width:${mpct}%"></span></div></div>
         </div>
         <ul class="pts">${ptsHtml}</ul>
       </article>`;
     }).join('');
     return `<section class="stage" data-stage="${stageId}">
-      <div class="sh"><span class="tag" style="background:${st.color}">${stageName(stageId)}</span><h2>${st.name}</h2><span class="dn">${mods.length} 个模块</span></div>
+      <div class="sh"><span class="tag" style="background:${st.color}">${st.name}</span><h2>${st.name}</h2><span class="dn">${mods.length} 个模块 · ${mods.flatMap(m=>m.pts).length} 个知识点</span></div>
       <p class="desc">${st.desc}</p>
       <div class="modules" style="margin-top:14px">${modsHtml}</div>
     </section>`;
@@ -448,44 +453,41 @@ const MODULES = [
 
   function renderAll(){
     const wrap = document.getElementById("stageWrap");
-    wrap.innerHTML = ["base","ds","algo"].map(renderStage).join("");
+    wrap.innerHTML = ["base","adv","practice"].map(renderStage).join("");
     wrap.querySelectorAll('input[type=checkbox]').forEach(ch=>{
       ch.addEventListener('change', ()=>{ const k=ch.dataset.key; if(ch.checked) done.add(k); else done.delete(k); save(); });
     });
   }
 
-  // 进度展示
   function renderProgress(){
-    const totalNow = allPts.filter(x=> (done.has(x.key)) ).length;
+    const totalNow = allPts.filter(x=> done.has(x.key) ).length;
     const pct = total? Math.round(totalNow/total*100):0;
     document.getElementById("nMod").textContent = MODULES.length;
     document.getElementById("nPt").textContent = total;
+    document.getElementById("nDemo").textContent = MODULES.filter(m=>m.demo).length;
     document.getElementById("nDone").textContent = totalNow;
     document.getElementById("nPct").textContent = pct+"%";
     document.getElementById("bigPct").textContent = pct+"%";
     document.getElementById("bigBar").style.width = pct+"%";
     document.getElementById("navDone").textContent = totalNow;
     document.getElementById("navTotal").textContent = total;
-    // 阶段长条
     const tagbar = document.getElementById("stagelong");
     tagbar.innerHTML = Object.keys(STAGES).map(s=>{
       const ms = MODULES.filter(m=>m.stage===s);
       const tp = ms.flatMap(m=>m.pts).length;
       const td = ms.flatMap(m=>m.pts.map(p=>m.id+"::"+p.id)).filter(k=>done.has(k)).length;
       const pc = tp? Math.round(td/tp*100):0;
-      return `<span class="tagpill" style="color:${STAGES[s].color};border-color:${STAGES[s].color}40">${STAGES[s].name} <span class="n">${td}/${tp}</span></span>`;
+      return `<span class="tagpill" style="color:${STAGES[s].color};border-color:${STAGES[s].color}40">${STAGES[s].name} <span class="n">${td}/${tp}</span> · ${pc}%</span>`;
     }).join('');
     document.getElementById("progTip").textContent = pct>=100
-      ? "🎉 全部完成！你已经系统过了一遍数据结构与算法。建议回归错题与重做各模块的「考核 / 答题」以巩固。"
-      : `已勾选 ${totalNow} 个知识点。建议按「基础 → 数据结构 → 算法思想」顺序推进，每个模块做完再打勾。`;
-    // 过滤计数
+      ? "🎉 全部完成！你已经系统过了一遍 SQL 与数据库。建议回归错题，把 15–17 的实战题再手写一遍，并在真实库上跑一次 EXPLAIN。"
+      : `已勾选 ${totalNow} 个知识点。建议按「基础 → 进阶 → 实战」顺序推进，每个模块做完「考核」再打勾。`;
     document.getElementById("cAll").textContent = total;
     document.getElementById("cBase").textContent = MODULES.filter(m=>m.stage==="base").flatMap(m=>m.pts).length;
-    document.getElementById("cDs").textContent = MODULES.filter(m=>m.stage==="ds").flatMap(m=>m.pts).length;
-    document.getElementById("cAlgo").textContent = MODULES.filter(m=>m.stage==="algo").flatMap(m=>m.pts).length;
+    document.getElementById("cAdv").textContent = MODULES.filter(m=>m.stage==="adv").flatMap(m=>m.pts).length;
+    document.getElementById("cPractice").textContent = MODULES.filter(m=>m.stage==="practice").flatMap(m=>m.pts).length;
   }
 
-  // 过滤 / 搜索
   let activeStage = "all";
   function applyFilter(){
     const q = (document.getElementById("searchTop").value + " " + document.getElementById("searchMob").value).trim().toLowerCase();
@@ -512,13 +514,14 @@ const MODULES = [
         st.querySelectorAll(".mod").forEach(mod=>mod.style.display="");
       }
     });
-    // 空提示
     let anyVisible = false;
     document.querySelectorAll(".mod").forEach(m=>{ if(m.style.display!=="none") anyVisible=true; });
-    if(!anyVisible){ let e=document.getElementById("emptyMsg"); if(!e){ e=document.createElement("div"); e.id="emptyMsg"; e.className="empty"; element_after(document.getElementById("stageWrap"), e); } e.textContent="没有匹配的知识点，换个关键词试试。"; e.style.display=""; }
-    else { const e=document.getElementById("emptyMsg"); if(e) e.style.display="none"; }
+    if(!anyVisible){
+      let e=document.getElementById("emptyMsg");
+      if(!e){ e=document.createElement("div"); e.id="emptyMsg"; e.className="empty"; document.getElementById("stageWrap").appendChild(e); }
+      e.textContent="没有匹配的知识点，换个关键词试试。"; e.style.display="";
+    } else { const e=document.getElementById("emptyMsg"); if(e) e.style.display="none"; }
   }
-  function element_after(ref, el){ ref.parentNode.insertBefore(el, ref.nextSibling); }
 
   document.getElementById("searchTop").addEventListener("input", applyFilter);
   document.getElementById("searchMob").addEventListener("input", applyFilter);
@@ -530,7 +533,6 @@ const MODULES = [
     if(confirm("确定要清空所有已打勾的进度吗？此操作不可撤销。")){ done = new Set(); save(); renderAll(); applyFilter(); }
   });
 
-  // 回到顶部
   const toTop = document.createElement("button"); toTop.className="totop"; toTop.textContent="↑"; toTop.setAttribute("aria-label","回到顶部"); document.body.appendChild(toTop);
   const toggle = ()=> toTop.classList.toggle("show", window.scrollY>700);
   window.addEventListener("scroll", toggle); toggle();

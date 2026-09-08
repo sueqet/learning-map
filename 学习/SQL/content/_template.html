@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【请替换：模块标题】 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 【替换为模块标题】：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>/*__SHARED_STYLE__*/</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 00 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">这里是本模块的一句话引言，用来说明你将学到什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <!-- TODO(目标): 逐条填写「学完后你能做到什么」，可验证、可考核。 -->
+      <li>目标占位：学完本模块，你能 …（用可验证的结果描述）。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">前置知识占位：例如「会基本电脑操作、了解表格/行列概念」。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       每个知识点一个 <section class="topic" id="锚点">，
+       锚点 id 必须与 index.html 里该知识点的 id 完全一致。
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>知识点一标题<br>（如下是示例结构，请按此模式扩展）</h2>
+  </section>
+
+  <!-- 示例知识点块 -->
+  <section class="topic" id="sample-anchor">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>知识点标题<span class="pt">示例块 · 请按此结构逐个知识点填写</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="sample::sample-anchor"><span>已学会</span></label>
+    </div>
+    <p>用一段话讲清这个知识点的<strong>定义与核心思想</strong>，为什么学它、用在什么场景。</p>
+    <ul>
+      <li>要点 1：一句话关键结论。</li>
+      <li>要点 2：与其它概念的联系。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>example.sql</div>
+      <pre><code>-- 代码注释：给出可运行的关键示例，突出核心逻辑
+SELECT * FROM customers WHERE city = '北京';</code></pre>
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>一两句「最需要记住」的结论，常考。</p></div>
+
+    <!-- 交互演示面板：需要 SQL 练习台的页面用这一行挂载（见文件底部 JS） -->
+    <div id="demo-sample"></div>
+  </section>
+
+  <!-- TODO(正文): 在此复制上面的示例块（section.topic），替换锚点与内容。
+       每个知识点应包含：定义与思想、可运行 SQL 示例、结果表或对照表、
+       易错点(callout danger)、面试考点(key callout)、至少 1 个交互演示面板。 -->
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <!-- TODO(挑战): 2–4 条更有难度的延伸题 / 思考题。 -->
+      <li>挑战占位：给出一条需要独立思考的更难题目或延伸方向。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+/* ============================================================
+   请替换下面的 CONFIG 与 QUZ —— 这是每个知识点网页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）请保持不动。
+   ============================================================ */
+const CONFIG = {
+  moduleId: "sample",          // 模块 id，必须与 index.html 的 MODULES 里一致
+  title: "模块标题",            // ex: 多表连接
+  eyebrow: "MODULE 04 · SQL / 数据库",
+  lead: "一句话说明本模块学什么、为什么重要。",
+  points: ["sample-anchor"],   // 本页所有知识点的锚点 id（顺序与正文一致）
+  prev: "",                    // 前一节文件名，如 "03-aggregate-group.html"；第一页留 ""
+  next: "",                    // 下一节文件名；最后一页留 ""
+};
+
+/* 考核题目：每道题一个对象。
+   type: "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；sql: 可选，题干下方展示的 SQL 片段；
+   opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"示例题干：下面哪项是本题想要你判断的核心结论？",
+    opts:["选项 A","选项 B","选项 C","选项 D"],
+    ans:1,
+    exp:"解析：解释为什么正确答案是这个，并顺带点明其它选项为何错。"
+  },
+  // TODO(题目): 继续添加 7–11 道题，覆盖本模块各知识点；至少 1 道 interview 题。
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1），
+   键内元素形如 "模块id::知识点id"。在详解页勾选 = 大纲同步打勾。
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   交互演示面板挂载区（每个页面按需保留 / 改写这一段）
+   —— 通用 SQL 练习台：SQLSandbox.mount(容器, {query, presets})
+   ------------------------------------------------------------ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-sample");
+  if(!host) return;
+  SQLSandbox.mount(host, {
+    query: "SELECT * FROM customers WHERE city = '北京';",
+    presets: [
+      {label:"全部客户", sql:"SELECT * FROM customers;"},
+      {label:"只看北京", sql:"SELECT name, city FROM customers WHERE city = '北京';"},
+      {label:"金额大于 1000 的订单", sql:"SELECT id, amount FROM orders WHERE amount > 1000 ORDER BY amount DESC;"}
+    ]
+  });
+})();
+</script>
+</body>
+</html>

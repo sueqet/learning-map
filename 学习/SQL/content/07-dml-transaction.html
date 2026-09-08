@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据修改、事务与并发 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 数据修改、事务与并发：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 07 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">数据修改、事务与并发</h1>
+    <p class="lead" id="pageLead"></p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>会写单行 / 多行 <b>INSERT</b> 与 <b>INSERT ... SELECT</b>，并说清为什么批量插入更快。</li>
+      <li>能按「先 SELECT 验证 → 再 UPDATE → 核对 ROW_COUNT()」的安全流程改数据，识别会误伤全表的写法。</li>
+      <li>能准确区分 <b>DELETE / TRUNCATE / DROP</b> 在回滚、自增值、触发器、日志量上的差异。</li>
+      <li>会用 <b>ON DUPLICATE KEY UPDATE</b> 实现幂等写入，并说明 <b>REPLACE INTO</b> 的副作用。</li>
+      <li>能解释 <b>ACID</b> 四项各自靠 InnoDB 的什么机制实现，知道哪些语句会隐式提交。</li>
+      <li>能对比四种隔离级别允许的并发异常，并在时间线上指认脏读 / 不可重复读 / 幻读。</li>
+      <li>掌握回滚、<b>SAVEPOINT</b> 与分批提交，能说出长事务的三类危害与排查入口。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：<code class="inl">SELECT / WHERE / JOIN</code> 与聚合查询（模块 02–04）、主键与唯一键的概念、以及「事务是一组原子操作」的直觉。本页示例沿用内置示例数据 <code class="inl">customers</code>（8 行）、<code class="inl">orders</code>（12 行）、<code class="inl">products</code>（6 行）、<code class="inl">order_items</code>（15 行）、<code class="inl">employees</code>（9 行）。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>写入数据：INSERT / UPDATE / DELETE / 幂等<br>先学会改数据，再学会不把数据改坏</h2>
+  </section>
+
+  <!-- ========== 知识点 1 ========== -->
+  <section class="topic" id="dml-insert">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>INSERT 与批量插入 / INSERT ... SELECT<span class="pt">dml-insert · 把新行写进表</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="dml::dml-insert"><span>已学会</span></label>
+    </div>
+    <p><b>INSERT</b> 是 DML（Data Manipulation Language，数据操纵语言）里把新行写入表的方式，基本形式是 <code class="inl">INSERT INTO 表 (列, …) VALUES (值, …)</code>。<b>显式列出列名</b>是最值得养成的习惯：表新增列或调整列顺序时，只写 VALUES 的语句会把数据写进错误的列，而且往往悄无声息。</p>
+    <p>性能上，一次插入多行（<code class="inl">VALUES (...), (...), (...)</code>）比循环执行多条单行 INSERT 快得多：只走一次网络往返、只解析一次 SQL、只提交一次事务。批量大小受 <code class="inl">max_allowed_packet</code> 限制，通常几百到几千行一批最稳妥。</p>
+    <p><b>INSERT ... SELECT</b> 把查询结果直接写入目标表，数据不经过客户端，是归档、ETL（Extract-Transform-Load，抽取-转换-加载）和建汇总表的常用手段。要注意它在大表上会形成一个长事务，日志与锁的代价都集中在一条语句里。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>insert.sql</div>
+      <pre><code>-- ① 单行插入：显式列出列名，表结构变化时不会错位
+INSERT INTO customers (name, city, gender, signup_date, level)
+VALUES ('郑凯', '成都', 'M', '2024-05-01', '普通');
+-- 结果：customers 8 → 9 行，新行 id = 9
+
+-- ② 批量插入：一条语句写多行，只走一次网络往返
+INSERT INTO products (name, category, price, stock) VALUES
+  ('耳机',       '数码', 299.00, 150),
+  ('显示器支架', '家居', 129.00,  60),
+  ('漫画书',     '图书',  45.00, 300);
+-- 结果：products 6 → 9 行
+
+-- ③ INSERT ... SELECT：把查询结果直接写入另一张表（归档 / ETL）
+CREATE TABLE orders_2024 LIKE orders;          -- 复制表结构
+INSERT INTO orders_2024 (id, customer_id, order_date, amount, status)
+SELECT id, customer_id, order_date, amount, status
+FROM orders
+WHERE order_date &gt;= '2024-01-01' AND order_date &lt; '2025-01-01';
+-- 结果：orders_2024 得到 orders 中 2024 年的全部 12 行
+
+-- ④ 冲突处理：主键 / 唯一键重复时跳过该行
+INSERT IGNORE INTO customers (id, name, city, signup_date, level)
+VALUES (1, '张伟', '北京', '2023-01-05', '金卡');   -- id = 1 已存在 → 跳过，不报错</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>典型场景</th><th>代价与注意</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">INSERT ... VALUES（单行）</td><td>零星写入、逐条循环</td><td>每行一次往返与解析，慢</td></tr>
+        <tr><td class="mono">INSERT ... VALUES（多行）</td><td>批量导入几百~几千行</td><td>一次往返，快；受 max_allowed_packet 限制</td></tr>
+        <tr><td class="mono">INSERT ... SELECT</td><td>表间复制、归档、汇总</td><td>数据不经客户端；大表上是长事务，建议分批</td></tr>
+        <tr><td class="mono">INSERT ... SET</td><td>MySQL 专有简写</td><td>可读性差，跨数据库不通用</td></tr>
+        <tr><td class="mono">INSERT IGNORE</td><td>重复数据直接跳过</td><td>会把非冲突错误（如截断）一起吞掉</td></tr>
+        <tr><td class="mono">LOAD DATA INFILE</td><td>超大文件（百万行级）导入</td><td>最快；需要 FILE 权限与 secure_file_priv 配置</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>批量插入的收益来自「减少往返 + 减少提交次数」。写一万行时，一条多行 INSERT 和一万条单行 INSERT 的差别可能是几十倍。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>动手提示：</b>本页的 SQL 练习台只支持 <code class="inl">SELECT</code>，INSERT / UPDATE / DELETE / 事务请在真实 MySQL 8.0 实例上验证（可以用 Docker 起一个临时库，或在本地测试库上练习）。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① 省略列名导致「插入位置错乱」；② <code class="inl">INSERT IGNORE</code> 顺手吞掉数据截断、类型转换等真实错误；③ 一次性 <code class="inl">INSERT ... SELECT</code> 几百万行，产生巨大事务、undo 膨胀并拖慢主从复制——应分批执行。</p></div>
+  </section>
+
+  <!-- ========== 知识点 2 ========== -->
+  <section class="topic" id="dml-update">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>UPDATE 与安全更新<span class="pt">dml-update · 最危险的一条 DML</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="dml::dml-update"><span>已学会</span></label>
+    </div>
+    <p><b>UPDATE</b> 修改已有行的列值，语法是 <code class="inl">UPDATE 表 SET 列 = 表达式 [, …] [WHERE 条件] [ORDER BY …] [LIMIT n]</code>。SET 右侧可以引用当前值（<code class="inl">price = price * 0.9</code>），这是它比「先查出来再写回去」更可靠的地方。</p>
+    <p>UPDATE 之所以最危险，是因为<b>漏写 WHERE 不会报错</b>：整表会被改掉，而且只要不在事务里，改完就已提交。安全流程固定三步：<b>① 用同样的 WHERE 先跑一次 SELECT 看清命中哪些行 → ② 执行 UPDATE → ③ 立即用 <code class="inl">ROW_COUNT()</code> 核对影响行数</b>，与预期不符就 <code class="inl">ROLLBACK</code>。</p>
+    <p>并发方面，InnoDB 会对 UPDATE 扫描到的行加<b>排他锁（X 锁）</b>。如果 WHERE 用不到索引，扫描过的行都会被锁住，别人写同一批行就会等待——所以「更新慢」经常不是 UPDATE 本身慢，而是它锁得太多。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>update-safe.sql</div>
+      <pre><code>-- ① 先看清楚会命中哪些行
+SELECT id, name, city, level FROM customers WHERE city = '北京';
+-- 命中 2 行：张伟(id=1)、赵磊(id=6)
+
+-- ② 再执行更新
+UPDATE customers
+SET level = '银卡'
+WHERE city = '北京';
+
+-- ③ 立刻核对影响行数
+SELECT ROW_COUNT();          -- 2，与 SELECT 结果一致，放心提交
+
+-- 用当前值参与计算：数码品类统一 9 折（3 行）
+UPDATE products
+SET price = ROUND(price * 0.9, 2)
+WHERE category = '数码';
+
+-- 多表更新：按已付款消费额刷新客户等级
+UPDATE customers c
+JOIN (SELECT customer_id, SUM(amount) AS total
+      FROM orders WHERE status = 'paid'
+      GROUP BY customer_id) t ON t.customer_id = c.id
+SET c.level = CASE WHEN t.total &gt;= 3000 THEN '金卡'
+                   WHEN t.total &gt;= 1000 THEN '银卡'
+                   ELSE '普通' END;
+
+-- 危险写法（只作对比，切勿在生产执行）
+-- UPDATE customers SET level = '金卡';            -- 没有 WHERE → 8 行全部被改
+-- UPDATE customers SET city = '北京' WHERE 1 = 1; -- 条件恒真 → 等价于全表更新
+-- UPDATE customers SET city = '北京' WHERE name LIKE '%张%';  -- 模糊匹配容易误伤</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>WHERE 写法</th><th>命中行数（本例）</th><th>风险等级</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">WHERE id = 1005</td><td class="mono">1</td><td>低</td><td>主键精确定位，锁 1 行</td></tr>
+        <tr><td class="mono">WHERE city = '北京'</td><td class="mono">2</td><td>中</td><td>非唯一列，先 SELECT 确认</td></tr>
+        <tr><td class="mono">WHERE category = '数码' AND stock &gt; 100</td><td class="mono">2</td><td>中</td><td>复合条件，注意索引是否覆盖</td></tr>
+        <tr><td class="mono">WHERE 1 = 1</td><td class="mono">8（全表）</td><td>高</td><td>条件恒真，等价于没有条件</td></tr>
+        <tr><td>不写 WHERE</td><td class="mono">8（全表）</td><td class="null">极高</td><td>不报错、直接改全表</td></tr>
+        <tr><td class="mono">ORDER BY id LIMIT 5</td><td class="mono">5</td><td>中</td><td>行数可控，但结果依赖排序稳定性</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「先 SELECT、再 UPDATE、后核对 ROW_COUNT()」是 DML 的两次确认原则。开启 MySQL 的 <code class="inl">sql_safe_updates = 1</code> 后，没有 WHERE（或 WHERE 不含索引列）的 UPDATE/DELETE 会被直接拒绝。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① <code class="inl">SET col = NULL</code> 撞上 NOT NULL 约束会报错并整条失败；② <code class="inl">SET count = count + 1</code> 在并发下要靠行锁保证原子性，读出来再写回去会丢失更新；③ 在 UPDATE 里对索引列做函数运算（如 <code class="inl">WHERE YEAR(order_date) = 2024</code>）会让索引失效，扫描并锁住更多行。</p></div>
+
+    <div id="demo-upd"></div>
+  </section>
+
+  <!-- ========== 知识点 3 ========== -->
+  <section class="topic" id="dml-delete">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>DELETE / TRUNCATE / DROP 的区别<span class="pt">dml-delete · 删行、清表还是删表</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="dml::dml-delete"><span>已学会</span></label>
+    </div>
+    <p>三个语句删的<b>对象</b>根本不同：<code class="inl">DELETE</code> 删的是「行」，表还在；<code class="inl">TRUNCATE</code> 删的是「表里的全部数据」并把表当成新表；<code class="inl">DROP</code> 删的是「表本身」——结构、数据、索引、约束一起消失。</p>
+    <p><code class="inl">DELETE</code> 属于 DML：逐行删除，每一行都写 undo / redo，可以带 WHERE、可以触发触发器，在事务里能被 <code class="inl">ROLLBACK</code> 撤销，代价随行数线性增长。<code class="inl">TRUNCATE</code> 和 <code class="inl">DROP</code> 属于 DDL（Data Definition Language，数据定义语言）：执行时<b>隐式提交</b>当前事务，因此无法回滚；TRUNCATE 直接释放数据页，速度快、日志量小，但会重置 <code class="inl">AUTO_INCREMENT</code> 且不触发触发器。</p>
+    <p>面试高频的一句话总结：<b>「DELETE 能回滚但慢，TRUNCATE 快但不可回滚且重置自增，DROP 连表都没了」</b>。生产上删数据前先备份或先改逻辑删除标记，是比记语法更重要的习惯。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>delete-truncate-drop.sql</div>
+      <pre><code>-- DELETE：按条件删行，可回滚
+START TRANSACTION;
+DELETE FROM orders WHERE status = 'cancelled';   -- 删 1 行（订单 1009）
+SELECT ROW_COUNT();                              -- 1
+ROLLBACK;                                        -- 数据回来了
+
+-- DELETE 全部行：表结构保留，自增值不重置
+DELETE FROM orders;              -- 12 行 → 0 行，下一个 id 仍从 1013 开始
+
+-- TRUNCATE：清空整表，重置 AUTO_INCREMENT，隐式提交
+TRUNCATE TABLE orders;           -- 12 行 → 0 行，下一个 id 回到 1
+
+-- DROP：连表结构一起删除
+DROP TABLE orders;
+
+-- 只保留近期数据？用「新建表 + 改名」更快，但同样不可回滚
+CREATE TABLE orders_new LIKE orders;
+INSERT INTO orders_new SELECT * FROM orders WHERE order_date &gt;= '2024-03-01';
+RENAME TABLE orders TO orders_old, orders_new TO orders;   -- 原子换名
+
+-- 大表分批删，避免长事务与主从延迟
+DELETE FROM orders WHERE status = 'cancelled' ORDER BY id LIMIT 1000;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th class="mono">DELETE</th><th class="mono">TRUNCATE</th><th class="mono">DROP</th></tr></thead>
+      <tbody>
+        <tr><td>语言分类</td><td>DML</td><td>DDL</td><td>DDL</td></tr>
+        <tr><td>删除对象</td><td>行</td><td>全部行</td><td>表（结构 + 数据 + 索引）</td></tr>
+        <tr><td>支持 WHERE</td><td>✅ 支持</td><td>❌ 不支持</td><td>❌ 不支持</td></tr>
+        <tr><td>能否 ROLLBACK</td><td>✅ 同一事务内可以</td><td>❌ 隐式提交</td><td>❌ 不可回滚</td></tr>
+        <tr><td>AUTO_INCREMENT</td><td>保留</td><td>重置为 1</td><td>随表删除</td></tr>
+        <tr><td>触发器</td><td>逐行触发</td><td>不触发</td><td>随表删除</td></tr>
+        <tr><td>日志量与速度</td><td>大 / 慢</td><td>小 / 快</td><td>最小 / 最快</td></tr>
+        <tr><td>锁</td><td>行锁</td><td>元数据锁（阻塞整表访问）</td><td>元数据锁</td></tr>
+        <tr><td>误操作后的恢复</td><td>ROLLBACK 或 binlog</td><td>只能靠备份</td><td>只能靠备份</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① <code class="inl">DELETE</code> 不带 WHERE 删全表后想回滚，必须还在同一个事务里；一旦提交就只能靠备份或解析 binlog（<code class="inl">binlog_format = ROW</code> 时可用工具生成反向 SQL）。② <code class="inl">TRUNCATE</code> 重置自增，会让外部系统里缓存的旧 id 与新数据冲突。③ 以为 <code class="inl">TRUNCATE</code> 是「更快的 DELETE」，其实它的语义是「重建空表」。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>性能提醒：</b>删 90% 的行时，<code class="inl">DELETE ... LIMIT</code> 分批删或「建新表 + RENAME」通常比一次性 DELETE 快得多，也不会长时间占着 undo 与主从带宽。</p></div>
+
+    <div id="demo-del"></div>
+  </section>
+
+  <!-- ========== 知识点 4 ========== -->
+  <section class="topic" id="upsert">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>幂等写入（ON DUPLICATE KEY / REPLACE）<span class="pt">upsert · 重复执行也不出错</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="dml::upsert"><span>已学会</span></label>
+    </div>
+    <p><b>幂等（idempotent）</b>写入指：同一个请求执行一次和执行多次，结果相同。接口重试、消息重复投递、定时任务重跑都会遇到这个问题。实现幂等的核心不是某条语法，而是<b>先有业务唯一标识，再加唯一键，最后用 upsert（update or insert）落地</b>。</p>
+    <p><code class="inl">INSERT ... ON DUPLICATE KEY UPDATE</code> 是 MySQL 的做法：不存在就插入，唯一键/主键冲突就执行 UPDATE 分支（PostgreSQL 用 <code class="inl">ON CONFLICT</code>，SQL Server 用 <code class="inl">MERGE</code>）。它最大的好处是<b>没被 SET 提到的列保持不变</b>，因此不会丢数据。</p>
+    <p><code class="inl">REPLACE INTO</code> 看起来像 upsert，实际语义是<b>先删除冲突行、再插入新行</b>：未列出的列被重置为默认值或 NULL，DELETE 与 INSERT 触发器都会触发，主键可能变化，外键上的 <code class="inl">ON DELETE CASCADE</code> 还可能连带删掉别的表的数据。除非你确实想要「整行替换」，否则优先用 ON DUPLICATE KEY UPDATE。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>upsert.sql</div>
+      <pre><code>-- 以唯一键 (order_id, product_id) 保证「一个订单里一个商品只有一行」
+CREATE TABLE order_items_u (
+  id         INT AUTO_INCREMENT PRIMARY KEY,
+  order_id   INT NOT NULL,
+  product_id INT NOT NULL,
+  qty        INT NOT NULL,
+  unit_price DECIMAL(10,2) NOT NULL,
+  UNIQUE KEY uk_order_product (order_id, product_id)
+);
+
+-- 幂等写入：不存在则插入，存在则累加数量并刷新单价
+-- MySQL 8.0.20+ 用别名 new 取代已废弃的 VALUES(col) 写法
+INSERT INTO order_items_u (order_id, product_id, qty, unit_price)
+VALUES (1001, 2, 1, 129.00) AS new
+ON DUPLICATE KEY UPDATE
+  qty        = order_items_u.qty + new.qty,
+  unit_price = new.unit_price;
+-- 第一次执行：插入 1 行（qty = 1）
+-- 再执行一次：更新同一行（qty = 2），结果仍然只有 1 行 → 幂等
+
+-- 只增不减：用 GREATEST 防止重复投递把库存改回去
+INSERT INTO products (id, name, category, price, stock)
+VALUES (1, '机械键盘', '数码', 499.00, 120) AS new
+ON DUPLICATE KEY UPDATE stock = GREATEST(products.stock, new.stock);
+
+-- REPLACE：先删后插，未列出的列会被重置（危险）
+REPLACE INTO order_items_u (order_id, product_id, qty, unit_price)
+VALUES (1001, 2, 5, 119.00);
+-- 结果：id 变了，若表里还有 created_at / 备注等列，它们会被清空
+
+-- 只忽略重复、什么都不改
+INSERT IGNORE INTO order_items_u (order_id, product_id, qty, unit_price)
+VALUES (1001, 2, 1, 129.00);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th class="mono">ON DUPLICATE KEY UPDATE</th><th class="mono">REPLACE INTO</th><th class="mono">INSERT IGNORE</th></tr></thead>
+      <tbody>
+        <tr><td>冲突时的动作</td><td>执行 UPDATE 分支</td><td>删除旧行 + 插入新行</td><td>跳过该行</td></tr>
+        <tr><td>未列出的列</td><td>保持不变</td><td class="null">重置为默认值 / NULL</td><td>保持不变</td></tr>
+        <tr><td>触发器</td><td>先 BEFORE INSERT，冲突后走 UPDATE 触发器</td><td>DELETE 与 INSERT 触发器都会触发</td><td>被跳过的行不触发</td></tr>
+        <tr><td>主键 / 自增值</td><td>通常仍消耗一个自增值</td><td>新行拿新 id，旧 id 消失</td><td>可能消耗自增值</td></tr>
+        <tr><td>影响行数</td><td>插入记 1，更新记 2</td><td>删除 + 插入记 2</td><td>跳过记 0</td></tr>
+        <tr><td>推荐度</td><td>首选</td><td>少用，务必确认副作用</td><td>只用于「忽略重复」</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>幂等 = <b>唯一键 + 可重复执行</b>。设计时先问「业务上的唯一标识是什么」（订单号、幂等键、业务主键），再决定用哪种 upsert，而不是先选语法。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① 用 <code class="inl">REPLACE INTO</code> 做「局部更新」，导致没写的列被清空；② 依赖 <code class="inl">VALUES(col)</code> 的旧写法（MySQL 8.0.20 起已废弃，改用 <code class="inl">AS new</code> 别名）；③ 以为 ON DUPLICATE KEY UPDATE 不消耗自增值——高并发下它仍可能让自增 id 出现空洞。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Transactions · 事务</div>
+    <h2><span class="num">02</span>ACID 与隔离级别<br>让多条语句变成一个原子动作</h2>
+  </section>
+
+  <!-- ========== 知识点 5 ========== -->
+  <section class="topic" id="txn-acid">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>事务与 ACID<span class="pt">txn-acid · 全做或全不做</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="dml::txn-acid"><span>已学会</span></label>
+    </div>
+    <p><b>事务（transaction）</b>是一组要么全部成功、要么全部失败的 SQL。InnoDB 支持事务，MyISAM 不支持——这也是 MyISAM 早已不推荐的核心原因。手动事务的写法是 <code class="inl">START TRANSACTION</code>（或 <code class="inl">BEGIN</code>）开始，<code class="inl">COMMIT</code> 提交，<code class="inl">ROLLBACK</code> 回滚。</p>
+    <p>MySQL 默认 <code class="inl">autocommit = 1</code>：每条 SQL 自成一个事务并立即提交。要让多条语句同生共死，必须显式开事务。反过来，很多「回滚没生效」的事故都源于<b>隐式提交</b>：DDL（CREATE / ALTER / TRUNCATE / DROP）、<code class="inl">LOCK TABLES</code>、<code class="inl">SET autocommit = 1</code> 等都会在不知不觉中结束当前事务。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>transaction.sql</div>
+      <pre><code>-- 转账：A 扣 100、B 加 100，必须同生共死
+START TRANSACTION;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;
+COMMIT;                      -- 两条同时生效
+
+-- 中途发现问题就整体撤销
+START TRANSACTION;
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+-- 发现目标账户不存在
+ROLLBACK;                    -- 第一条也撤销，余额回到原值
+
+-- 查看与修改自动提交
+SELECT @@autocommit;         -- 1
+SET autocommit = 0;          -- 之后的语句需要显式 COMMIT
+COMMIT;
+SET autocommit = 1;          -- 恢复默认
+
+-- 隐式提交陷阱：DDL 会悄悄结束当前事务
+START TRANSACTION;
+INSERT INTO customers (name, city, signup_date, level)
+VALUES ('测试用户', '北京', '2024-05-01', '普通');
+CREATE TABLE tmp_t (id INT);  -- ← DDL 隐式提交，上面的 INSERT 已经落盘
+ROLLBACK;                     -- 什么也回滚不了</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>ACID 特性</th><th>含义</th><th>InnoDB 靠什么实现</th></tr></thead>
+      <tbody>
+        <tr><td><b>原子性</b> Atomicity</td><td>事务内的操作全做或全不做</td><td>undo log：回滚时按记录反向撤销</td></tr>
+        <tr><td><b>一致性</b> Consistency</td><td>数据始终满足约束与业务规则</td><td>主键 / 唯一 / 外键 / CHECK 约束 + 正确的应用逻辑</td></tr>
+        <tr><td><b>隔离性</b> Isolation</td><td>并发事务之间互不干扰</td><td>MVCC（Read View）+ 行锁 / 间隙锁</td></tr>
+        <tr><td><b>持久性</b> Durability</td><td>提交后即使断电也不丢</td><td>redo log（WAL：先写日志再刷数据页）+ 双写缓冲</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>ACID 不是四个口号，而是四套机制：undo 管回滚、redo 管持久、MVCC + 锁管隔离、约束 + 业务逻辑管一致。模块 11 会把 redo / undo / binlog 三者关系展开讲。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把 DDL 写进事务里——它会让事务在你没察觉的地方提交；另外 <code class="inl">autocommit = 0</code> 后忘记 <code class="inl">COMMIT</code>，连接断开时数据会回滚，看起来像「插入丢失」。</p></div>
+  </section>
+
+  <!-- ========== 知识点 6 ========== -->
+  <section class="topic" id="txn-isolation">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>隔离级别与并发异常（脏读/不可重复读/幻读）<span class="pt">txn-isolation · 快照与锁的取舍</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="dml::txn-isolation"><span>已学会</span></label>
+    </div>
+    <p>隔离性（isolation）要解决三类并发异常：<b>脏读（dirty read）</b>——读到了别的事务还没提交的数据；<b>不可重复读（non-repeatable read）</b>——同一事务内两次读同一行，值变了；<b>幻读（phantom read）</b>——同一事务内两次执行同样的范围查询，行数变了。</p>
+    <p>SQL 标准定义了四个隔离级别，级别越高异常越少、并发度越低。MySQL 8.0 InnoDB 的默认级别是 <b>REPEATABLE READ</b>，它用 MVCC（Multi-Version Concurrency Control，多版本并发控制）让事务内看到固定的快照，再配合间隙锁（gap lock）在范围读上加锁，因此标准里允许的幻读在 InnoDB 中基本不会出现。</p>
+    <p>选择级别时问两个问题：业务能容忍哪种异常？并发压力有多大？账务类场景宁可保守（RR 或串行化）；以报表读为主的库可以降到 READ COMMITTED 换取更少的锁等待。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>isolation.sql</div>
+      <pre><code>-- 查看当前会话的隔离级别（MySQL 8.0 的变量名是 transaction_isolation）
+SELECT @@transaction_isolation;          -- REPEATABLE-READ
+
+-- 修改当前会话（只影响这个连接）
+SET SESSION TRANSACTION ISOLATION LEVEL READ COMMITTED;
+
+-- 只对下一个事务生效
+SET TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+START TRANSACTION;
+SELECT stock FROM products WHERE id = 1;
+COMMIT;
+
+-- 全局修改（需权限，重启失效，建议写进 my.cnf）
+SET GLOBAL transaction_isolation = 'READ-COMMITTED';
+
+-- SERIALIZABLE 下读也会加共享锁；8.0 推荐写法是 FOR SHARE
+SELECT stock FROM products WHERE id = 1 FOR SHARE;   -- 旧写法 LOCK IN SHARE MODE
+
+-- 明确要写锁时用 FOR UPDATE（排他锁，别人改同一行要等）
+SELECT stock FROM products WHERE id = 1 FOR UPDATE;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>隔离级别</th><th>脏读</th><th>不可重复读</th><th>幻读</th><th>实现要点</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">READ UNCOMMITTED</td><td class="null">可能</td><td class="null">可能</td><td class="null">可能</td><td>不加读锁、读最新版本，几乎只用于实验</td></tr>
+        <tr><td class="mono">READ COMMITTED</td><td>不可能</td><td class="null">可能</td><td class="null">可能</td><td>每条语句取一次最新快照（Oracle / PostgreSQL 默认）</td></tr>
+        <tr><td class="mono">REPEATABLE READ</td><td>不可能</td><td>不可能</td><td>标准允许，InnoDB 基本避免</td><td>事务内快照固定 + 间隙锁；MySQL 默认</td></tr>
+        <tr><td class="mono">SERIALIZABLE</td><td>不可能</td><td>不可能</td><td>不可能</td><td>读也加共享锁，等价于串行执行，并发度最低</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn"><span class="i">◆</span><p><b>面试点：</b>MySQL 的 RR 与「标准 RR」不完全一样——InnoDB 通过 next-key lock（记录锁 + 间隙锁）在很大程度上消除了幻读。同时，长事务会让 RR 的 Read View 一直存活，undo 版本无法清理，这是「RR 更贵」的常见原因。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① 把「事务里自己刚 UPDATE 再读到自己改的值」当成脏读——那是自己的修改，本来就可见；② 改隔离级别时用了 <code class="inl">SET GLOBAL</code> 却没意识到会影响所有新连接；③ 以为 RC 一定更快，忽略了 RC 下每条语句都要重建快照、且需要更多间隙锁的情况。</p></div>
+
+    <div id="demo-iso"></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Practice · 事务实践</div>
+    <h2><span class="num">03</span>回滚、保存点与长事务<br>把事务写短、写小、不依赖外部服务</h2>
+  </section>
+
+  <!-- ========== 知识点 7 ========== -->
+  <section class="topic" id="txn-practice">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>事务实践：回滚、保存点、长事务危害<span class="pt">txn-practice · 生产环境的铁律</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="dml::txn-practice"><span>已学会</span></label>
+    </div>
+    <p><b>保存点（SAVEPOINT）</b>让事务内部可以有「部分回滚」：<code class="inl">SAVEPOINT sp1</code> 打点，<code class="inl">ROLLBACK TO SAVEPOINT sp1</code> 回到该点（之前的操作仍然保留），<code class="inl">RELEASE SAVEPOINT sp1</code> 释放。典型场景是「主记录 + 多条明细」，某条明细失败时只撤销这一条，而不是整单重做。</p>
+    <p><b>长事务</b>是生产事故的常客，危害至少三类：① 长时间持有行锁，阻塞其它写入甚至引发死锁；② undo log 无法清理（最老的 Read View 一直有效），回滚段膨胀、磁盘涨、查询变慢；③ 一个巨大事务的 binlog 要等提交后一次性传给从库，造成主从延迟。</p>
+    <p>实践规范可以浓缩成八个字：<b>短、小、无外部依赖</b>。把查询放在事务外；批量操作分批提交；绝不在事务里调用 HTTP / RPC；必要时用 <code class="inl">innodb_lock_wait_timeout</code> 与 <code class="inl">max_execution_time</code> 兜底，并通过 <code class="inl">information_schema.INNODB_TRX</code> 找到跑得最久的那个事务。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>txn-practice.sql</div>
+      <pre><code>-- 保存点：整单下单，某条明细失败只回滚该条
+START TRANSACTION;
+INSERT INTO orders (id, customer_id, order_date, amount, status)
+VALUES (1013, 1, '2024-05-06', 0.00, 'paid');
+SAVEPOINT after_order;
+
+INSERT INTO order_items (order_id, product_id, qty, unit_price)
+VALUES (1013, 1, 2, 499.00);
+SAVEPOINT after_item1;
+
+INSERT INTO order_items (order_id, product_id, qty, unit_price)
+VALUES (1013, 999, 1, 0.00);            -- 商品不存在，业务校验失败
+ROLLBACK TO SAVEPOINT after_item1;      -- 只撤销第二条明细
+
+UPDATE orders SET amount = 998.00 WHERE id = 1013;
+COMMIT;                                 -- 订单 + 第一条明细一起提交
+
+-- 分批提交：把大批量更新拆成多批，避免长事务
+-- （在应用层或存储过程里循环执行）
+UPDATE orders SET status = 'archived' WHERE status = 'cancelled' ORDER BY id LIMIT 1000;
+SELECT ROW_COUNT();                     -- 每批核对行数，为 0 时结束
+
+-- 排查长事务：跑了多久、锁了多少行、正在执行什么
+SELECT trx_id, trx_state, trx_started,
+       TIMESTAMPDIFF(SECOND, trx_started, NOW()) AS secs,
+       trx_rows_locked, trx_query
+FROM information_schema.INNODB_TRX
+ORDER BY secs DESC;
+
+-- 兜底：锁等待与单语句超时（会话级）
+SET SESSION innodb_lock_wait_timeout = 5;
+SET SESSION max_execution_time = 2000;  -- 单位毫秒，且只作用于 SELECT 语句</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>场景</th><th>不推荐</th><th>推荐做法</th></tr></thead>
+      <tbody>
+        <tr><td>批量更新 10 万行</td><td>一个事务全做完</td><td>按主键分批提交，每批 500~1000 行</td></tr>
+        <tr><td>事务里调用第三方接口</td><td>锁持有到接口返回</td><td>先落库业务状态，接口用异步任务补偿</td></tr>
+        <tr><td>事务里做长查询</td><td>SELECT 与写混在一个事务</td><td>查询放事务外，事务只包住写操作</td></tr>
+        <tr><td>部分失败</td><td>整单重做</td><td>用 SAVEPOINT 只回滚出错的那一步</td></tr>
+        <tr><td>异常处理</td><td>抛异常后不管连接状态</td><td>捕获异常 → ROLLBACK → 记录日志</td></tr>
+        <tr><td>事务里执行 DDL</td><td>以为能一起回滚</td><td>DDL 单独执行，先提交再改结构</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① 事务开着却去做耗时操作（发消息、调接口、等用户输入），锁一直不放；② 只 <code class="inl">ROLLBACK</code> 却忘了 <code class="inl">RELEASE SAVEPOINT</code>，保存点越积越多；③ 用 <code class="inl">KILL</code> 杀掉长事务前没确认它是否在跑重要业务。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>事务只包住「必须原子」的写操作。把长事务拆短，比事后排查锁等待、主从延迟和 undo 膨胀划算得多。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>在测试库上分别执行 <code class="inl">START TRANSACTION; DELETE FROM products; ROLLBACK;</code> 与 <code class="inl">START TRANSACTION; TRUNCATE TABLE products; ROLLBACK;</code>，记录两次的行数与 <code class="inl">AUTO_INCREMENT</code>，解释差异。</li>
+      <li>用 <code class="inl">ON DUPLICATE KEY UPDATE</code> 实现「库存只增不减」的写入，再用 <code class="inl">REPLACE INTO</code> 做同一件事，观察哪一列被意外重置，并写出结论。</li>
+      <li>把 <code class="inl">orders</code> 中 <code class="inl">status = 'cancelled'</code> 的记录按 1000 行分批归档到 <code class="inl">orders_archive</code>，说明如何避免长事务与主从延迟。</li>
+      <li>开两个 mysql 客户端，分别在 REPEATABLE READ 与 READ COMMITTED 下复现「不可重复读」，把每一步读到的值记下来，再用本页的时间线模拟器核对结论。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">窗口函数</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">表设计、约束与范式</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "dml",
+  title: "数据修改、事务与并发",
+  eyebrow: "MODULE 07 · SQL / 数据库",
+  lead: "写入数据最容易出事：漏一个 WHERE 就改掉整张表，一次误删可能无法回滚。本页把 INSERT / UPDATE / DELETE / 幂等写入讲清，再用「并发时间线模拟器」把事务的隔离级别逐帧演给你看。",
+  points: ["dml-insert","dml-update","dml-delete","upsert","txn-acid","txn-isolation","txn-practice"],
+  prev: "06-window-functions.html",
+  next: "08-schema-design.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于批量插入，下列说法正确的是：",
+    opts:[
+      "多条单行 INSERT 与一条多行 INSERT 的性能基本一样",
+      "一条 INSERT 写入多行可以减少网络往返与提交次数，通常明显更快",
+      "多行 INSERT 不受 max_allowed_packet 限制，可以一次写任意多行",
+      "INSERT ... SELECT 必须先把数据取回客户端，再逐行插入"
+    ],
+    ans:1,
+    exp:"多行 VALUES 把多次「解析 + 往返 + 提交」合并成一次，因此更快，但受 max_allowed_packet 限制，不能无限大。A 忽略了往返与提交开销；D 说反了——INSERT ... SELECT 的数据在服务端内部流转，不经过客户端。"
+  },
+  {
+    type:"quiz",
+    q:"在生产库执行 UPDATE 之前，最稳妥的做法是：",
+    opts:[
+      "直接执行，出问题再用备份恢复",
+      "只要把 autocommit 关掉就不会有风险",
+      "加上 LIMIT 1 就一定安全",
+      "先用同样的 WHERE 跑一次 SELECT 确认命中行数，再执行 UPDATE 并核对 ROW_COUNT()"
+    ],
+    ans:3,
+    exp:"先 SELECT 看清命中哪些行、再更新、再用 ROW_COUNT() 核对，是 DML 的两次确认原则。关掉 autocommit 只是把提交时机推后，写错范围依然会错；LIMIT 1 只限制行数，不保证改的是你想要的那一行；靠备份恢复是最后手段，不是流程。"
+  },
+  {
+    type:"quiz",
+    q:"products 表共 6 行，其中 category = '数码' 的有 3 行（机械键盘、无线鼠标、显示器）。下面这条 UPDATE 会修改几行？",
+    sql:"UPDATE products\nSET price = ROUND(price * 0.9, 2)\nWHERE category = '数码';",
+    opts:["3 行","6 行","1 行","0 行"],
+    ans:0,
+    exp:"WHERE category = '数码' 命中 3 行，因此改 3 行。6 行是全表（漏写 WHERE 时的结果），1 行是按主键 id 精确定位时的结果，0 行说明条件写错或数据已变化。执行前用同样的条件 SELECT 一遍即可确认。"
+  },
+  {
+    type:"quiz",
+    q:"关于 TRUNCATE TABLE orders;，下列说法正确的是：",
+    opts:[
+      "它可以带 WHERE 条件，只清空符合条件的行",
+      "它属于 DML，可以在事务里 ROLLBACK 回滚",
+      "它属于 DDL，会隐式提交、重置 AUTO_INCREMENT，且不触发 DELETE 触发器",
+      "它与 DELETE FROM orders 完全等价，只是更快"
+    ],
+    ans:2,
+    exp:"TRUNCATE 是 DDL：不支持 WHERE，执行时隐式提交当前事务（因此不能回滚），把表当成新表从而重置自增计数器，也不做行级操作所以不触发触发器。它虽然结果看起来和 DELETE 全表一样，但语义与副作用完全不同。"
+  },
+  {
+    type:"quiz",
+    q:"下列哪种操作在 MySQL 8.0（InnoDB）中不能通过 ROLLBACK 撤销？",
+    opts:[
+      "TRUNCATE TABLE orders;",
+      "DELETE FROM orders WHERE status = 'cancelled';",
+      "UPDATE orders SET amount = 0 WHERE id = 1001;",
+      "INSERT INTO orders (id, customer_id, order_date, amount, status) VALUES (1013, 1, '2024-05-06', 100.00, 'paid');"
+    ],
+    ans:0,
+    exp:"TRUNCATE 属于 DDL，会隐式提交当前事务，ROLLBACK 无效。其余三条都是 DML，只要在同一个事务里、还没有 COMMIT，就能用 ROLLBACK 撤销。要恢复被 TRUNCATE 的数据，只能靠备份或物理恢复。"
+  },
+  {
+    type:"quiz",
+    q:"REPLACE INTO order_items_u (order_id, product_id, qty, unit_price) VALUES (1001, 2, 5, 119.00); 在唯一键冲突时的行为是：",
+    opts:[
+      "只更新列出的 4 个字段，其它字段保持不变",
+      "先删除冲突行再插入新行，未列出的字段会被重置为默认值或 NULL",
+      "跳过该行，什么都不做",
+      "报错并终止当前事务"
+    ],
+    ans:1,
+    exp:"REPLACE 的语义是 DELETE + INSERT：旧行被删除，新行按列出的字段插入，因此未列出的列会拿到默认值或 NULL，主键 id 通常也会变。要保持其它列不变应改用 INSERT ... ON DUPLICATE KEY UPDATE；想跳过重复则用 INSERT IGNORE。"
+  },
+  {
+    type:"quiz",
+    q:"要实现「同一订单里同一商品重复写入时累加数量」的幂等写入，最合适的做法是：",
+    opts:[
+      "先 SELECT 判断是否存在，不存在再 INSERT",
+      "每次都用 REPLACE INTO 覆盖整行",
+      "用 INSERT IGNORE 忽略重复写入",
+      "建唯一键 (order_id, product_id) + INSERT ... ON DUPLICATE KEY UPDATE qty = qty + VALUES(qty)"
+    ],
+    ans:3,
+    exp:"幂等靠「唯一键 + 可重复执行的 upsert」：唯一键把重复请求收敛到同一行，ON DUPLICATE KEY UPDATE 用 qty = qty + 新值 累加。先 SELECT 再 INSERT 存在并发竞态（两个请求都判断为不存在）；REPLACE 会清空未列出的列；INSERT IGNORE 直接丢弃，不会累加。补充：选项里的 VALUES(qty) 写法从 MySQL 8.0.20 起已被标记废弃，更推荐给 VALUES 起行别名（如 AS new）后写成 new.qty。"
+  },
+  {
+    type:"quiz",
+    q:"ACID 中的「持久性（Durability）」在 InnoDB 里主要靠什么保证？",
+    opts:[
+      "undo log 回滚未提交的修改",
+      "MVCC 生成一致性快照",
+      "redo log（WAL：先写日志再刷数据页），提交后即使断电也能恢复",
+      "间隙锁阻止其它事务插入新行"
+    ],
+    ans:2,
+    exp:"持久性靠 redo log：提交时把修改写入日志并落盘，崩溃重启后用日志重放，未刷盘的数据页也能补回来。undo log 负责原子性（回滚），MVCC 负责隔离性，间隙锁属于隔离性里防幻读的手段，都不负责持久性。"
+  },
+  {
+    type:"quiz",
+    q:"「同一事务内两次执行同样的查询，第二次看到了别的事务新插入的行，导致结果行数变多」，这种现象叫：",
+    opts:[
+      "幻读（phantom read）",
+      "脏读（dirty read）",
+      "不可重复读（non-repeatable read）",
+      "丢失更新（lost update）"
+    ],
+    ans:0,
+    exp:"幻读关注的是「行数变化」——新插入的行像幻影一样出现；不可重复读关注「同一行的值变了」；脏读是读到了别人未提交的数据；丢失更新是两个事务互相覆盖对方的修改，属于写冲突。InnoDB 在 REPEATABLE READ 下用间隙锁基本避免了幻读。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 8.0 InnoDB 的默认隔离级别是什么？它能避免哪些并发异常？",
+    opts:[
+      "READ COMMITTED，能避免脏读与不可重复读",
+      "REPEATABLE READ，能避免脏读与不可重复读，并通过间隙锁基本避免幻读",
+      "SERIALIZABLE，所有并发异常都不可能发生",
+      "READ UNCOMMITTED，性能最好，但可能发生脏读"
+    ],
+    ans:1,
+    exp:"MySQL 8.0 默认 REPEATABLE READ：事务内快照固定，因此没有脏读和不可重复读；标准允许的幻读由 next-key lock（记录锁 + 间隙锁）基本消除。READ COMMITTED 无法避免不可重复读，SERIALIZABLE 并发度最低且并非默认，READ UNCOMMITTED 会脏读。"
+  },
+  {
+    type:"interview",
+    q:"面试题：一个「批量更新 10 万行订单状态」的定时任务，下面哪种做法最合理？",
+    opts:[
+      "在一个事务里一条 UPDATE 全部更新，保证原子性",
+      "关掉 autocommit，让 MySQL 自己决定什么时候提交",
+      "按主键分批（每批 500~1000 行）提交，每批核对影响行数，失败可从断点续跑",
+      "先把表 TRUNCATE 再重新插入全部数据，速度最快"
+    ],
+    ans:2,
+    exp:"分批提交把长事务拆成若干短事务：锁持有时间短、undo 可及时清理、binlog 不会一次性砸给从库，失败还能按断点续跑。一次性大事务会长时间持锁并制造主从延迟；关掉 autocommit 并不能把事务变小；TRUNCATE 是 DDL，不可回滚且会丢数据，绝不能用在这种场景。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：为什么在事务中执行 CREATE TABLE 之后，再 ROLLBACK 也无法撤销之前的 INSERT？",
+    opts:[
+      "因为 INSERT 语句会自动提交",
+      "因为 CREATE TABLE 属于 DDL，会隐式提交当前事务",
+      "因为 ROLLBACK 只能撤销 SELECT",
+      "因为 InnoDB 不支持在同一事务里混合 DML 与 DDL"
+    ],
+    ans:1,
+    exp:"MySQL 在执行 DDL（CREATE / ALTER / TRUNCATE / DROP 等）前会隐式提交当前事务，所以 CREATE TABLE 之前的 INSERT 已经落盘，之后的 ROLLBACK 没有可回滚的内容。DML 语句本身不会自动提交（autocommit = 1 时才会每条提交），而 ROLLBACK 撤销的是 DML 修改，不是 SELECT。"
+  }
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1），
+   键内元素形如 "模块id::知识点id"。在详解页勾选 = 大纲同步打勾。
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ============================================================
+   演示一：隔离级别并发时间线模拟器（两个会话逐步推进）
+   ============================================================ */
+(function(){
+  const host = document.getElementById("demo-iso");
+  if(!host) return;
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c])); }
+
+  const LEVELS = [
+    {id:"RU",  name:"READ UNCOMMITTED", note:"能读到别人未提交的数据，几乎只用于实验"},
+    {id:"RC",  name:"READ COMMITTED",   note:"只读已提交数据，每条语句取一次最新快照"},
+    {id:"RR",  name:"REPEATABLE READ",  note:"事务内快照固定，这是 MySQL 的默认级别"},
+    {id:"SER", name:"SERIALIZABLE",     note:"事务内的普通读会被隐式转成 FOR SHARE（加共享锁），写入要等它释放，并发度最低"}
+  ];
+
+  const STEPS = [
+    {who:"A", sql:"BEGIN;", desc:"会话 A 开启事务", res:null},
+    {who:"A", sql:"UPDATE products SET stock = 100 WHERE id = 1;", desc:"会话 A 把库存从 120 改成 100（尚未提交，持有排他锁）", res:null},
+    {who:"B", sql:"SELECT stock FROM products WHERE id = 1;", desc:"会话 B 读同一行，看它能读到什么",
+      res:{RU:{v:"100", flag:"脏读：读到了 A 未提交的值", ano:"脏读"}, RC:{v:"120"}, RR:{v:"120"}, SER:{v:"120", flag:"此刻 B 处于 autocommit，SERIALIZABLE 的加锁读只作用于显式事务内的 SELECT"}}},
+    {who:"A", sql:"ROLLBACK;", desc:"会话 A 回滚，库存回到 120", res:null},
+    {who:"B", sql:"SELECT stock FROM products WHERE id = 1;", desc:"会话 B 再读一次",
+      res:{RU:{v:"120", flag:"刚才读到的 100 从未存在过"}, RC:{v:"120"}, RR:{v:"120"}, SER:{v:"120"}}},
+    {who:"B", sql:"BEGIN;", desc:"会话 B 开启事务，一致性快照从现在开始", res:null},
+    {who:"B", sql:"SELECT stock FROM products WHERE id = 1;", desc:"会话 B 事务内第 1 次读",
+      res:{RU:{v:"120"}, RC:{v:"120"}, RR:{v:"120"}, SER:{v:"120"}}},
+    {who:"A", sql:"BEGIN; UPDATE products SET stock = 88 WHERE id = 1; COMMIT;", desc:"会话 A 把库存改成 88 并提交", res:null},
+    {who:"B", sql:"SELECT stock FROM products WHERE id = 1;", desc:"会话 B 在同一事务里第 2 次读",
+      res:{RU:{v:"88", flag:"不可重复读：同一事务内值变了", ano:"不可重复读"}, RC:{v:"88", flag:"不可重复读：同一事务内值变了", ano:"不可重复读"}, RR:{v:"120"}, SER:{v:"120"}}},
+    {who:"B", sql:"COMMIT;", desc:"会话 B 提交，快照结束", res:null},
+    {who:"B", sql:"BEGIN; SELECT COUNT(*) FROM orders WHERE amount > 1000;", desc:"会话 B 统计高价订单数（当前 4 条）",
+      res:{RU:{v:"4"}, RC:{v:"4"}, RR:{v:"4"}, SER:{v:"4"}}},
+    {who:"A", sql:"INSERT INTO orders (id, customer_id, order_date, amount, status) VALUES (1013, 2, '2024-05-01', 1500.00, 'paid');", desc:"会话 A 插入一条 1500 元的新订单并提交", res:null},
+    {who:"B", sql:"SELECT COUNT(*) FROM orders WHERE amount > 1000;", desc:"会话 B 在同一事务里再统计一次",
+      res:{RU:{v:"5", flag:"幻读：多出一行", ano:"幻读"}, RC:{v:"5", flag:"幻读：多出一行", ano:"幻读"}, RR:{v:"4"}, SER:{v:"4"}}},
+    {who:"B", sql:"COMMIT;", desc:"会话 B 提交，整个时间线结束", res:null}
+  ];
+
+  host.innerHTML = '<div class="demo">' +
+    '<div class="dh"><span class="t">🖥 演示：隔离级别并发时间线</span><span class="hint">选级别 → 点「下一步」</span></div>' +
+    '<div class="db">' +
+      '<div class="ctl">' +
+        '<label>隔离级别</label>' +
+        '<select id="isoSel">' + LEVELS.map(l=>'<option value="'+l.id+'">'+l.name+'</option>').join("") + '</select>' +
+        '<button class="b" id="isoNext">▶ 下一步</button>' +
+        '<button class="b" id="isoReset">↺ 重置</button>' +
+      '</div>' +
+      '<div id="isoInfo"></div>' +
+      '<div style="overflow-x:auto"><table class="dt">' +
+        '<caption>并发时间线（灰色行 = 尚未执行）</caption>' +
+        '<thead><tr><th>#</th><th>会话</th><th>语句</th><th>读到 / 结果</th><th>异常</th></tr></thead>' +
+        '<tbody id="isoBody"></tbody>' +
+      '</table></div>' +
+      '<div class="log" id="isoLog"></div>' +
+      '<div class="foot">初始数据：products 中 id=1（机械键盘）stock = 120；orders 中 amount &gt; 1000 的记录有 4 条。SERIALIZABLE 下只有「显式事务内」的 SELECT 才被隐式转成 FOR SHARE，所以会话 B 开启事务后的读会挡住会话 A 的写（A 要等 B 提交才执行），本面板只展示最终读到的值。</div>' +
+    '</div>' +
+  '</div>';
+
+  const sel = host.querySelector("#isoSel");
+  const body = host.querySelector("#isoBody");
+  const log = host.querySelector("#isoLog");
+  const info = host.querySelector("#isoInfo");
+  let cur = 0;
+
+  function levelObj(){ return LEVELS.find(l => l.id === sel.value) || LEVELS[2]; }
+
+  function render(){
+    const lv = levelObj();
+    body.innerHTML = STEPS.map((s,i)=>{
+      const done = i < cur, isLast = (i === cur - 1);
+      const cls = isLast ? "hl" : (done ? "match" : "dim");
+      let val = "—", flag = "";
+      if(done && s.res && s.res[lv.id]){
+        val = s.res[lv.id].v;
+        flag = s.res[lv.id].flag || "";
+      }
+      return '<tr class="' + cls + '"><td class="key">' + (i+1) + '</td><td>' + esc(s.who) + '</td><td>' + esc(s.sql) +
+        '</td><td>' + esc(val) + '</td><td>' + esc(flag) + '</td></tr>';
+    }).join("");
+
+    const flags = [];
+    STEPS.slice(0, cur).forEach(s=>{
+      if(s.res && s.res[lv.id] && s.res[lv.id].ano) flags.push(s.res[lv.id].ano);
+    });
+    const uniq = [...new Set(flags)];
+    info.innerHTML = '<div class="log"><b>' + esc(lv.name) + '</b> — ' + esc(lv.note) +
+      '<br>已执行 <b>' + cur + ' / ' + STEPS.length + '</b> 步' +
+      (uniq.length ? ' &nbsp;·&nbsp; <span class="bad">已出现异常：' + esc(uniq.join("、")) + '</span>'
+                   : ' &nbsp;·&nbsp; 尚未出现并发异常') + '</div>';
+
+    if(cur === 0){
+      log.innerHTML = '点「下一步」开始：会话 A 会先开事务并改库存，再让会话 B 去读同一行。切换隔离级别会重置时间线。';
+    } else {
+      const s = STEPS[cur-1], r = s.res ? s.res[lv.id] : null;
+      let html = '步骤 ' + cur + '｜会话 <b>' + esc(s.who) + '</b>：' + esc(s.sql) + '<br>' + esc(s.desc);
+      if(r) html += '<br>读到 / 结果：<b>' + esc(r.v) + '</b>' + (r.flag ? ' &nbsp;<span class="bad">⚠ ' + esc(r.flag) + '</span>' : '');
+      if(cur === STEPS.length){
+        html += '<br>时间线结束：' + (uniq.length ? '本级别下出现了 <b>' + esc(uniq.join("、")) + '</b>' : '本级别下没有出现任何并发异常');
+      }
+      log.innerHTML = html;
+    }
+  }
+
+  host.querySelector("#isoNext").addEventListener("click", ()=>{ if(cur < STEPS.length) cur++; render(); });
+  host.querySelector("#isoReset").addEventListener("click", ()=>{ cur = 0; render(); });
+  sel.addEventListener("change", ()=>{ cur = 0; render(); });
+  render();
+})();
+
+/* ============================================================
+   演示二：DELETE vs TRUNCATE vs DROP 对比器
+   ============================================================ */
+(function(){
+  const host = document.getElementById("demo-del");
+  if(!host) return;
+
+  const OPS = {
+    DELETE: {
+      label:"DELETE FROM products",
+      sql:"DELETE FROM products;",
+      rows:[
+        ["表结构","存在","✅ 仍然存在","只删行，不碰表定义 / 索引 / 约束"],
+        ["数据行数","6 行","0 行","逐行删除，代价随行数线性增长"],
+        ["AUTO_INCREMENT","下一个 id = 7","仍是 7","自增计数器不重置（常考）"],
+        ["能否 ROLLBACK","—","✅ 同一事务内可以","DML，靠 undo log 撤销"],
+        ["事务日志量","—","大","每删一行都写 undo + redo"],
+        ["触发器","—","逐行触发","有审计逻辑时有用，也带来额外开销"],
+        ["锁与并发","—","行锁，逐行释放","大表全删会长期占用 undo、拖慢主从"],
+        ["误删后恢复","—","ROLLBACK 或 binlog","提交后只能靠备份 / binlog 解析"]
+      ],
+      note:"DELETE 最灵活也最慢：能带 WHERE、能回滚，但逐行写日志。"
+    },
+    TRUNCATE: {
+      label:"TRUNCATE TABLE products",
+      sql:"TRUNCATE TABLE products;",
+      rows:[
+        ["表结构","存在","✅ 仍然存在","只是清空数据，表定义保留"],
+        ["数据行数","6 行","0 行","直接释放数据页，不做逐行删除"],
+        ["AUTO_INCREMENT","下一个 id = 7","重置为 1","表被当成新表重新计数"],
+        ["能否 ROLLBACK","—","❌ 不能","DDL，执行时隐式提交当前事务"],
+        ["事务日志量","—","小","只记录页释放，速度快得多"],
+        ["触发器","—","不触发","没有行级操作，触发器不会执行"],
+        ["锁与并发","—","元数据锁（MDL）","瞬间完成，但等待期间整表访问被阻塞"],
+        ["误删后恢复","—","只能靠备份 / 物理恢复","binlog 里只有一条 TRUNCATE 语句"]
+      ],
+      note:"TRUNCATE 的语义是「重建空表」：快、日志少、重置自增，但不可回滚。"
+    },
+    DROP: {
+      label:"DROP TABLE products",
+      sql:"DROP TABLE products;",
+      rows:[
+        ["表结构","存在","❌ 已不存在","表定义、数据、索引、约束一起删除"],
+        ["数据行数","6 行","表都没了","无从统计"],
+        ["AUTO_INCREMENT","下一个 id = 7","随表消失","重建表后从 1 开始"],
+        ["能否 ROLLBACK","—","❌ 不能","DDL，隐式提交"],
+        ["事务日志量","—","最小","主要是元数据变更"],
+        ["触发器","—","随表一起删除","—"],
+        ["锁与并发","—","元数据锁（MDL）","阻塞对该表的所有访问"],
+        ["误删后恢复","—","只能靠备份 / 物理恢复","需要 DBA 介入"]
+      ],
+      note:"DROP 连表都没了，是最不可逆的一种；删表前务必确认备份。"
+    }
+  };
+
+  host.innerHTML = '<div class="demo">' +
+    '<div class="dh"><span class="t">🖥 演示：DELETE vs TRUNCATE vs DROP</span><span class="hint">点按钮模拟操作</span></div>' +
+    '<div class="db">' +
+      '<div class="ctl" id="delCtl">' +
+        '<label>模拟操作</label>' +
+        '<button class="b" data-op="DELETE">DELETE FROM products</button>' +
+        '<button class="b" data-op="TRUNCATE">TRUNCATE TABLE products</button>' +
+        '<button class="b" data-op="DROP">DROP TABLE products</button>' +
+      '</div>' +
+      '<div id="delOut"></div>' +
+      '<div class="log" id="delLog"></div>' +
+      '<div class="foot">示例表 products 共 6 行（机械键盘 / 无线鼠标 / 显示器 / 笔记本 / 保温杯 / 台灯），AUTO_INCREMENT 下一个值为 7。</div>' +
+    '</div>' +
+  '</div>';
+
+  const out = host.querySelector("#delOut");
+  const log = host.querySelector("#delLog");
+
+  function render(key){
+    const op = OPS[key];
+    host.querySelectorAll("#delCtl .b").forEach(b => b.classList.toggle("on", b.dataset.op === key));
+    out.innerHTML = '<div style="overflow-x:auto"><table class="dt">' +
+      '<caption>执行 ' + op.sql + ' 前后</caption>' +
+      '<thead><tr><th>检查项</th><th>操作前</th><th>操作后</th><th>关键点</th></tr></thead>' +
+      '<tbody>' + op.rows.map(r=>'<tr><td class="key">' + r[0] + '</td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>').join("") + '</tbody>' +
+      '</table></div>';
+    log.innerHTML = '执行：<b>' + op.sql + '</b><br>' + op.note +
+      '<br>提示：把语句放进 <b>START TRANSACTION … ROLLBACK</b> 里试一次，就能亲眼看到哪一种能撤销。';
+  }
+
+  host.querySelectorAll("#delCtl .b").forEach(b => b.addEventListener("click", ()=>render(b.dataset.op)));
+  render("DELETE");
+})();
+
+/* ============================================================
+   演示三：UPDATE 安全自检器
+   ============================================================ */
+(function(){
+  const host = document.getElementById("demo-upd");
+  if(!host) return;
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c])); }
+
+  const PRESETS = [
+    {label:"① 忘记 WHERE", sql:"UPDATE customers SET level = '金卡';"},
+    {label:"② 按城市过滤", sql:"UPDATE customers SET city = '上海' WHERE gender = 'F';"},
+    {label:"③ 主键精确更新", sql:"UPDATE orders SET status = 'paid' WHERE id = 1005;"},
+    {label:"④ 复合条件", sql:"UPDATE products SET price = ROUND(price * 0.9, 2) WHERE category = '数码' AND stock > 100;"},
+    {label:"⑤ 恒真条件", sql:"UPDATE employees SET salary = salary + 1000 WHERE 1 = 1;"}
+  ];
+
+  function tableOf(name){
+    return (window.SQLSandbox && SQLSandbox.SAMPLE && SQLSandbox.SAMPLE[name]) ? SQLSandbox.SAMPLE[name] : null;
+  }
+
+  function parseVal(txt){
+    const t = txt.trim();
+    if((t.charAt(0) === "'" && t.charAt(t.length-1) === "'") || (t.charAt(0) === '"' && t.charAt(t.length-1) === '"')) return t.slice(1, -1);
+    const n = Number(t);
+    return isNaN(n) ? null : n;
+  }
+
+  function compare(a, op, b){
+    if(a === null || a === undefined || b === null) return null;
+    if(op === "=")  return a === b;
+    if(op === "<>") return a !== b;
+    if(op === "!=") return a !== b;
+    if(op === ">")  return a >  b;
+    if(op === ">=") return a >= b;
+    if(op === "<")  return a <  b;
+    if(op === "<=") return a <= b;
+    return null;
+  }
+
+  function countWhere(tbl, whereRaw){
+    const ci = {}; tbl.columns.forEach((c,i)=>ci[c]=i);
+    const parsed = [];
+    for(const p of whereRaw.split(/\s+and\s+/i)){
+      const t = p.trim();
+      const m = t.match(/^([A-Za-z_][A-Za-z0-9_]*)\s*(<>|!=|>=|<=|=|>|<)\s*(.+)$/);
+      if(m){
+        if(!(m[1] in ci)) return null;          // 列名不在示例表里 → 无法估算
+        const right = parseVal(m[3]);
+        if(right === null) return null;         // 比较值无法解析 → 无法估算
+        parsed.push({col:m[1], op:m[2], val:right});
+        continue;
+      }
+      const c = t.match(/^(\d+)\s*=\s*(\d+)$/);
+      if(!c) return null;                       // 条件太复杂 → 无法估算
+      parsed.push({constant: c[1] === c[2]});
+    }
+    let n = 0;
+    for(const row of tbl.rows){
+      let all = true;
+      for(const q of parsed){
+        if(q.constant !== undefined){ if(!q.constant){ all = false; break; } continue; }
+        const left = row[ci[q.col]];
+        // 左侧为 NULL 时比较结果是 UNKNOWN，按 SQL 语义该行不命中
+        const res = (left === null || left === undefined) ? null : compare(left, q.op, q.val);
+        if(res !== true){ all = false; break; }
+      }
+      if(all) n++;
+    }
+    return n;
+  }
+
+  function analyze(raw){
+    const r = {err:"", table:"—", hasWhere:false, where:"", est:null, total:null, pct:"", risk:"", riskLevel:"mid", tips:[], sql:String(raw||"").trim()};
+    const s = r.sql;
+    const m = s.match(/^\s*update\s+([A-Za-z_][A-Za-z0-9_]*)/i);
+    if(!m){ r.err = "这里只分析 UPDATE 语句：请以 UPDATE 表名 SET … 开头。"; return r; }
+    r.table = m[1];
+    const rest = s.slice(m[0].length);
+    const hasLimit = /\blimit\s+\d+/i.test(rest);
+    const wi = rest.search(/\bwhere\b/i);
+    let whereRaw = null;
+    if(wi >= 0){
+      whereRaw = rest.slice(wi + 5)
+        .replace(/\border\s+by[\s\S]*$/i, "")
+        .replace(/\blimit\s+\d+(\s*,\s*\d+)?\s*;?\s*$/i, "")
+        .replace(/;\s*$/, "").trim();
+    }
+    r.hasWhere = !!whereRaw;
+    r.where = whereRaw || "";
+
+    const tbl = tableOf(r.table);
+    if(tbl){
+      r.total = tbl.rows.length;
+      if(!whereRaw) r.est = tbl.rows.length;
+      else r.est = countWhere(tbl, whereRaw);
+      if(r.est !== null && r.total) r.pct = Math.round(r.est / r.total * 100) + "%";
+    }
+
+    const constant = r.hasWhere && /^\s*(1\s*=\s*1|true)\s*$/i.test(r.where);
+    if(!r.hasWhere || constant){
+      r.riskLevel = "high";
+      r.risk = "极高 —— " + (constant ? "WHERE 条件恒真" : "没有 WHERE") + "，整表都会被修改";
+      r.tips.push("补上 WHERE，并先用同样的条件 SELECT 一遍确认命中行");
+      r.tips.push("临时兜底：加 ORDER BY 主键 + LIMIT，或先 SET sql_safe_updates = 1");
+    } else if(r.est === null){
+      r.riskLevel = "mid";
+      r.risk = "无法自动估算 —— 条件太复杂或表不在示例数据里";
+      r.tips.push("先手动执行 SELECT COUNT(*) FROM " + r.table + " WHERE " + r.where + "; 确认行数");
+    } else if(r.est === 0){
+      r.riskLevel = "low";
+      r.risk = "低 —— 当前条件下 0 行命中（可能是条件写错或数据已变化）";
+      r.tips.push("检查条件里的值、大小写与 NULL 判断（判空要用 IS NULL，不能写 = NULL）");
+    } else if(r.est === 1 && /\bid\s*=/i.test(r.where)){
+      r.riskLevel = "low";
+      r.risk = "低 —— 按主键精确定位，最多 1 行";
+      r.tips.push("仍然建议先 SELECT 确认这一行确实是你想改的记录");
+    } else if(r.total !== null && r.est >= r.total){
+      r.riskLevel = "high";
+      r.risk = "高 —— 命中行数等于全表行数（" + r.est + " 行）";
+      r.tips.push("确认业务上真的需要改全表；否则缩小 WHERE 范围");
+    } else {
+      r.riskLevel = "mid";
+      r.risk = "中 —— 预计命中 " + r.est + " 行（占全表 " + r.pct + "）";
+      r.tips.push("先 SELECT 一遍核对这 " + r.est + " 行是否符合预期，再执行 UPDATE");
+    }
+    if(!/\bid\b/i.test(r.where)) r.tips.push("WHERE 未使用主键：InnoDB 会锁住扫描过的行，建议给过滤列建索引");
+    if(hasLimit) r.tips.push("LIMIT 让更新结果依赖排序稳定性，请配合 ORDER BY 唯一键使用");
+    if(/=\s*null/i.test(s)) r.tips.push("SET 或 WHERE 里出现 = NULL，判断空值必须用 IS NULL");
+    r.tips.push("执行后立刻 SELECT ROW_COUNT(); 核对影响行数");
+    return r;
+  }
+
+  host.innerHTML = '<div class="demo">' +
+    '<div class="dh"><span class="t">🖥 演示：UPDATE 安全自检器</span><span class="hint">切换示例或直接改语句</span></div>' +
+    '<div class="db">' +
+      '<div class="ctl" id="upCtl"><label>示例语句</label>' +
+        PRESETS.map((p,i)=>'<button class="b" data-up="' + i + '">' + p.label + '</button>').join("") +
+      '</div>' +
+      '<textarea id="upSql" rows="3" style="width:100%;font-family:var(--font-mono);font-size:12.5px;line-height:1.7;padding:9px 11px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none;resize:vertical;margin-bottom:12px"></textarea>' +
+      '<div id="upOut"></div>' +
+      '<div class="log" id="upLog"></div>' +
+      '<div class="foot">估算基于内置示例数据（customers 8 行 / orders 12 行 / products 6 行 / employees 9 行）；本面板只做静态分析，不会真的执行 UPDATE。</div>' +
+    '</div>' +
+  '</div>';
+
+  const ta = host.querySelector("#upSql");
+  const out = host.querySelector("#upOut");
+  const log = host.querySelector("#upLog");
+
+  function render(){
+    const r = analyze(ta.value);
+    host.querySelectorAll("#upCtl .b").forEach(b => b.classList.toggle("on", PRESETS[+b.dataset.up].sql === ta.value.trim()));
+
+    if(r.err){
+      out.innerHTML = '<div class="log"><span class="bad">' + esc(r.err) + '</span></div>';
+      log.innerHTML = '提示：面板会检查「有没有 WHERE」「影响行数估算」「是否会误伤全表」，并给出安全写法建议。';
+      return;
+    }
+
+    const estText = (r.est === null) ? '无法估算（请手动 SELECT COUNT(*) 确认）'
+      : (r.est + ' 行' + (r.pct ? '（占全表 ' + r.pct + '）' : ''));
+    const rows = [
+      ["目标表", esc(r.table) + (r.total !== null ? '（示例数据 ' + r.total + ' 行）' : '（不在示例数据中）')],
+      ["有无 WHERE", r.hasWhere ? '✅ 有：' + esc(r.where) : '❌ 没有'],
+      ["影响行数估算", estText],
+      ["是否可能误伤全表", (r.riskLevel === "high") ? '⚠ 是 —— 会改动整表范围' : '否 —— 条件已限制范围'],
+      ["风险等级", r.risk],
+      ["安全建议", r.tips.map(t=>'· ' + esc(t)).join('<br>')]
+    ];
+    out.innerHTML = '<div style="overflow-x:auto"><table class="dt">' +
+      '<caption>静态自检结果（不会执行）</caption>' +
+      '<thead><tr><th>检查项</th><th>结论</th></tr></thead><tbody>' +
+      rows.map(x=>'<tr><td class="key">' + esc(x[0]) + '</td><td style="white-space:normal">' + x[1] + '</td></tr>').join("") +
+      '</tbody></table></div>';
+    log.innerHTML = (r.riskLevel === "high" ? '<span class="bad">⚠ ' : '<b>') + esc(r.risk) +
+      (r.riskLevel === "high" ? '</span>' : '</b>') +
+      '<br>安全流程：先 SELECT 验证 → 再 UPDATE → 核对 ROW_COUNT() → 必要时 ROLLBACK。';
+  }
+
+  host.querySelectorAll("#upCtl .b").forEach(b => b.addEventListener("click", ()=>{
+    ta.value = PRESETS[+b.dataset.up].sql;
+    render();
+  }));
+  ta.addEventListener("input", render);
+  ta.value = PRESETS[1].sql;
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>子查询与集合运算 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 子查询与集合运算：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 00 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">这里是本模块的一句话引言，用来说明你将学到什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能按返回形态区分标量、列、行、表四种子查询，并判断它能不能写在 SELECT / WHERE / FROM / HAVING 里。</li>
+      <li>能说清 <code>IN</code>、<code>EXISTS</code>、<code>ANY</code>、<code>ALL</code> 的语义差异，并解释为什么 <code>NOT IN</code> 遇到 NULL 会返回空集。</li>
+      <li>能写出相关子查询，并说明它「外层每行执行一次」的执行方式与索引依赖。</li>
+      <li>会用派生表先聚合再连接，会为派生表起别名，知道 LATERAL 解决什么问题。</li>
+      <li>能用 CTE（WITH）把多层嵌套重构为可读的命名步骤，能写出递归 CTE 展开层级。</li>
+      <li>能区分 UNION / UNION ALL / INTERSECT / EXCEPT 的去重与代价，并在旧版本用 EXISTS / JOIN 等价改写。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：<code>SELECT / WHERE / ORDER BY</code> 基本查询、聚合与 <code>GROUP BY / HAVING</code>（模块 03）、多表连接 <code>JOIN</code>（模块 04），以及 NULL 的三值逻辑。示例数据沿用全站内置的 customers / orders / products / order_items / employees。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>子查询的形态与位置</h2>
+  </section>
+
+  <!-- 知识点 1 -->
+  <section class="topic" id="sub-scalar">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>标量、列、行、表子查询<span class="pt">subquery forms · 先认清「返回什么」，再决定「写在哪」</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="subquery::sub-scalar"><span>已学会</span></label>
+    </div>
+    <p>子查询（subquery）就是嵌套在另一个 SQL 语句里的 <code>SELECT</code>。它最容易踩的坑不是语法，而是<strong>形态与位置的匹配</strong>：数据库允许你把哪种形态的子查询放在哪个位置，是有硬性规则的。所以第一步永远是问自己「这个子查询返回几行几列」。</p>
+    <p>按返回形态分四类：<strong>标量子查询</strong>（1 行 1 列，可以当普通值用）、<strong>列子查询</strong>（1 列多行，配合 <code>IN / ANY / ALL</code> 使用）、<strong>行子查询</strong>（1 行多列，用 <code>(a, b)</code> 整体比较）、<strong>表子查询</strong>（多行多列，只能出现在 FROM / JOIN 或 EXISTS 里）。</p>
+    <ul>
+      <li>标量子查询可以出现在任何「能写值」的地方：SELECT 列表、WHERE、HAVING、ORDER BY，甚至 <code>SET</code>。</li>
+      <li>列子查询只能配合 <code>IN / NOT IN / ANY / ALL</code>，或放在 FROM 里（必须起别名）。</li>
+      <li>标量子查询一旦返回超过 1 行，MySQL 直接报错 1242，不会帮你「随便挑一行」。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>scalar_subquery.sql</div>
+      <pre><code>-- ① 标量子查询写在 SELECT 列表：为每个客户附上订单数
+SELECT c.id, c.name,
+       (SELECT COUNT(*) FROM orders o WHERE o.customer_id = c.id) AS order_cnt
+FROM customers c
+ORDER BY order_cnt DESC, c.id;
+
+-- ② 标量子查询写在 WHERE：金额高于全站平均的订单
+SELECT id, customer_id, amount
+FROM orders
+WHERE amount &gt; (SELECT AVG(amount) FROM orders)
+ORDER BY amount DESC;
+
+-- ③ 标量子查询写在 HAVING：总额超过平均订单额 2 倍的客户
+SELECT customer_id, SUM(amount) AS total
+FROM orders
+GROUP BY customer_id
+HAVING SUM(amount) &gt; 2 * (SELECT AVG(amount) FROM orders);
+
+-- ④ 行子查询：用 (customer_id, status) 这一整行去匹配
+SELECT id, customer_id, status, amount
+FROM orders
+WHERE (customer_id, status) IN (
+  SELECT customer_id, status FROM orders WHERE amount &gt; 2000
+);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>形态</th><th>返回</th><th>可出现的合法位置</th><th>示例</th></tr></thead>
+      <tbody>
+        <tr><td>标量子查询</td><td>1 行 1 列</td><td>SELECT / WHERE / HAVING / ORDER BY</td><td><code>(SELECT AVG(amount) FROM orders)</code></td></tr>
+        <tr><td>列子查询</td><td>1 列多行</td><td>WHERE 的 IN / ANY / ALL，或 FROM（需别名）</td><td><code>(SELECT customer_id FROM orders)</code></td></tr>
+        <tr><td>行子查询</td><td>1 行多列</td><td>WHERE 的 <code>(a,b) =</code> / <code>(a,b) IN</code></td><td><code>(SELECT customer_id, MAX(amount) FROM orders)</code></td></tr>
+        <tr><td>表子查询</td><td>多行多列</td><td>FROM / JOIN（必须别名）、EXISTS</td><td><code>(SELECT city, COUNT(*) FROM customers GROUP BY city) t</code></td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>查询 ① 的预期结果</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td>共 8 行</td><td>customers 有 8 行，一个客户一行，标量子查询逐行取值。</td></tr>
+        <tr><td>id = 8 的 order_cnt 为 0</td><td>该客户没有任何订单；<code>COUNT(*)</code> 在空集上返回 0，而不是 NULL。</td></tr>
+        <tr><td>其余 7 行 order_cnt 之和 = 12</td><td>与 orders 的 12 行一一对应，可用来核对子查询没有多算或漏算。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>标量子查询的隐含契约是「至多 1 行」。要保证这一点，子查询里通常得有聚合函数或 <code>LIMIT 1</code>，否则数据一变就报 1242。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>标量子查询返回 0 行时结果是 NULL（<code>COUNT(*)</code> 例外），NULL 参与算术会把整列结果污染成 NULL；而返回 2 行则直接报错。写标量子查询时先想清楚「它会不会返回多行」。</p></div>
+  </section>
+
+  <!-- 知识点 2 -->
+  <section class="topic" id="sub-in-exists">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>IN / EXISTS / ANY / ALL 的语义差异<span class="pt">in / exists / any / all · 一个比「值」，一个比「有没有行」</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="subquery::sub-in-exists"><span>已学会</span></label>
+    </div>
+    <p>这四个写法都是「用子查询做条件」，但判断的东西不同：<code>x IN (子查询)</code> 等价于 <code>x = ANY (子查询)</code>，是把<strong>值</strong>拿去和集合比；<code>x NOT IN (子查询)</code> 等价于 <code>x &lt;&gt; ALL (子查询)</code>；而 <code>EXISTS (子查询)</code> 只判断<strong>子查询有没有返回至少一行</strong>，根本不在乎返回的是什么列。</p>
+    <p>这个差别带来两个实际后果：一是 EXISTS 里的 SELECT 列表写什么都没关系（习惯写 <code>SELECT 1</code>），二是 NULL 的处理完全不同——IN/NOT IN 受三值逻辑影响，EXISTS/NOT EXISTS 只看行数，天然 NULL 安全。</p>
+    <ul>
+      <li><code>IN</code> 与 <code>EXISTS</code> 在结果上常常等价，但语义与执行方式不同；性能要按具体数据与索引判断，不要背结论。</li>
+      <li><code>NOT IN</code> 的子查询结果里只要有一个 NULL，整个条件就永远不成立，查询返回空集。</li>
+      <li><code>&gt; ANY</code> 相当于「大于最小值」，<code>&gt;= ALL</code> 相当于「大于等于最大值」。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>in_exists.sql</div>
+      <pre><code>-- ① IN：下过单的客户
+SELECT id, name FROM customers WHERE id IN (SELECT customer_id FROM orders);
+
+-- ② EXISTS：同样的语义，但只判断「存在」
+SELECT c.id, c.name
+FROM customers c
+WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+-- ③ NOT EXISTS：从未下单的客户（NULL 安全）
+SELECT c.id, c.name
+FROM customers c
+WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+-- ④ ALL / ANY：最贵的那件产品 / 除最便宜之外的产品
+SELECT name, price FROM products WHERE price &gt;= ALL (SELECT price FROM products);
+SELECT name, price FROM products WHERE price &gt;  ANY (SELECT price FROM products);
+
+-- ⑤ 危险写法：子查询若含 NULL，NOT IN 一行都返回不了
+SELECT id, name FROM customers WHERE id NOT IN (SELECT customer_id FROM orders);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th>IN (子查询)</th><th>EXISTS (子查询)</th></tr></thead>
+      <tbody>
+        <tr><td>语义</td><td><code>x = ANY(集合)</code>，比较值</td><td>子查询是否返回 ≥ 1 行，比较「有无」</td></tr>
+        <tr><td>返回列要求</td><td>必须恰好 1 列</td><td>任意列，习惯写 <code>SELECT 1</code></td></tr>
+        <tr><td>NULL 影响</td><td><code>NOT IN</code> 遇到 NULL 结果恒为 UNKNOWN</td><td>不受影响，只看行数</td></tr>
+        <tr><td>能否引用外层列</td><td>可以写相关形式，但语义上更绕</td><td>天然就是相关写法，最直观</td></tr>
+        <tr><td>短路</td><td>先把内层结果建成集合再逐行比对</td><td>内层找到 1 行立即停止</td></tr>
+        <tr><td>典型场景</td><td>内层结果集小、可枚举</td><td>外层行数大、内层过滤列有索引</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>查询</th><th>预期行数</th><th>关键点</th></tr></thead>
+      <tbody>
+        <tr><td>① IN</td><td>7</td><td>排除 id = 8 的客户（他没有订单）。</td></tr>
+        <tr><td>② EXISTS</td><td>7</td><td>结果集与 ① 相同，但输出列由自己决定。</td></tr>
+        <tr><td>③ NOT EXISTS</td><td>1</td><td>只剩 id = 8。</td></tr>
+        <tr><td>④ ALL</td><td>1</td><td>价格最高的一件产品。</td></tr>
+        <tr><td>④ ANY</td><td>5</td><td>6 件产品里排除最便宜的 1 件；若最低价并列，行数会更多。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>SELECT 1 NOT IN (2, NULL);</code> 的结果是 NULL 而不是 TRUE。所以只要子查询可能返回 NULL（比如某行 <code>customer_id</code> 为空），<code>NOT IN</code> 就一行都返回不了。改用 <code>NOT EXISTS</code>，或给子查询补上 <code>WHERE customer_id IS NOT NULL</code>。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>IN 和 EXISTS 谁更快没有固定答案：MySQL 8.0 常把二者改写成半连接（semi-join）。真正要记的是——NULL 安全用 EXISTS，集合枚举用 IN。</p></div>
+
+    <div id="demo-sandbox"></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>相关子查询与派生表</h2>
+  </section>
+
+  <!-- 知识点 3 -->
+  <section class="topic" id="sub-correlated">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>相关子查询与执行方式<span class="pt">correlated subquery · 外层每行跑一次内层</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="subquery::sub-correlated"><span>已学会</span></label>
+    </div>
+    <p>相关子查询（correlated subquery）是指内层查询<strong>引用了外层的列</strong>，因此它不能再脱离外层单独执行：逻辑上外层每处理一行，内层就要带着该行的值重新执行一次。与之相对，非相关子查询与外层完全无关，可以只算一次、结果复用。</p>
+    <p>这就是「写法差不多、性能差很多」的根源。相关子查询天生依赖索引——内层过滤用的列（如 <code>orders.customer_id</code>、<code>employees.dept</code>）如果没有索引，外层每一行都会触发一次全表扫描，代价立刻爆炸。好在 MySQL 8.0 的优化器会把很多 <code>IN</code> / <code>EXISTS</code> 改写成半连接或 JOIN，实际执行不一定真的是「逐行嵌套」。</p>
+    <ul>
+      <li>判断标准只有一条：内层 <code>WHERE</code> 里有没有引用外层别名。</li>
+      <li>相关子查询最常见的两个用途：逐行与「本组均值」比较、逐行判断「是否存在匹配行」。</li>
+      <li>相关子查询里漏写关联条件，会从「逐行比较」退化成「全表算一次」，结果常常悄悄变错。</li>
+    </ul>
+
+    <div class="mermaid">
+flowchart TB
+  A["外层 FROM 取出一行"] --&gt; B{"子查询是否引用外层列？"}
+  B -- "否：非相关" --&gt; C["内层只执行一次，结果复用"]
+  B -- "是：相关" --&gt; D["带着当前行的值执行内层"]
+  C --&gt; E["得到值 / 是否命中"]
+  D --&gt; E
+  E --&gt; F["用结果过滤或计算该行"]
+  F --&gt; G{"还有下一行？"}
+  G -- "有" --&gt; A
+  G -- "没有" --&gt; H["输出最终结果集"]
+    </div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>correlated.sql</div>
+      <pre><code>-- ① 相关标量子查询：每行都与「本部门」的平均薪资比较
+SELECT e.id, e.name, e.dept, e.salary,
+       (SELECT ROUND(AVG(x.salary), 0) FROM employees x WHERE x.dept = e.dept) AS dept_avg
+FROM employees e
+ORDER BY e.dept, e.salary DESC;
+
+-- ② 相关 EXISTS：找出「手下有人」的管理者
+SELECT e.id, e.name, e.dept
+FROM employees e
+WHERE EXISTS (SELECT 1 FROM employees x WHERE x.manager_id = e.id);
+
+-- ③ 非相关子查询：只算一次，结果被所有行复用
+SELECT id, amount
+FROM orders
+WHERE amount &gt; (SELECT AVG(amount) FROM orders);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th>非相关子查询</th><th>相关子查询</th></tr></thead>
+      <tbody>
+        <tr><td>是否引用外层列</td><td>否</td><td>是</td></tr>
+        <tr><td>执行次数</td><td>1 次</td><td>逻辑上等于外层行数</td></tr>
+        <tr><td>能否单独运行</td><td>能，直接粘贴出来就能跑</td><td>不能，外层列没值</td></tr>
+        <tr><td>典型写法</td><td><code>WHERE amount &gt; (SELECT AVG(amount) FROM orders)</code></td><td><code>WHERE EXISTS (SELECT 1 … WHERE o.customer_id = c.id)</code></td></tr>
+        <tr><td>对索引的依赖</td><td>低</td><td>高，内层过滤列必须有索引</td></tr>
+        <tr><td>优化器改写</td><td>可能改写成 JOIN</td><td>可能改写成半连接 / 物化</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>查询</th><th>预期结果</th></tr></thead>
+      <tbody>
+        <tr><td>①</td><td>9 行（employees 全表）；每行的 dept_avg 只由同部门同事的薪资决定，不同部门互不影响。</td></tr>
+        <tr><td>②</td><td>实际 4 行：<code>DISTINCT manager_id</code> 去掉 NULL 之后是 1、2、4、6，即这 4 位员工手下有人。</td></tr>
+        <tr><td>③</td><td>金额高于全站平均值的订单；与部门无关，属于非相关写法。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「相关」只由「内层是否引用外层列」决定，和有没有 <code>EXISTS</code> 无关。相关子查询本身不可怕，可怕的是内层过滤列没有索引。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把 <code>WHERE x.dept = e.dept</code> 写漏或写成恒真条件，内层就变成非相关的全表统计，语法照样通过、结果却是错的。写完相关子查询后，一定把内层 <code>WHERE</code> 单独看一眼关联条件。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：子查询执行分步器（IN vs EXISTS）</span><span class="hint">先选方式，再点「下一步」</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>方式</label>
+          <select id="stepMode">
+            <option value="in">IN (子查询)</option>
+            <option value="exists">EXISTS (相关)</option>
+          </select>
+          <button class="b" id="stepBtn">▶ 下一步</button>
+          <button class="b" id="stepReset">↺ 重来</button>
+        </div>
+        <div id="stepOut"></div>
+        <div class="log" id="stepLog">点「下一步」开始…</div>
+        <div class="foot">IN 是「先算一次内层 → 用结果集合逐行比对」；EXISTS 是「外层每行带参数跑一次内层 → 命中即停」。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 知识点 4 -->
+  <section class="topic" id="sub-derived">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>派生表与 FROM 子查询<span class="pt">derived table · 先把结果做成一张临时表，再连接</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="subquery::sub-derived"><span>已学会</span></label>
+    </div>
+    <p>派生表（derived table）是写在 <code>FROM</code> 或 <code>JOIN</code> 里的子查询：它先产出一张临时结果集，再被外层当成一张普通的表来用。MySQL 硬性要求<strong>派生表必须有别名</strong>，否则报语法错误 1064。</p>
+    <p>派生表的核心价值是「分步」：先聚合、去重或限行，得到一个干净的小结果集，再参与后续的连接与过滤。很多「先分组算指标，再按指标筛选」的需求，用派生表一次就能表达清楚，而不必写两层嵌套。</p>
+    <p>MySQL 8.0 对派生表有两种处理方式：能被<strong>合并</strong>（derived merge）时，就把子查询直接揉进外层的 JOIN 里；不能合并时（例如带 <code>GROUP BY</code>、<code>DISTINCT</code>、<code>LIMIT</code>、聚合）会被<strong>物化</strong>（materialized）成临时表。想确认到底是哪种，用 <code>EXPLAIN</code> 看执行计划。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>derived.sql</div>
+      <pre><code>-- ① 先分组，再过滤：客户数不少于 2 的城市
+SELECT t.city, t.cnt
+FROM (SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city) t
+WHERE t.cnt &gt;= 2
+ORDER BY t.cnt DESC, t.city;
+
+-- ② 派生表 + JOIN：客户订单总额排行
+SELECT c.name, s.total
+FROM customers c
+JOIN (SELECT customer_id, SUM(amount) AS total
+      FROM orders GROUP BY customer_id) s
+  ON s.customer_id = c.id
+ORDER BY s.total DESC;
+
+-- ③ MySQL 8.0.14+ LATERAL：派生表可以引用左边的表
+SELECT c.id, c.name, x.amount AS max_amount
+FROM customers c
+LEFT JOIN LATERAL (
+  SELECT amount FROM orders o
+  WHERE o.customer_id = c.id
+  ORDER BY amount DESC LIMIT 1
+) x ON TRUE;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th>派生表（FROM 子查询）</th><th>CTE（WITH）</th><th>临时表</th></tr></thead>
+      <tbody>
+        <tr><td>生命周期</td><td>单条语句内</td><td>单条语句内</td><td>会话内，可被多条语句复用</td></tr>
+        <tr><td>是否必须命名</td><td>必须写别名</td><td>WITH 名即别名</td><td>必须命名</td></tr>
+        <tr><td>能否多次引用</td><td>不能，得整段重写</td><td>可以</td><td>可以</td></tr>
+        <tr><td>能否引用左侧表</td><td>仅 LATERAL 可以</td><td>非递归 CTE 不可以</td><td>可以</td></tr>
+        <tr><td>版本要求</td><td>全部 MySQL</td><td>8.0+</td><td>全部 MySQL</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>查询</th><th>预期结果</th></tr></thead>
+      <tbody>
+        <tr><td>①</td><td>只返回客户数 ≥ 2 的城市；注意 id = 8 的客户 city 为 NULL，<code>GROUP BY</code> 会把 NULL 单独当成一组。</td></tr>
+        <tr><td>②</td><td>至多 7 行（只有下过单的客户会出现在派生表里），按总额降序排列。</td></tr>
+        <tr><td>③</td><td>8 行：LEFT JOIN 保住了没有订单的客户，其 max_amount 为 NULL。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>派生表 = 「先算出一张小表，再当表用」。它的两个硬约束：必须起别名；默认不能引用外层列（MySQL 8.0.14+ 用 <code>LATERAL</code> 才打破）。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>FROM (SELECT …)</code> 后面直接跟 <code>WHERE</code> 会报 1064，因为少了别名；另外物化的派生表会丢失原表的索引，外层再按派生表列过滤时可能是全表扫描，数据量大时要留意。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>CTE 与集合运算</h2>
+  </section>
+
+  <!-- 知识点 5 -->
+  <section class="topic" id="cte">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>CTE（WITH）与可读性重构<span class="pt">common table expression · 给每一步起个名字</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="subquery::cte"><span>已学会</span></label>
+    </div>
+    <p>CTE（Common Table Expression，公用表表达式）用 <code>WITH 名字 AS (SELECT …)</code> 给一段查询起名，然后在主查询里像表一样引用它。它和派生表能力重叠，但胜在<strong>可以命名、可以多次引用、可以从上到下线性阅读</strong>，是把长 SQL 重构得能读的关键工具。MySQL 8.0 起支持，递归场景需要 <code>WITH RECURSIVE</code>。</p>
+    <p>CTE 的首要价值是<strong>可读性重构</strong>：把「嵌套三层才看懂」的 SQL 拆成 3 个有名字的步骤，每一步都能单独拿出来跑一遍验证。第二个价值是<strong>复用</strong>：同一段中间结果在主查询里被引用多次时，派生表写法必须整段重写，CTE 只写一次。</p>
+    <p>但要注意 CTE 不是缓存。MySQL 对被引用多次的 CTE 可能选择物化（算一次存起来），也可能内联展开（每次引用都重算），具体取决于是否被多次引用以及优化器判断，性能差异必须用 <code>EXPLAIN</code> 确认。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>cte.sql</div>
+      <pre><code>-- ① 把「部门均值」抽成 CTE，主查询立刻变短（练习台不支持 WITH，请到真实数据库验证）
+WITH dept_avg AS (
+  SELECT dept, AVG(salary) AS avg_salary
+  FROM employees
+  GROUP BY dept
+)
+SELECT e.name, e.dept, e.salary, ROUND(d.avg_salary, 0) AS dept_avg
+FROM employees e
+JOIN dept_avg d ON d.dept = e.dept
+WHERE e.salary &gt; d.avg_salary
+ORDER BY e.dept, e.salary DESC;
+
+-- ② 多个 CTE 串联：后一个可以引用前一个
+WITH paid AS (
+  SELECT customer_id, SUM(amount) AS total
+  FROM orders
+  WHERE status = 'paid'
+  GROUP BY customer_id
+),
+big AS (
+  SELECT customer_id, total FROM paid WHERE total &gt; 1000
+)
+SELECT c.name, b.total
+FROM big b
+JOIN customers c ON c.id = b.customer_id
+ORDER BY b.total DESC;
+
+-- ③ 递归 CTE：从顶层经理往下展开汇报链（练习台不支持，请到真实数据库验证）
+WITH RECURSIVE tree AS (
+  SELECT id, name, manager_id, 1 AS lvl
+  FROM employees
+  WHERE manager_id IS NULL
+  UNION ALL
+  SELECT e.id, e.name, e.manager_id, t.lvl + 1
+  FROM employees e
+  JOIN tree t ON e.manager_id = t.id
+)
+SELECT lvl, id, name, manager_id
+FROM tree
+ORDER BY lvl, id;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th>嵌套子查询 / 派生表</th><th>CTE（WITH）</th></tr></thead>
+      <tbody>
+        <tr><td>可读性</td><td>层数一多，阅读要来回跳括号</td><td>从上到下线性阅读，每步有名</td></tr>
+        <tr><td>复用</td><td>每次引用都要重写整段</td><td>名字可被引用多次</td></tr>
+        <tr><td>调试</td><td>只能整条语句跑</td><td>可单独把某个 CTE 的 SELECT 拿出来跑</td></tr>
+        <tr><td>递归</td><td>不支持</td><td><code>WITH RECURSIVE</code> 支持层级展开</td></tr>
+        <tr><td>版本要求</td><td>全部 MySQL</td><td>MySQL 8.0+</td></tr>
+        <tr><td>是否缓存结果</td><td>物化与否由优化器决定</td><td>同样不一定：可能物化，也可能每次重算</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>查询</th><th>预期结果</th></tr></thead>
+      <tbody>
+        <tr><td>①</td><td>只保留薪资高于本部门均值的员工；把它改写成「JOIN 一个部门均值派生表」结果完全一致。</td></tr>
+        <tr><td>②</td><td>已付款总额超过 1000 的客户，按总额降序；行数取决于数据，不包含无订单客户。</td></tr>
+        <tr><td>③</td><td>共 9 行（employees 全表），<code>lvl</code> 从 1 开始逐层加 1，顶层经理的 manager_id 为 NULL。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>练习台引擎不支持 <code>WITH</code> 与递归 CTE —— 上面代码块里的语法是标准 MySQL 8.0 写法，请到真实数据库里验证。另外别把 CTE 当缓存：被引用多次时它可能被物化也可能被重复计算。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>能用 CTE 就别写三层嵌套。重构口诀：一段逻辑一个 CTE，名字直接说清这一步在算什么。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：CTE 重构对照（派生表 vs WITH）</span><span class="hint">点按钮切换写法</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>写法</label>
+          <button class="b" data-k="nest">派生表（嵌套）</button>
+          <button class="b" data-k="cte">CTE（WITH）</button>
+          <button class="b" data-k="why">为什么等价</button>
+        </div>
+        <div id="cteOut"></div>
+        <div class="log" id="cteLog"></div>
+        <div class="foot">两种写法的结果集完全相同；差别只在可读性、复用性与调试成本。练习台不支持 WITH，这里用对照方式讲解。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 知识点 6 -->
+  <section class="topic" id="set-ops">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>UNION / UNION ALL / INTERSECT / EXCEPT<span class="pt">set operations · 按行做并集、交集、差集</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="subquery::set-ops"><span>已学会</span></label>
+    </div>
+    <p>集合运算（set operations）把两个 <code>SELECT</code> 的结果<strong>按行</strong>组合起来：<code>UNION</code> 合并去重、<code>UNION ALL</code> 直接拼接、<code>INTERSECT</code> 求交集、<code>EXCEPT</code> 求差集。它们要求两侧<strong>列数相同、类型兼容</strong>，结果的列名取第一个 <code>SELECT</code> 的列名。</p>
+    <p>最常考的差异是去重：<code>UNION</code> 隐含一次 <code>DISTINCT</code>，为了去重它必须排序或建哈希表，大结果集下代价明显；<code>UNION ALL</code> 只是把两块结果首尾相接，不比较不排序，是最便宜的写法。能用 <code>UNION ALL</code> 满足需求时就不要写 <code>UNION</code>。</p>
+    <p>版本差异也很关键：<code>INTERSECT</code> 与 <code>EXCEPT</code> 在 MySQL 8.0.31 才支持。在更早的版本里，求交集要用 <code>INNER JOIN</code> 或 <code>EXISTS</code>，求差集要用 <code>LEFT JOIN … IS NULL</code> 或 <code>NOT EXISTS</code> 来模拟。</p>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>set_ops.sql</div>
+      <pre><code>-- ① UNION ALL：直接拼接，保留重复（练习台不支持，请到真实数据库验证）
+SELECT id AS uid, name, 'customer' AS src FROM customers
+UNION ALL
+SELECT id, name, 'employee' FROM employees;
+
+-- ② UNION：去重 + 隐式排序，代价更高
+SELECT city FROM customers
+UNION
+SELECT city FROM customers WHERE id &gt;= 4;
+
+-- ③ INTERSECT（MySQL 8.0.31+）：两边都有的城市
+SELECT city FROM customers
+INTERSECT
+SELECT city FROM customers WHERE id &gt;= 4;
+
+-- ④ EXCEPT（MySQL 8.0.31+）：A 有、B 没有
+SELECT id FROM customers
+EXCEPT
+SELECT customer_id FROM orders;
+
+-- ⑤ 全版本可用：用 EXISTS 模拟 INTERSECT
+SELECT DISTINCT c.city
+FROM customers c
+WHERE EXISTS (SELECT 1 FROM customers x WHERE x.city = c.city AND x.id &gt;= 4);
+
+-- ⑥ 全版本可用：用 NOT EXISTS 模拟 EXCEPT
+SELECT c.id
+FROM customers c
+WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>运算</th><th>是否去重</th><th>是否排序</th><th>NULL 处理</th><th>MySQL 版本</th></tr></thead>
+      <tbody>
+        <tr><td><code>UNION</code></td><td>去重（隐式 DISTINCT）</td><td>需要，代价高</td><td>NULL 视为相等，只保留一个</td><td>全部</td></tr>
+        <tr><td><code>UNION ALL</code></td><td>不去重</td><td>不排序</td><td>原样保留</td><td>全部</td></tr>
+        <tr><td><code>INTERSECT</code></td><td>去重</td><td>需要</td><td>NULL 视为相等</td><td>8.0.31+</td></tr>
+        <tr><td><code>EXCEPT</code></td><td>去重</td><td>需要</td><td>NULL 视为相等</td><td>8.0.31+</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>查询</th><th>预期结果</th></tr></thead>
+      <tbody>
+        <tr><td>①</td><td>8 + 9 = 17 行；列名沿用第一个 SELECT 的 uid / name / src。</td></tr>
+        <tr><td>②</td><td>右侧是左侧的子集，所以结果就是左侧去重后的 6 行：5 个城市 + 1 个 NULL（NULL 自成一组）。</td></tr>
+        <tr><td>③</td><td>两侧都出现的城市，结果与 ⑤ 的 EXISTS 写法一致。</td></tr>
+        <tr><td>④</td><td>从未下单的客户 id，预期 1 行（id = 8），与 ⑥ 结果一致。</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>两侧列数不一致会报 1222「The used SELECT statements have a different number of columns」；<code>ORDER BY</code> / <code>LIMIT</code> 只能写在最后一个 SELECT 之后，作用于整个结果集；<code>UNION</code> 的去重是按整行比较，不是按某一列。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>并集优先 <code>UNION ALL</code>（除非确实需要去重）；交集、差集先看数据库版本，老版本一律用 <code>EXISTS</code> / <code>NOT EXISTS</code> 等价改写，既兼容又能利用索引。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：集合运算演示器（手算结果集）</span><span class="hint">点按钮切换运算</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>运算</label>
+          <button class="b" data-k="union">UNION</button>
+          <button class="b" data-k="unionall">UNION ALL</button>
+          <button class="b" data-k="intersect">INTERSECT</button>
+          <button class="b" data-k="except">EXCEPT</button>
+        </div>
+        <div id="setOut"></div>
+        <div class="log" id="setLog"></div>
+        <div class="foot">两组独立的手算小数据（与内置示例数据无关）：A = {北京, 上海, 广州, 深圳, 杭州}，B = {上海, 广州, 成都, 杭州}。练习台不支持 UNION / INTERSECT / EXCEPT，所以这里手算演示。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用相关子查询找出「每个城市订单金额最高的那一位客户」，再改写成窗口函数写法（模块 06）做对比，说明两种写法的执行代价差别。</li>
+      <li>把一条三层嵌套的查询（内层分组 → 中层过滤 → 外层连接）重构成 3 个 CTE，保证结果集完全一致，并写出你验证「等价」的方法。</li>
+      <li>在 MySQL 8.0.30 上写出「两个结果集的交集」，要求不使用 <code>INTERSECT</code>，并解释为什么 <code>INNER JOIN</code> 写法在含 NULL 列时可能与 <code>INTERSECT</code> 结果不同。</li>
+      <li>设计一个查询：用 <code>UNION ALL</code> 把 customers 与 employees 的姓名合并成一个「通讯录」，再统计重名人数，并说明为什么这里不能直接用 <code>UNION</code>。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+/* ============================================================
+   CONFIG 与 QUZ —— 本页唯一的改动点。
+   其余 JS（渲染、计分、进度、翻页）保持与骨架一致。
+   ============================================================ */
+const CONFIG = {
+  moduleId: "subquery",
+  title: "子查询与集合运算",
+  eyebrow: "MODULE 05 · SQL / 数据库",
+  lead: "子查询让一条 SQL 能「先算一部分、再拿结果继续算」，是拆解复杂需求的核心手段。本模块讲透四种返回形态、IN 与 EXISTS 的语义差异、相关子查询的执行方式、派生表与 CTE 的重构技巧，以及 UNION / INTERSECT / EXCEPT 的取舍。",
+  points: ["sub-scalar","sub-in-exists","sub-correlated","sub-derived","cte","set-ops"],
+  prev: "04-joins.html",
+  next: "06-window-functions.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"在 SELECT 列表里写了一个标量子查询，运行后发现子查询会返回 2 行，MySQL 会怎么处理？",
+    sql:"SELECT c.name, (SELECT o.amount FROM orders o WHERE o.customer_id = c.id) AS amt\nFROM customers c;",
+    opts:[
+      "自动取第一行，忽略其余行",
+      "把两行的结果相加后返回",
+      "报错 Subquery returns more than 1 row（1242）",
+      "自动加上 DISTINCT 去重后返回一行"
+    ],
+    ans:2,
+    exp:"标量子查询的隐含契约是「至多 1 行」，超过就报 1242，数据库不会替你做取舍。选项 A、D 是「数据库很聪明」的错觉，MySQL 不做这种隐式裁剪；选项 B 只在聚合函数 COUNT 内部才会发生，标量子查询本身不会合并行。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪条 SQL 是合法的「行子查询（row subquery）」写法？",
+    opts:[
+      "SELECT * FROM orders WHERE amount = (SELECT amount, status FROM orders);",
+      "SELECT * FROM orders WHERE customer_id IN (SELECT customer_id, status FROM orders);",
+      "SELECT * FROM orders WHERE amount IN (SELECT amount FROM orders GROUP BY status);",
+      "SELECT * FROM orders WHERE (customer_id, status) IN (SELECT customer_id, status FROM orders);"
+    ],
+    ans:3,
+    exp:"行子查询要求两侧列数一致且用括号整体比较，(customer_id, status) IN (…) 是标准写法。A 用一个标量去接两列结果，列数不匹配；B 是 IN 接两列，同样非法；C 在默认 sql_mode（含 ONLY_FULL_GROUP_BY）下会直接报 1055（SELECT 的 amount 既不在 GROUP BY 里、也不是聚合值），即便能跑它也仍然是列子查询而非行子查询。"
+  },
+  {
+    type:"quiz",
+    q:"执行下面的查询时，如果子查询结果里存在 NULL（例如某些订单的 customer_id 为空），结果会怎样？",
+    sql:"SELECT name FROM customers WHERE id NOT IN (SELECT customer_id FROM orders);",
+    opts:[
+      "正常返回所有没有订单的客户",
+      "返回空集，一行都不会返回",
+      "报语法错误，提示 NULL 不能用于 NOT IN",
+      "自动忽略 NULL 行，按剩余值正常返回"
+    ],
+    ans:1,
+    exp:"NOT IN 等价于 <> ALL，只要集合里出现 NULL，比较结果就是 UNKNOWN 而不是 TRUE，整条 WHERE 对每一行都不成立，于是返回空集。A 和 D 都是把 NULL 当成「可忽略」的错误直觉；C 不存在，这不是语法错误，是语义陷阱。正确做法是改用 NOT EXISTS 或在子查询里加 IS NOT NULL。"
+  },
+  {
+    type:"quiz",
+    q:"关于 IN 与 EXISTS 的语义，下列说法正确的是？",
+    opts:[
+      "IN 等价于 = ANY，NOT IN 等价于 <> ALL，两者都受 NULL 影响",
+      "EXISTS 必须写出具体列名，写成 SELECT 1 会报错",
+      "EXISTS 一定比 IN 快，因为它不会去重",
+      "NOT IN 与 NOT EXISTS 在所有情况下都完全等价"
+    ],
+    ans:0,
+    exp:"IN 就是 = ANY 的语法糖，NOT IN 就是 <> ALL，所以都会碰到三值逻辑里的 NULL 问题。B 错误：EXISTS 只判断有没有行，SELECT 列表写什么都不影响结果；C 错误：性能取决于数据分布与索引，MySQL 8.0 常把两者都改写成半连接，没有「一定更快」；D 错误：正是 NULL 场景让二者行为分道扬镳。"
+  },
+  {
+    type:"quiz",
+    q:"下面这条查询等价于下列哪一条？",
+    sql:"SELECT name FROM products WHERE price >= ALL (SELECT price FROM products);",
+    opts:[
+      "SELECT name FROM products WHERE price > (SELECT MIN(price) FROM products);",
+      "SELECT name FROM products WHERE price >= (SELECT AVG(price) FROM products);",
+      "SELECT name FROM products WHERE price = (SELECT MAX(price) FROM products);",
+      "SELECT DISTINCT name FROM products;"
+    ],
+    ans:2,
+    exp:">= ALL 表示「大于等于集合里的每一个值」，等价于大于等于最大值。A 的 > MIN 是 > ANY 的近似（大于最小值）；B 把最大值换成了平均值，语义完全不同；D 只是去重，没有任何比较。"
+  },
+  {
+    type:"quiz",
+    q:"关于相关子查询（correlated subquery）的执行方式，正确的是？",
+    opts:[
+      "整个语句只执行一次，结果被缓存后所有行复用",
+      "外层每处理一行，内层子查询就带着该行的值执行一次",
+      "只有外层使用了 GROUP BY 时才会逐行执行",
+      "相关子查询无法出现在 WHERE 子句中"
+    ],
+    ans:1,
+    exp:"「相关」的定义就是内层引用了外层列，因此逻辑上必须外层每行跑一次内层，也正因如此内层过滤列必须有索引。A 描述的是非相关子查询；C 与 GROUP BY 无关；D 错误，WHERE EXISTS (SELECT 1 … WHERE x.id = e.id) 就是最常见的相关子查询。"
+  },
+  {
+    type:"quiz",
+    q:"关于 EXISTS 子查询的写法，下列说法正确的是？",
+    opts:[
+      "SELECT 1 比 SELECT * 快，因为取回的列更少",
+      "必须写成 SELECT 1，写成 SELECT * 会报语法错误",
+      "EXISTS 会把内层查询查到的列值返回给外层使用",
+      "SELECT 列表写什么都不影响结果，EXISTS 只判断有没有返回行"
+    ],
+    ans:3,
+    exp:"EXISTS 的语义是「子查询是否返回至少一行」，不关心返回了什么列，所以 SELECT 1、SELECT *、SELECT 常量 在结果上完全等价，性能也基本一致。A 的直觉错误在于「取列少就更快」——EXISTS 根本不会把内层列带出来；B 不是语法要求；C 把它和标量子查询混为一谈了。"
+  },
+  {
+    type:"quiz",
+    q:"在 MySQL 中执行下面这条语句（派生表没有别名）会怎样？",
+    sql:"SELECT * FROM (SELECT city FROM customers);",
+    opts:[
+      "正常执行，派生表的别名可以省略",
+      "自动用 inner 作为默认别名",
+      "报语法错误，MySQL 要求派生表必须指定别名",
+      "会被自动当作 CTE 处理"
+    ],
+    ans:2,
+    exp:"MySQL 硬性要求 FROM 里的子查询必须有别名，缺了会报 1064 语法错误。A、B 是「数据库会帮你补」的错误假设；D 更不可能，CTE 必须显式写 WITH 名字 AS (…)。正确写法是 (SELECT city FROM customers) t。"
+  },
+  {
+    type:"quiz",
+    q:"想在 FROM 子句里的派生表中引用左边表 c 的列（为每个客户取金额最高的那一笔订单），MySQL 8.0.14+ 应该怎么写？",
+    opts:[
+      "把派生表搬到 WHERE 里改成 IN 子查询",
+      "JOIN LATERAL (SELECT … WHERE o.customer_id = c.id ORDER BY amount DESC LIMIT 1) x ON TRUE",
+      "在 SELECT 列表里把派生表再写一遍",
+      "用 UNION ALL 把两个派生表合并起来"
+    ],
+    ans:1,
+    exp:"普通派生表不能引用外层列，MySQL 8.0.14 引入 LATERAL 后，FROM 里的子查询才能引用它左边已经出现的表，从而实现「每组取 top 1」。A 换成 IN 会丢失「取最大那笔」的排序信息；C 语法上不成立；D 与需求无关。"
+  },
+  {
+    type:"quiz",
+    q:"关于 MySQL 8.0 的 CTE（WITH），下列说法正确的是？",
+    opts:[
+      "WITH 定义的命名结果集可以在同一语句中被多次引用",
+      "WITH 定义的结果集在同一语句里只能引用一次",
+      "CTE 会在数据库里永久创建一张物理表",
+      "递归 CTE 不需要写 WITH RECURSIVE 关键字"
+    ],
+    ans:0,
+    exp:"CTE 的核心优势之一就是命名后可复用，同一语句里引用多次不必重写。B 恰好说反了；C 错误，CTE 只存在于单条语句的执行期间，不落盘、不持久；D 错误，MySQL 里递归 CTE 必须写 WITH RECURSIVE，否则会报错。"
+  },
+  {
+    type:"quiz",
+    q:"关于 UNION 与 UNION ALL 的差异，下列说法正确的是？",
+    opts:[
+      "UNION ALL 会去重，UNION 不会去重",
+      "两者行数一定相同，只是输出顺序不同",
+      "UNION 会自动把 NULL 转成 0 再参与比较",
+      "UNION 会隐式去重并需要排序，UNION ALL 直接拼接并保留重复"
+    ],
+    ans:3,
+    exp:"UNION 隐含一次 DISTINCT，为了去重必须排序或建哈希表，大结果集下代价明显；UNION ALL 只是把两块结果首尾相接。A 把两者说反了；B 错误，去重会改变行数；C 错误，NULL 不会被转换，只是比较时视为相等。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：MySQL 8.0.31 之前不支持 INTERSECT，你会如何得到「既在 A 中又在 B 中」的结果？",
+    opts:[
+      "用 UNION ALL 把两个结果集拼起来",
+      "用 A LEFT JOIN B ON 1 = 1",
+      "用 A INNER JOIN B ON 所有比较列相等，或用 WHERE EXISTS 相关子查询",
+      "用 A CROSS JOIN B 然后去掉重复行"
+    ],
+    ans:2,
+    exp:"求交集的标准老写法是 INNER JOIN 全部参与比较的列，或用 EXISTS 做半连接（后者还能顺便规避 NULL 相等的语义坑）。A 得到的是并集而非交集；B 的 ON 1 = 1 是笛卡尔积；D 同样是笛卡尔积，行数会爆炸。面试时补一句「8.0.31+ 可以直接写 INTERSECT」更完整。"
+  }
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1），
+   键内元素形如 "模块id::知识点id"。在详解页勾选 = 大纲同步打勾。
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   交互演示面板 ①：SQL 练习台（子查询全谱系）
+   ------------------------------------------------------------ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-sandbox");
+  if(!host) return;
+  SQLSandbox.mount(host, {
+    query: "SELECT c.id, c.name\nFROM customers c\nWHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id)\nORDER BY c.id;",
+    presets: [
+      {label:"标量子查询", sql:"SELECT id, customer_id, amount,\n       (SELECT AVG(amount) FROM orders) AS avg_amount\nFROM orders\nORDER BY amount DESC;"},
+      {label:"IN (子查询)", sql:"SELECT id, name, city\nFROM customers\nWHERE id IN (SELECT customer_id FROM orders)\nORDER BY id;"},
+      {label:"EXISTS", sql:"SELECT c.id, c.name\nFROM customers c\nWHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id)\nORDER BY c.id;"},
+      {label:"NOT EXISTS", sql:"SELECT c.id, c.name\nFROM customers c\nWHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);"},
+      {label:"派生表", sql:"SELECT t.city, t.cnt\nFROM (SELECT city, COUNT(*) AS cnt FROM customers GROUP BY city) t\nWHERE t.cnt >= 2\nORDER BY t.cnt DESC, t.city;"}
+    ]
+  });
+})();
+
+/* ------------------------------------------------------------
+   交互演示面板 ②：子查询执行分步器（IN vs EXISTS，模式 C）
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("stepOut"), log = document.getElementById("stepLog"),
+        sel = document.getElementById("stepMode");
+  if(!out || !sel) return;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const OUTER = [1,2,3,4,5,6,7,8];
+  const HAS = id => id <= 7;          // id = 8 的客户没有任何订单
+
+  function outerTable(shown, label){
+    let h = `<table class="dt"><thead><tr><th>外层 customers.id</th><th>${esc(label)}</th><th>是否保留</th></tr></thead><tbody>`;
+    for(let k=0;k<shown;k++){
+      const id = OUTER[k], ok = HAS(id);
+      h += `<tr class="${ok?'match':'dim'}"><td>${id}</td><td>${ok?'命中':'查不到'}</td><td>${ok?'✓ 保留':'✗ 丢弃'}</td></tr>`;
+    }
+    return h + `</tbody></table>`;
+  }
+  function resultTable(){
+    let h = `<table class="dt"><thead><tr><th>结果行</th><th>customers.id</th></tr></thead><tbody>`;
+    for(let k=1;k<=7;k++) h += `<tr class="match"><td>${k}</td><td>${k}</td></tr>`;
+    return h + `</tbody></table>`;
+  }
+
+  const MODES = {
+    in: {
+      title:"IN (子查询)",
+      sql:"SELECT id, name FROM customers WHERE id IN (SELECT customer_id FROM orders);",
+      steps:[
+        {t:"① 先执行内层子查询",
+         html:`<div class="qsql">${esc("SELECT customer_id FROM orders;")}</div>
+           <p>内层不引用外层任何列，可以单独跑：orders 共 12 行，取出 12 个 customer_id 值（含重复）。</p>`,
+         note:"内层只执行一次，这是非相关子查询。"},
+        {t:"② 内层结果去重成一个集合",
+         html:`<p>MySQL 把 12 个值去重成 7 个不同的 customer_id：</p>
+           <table class="dt"><thead><tr><th>集合元素</th></tr></thead><tbody>` +
+           [1,2,3,4,5,6,7].map(v=>`<tr><td class="key">${v}</td></tr>`).join("") +
+           `</tbody></table><p>IN 的语义就是「这个值是否属于这个集合」。</p>`,
+         note:"集合建好后，外层才开始逐行比对。"},
+        {t:"③ 外层逐行与集合比对",
+         html:`<p>外层 customers 的 8 行各判断一次：</p>` + outerTable(8,"id 是否在集合里"),
+         note:"命中即保留；id = 8 不在集合里，被过滤掉。"},
+        {t:"④ 输出最终结果",
+         html:`<p>结果 7 行：</p>` + resultTable(),
+         note:"IN 的代价 ≈ 内层一次 + 外层每行一次集合查找。"}
+      ]
+    },
+    exists: {
+      title:"EXISTS (相关子查询)",
+      sql:"SELECT c.id, c.name FROM customers c WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);",
+      steps:[
+        {t:"① 外层取出第 1 行",
+         html:`<p>外层 <code>FROM customers c</code> 先取出一行，此时内层还没执行。</p>` + outerTable(1,"内层判断"),
+         note:"相关子查询由外层驱动，逐行推进。"},
+        {t:"② 带着 c.id = 1 执行内层，命中即停",
+         html:`<div class="qsql">${esc("SELECT 1 FROM orders o WHERE o.customer_id = 1 LIMIT 1;")}</div>
+           <p>在 orders 的 customer_id 索引上查到第 1 条匹配就返回 TRUE，不再继续扫描。</p>`,
+         note:"EXISTS 只关心「有没有行」，找到 1 行就短路。"},
+        {t:"③ 外层继续取下一行，重复 8 次",
+         html:`<p>逻辑上内层要执行 8 次；MySQL 8.0 常把它改写成半连接，实际可能只做 7 次索引查找：</p>` + outerTable(8,"内层判断"),
+         note:"内层过滤列 customer_id 必须有索引，否则每次都是全表扫描。"},
+        {t:"④ 输出最终结果",
+         html:`<p>结果同样是 7 行，与 IN 写法完全一致：</p>` + resultTable(),
+         note:"结果相同、执行方式不同——这就是 IN 与 EXISTS 的真正差别。"}
+      ]
+    }
+  };
+
+  let i = -1, mode = "in";
+  function render(){
+    const m = MODES[mode];
+    if(i < 0){
+      out.innerHTML = `<div style="font-weight:700;color:#1e5b4f;margin-bottom:6px">${esc(m.title)}</div>
+        <div class="qsql">${esc(m.sql)}</div>
+        <p style="color:#857c6b;font-size:13.5px">准备就绪，点「下一步」开始。</p>`;
+      log.textContent = "点「下一步」开始…";
+      return;
+    }
+    const s = m.steps[i];
+    out.innerHTML = `<div style="font-weight:700;color:#1e5b4f;margin-bottom:6px">${esc(s.t)}</div>` + s.html;
+    log.innerHTML = `<b>${esc(s.t)}</b>：${s.note}`;
+  }
+  document.getElementById("stepBtn").addEventListener("click", ()=>{ i = Math.min(i+1, MODES[mode].steps.length-1); render(); });
+  document.getElementById("stepReset").addEventListener("click", ()=>{ i = -1; render(); });
+  sel.addEventListener("change", ()=>{ mode = sel.value; i = -1; render(); });
+  render();
+})();
+
+/* ------------------------------------------------------------
+   交互演示面板 ③：CTE 重构对照（模式 B，手算演示）
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("cteOut"), log = document.getElementById("cteLog");
+  if(!out) return;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const DATA = {
+    nest: {
+      title:"派生表（嵌套子查询）写法",
+      sql:"SELECT e.name, e.dept, e.salary\nFROM employees e\nJOIN (\n  SELECT dept, AVG(salary) AS dept_avg\n  FROM employees\n  GROUP BY dept\n) d ON d.dept = e.dept\nWHERE e.salary > d.dept_avg\nORDER BY e.dept, e.salary DESC;",
+      rows:[
+        ["聚合逻辑位置","被压进 FROM 的括号里，一眼看不出这一步在算「部门均值」"],
+        ["复用","差：想再引用一次部门均值，必须把整段子查询重写一遍"],
+        ["调试","中：只能整条语句跑，出问题要一层层拆括号"],
+        ["执行","派生表可能被合并进外层 JOIN，也可能被物化"]
+      ],
+      note:"派生表写一次用一次，聚合逻辑埋在括号里，读者要「从里往外」读。"
+    },
+    cte: {
+      title:"CTE（WITH）写法",
+      sql:"WITH dept_avg AS (\n  SELECT dept, AVG(salary) AS dept_avg\n  FROM employees\n  GROUP BY dept\n)\nSELECT e.name, e.dept, e.salary\nFROM employees e\nJOIN dept_avg d ON d.dept = e.dept\nWHERE e.salary > d.dept_avg\nORDER BY e.dept, e.salary DESC;",
+      rows:[
+        ["聚合逻辑位置","单独一个命名块 dept_avg，名字直接说明意图"],
+        ["复用","好：同一语句里可以多次引用 dept_avg"],
+        ["调试","好：把 CTE 里的 SELECT 单独拿出来就能跑"],
+        ["执行","是否物化由优化器决定，被多次引用时更可能物化"]
+      ],
+      note:"CTE 从上到下线性阅读：先声明中间结果，再写主查询。"
+    },
+    why: {
+      title:"为什么两种写法结果完全相同",
+      sql:"-- 两者等价：都是「先按 dept 聚合出平均薪资，再与原表按 dept 连接并过滤」\n-- 差异只在可读性与优化器的处理方式，不在结果集",
+      rows:[
+        ["第 1 步","按 dept 分组，算出每个部门的 AVG(salary)"],
+        ["第 2 步","把这份「部门均值」与 employees 按 dept 连接"],
+        ["第 3 步","过滤 salary > dept_avg，按 dept、salary 排序"],
+        ["结论","同一套步骤，两种表达；CTE 只是给它起了名字"]
+      ],
+      note:"把中间结果命名，是 SQL 可维护性提升最划算的一招。"
+    }
+  };
+  function render(k){
+    document.querySelectorAll(".db").forEach(db=>{
+      if(!db.querySelector("#cteOut")) return;
+      db.querySelectorAll("[data-k]").forEach(b=>b.classList.toggle("on", b.dataset.k===k));
+    });
+    const d = DATA[k];
+    out.innerHTML = `<div style="font-weight:700;color:#1e5b4f;margin-bottom:6px">${esc(d.title)}</div>
+      <div class="qsql">${esc(d.sql)}</div>
+      <table class="dt"><thead><tr><th>维度</th><th>说明</th></tr></thead><tbody>` +
+      d.rows.map(r=>`<tr><td class="key">${esc(r[0])}</td><td>${esc(r[1])}</td></tr>`).join("") +
+      `</tbody></table>`;
+    log.innerHTML = `<b>${esc(d.title)}</b>：${esc(d.note)}`;
+  }
+  document.querySelectorAll("#cteOut").forEach(()=>{});
+  document.querySelectorAll(".db").forEach(db=>{
+    if(!db.querySelector("#cteOut")) return;
+    db.querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.k)));
+  });
+  render("nest");
+})();
+
+/* ------------------------------------------------------------
+   交互演示面板 ④：集合运算演示器（模式 B，手算结果集）
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("setOut"), log = document.getElementById("setLog");
+  if(!out) return;
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const A = ["北京","上海","广州","深圳","杭州"];   // A 集合
+  const B = ["上海","广州","成都","杭州"];           // B 集合
+
+  function calc(k){
+    if(k === "union"){
+      const seen = [];
+      A.concat(B).forEach(v=>{ if(seen.indexOf(v) < 0) seen.push(v); });
+      return { rows: seen.map(v=>[v, (A.indexOf(v)>=0 && B.indexOf(v)>=0) ? "A、B 都有" : (A.indexOf(v)>=0 ? "仅 A" : "仅 B"), "保留 1 行"]),
+               note: "去重后 " + seen.length + " 行（隐式 DISTINCT，需要排序/哈希，代价更高）" };
+    }
+    if(k === "unionall"){
+      const rows = A.map(v=>[v,"来自 A","原样保留"]).concat(B.map(v=>[v,"来自 B","原样保留"]));
+      return { rows, note: "直接拼接 " + rows.length + " 行，重复的「上海/广州/杭州」各出现两次" };
+    }
+    if(k === "intersect"){
+      const hit = A.filter(v=>B.indexOf(v) >= 0);
+      return { rows: hit.map(v=>[v,"A、B 都有","保留 1 行"]), note: "交集 " + hit.length + " 行（MySQL 8.0.31+ 才支持 INTERSECT）" };
+    }
+    const only = A.filter(v=>B.indexOf(v) < 0);
+    return { rows: only.map(v=>[v,"仅 A 有","保留 1 行"]), note: "A EXCEPT B = " + only.length + " 行（MySQL 8.0.31+ 才支持 EXCEPT）" };
+  }
+
+  function render(k){
+    document.querySelectorAll(".db").forEach(db=>{
+      if(!db.querySelector("#setOut")) return;
+      db.querySelectorAll("[data-k]").forEach(b=>b.classList.toggle("on", b.dataset.k===k));
+    });
+    const d = calc(k);
+    out.innerHTML = `<div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:8px;font-size:13.5px">
+        <span><b>A</b> = {${A.map(esc).join(", ")}}</span>
+        <span><b>B</b> = {${B.map(esc).join(", ")}}</span>
+      </div>
+      <table class="dt"><thead><tr><th>结果值</th><th>来源</th><th>说明</th></tr></thead><tbody>` +
+      d.rows.map(r=>`<tr class="match"><td class="key">${esc(r[0])}</td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join("") +
+      `</tbody></table>`;
+    log.innerHTML = `<b>${esc(k.toUpperCase())}</b>：${esc(d.note)}`;
+  }
+  document.querySelectorAll(".db").forEach(db=>{
+    if(!db.querySelector("#setOut")) return;
+    db.querySelectorAll("[data-k]").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.k)));
+  });
+  render("union");
+})();
+</script>
+</body>
+</html>

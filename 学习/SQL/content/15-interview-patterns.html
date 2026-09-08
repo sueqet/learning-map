@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>面试高频 SQL 题型 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 面试高频 SQL 题型：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">面试高频 SQL 题型</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 15 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">面试高频 SQL 题型</h1>
+    <p class="lead" id="pageLead">把面试里反复出现的七类 SQL 题拆成可复用的「套路」：TopN、排名并列、连续区间、去重取最新、自连接比较、行列转换、NULL 陷阱。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>看到「每个/各 + 前 N」这类题干时，能在 30 秒内判断该用窗口函数、相关子查询还是派生表，并写出可运行的 SQL。</li>
+      <li>说清 <code>ROW_NUMBER()</code>、<code>RANK()</code>、<code>DENSE_RANK()</code> 在并列时的输出差异，并按「要不要并列」选择函数。</li>
+      <li>能用「日期 − 序号 = 常量」把连续登录/连续下单拆成连续区间，并解释断点为什么会自动分成新组。</li>
+      <li>能写出「每个客户保留最新一笔订单」的三种写法（相关子查询 / 窗口函数 / 自连接删除），并说明各自适用场景。</li>
+      <li>能识别 NULL 引发的边界陷阱（<code>NOT IN</code>、<code>COUNT(列)</code>、<code>&lt;&gt;</code> 比较），并改用反连接或 <code>&lt;=&gt;</code> 修正。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：单表查询与 <code>WHERE</code>/<code>ORDER BY</code>/<code>LIMIT</code>、多表 <code>JOIN</code>、<code>GROUP BY</code> 与聚合函数、子查询（相关子查询）、以及第 06 节的窗口函数基础（<code>OVER (PARTITION BY … ORDER BY …)</code>）。本页所有语法以 MySQL 8.0 为准。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>取数与排名：<br>TopN、并列、组内排序</h2>
+  </section>
+
+  <!-- 知识点 1 -->
+  <section class="topic" id="itv-topn">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>TopN 与分组 TopN<span class="pt">top-n · 先全局排序取前几，再按组取前几</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="interview::itv-topn"><span>已学会</span></label>
+    </div>
+    <p><b>TopN</b> 指按某个排序键取出前 N 行；<b>分组 TopN</b>（grouped TopN）则是「每个分组内部各取前 N 行」，本质是「先分组、再组内排序、最后每组截断」。它是面试出现频率最高的一类题，题干特征非常固定：出现「每个 / 各 / 每组」＋「最高 / 前 N / 最新」。</p>
+    <p>最容易踩的坑是把全局 TopN 的写法直接搬到分组场景：<code>GROUP BY city ORDER BY amount DESC LIMIT 1</code> 只会返回<b>整个结果集的 1 行</b>，因为 <code>LIMIT</code> 作用在最终结果上，跟分组没有关系。分组 TopN 必须做到「组内独立排序」，只有三种可行路线：窗口函数编号、相关子查询求组内极值、派生表求组内极值再 JOIN 回原表。</p>
+    <p>选型上：MySQL 8.0 优先窗口函数，一次分区排序即可完成，可读性和性能都最好；遇到不支持窗口函数的旧版本，就用相关子查询或派生表；如果组内可能有并列值，还要先想清楚「并列是否全部保留」——保留用 <code>RANK()</code> 或 <code>= MAX()</code>，只留一条用 <code>ROW_NUMBER()</code> 并在排序键后补一个唯一列（如 <code>id</code>）保证结果稳定。</p>
+
+    <ul>
+      <li><b>识别特征</b>：题干里出现「每个 / 各 / 每组」＋「前 N / 最高 / 最低 / 最新」。</li>
+      <li><b>解题步骤</b>：① 定分组键（city / dept / customer_id）；② 定排序键（<code>amount DESC</code>，再补 <code>id</code>）；③ 选解法；④ 外层筛 <code>rn &lt;= N</code> 或 <code>amount = 组内 MAX</code>。</li>
+      <li><b>易错点</b>：用 <code>LIMIT</code> 代替分组；<code>GROUP BY</code> 后选非分组列（MySQL 8.0 默认 <code>ONLY_FULL_GROUP_BY</code> 直接报错）；并列时结果条数不等于 N。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>topn.sql</div>
+      <pre><code>-- ① 全局 TopN：订单金额最高的 3 笔
+SELECT o.id, o.customer_id, o.amount
+FROM orders o
+ORDER BY o.amount DESC, o.id      -- 补 id 保证并列时次序稳定
+LIMIT 3;
+
+-- ② 分组 TopN（MySQL 8.0 窗口函数，推荐）
+SELECT t.city, t.name, t.order_id, t.amount
+FROM (
+  SELECT c.city, c.name, o.id AS order_id, o.amount,
+         ROW_NUMBER() OVER (PARTITION BY c.city
+                            ORDER BY o.amount DESC, o.id) AS rn
+  FROM orders o
+  JOIN customers c ON c.id = o.customer_id
+) t
+WHERE t.rn &lt;= 1
+ORDER BY t.amount DESC;
+
+-- ③ 分组 TopN（无窗口函数的替代：相关子查询求组内极值）
+SELECT c.city, c.name, o.id AS order_id, o.amount
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+WHERE o.amount = (
+  SELECT MAX(o2.amount)
+  FROM orders o2
+  JOIN customers c2 ON c2.id = o2.customer_id
+  WHERE c2.city = c.city            -- 关键：随外行变化的关联条件
+)
+ORDER BY o.amount DESC;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>能否按组取前 N</th><th>并列处理</th><th>代价</th><th>版本</th></tr></thead>
+      <tbody>
+        <tr><td><code>ORDER BY … LIMIT n</code></td><td>不能，只作用于整个结果集</td><td>可能截断并列</td><td>一次排序</td><td>所有版本</td></tr>
+        <tr><td><code>ROW_NUMBER() OVER (PARTITION BY …)</code> + 外层 <code>rn &lt;= n</code></td><td>能</td><td>并列被强行拆开，序号唯一</td><td>一次分区排序</td><td>MySQL 8.0+</td></tr>
+        <tr><td><code>RANK() OVER (PARTITION BY …)</code> + 外层 <code>rk &lt;= n</code></td><td>能</td><td>并列全保留，行数可能多于 N</td><td>一次分区排序</td><td>MySQL 8.0+</td></tr>
+        <tr><td>相关子查询 <code>MAX</code> + 回表匹配</td><td>能</td><td>并列全保留</td><td>每行一次子查询，最坏 O(n²)</td><td>所有版本</td></tr>
+        <tr><td>派生表求组内极值再 JOIN</td><td>能</td><td>并列全保留</td><td>一次分组 + 一次 JOIN</td><td>所有版本</td></tr>
+      </tbody>
+    </table>
+
+    <p>用写法 ③ 在示例数据上跑，得到「每个城市金额最高的一笔订单」共 <b>5 行</b>：</p>
+    <table class="tbl">
+      <thead><tr><th>城市</th><th>客户</th><th>订单号</th><th>金额</th></tr></thead>
+      <tbody>
+        <tr><td>广州</td><td>王强</td><td>1004</td><td>2297.00</td></tr>
+        <tr><td>上海</td><td>李娜</td><td>1012</td><td>1497.00</td></tr>
+        <tr><td>北京</td><td>张伟</td><td>1002</td><td>1299.00</td></tr>
+        <tr><td>杭州</td><td>陈晨</td><td>1007</td><td>998.00</td></tr>
+        <tr><td>深圳</td><td>刘敏</td><td>1006</td><td>59.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>全局 TopN 用 <code>ORDER BY + LIMIT</code>；分组 TopN 必须让排序在「组内」发生——窗口函数 <code>PARTITION BY</code> 或相关子查询二选一。<code>LIMIT</code> 永远不是分组截断工具。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>相关子查询版一旦漏写 <code>WHERE c2.city = c.city</code>，就退化成「全表最高金额」，只会返回 1 行；用 <code>GROUP BY c.city</code> 又想同时选 <code>c.name</code>，MySQL 8.0 默认 <code>ONLY_FULL_GROUP_BY</code> 会直接报错——要用窗口函数或子查询，而不是靠关闭 sql_mode 蒙过去。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：面试题演算器</span><span class="hint">选一道题，点「下一步」看中间结果</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>题目</label>
+          <select id="calcSel">
+            <option value="cityTop">每个城市金额最高的订单</option>
+            <option value="top3">订单金额 Top 3</option>
+            <option value="tenth">金额第 10 名的订单（并列）</option>
+          </select>
+          <button class="b" id="calcStep">▶ 下一步</button>
+          <button class="b" id="calcReset">↺ 重来</button>
+        </div>
+        <div id="calcOut"></div>
+        <div class="log" id="calcLog">点「下一步」开始…</div>
+        <div class="foot">提示：每一步对应 SQL 逻辑执行顺序中的一环——先看 FROM 出的原始行，再看 JOIN、聚合子查询、最后看 WHERE 筛选。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 知识点 2 -->
+  <section class="topic" id="itv-rank">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>排名与并列处理<span class="pt">ranking · 并列怎么编号决定返回几行</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="interview::itv-rank"><span>已学会</span></label>
+    </div>
+    <p>排名类题目的核心不是「怎么写 <code>ORDER BY</code>」，而是<b>并列值怎么编号</b>。MySQL 8.0 提供三个排名窗口函数：<code>ROW_NUMBER()</code> 强制给每行唯一序号（并列被拆开），<code>RANK()</code> 并列同名并<b>跳号</b>（1,1,3），<code>DENSE_RANK()</code> 并列同名且<b>不跳号</b>（1,1,2）。同一个「取第 2 名」的需求，用不同函数返回的行数可能完全不同。</p>
+    <p>答题时先把需求翻译成一句明确的问法：「第 2 名」是「第 2 行」（用 <code>ROW_NUMBER</code>）、还是「并列第 2 名全部返回」（用 <code>RANK</code>）、还是「去重后的第 2 个值」（用 <code>DENSE_RANK</code>）。这句话问清了，SQL 几乎是模板化的：窗口函数在外层子查询里算序号，外层 <code>WHERE</code> 筛选。</p>
+    <p>如果面试官要求「不用窗口函数」，就用相关子查询计数法：统计同组内比自己大的行数，<b>该人数 + 1 就是排名</b>。它在并列时等价于 <code>RANK</code>，代价是每行一次子查询比较（最坏 O(n²)），大表上明显慢于窗口函数的一次排序。</p>
+
+    <ul>
+      <li><b>识别特征</b>：出现「第 N 名 / 排名 / 并列 / 前 N 名」。</li>
+      <li><b>解题步骤</b>：① 明确并列语义；② 选函数（ROW_NUMBER / RANK / DENSE_RANK）；③ 子查询里算序号，外层筛选；④ 无窗口函数时改用「比我高的人数 + 1」。</li>
+      <li><b>易错点</b>：把 <code>RANK</code> 当 <code>ROW_NUMBER</code> 用导致返回多行；排序键不唯一导致分页/取数结果抖动。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>rank.sql</div>
+      <pre><code>-- 三个排名函数在同一份数据上的输出差异
+SELECT o.id, o.amount,
+       ROW_NUMBER() OVER (ORDER BY o.amount DESC, o.id) AS rn,
+       RANK()       OVER (ORDER BY o.amount DESC)       AS rk,
+       DENSE_RANK() OVER (ORDER BY o.amount DESC)       AS drk
+FROM orders o;
+
+-- 取「并列第 2 名」：用 RANK，并列的两行都返回
+SELECT id, amount
+FROM (SELECT id, amount, RANK() OVER (ORDER BY amount DESC) AS rk FROM orders) t
+WHERE t.rk = 2;
+
+-- 取「第 2 行」：用 ROW_NUMBER，只返回一行
+SELECT id, amount
+FROM (SELECT id, amount, ROW_NUMBER() OVER (ORDER BY amount DESC, id) AS rn FROM orders) t
+WHERE t.rn = 2;
+
+-- 不用窗口函数的替代：同部门内比我薪资高的人数 + 1 就是排名
+SELECT e.dept, e.name, e.salary,
+       (SELECT COUNT(*) FROM employees e2
+        WHERE e2.dept = e.dept AND e2.salary &gt; e.salary) + 1 AS 部门内排名
+FROM employees e
+ORDER BY e.dept, e.salary DESC;
+
+-- 经典「第二高薪资」写法（没有第二名时返回 NULL）
+SELECT MAX(salary) AS 第二高薪资
+FROM employees
+WHERE salary &lt; (SELECT MAX(salary) FROM employees);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>值</th><th>ROW_NUMBER()</th><th>RANK()</th><th>DENSE_RANK()</th></tr></thead>
+      <tbody>
+        <tr><td>100</td><td>1</td><td>1</td><td>1</td></tr>
+        <tr><td>100</td><td>2</td><td>1</td><td>1</td></tr>
+        <tr><td>90</td><td>3</td><td>3</td><td>2</td></tr>
+        <tr><td>80</td><td>4</td><td>4</td><td>3</td></tr>
+      </tbody>
+    </table>
+
+    <p>示例数据里订单 1003 与 1008 的金额都是 89，并列出现在第 10 位，所以按金额排名的尾部是：</p>
+    <table class="tbl">
+      <thead><tr><th>订单号</th><th>金额</th><th>RANK()</th><th>DENSE_RANK()</th><th>取第 10 名返回几行</th></tr></thead>
+      <tbody>
+        <tr><td>1009</td><td>129.00</td><td>9</td><td>9</td><td>—</td></tr>
+        <tr><td>1003</td><td>89.00</td><td>10</td><td>10</td><td>RANK 会返回这一行</td></tr>
+        <tr><td>1008</td><td>89.00</td><td>10</td><td>10</td><td>RANK 也会返回这一行（共 2 行）</td></tr>
+        <tr><td>1006</td><td>59.00</td><td>12</td><td>11</td><td>RANK 跳号：没有第 11 名</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>先问「并列要不要全要」——要就用 <code>RANK</code>／<code>DENSE_RANK</code>，不要就用 <code>ROW_NUMBER</code>。窗口函数统一写成「子查询算序号 + 外层筛选」，比相关子查询计数法快得多。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>用 <code>ROW_NUMBER() OVER (ORDER BY amount DESC)</code> 取 TopN 时，如果金额有并列，序号分配是<b>不确定</b>的（同样数据两次执行可能给出不同行）。务必在 <code>ORDER BY</code> 后补一个唯一列（如 <code>id</code>）保证结果可复现。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：TopN 解法对比器</span><span class="hint">切换解法，看结果行数怎么变</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>解法</label>
+          <button class="b" data-k="limit">ORDER BY + LIMIT</button>
+          <button class="b" data-k="rownumber">ROW_NUMBER()</button>
+          <button class="b" data-k="rank">RANK()</button>
+          <button class="b" data-k="dense">DENSE_RANK()</button>
+          <button class="b" data-k="group">分组内 TopN</button>
+        </div>
+        <div id="topnOut"></div>
+        <div class="log" id="topnLog"></div>
+        <div class="foot">提示：注意订单 1003 与 1008 金额并列（89.00），不同函数在「取第 10 名 / 前 10 名」时返回的行数不一样。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>时间序列与去重：<br>连续区间、保留最新、环比比较</h2>
+  </section>
+
+  <!-- 知识点 3 -->
+  <section class="topic" id="itv-consecutive">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>连续 N 天 / 连续区间<span class="pt">consecutive · 日期 − 序号 = 常量</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="interview::itv-consecutive"><span>已学会</span></label>
+    </div>
+    <p>「连续 3 天登录」「连续 3 天有订单」「连续 3 个月增长」都属于<b>连续区间</b>问题。它的经典解法只有一句话：<b>日期 − 序号 = 常量</b>。对同一用户按日期排序并编号，如果日期每天递增 1、序号也每天递增 1，两者的差就不变；一旦日期断档（日期跳了 2 天而序号只 +1），差值就变了——于是所有连续的日子自动落进同一个「差值分组」，断点自然形成新组。</p>
+    <p>拿到连续段后，<code>GROUP BY 用户, 差值</code> 再用 <code>MIN/MAX/COUNT</code> 就能得到「起始日期、结束日期、连续天数」，最后 <code>HAVING COUNT(*) &gt;= N</code> 筛出满足要求的段。注意 <code>HAVING</code> 是对分组结果筛选，<b>不能</b>写成 <code>WHERE</code>。</p>
+    <p>如果面试官不让用窗口函数，还有第二条路：自连接逐日探测。对「连续 3 天」，让 a、b、c 三份自身连接，分别要求 <code>DATEDIFF = 1</code> 和 <code>DATEDIFF = 2</code>，命中即连续。它直观但扩展性差（连续 N 天就要 N 次自连接），适合 N 很小、或者只判断「是否存在」而不需要给出区间的场景。</p>
+    <p>本页为连续类题目补充一张辅助表 <code>signins(id, user_id, sign_date)</code>，与内置数据集风格一致，下方练习台已加载，可以直接跑。</p>
+
+    <ul>
+      <li><b>识别特征</b>：出现「连续 N 天 / 连续 N 个月 / 连续区间 / 最长连续」。</li>
+      <li><b>解题步骤</b>：① 先按天 <code>DISTINCT</code> 去重；② <code>ROW_NUMBER() OVER (PARTITION BY user_id ORDER BY sign_date)</code> 编号；③ 用 <code>DATEDIFF(日期, 基准日) − 序号</code> 当分组键；④ 按「用户 + 分组键」聚合，<code>HAVING COUNT(*) &gt;= N</code>。</li>
+      <li><b>易错点</b>：忘记按用户分区（不同用户会混成一段）；忘记去重（同一天多条记录把序号算错）；日期列是 <code>DATETIME</code> 时没做 <code>DATE()</code> 归一化。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>consecutive.sql</div>
+      <pre><code>-- 辅助表：signins(id, user_id, sign_date)
+-- 解法一：日期 - 序号 = 常量（推荐，能拿到完整连续区间）
+SELECT user_id,
+       MIN(sign_date) AS 起始日期,
+       MAX(sign_date) AS 结束日期,
+       COUNT(*)       AS 连续天数
+FROM (
+  SELECT a.user_id, a.sign_date,
+         DATEDIFF(a.sign_date, '2000-01-01')
+         - ROW_NUMBER() OVER (PARTITION BY a.user_id ORDER BY a.sign_date) AS grp
+  FROM (SELECT DISTINCT user_id, sign_date FROM signins) a   -- 必须先按天去重
+) t
+GROUP BY user_id, grp
+HAVING COUNT(*) &gt;= 3
+ORDER BY user_id, 起始日期;
+
+-- 解法二：自连接逐日探测（固定 N 小、无需窗口函数，练习台可跑）
+SELECT DISTINCT a.user_id
+FROM signins a
+JOIN signins b ON b.user_id = a.user_id AND DATEDIFF(b.sign_date, a.sign_date) = 1
+JOIN signins c ON c.user_id = a.user_id AND DATEDIFF(c.sign_date, a.sign_date) = 2
+ORDER BY a.user_id;
+
+-- 解法三：LAG 判断相邻两天是否连续（MySQL 8.0，练习台不支持，请到真实数据库验证）
+SELECT user_id, sign_date,
+       LAG(sign_date) OVER (PARTITION BY user_id ORDER BY sign_date) AS 上次签到,
+       DATEDIFF(sign_date, LAG(sign_date) OVER (PARTITION BY user_id ORDER BY sign_date)) AS 间隔天数
+FROM signins;</code></pre>
+    </div>
+
+    <p>把「解法一」的中间结果摊开看，差值列就是分组键（基准日取 <code>2000-01-01</code>，此处把 <code>DATEDIFF</code> 结果简记为 d）：</p>
+    <table class="tbl">
+      <thead><tr><th>user_id</th><th>sign_date</th><th>序号 rn</th><th>d − rn（分组键）</th><th>归属连续段</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>2024-03-01</td><td>1</td><td>8825</td><td>段 A</td></tr>
+        <tr><td>1</td><td>2024-03-02</td><td>2</td><td>8825</td><td>段 A</td></tr>
+        <tr><td>1</td><td>2024-03-03</td><td>3</td><td>8825</td><td>段 A</td></tr>
+        <tr><td>1</td><td>2024-03-04</td><td>4</td><td>8825</td><td>段 A</td></tr>
+        <tr><td>2</td><td>2024-03-01</td><td>1</td><td>8825</td><td>单独一段（只有 1 天）</td></tr>
+        <tr><td>2</td><td>2024-03-03</td><td>2</td><td>8826</td><td>断点 → 新段 B</td></tr>
+        <tr><td>2</td><td>2024-03-04</td><td>3</td><td>8826</td><td>段 B（2 天，不达标）</td></tr>
+        <tr><td>3</td><td>2024-03-05</td><td>1</td><td>8829</td><td>段 C</td></tr>
+        <tr><td>3</td><td>2024-03-06</td><td>2</td><td>8829</td><td>段 C</td></tr>
+        <tr><td>3</td><td>2024-03-07</td><td>3</td><td>8829</td><td>段 C</td></tr>
+        <tr><td>4</td><td>2024-03-02</td><td>1</td><td>8826</td><td>与用户 2 的 8826 同键但用户不同</td></tr>
+        <tr><td>4</td><td>2024-03-10</td><td>2</td><td>8833</td><td>断点 → 新段</td></tr>
+      </tbody>
+    </table>
+
+    <p>最终结果（连续 ≥ 3 天）共 <b>2 行</b>：</p>
+    <table class="tbl">
+      <thead><tr><th>user_id</th><th>起始日期</th><th>结束日期</th><th>连续天数</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>2024-03-01</td><td>2024-03-04</td><td>4</td></tr>
+        <tr><td>3</td><td>2024-03-05</td><td>2024-03-07</td><td>3</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>分组键必须是「<code>user_id</code> + 日期−序号」两个字段。用户 2 和用户 4 在表里出现了相同的差值 8826，如果只按差值分组，不同用户会被错误地拼成一段。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>同一用户同一天可能有多条签到记录，序号会被撑大导致差值错乱——先 <code>SELECT DISTINCT user_id, sign_date</code> 再编号。另外若 <code>sign_date</code> 是 <code>DATETIME</code>，<code>DATEDIFF</code> 之外还要统一成 <code>DATE(sign_date)</code>，否则同一天不同时刻会被当成不同天。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：连续区间手算器</span><span class="hint">点「下一步」看分组键怎么算出来</span></div>
+      <div class="db">
+        <div class="ctl">
+          <button class="b" id="consecStep">▶ 下一步</button>
+          <button class="b" id="consecReset">↺ 重来</button>
+        </div>
+        <div id="consecOut"></div>
+        <div class="log" id="consecLog">点「下一步」开始…</div>
+        <div class="foot">提示：这里用相关子查询模拟 ROW_NUMBER() 的效果（练习台不支持窗口函数），所以每一步都能手算核对。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 知识点 4 -->
+  <section class="topic" id="itv-dedup">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>去重与保留最新<span class="pt">dedup · 先去重，再决定留哪一条</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="interview::itv-dedup"><span>已学会</span></label>
+    </div>
+    <p>这类题要先区分两种完全不同的需求：<b>去重</b>（同一组值只出现一次）和<b>保留最新</b>（每组挑一条代表行，通常是日期最新或 id 最大）。<code>DISTINCT</code> 只能解决前者——它消除的是整行值组合完全相同的行，无法告诉你「哪一条是最新的」。</p>
+    <p>保留最新有三种主流写法：① 相关子查询定位每组最大日期，写法短、所有版本可用；② 窗口函数 <code>ROW_NUMBER()</code> 分区排序后取 <code>rn = 1</code>，最灵活，可以用多个排序键打破「同一天多笔」的并列；③ 物理删除重复行时用自连接 <code>DELETE … JOIN … ON o1.id &lt; o2.id</code>，保留 id 最大的那条（属于 DML，练习台不支持，请到真实数据库验证）。</p>
+    <p>需要特别注意「最新」的判据：如果业务上同一天可能有多笔订单，只比 <code>MAX(order_date)</code> 会一次返回多行。这时要么在子查询里再加一层「同日期内取最大 id」，要么直接用 <code>ROW_NUMBER()</code> 的多级排序键一次性搞定。</p>
+
+    <ul>
+      <li><b>识别特征</b>：出现「去重 / 重复 / 每个…只保留一条 / 最新的一条 / 删除重复」。</li>
+      <li><b>解题步骤</b>：① 明确「代表行」的判据（最新日期？最大 id？最高金额？）；② 相关子查询定位判据，或窗口函数编号；③ 外层 <code>WHERE rn = 1</code>／<code>= MAX(...)</code>；④ 删除场景用自连接。</li>
+      <li><b>易错点</b>：把 <code>DISTINCT</code> 当「保留最新」；<code>GROUP BY</code> 里选非聚合列；判据不唯一导致每组返回多行。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>dedup.sql</div>
+      <pre><code>-- ① 去重：只关心「值组合不重复」时用 DISTINCT
+SELECT DISTINCT city FROM customers;
+
+-- ② 保留最新：每个客户最新的一笔订单（相关子查询）
+SELECT o.id, o.customer_id, o.order_date, o.amount
+FROM orders o
+WHERE o.order_date = (
+  SELECT MAX(o2.order_date) FROM orders o2 WHERE o2.customer_id = o.customer_id
+)
+ORDER BY o.customer_id;
+
+-- ③ 同一天多笔时，用多级排序键一次挑出一条
+SELECT id, customer_id, order_date, amount
+FROM (
+  SELECT id, customer_id, order_date, amount,
+         ROW_NUMBER() OVER (PARTITION BY customer_id
+                            ORDER BY order_date DESC, amount DESC, id DESC) AS rn
+  FROM orders
+) t
+WHERE t.rn = 1;
+
+-- ④ 物理删除重复行、每组只留 id 最大的一条（DML，练习台不支持）
+DELETE o1 FROM orders o1
+JOIN orders o2
+  ON o1.customer_id = o2.customer_id
+ AND o1.order_date  = o2.order_date
+ AND o1.id &lt; o2.id;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>语义</th><th>能保留「最新一条」吗</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>DISTINCT</code></td><td>整行值组合去重</td><td>不能</td><td>只消除完全相同的行，不表达优先级</td></tr>
+        <tr><td><code>GROUP BY</code> + <code>MAX</code></td><td>每组取极值</td><td>只能取极值本身</td><td>想同时要其它列会踩 <code>ONLY_FULL_GROUP_BY</code></td></tr>
+        <tr><td>相关子查询 <code>= MAX(order_date)</code></td><td>每组取代表行</td><td>能</td><td>同一天多笔会全部留下</td></tr>
+        <tr><td><code>ROW_NUMBER()</code> + <code>rn = 1</code></td><td>每组取一条</td><td>能</td><td>可用多级排序键打破并列，最稳</td></tr>
+        <tr><td><code>DELETE</code> + 自连接</td><td>物理删除重复</td><td>能</td><td>DML 操作，练习台不支持</td></tr>
+      </tbody>
+    </table>
+
+    <p>用写法 ② 在示例数据上跑，「每个客户最新一笔订单」共 <b>7 行</b>（客户 8 周涛没有订单，自然不出现）：</p>
+    <table class="tbl">
+      <thead><tr><th>订单号</th><th>customer_id</th><th>order_date</th><th>amount</th></tr></thead>
+      <tbody>
+        <tr><td>1002</td><td>1</td><td>2024-01-20</td><td>1299.00</td></tr>
+        <tr><td>1012</td><td>2</td><td>2024-04-22</td><td>1497.00</td></tr>
+        <tr><td>1005</td><td>3</td><td>2024-02-15</td><td>318.00</td></tr>
+        <tr><td>1006</td><td>4</td><td>2024-02-20</td><td>59.00</td></tr>
+        <tr><td>1008</td><td>5</td><td>2024-03-12</td><td>89.00</td></tr>
+        <tr><td>1009</td><td>6</td><td>2024-03-18</td><td>129.00</td></tr>
+        <tr><td>1011</td><td>7</td><td>2024-04-15</td><td>178.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>去重用 <code>DISTINCT</code>，保留最新用「定位极值 + 回表」。判据不唯一（同一天多笔）时，把 <code>ROW_NUMBER()</code> 的 <code>ORDER BY</code> 写成多级排序键，是唯一能保证每组恰好一行的写法。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>DELETE o1 FROM orders o1 JOIN orders o2 … ON o1.id &lt; o2.id</code> 里的 <code>&lt;</code> 方向决定留哪一条：写 <code>&lt;</code> 保留 id 大的，写成 <code>&gt;</code> 就反过来保留 id 小的。删除前务必先把它改写成等价的 <code>SELECT</code> 看一遍要删哪些行。</p></div>
+  </section>
+
+  <!-- 知识点 5 -->
+  <section class="topic" id="itv-compare">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>自连接比较类（环比 / 上一条）<span class="pt">self-join · 同一张表当两张用</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="interview::itv-compare"><span>已学会</span></label>
+    </div>
+    <p><b>自连接</b>（self join）就是把同一张表用两个别名连接起来，分别代表「当前行」和「参照行」。环比、同比、上一条记录、相邻两行差值，都是它的典型场景：<code>FROM orders o JOIN orders p ON …</code>，其中 <code>o</code> 是本期、<code>p</code> 是上一期。</p>
+    <p>连接条件是全部难点。最常见的错误是 <code>p.id = o.id - 1</code>——它假设主键连续且同客户相邻，真实数据里完全不成立。正确做法是用业务排序键比较：<code>p.customer_id = o.customer_id AND p.order_date &lt; o.order_date</code>。但这个条件在「一个客户有多笔更早订单」时会一对多，产生多行；要严格只取「上一条」，得再补一个子查询锁定唯一行（<code>ORDER BY order_date DESC LIMIT 1</code>），或者直接用窗口函数 <code>LAG()</code>。</p>
+    <p>写自连接时还要注意内连接语义：只有一个订单的客户（示例数据里的客户 4、6）不会出现在结果里，因为找不到参照行。如果需求要求「第一笔也要显示、环比记为空」，就要把 <code>JOIN</code> 换成 <code>LEFT JOIN</code>，缺失的上一笔自然是 <code>NULL</code>。</p>
+
+    <ul>
+      <li><b>识别特征</b>：出现「环比 / 同比 / 与上一条比较 / 相邻两行 / 差值 / 增长率」。</li>
+      <li><b>解题步骤</b>：① 确定排序键（日期、序号）；② 自连接，别名区分本期与上期；③ 用严格小于 + 子查询/窗口函数锁定唯一参照行；④ 计算差值/比值，注意除零与 NULL。</li>
+      <li><b>易错点</b>：用 id 差 1 当「上一条」；漏写分组键导致跨客户比较；内连接丢掉了第一期。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>compare.sql</div>
+      <pre><code>-- ① 自连接求环比：当前订单与同客户上一笔订单比较（练习台可跑）
+SELECT o.id, o.customer_id, o.order_date, o.amount,
+       p.amount AS 上一笔金额,
+       o.amount - p.amount AS 环比差额
+FROM orders o
+JOIN orders p
+  ON p.customer_id = o.customer_id
+ AND p.order_date  &lt; o.order_date
+ORDER BY o.customer_id, o.order_date;
+
+-- ② 严格取「上一条」：用子查询锁定唯一行，避免一对多
+SELECT o.id, o.customer_id, o.order_date, o.amount, p.amount AS 上一笔金额
+FROM orders o
+JOIN orders p
+  ON p.id = (SELECT o2.id FROM orders o2
+             WHERE o2.customer_id = o.customer_id
+               AND o2.order_date  &lt; o.order_date
+             ORDER BY o2.order_date DESC, o2.id DESC
+             LIMIT 1)
+ORDER BY o.customer_id, o.order_date;
+
+-- ③ MySQL 8.0 更简单的写法：LAG 取上一行（练习台不支持，请到真实数据库验证）
+SELECT id, customer_id, order_date, amount,
+       LAG(amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS 上一笔金额,
+       amount - LAG(amount) OVER (PARTITION BY customer_id ORDER BY order_date) AS 环比差额
+FROM orders;
+
+-- ④ 同比：与去年同期比较
+SELECT o.id, o.order_date, o.amount, p.amount AS 去年同期金额
+FROM orders o
+JOIN orders p
+  ON p.customer_id = o.customer_id
+ AND p.order_date  = DATE_SUB(o.order_date, INTERVAL 1 YEAR);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th>自连接（JOIN 别名）</th><th>窗口函数 LAG / LEAD</th></tr></thead>
+      <tbody>
+        <tr><td>可用版本</td><td>所有版本</td><td>MySQL 8.0+</td></tr>
+        <tr><td>写法</td><td>同表两别名 + 业务排序键比较</td><td>一次扫描 + <code>PARTITION BY</code></td></tr>
+        <tr><td>一对多风险</td><td>有，需子查询/额外条件收敛</td><td>无，天然一行对一行</td></tr>
+        <tr><td>性能</td><td>最坏 O(n²)，需要 (customer_id, order_date) 索引</td><td>一次分区排序，通常更快</td></tr>
+        <tr><td>首行处理</td><td>内连接会丢首行，要保留得用 LEFT JOIN</td><td><code>LAG</code> 首行返回 NULL</td></tr>
+      </tbody>
+    </table>
+
+    <p>用写法 ① 在示例数据上跑，只有下过 ≥ 2 单的客户出现在结果里，共 <b>5 行</b>：</p>
+    <table class="tbl">
+      <thead><tr><th>订单号</th><th>customer_id</th><th>order_date</th><th>amount</th><th>上一笔金额</th><th>环比差额</th></tr></thead>
+      <tbody>
+        <tr><td>1002</td><td>1</td><td>2024-01-20</td><td>1299.00</td><td>247.00</td><td>+1052.00</td></tr>
+        <tr><td>1012</td><td>2</td><td>2024-04-22</td><td>1497.00</td><td>89.00</td><td>+1408.00</td></tr>
+        <tr><td>1005</td><td>3</td><td>2024-02-15</td><td>318.00</td><td>2297.00</td><td>−1979.00</td></tr>
+        <tr><td>1008</td><td>5</td><td>2024-03-12</td><td>89.00</td><td>998.00</td><td>−909.00</td></tr>
+        <tr><td>1011</td><td>7</td><td>2024-04-15</td><td>178.00</td><td>1458.00</td><td>−1280.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>自连接的连接条件必须由<b>业务排序键</b>（日期、序号）构成，绝不能用主键差值。取「严格上一条」时，用子查询 + <code>ORDER BY … DESC LIMIT 1</code> 收敛成一行，或直接用 <code>LAG()</code>。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>环比算增长率的除法要防除零（上一笔为 0 或 <code>NULL</code>）：<code>NULLIF(p.amount, 0)</code> 是常用写法，否则结果为 <code>NULL</code> 或报错；另外 <code>p.order_date &lt; o.order_date</code> 漏写会变成自己和自己比。</p></div>
+
+    <div id="demo-sandbox"></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>报表与陷阱：<br>行列转换、NULL 与边界</h2>
+  </section>
+
+  <!-- 知识点 6 -->
+  <section class="topic" id="itv-pivot">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>行列转换与报表题<span class="pt">pivot · 条件聚合代替 PIVOT</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="interview::itv-pivot"><span>已学会</span></label>
+    </div>
+    <p><b>行转列</b>（pivot）把某一列里的枚举值「摊」成多个列，报表里最典型的样子是：每行一个客户，列是各状态（paid / refunded / cancelled）的金额。<b>列转行</b>（unpivot）方向相反，把多个列压回多行。面试常考「MySQL 怎么做行转列」——答案是：MySQL 没有 <code>PIVOT</code> 语法（Oracle、SQL Server 有），要用<b>条件聚合</b>实现。</p>
+    <p>条件聚合的模板是 <code>SUM(CASE WHEN 状态 = 'x' THEN 金额 ELSE 0 END) AS x金额</code>，配合 <code>GROUP BY 分组列</code>。要点是 <code>ELSE 0</code>：不写 <code>ELSE</code> 会得到 <code>NULL</code>，后续参与求和或除法时容易出意外；而用 <code>COUNT(CASE WHEN … THEN 1 END)</code> 统计单数时，恰恰要靠 <code>NULL</code> 被忽略的特性，这里不要写 <code>ELSE</code>。</p>
+    <p>枚举值固定时手写列最清晰；枚举值动态变化（状态经常新增）时，只能拼动态 SQL：用 <code>GROUP_CONCAT</code> 生成列表达式，再 <code>PREPARE</code> 执行。生产环境更常见的做法是把「摊平」交给应用层或 BI 工具，数据库只输出长表。</p>
+
+    <ul>
+      <li><b>识别特征</b>：出现「行转列 / 列转行 / 透视 / 报表 / 每种状态一列」。</li>
+      <li><b>解题步骤</b>：① 定行维度（客户/城市）与列维度（状态/月份）；② 每列写一个 <code>SUM(CASE WHEN … THEN … ELSE 0 END)</code>；③ <code>GROUP BY</code> 行维度；④ 列不固定时改动态 SQL。</li>
+      <li><b>易错点</b>：误以为 MySQL 有 <code>PIVOT</code>；忘记 <code>ELSE 0</code> 导致整列 <code>NULL</code>；列名带中文或空格没加反引号。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>pivot.sql</div>
+      <pre><code>-- 行转列：每行一个客户，列是各状态的订单金额（条件聚合）
+SELECT c.name AS 客户,
+       SUM(CASE WHEN o.status = 'paid'      THEN o.amount ELSE 0 END) AS 已付金额,
+       SUM(CASE WHEN o.status = 'refunded'  THEN o.amount ELSE 0 END) AS 退款金额,
+       SUM(CASE WHEN o.status = 'cancelled' THEN o.amount ELSE 0 END) AS 取消金额,
+       COUNT(o.id) AS 订单数
+FROM customers c
+JOIN orders o ON o.customer_id = c.id
+GROUP BY c.name
+ORDER BY 已付金额 DESC;
+
+-- 统计单数时用 COUNT(CASE WHEN … THEN 1 END)：不写 ELSE，NULL 会被自动忽略
+SELECT c.level AS 等级,
+       COUNT(CASE WHEN o.status = 'paid'     THEN 1 END) AS 已付单数,
+       COUNT(CASE WHEN o.status = 'refunded' THEN 1 END) AS 已退单数,
+       COUNT(o.id) AS 总单数
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id
+GROUP BY c.level;
+
+-- 列转行：把多个列压回多行（练习台不支持 UNION ALL，请到真实数据库验证）
+SELECT name, 'paid'      AS status, paid_amt      AS amount FROM customer_report
+UNION ALL
+SELECT name, 'refunded'  AS status, refund_amt    AS amount FROM customer_report
+UNION ALL
+SELECT name, 'cancelled' AS status, cancelled_amt AS amount FROM customer_report;
+
+-- 枚举值不固定时：动态 SQL 拼列（MySQL 8.0）
+SET @cols = (
+  SELECT GROUP_CONCAT(DISTINCT
+           CONCAT("SUM(CASE WHEN status='", status, "' THEN amount ELSE 0 END) AS `", status, "`"))
+  FROM orders
+);
+SET @sql = CONCAT('SELECT customer_id, ', @cols, ' FROM orders GROUP BY customer_id');
+PREPARE stmt FROM @sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>方向</th><th>典型写法</th><th>MySQL 支持情况</th><th>常见用途</th></tr></thead>
+      <tbody>
+        <tr><td>行转列 pivot</td><td><code>SUM(CASE WHEN … THEN … ELSE 0 END)</code> + <code>GROUP BY</code></td><td>无 <code>PIVOT</code> 语法，用条件聚合代替</td><td>状态/月份摊平成列</td></tr>
+        <tr><td>行转列（动态枚举）</td><td><code>GROUP_CONCAT</code> 拼列 + <code>PREPARE</code></td><td>支持，但需拼接 SQL</td><td>状态值不固定</td></tr>
+        <tr><td>列转行 unpivot</td><td><code>UNION ALL</code> 多条 <code>SELECT</code></td><td>支持 <code>UNION ALL</code></td><td>宽表还原成长表</td></tr>
+        <tr><td>列转行（MySQL 8.0）</td><td><code>CROSS JOIN JSON_TABLE</code> 或数字辅助表</td><td>支持</td><td>列数很多时更省事</td></tr>
+      </tbody>
+    </table>
+
+    <p>上面第一段 SQL 在示例数据上的输出共 <b>7 行</b>（按已付金额降序）：</p>
+    <table class="tbl">
+      <thead><tr><th>客户</th><th>已付金额</th><th>退款金额</th><th>取消金额</th><th>订单数</th></tr></thead>
+      <tbody>
+        <tr><td>王强</td><td>2297.00</td><td>318.00</td><td>0.00</td><td>2</td></tr>
+        <tr><td>孙悦</td><td>1636.00</td><td>0.00</td><td>0.00</td><td>2</td></tr>
+        <tr><td>李娜</td><td>1586.00</td><td>0.00</td><td>0.00</td><td>2</td></tr>
+        <tr><td>张伟</td><td>1546.00</td><td>0.00</td><td>0.00</td><td>2</td></tr>
+        <tr><td>陈晨</td><td>1087.00</td><td>0.00</td><td>0.00</td><td>2</td></tr>
+        <tr><td>刘敏</td><td>59.00</td><td>0.00</td><td>0.00</td><td>1</td></tr>
+        <tr><td>赵磊</td><td>0.00</td><td>0.00</td><td>129.00</td><td>1</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>MySQL 行转列 = <code>SUM(CASE WHEN … THEN … ELSE 0 END)</code> × N 列 + <code>GROUP BY</code> 行维度。求金额写 <code>ELSE 0</code>，求个数写 <code>COUNT(CASE WHEN … THEN 1 END)</code>（不加 <code>ELSE</code>）。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>行转列时用 <code>INNER JOIN</code> 会丢掉没有任何订单的客户（示例数据里的周涛），报表要保留全部客户请用 <code>LEFT JOIN</code>，并且注意此时 <code>SUM</code> 结果是 <code>0</code> 还是 <code>NULL</code> 取决于 <code>ELSE</code> 分支的写法。</p></div>
+  </section>
+
+  <!-- 知识点 7 -->
+  <section class="topic" id="itv-trap">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>NULL 与边界陷阱题<span class="pt">traps · 结果为空不一定是数据为空</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="interview::itv-trap"><span>已学会</span></label>
+    </div>
+    <p>面试里最容易「写对语法、拿错结果」的就是 NULL 相关的边界题。<b>NULL 不是值，而是「未知」</b>：任何与 NULL 的比较（<code>=</code>、<code>&lt;&gt;</code>、<code>IN</code>）结果都是 <code>UNKNOWN</code>，而 <code>WHERE</code> 只保留结果为 <code>TRUE</code> 的行——所以 <code>WHERE city &lt;&gt; '北京'</code> 只返回 5 行（李娜、王强、刘敏、陈晨、孙悦），两位北京客户被条件排除，city 为 NULL 的周涛也因为结果是 <code>UNKNOWN</code> 被静默丢掉。</p>
+    <p>最经典的陷阱是 <code>NOT IN</code>：<code>id NOT IN (SELECT customer_id FROM orders)</code>，只要子查询结果里出现一个 <code>NULL</code>，整个条件对所有行都变成 <code>UNKNOWN</code>，语句返回 0 行——看起来像「数据错了」，其实是三值逻辑。示例数据的 <code>orders.customer_id</code> 恰好没有 NULL，所以这里侥幸返回 1 行（周涛），但换一张表就可能翻车（下面表格里那一行列的就是这种子查询含 NULL 的情形）。安全写法是反连接：<code>LEFT JOIN … WHERE 右表主键 IS NULL</code>。</p>
+    <p>其它高频边界：<code>COUNT(*)</code> 统计行数（含 NULL），<code>COUNT(列)</code> 忽略 NULL，<code>COUNT(DISTINCT 列)</code> 再去重；聚合函数（除 <code>COUNT(*)</code> 外）都忽略 NULL，<code>AVG</code> 的分母是<b>非 NULL 行数</b>而不是总行数；<code>GROUP BY</code> 会把所有 NULL 归成一组；<code>BETWEEN a AND b</code> 含两端；字符串排序里 NULL 排在最前（MySQL 升序）。</p>
+    <p>MySQL 还提供 NULL 安全等号 <code>&lt;=&gt;</code>：<code>city &lt;=&gt; NULL</code> 等价于 <code>city IS NULL</code>，两个 NULL 比较返回 TRUE，常用于可空字段的等值匹配（其他数据库如 PostgreSQL 需用 <code>IS NOT DISTINCT FROM</code>）。</p>
+
+    <ul>
+      <li><b>识别特征</b>：题干出现「没有下过订单 / 不存在 / 排除某些值 / 统计人数」，或结果「应该是 N 行却是 0 行」。</li>
+      <li><b>解题步骤</b>：① 先看字段是否可空；② 排除值改反连接（<code>LEFT JOIN … IS NULL</code>）或 <code>NOT EXISTS</code>；③ 统计时区分 <code>COUNT(*)</code> 与 <code>COUNT(列)</code>；④ 用 <code>&lt;=&gt;</code> 处理 NULL 等值。</li>
+      <li><b>易错点</b>：<code>NOT IN</code> + 含 NULL 子查询；<code>INNER JOIN … WHERE 右表 IS NULL</code> 永远 0 行；把 <code>NULL</code> 当 0 参与运算。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>traps.sql</div>
+      <pre><code>-- ① 反连接：没有下过订单的客户（NULL 安全，练习台可跑）
+SELECT c.id, c.name
+FROM customers c
+LEFT JOIN orders o ON o.customer_id = c.id
+WHERE o.id IS NULL;
+
+-- ② NOT IN 的陷阱：子查询结果里只要有一个 NULL，整条语句返回空集
+SELECT COUNT(*) FROM customers
+WHERE id NOT IN (SELECT customer_id FROM orders);   -- customer_id 无 NULL 时才安全
+
+-- ③ COUNT(*) / COUNT(列) / COUNT(DISTINCT 列) 的差别
+SELECT COUNT(*)            AS 总行数,
+       COUNT(city)         AS 有城市的行数,
+       COUNT(DISTINCT city) AS 城市个数
+FROM customers;
+
+-- ④ 三值逻辑：NULL 不参与 = 比较，必须用 IS NULL
+SELECT id, name FROM customers WHERE city IS NULL OR city &lt;&gt; '北京';
+
+-- ⑤ MySQL 的 NULL 安全等号 &lt;=&gt;：两个 NULL 也判等
+SELECT id, name FROM customers WHERE city &lt;=&gt; NULL;
+
+-- ⑥ NOT EXISTS 是 NOT IN 的安全替代
+SELECT COUNT(*) FROM customers c
+WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>本页数据返回</th><th>原因</th></tr></thead>
+      <tbody>
+        <tr><td><code>COUNT(*)</code></td><td>8</td><td>统计行数，NULL 也算一行</td></tr>
+        <tr><td><code>COUNT(city)</code></td><td>7</td><td>忽略 NULL（周涛的 city 为 NULL）</td></tr>
+        <tr><td><code>COUNT(DISTINCT city)</code></td><td>5</td><td>去重后再计数：北京、上海、广州、深圳、杭州</td></tr>
+        <tr><td><code>WHERE city &lt;&gt; '北京'</code></td><td>5 行</td><td>NULL 行结果 UNKNOWN，被静默排除</td></tr>
+        <tr><td><code>WHERE city IS NULL OR city &lt;&gt; '北京'</code></td><td>6 行</td><td>显式把 NULL 行捞回来</td></tr>
+        <tr><td><code>NOT IN (含 NULL 的子查询)</code></td><td>0 行</td><td>三值逻辑：整体 UNKNOWN</td></tr>
+        <tr><td><code>INNER JOIN … WHERE o.id IS NULL</code></td><td>0 行</td><td>内连接已经把无订单客户过滤掉了</td></tr>
+      </tbody>
+    </table>
+
+    <p>「没有下过订单的客户」三种写法对照（本页数据答案都是 <b>1</b> 个：周涛）：</p>
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>NULL 安全性</th><th>推荐度</th></tr></thead>
+      <tbody>
+        <tr><td><code>LEFT JOIN … WHERE o.id IS NULL</code></td><td>安全</td><td>推荐，执行计划通常是反连接</td></tr>
+        <tr><td><code>NOT EXISTS (子查询)</code></td><td>安全</td><td>推荐，语义最直白</td></tr>
+        <tr><td><code>NOT IN (子查询)</code></td><td>不安全，子查询含 NULL 就返回空集</td><td>子查询列非空时才可用</td></tr>
+        <tr><td><code>INNER JOIN … WHERE o.id IS NULL</code></td><td>不适用</td><td>永远 0 行，属于逻辑错误</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「不存在」类问题一律优先反连接（<code>LEFT JOIN … IS NULL</code>）或 <code>NOT EXISTS</code>；只有确认子查询列不可为空时，才用 <code>NOT IN</code>。看到「应该是 N 行却 0 行」，先怀疑 NULL。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把 <code>NULL</code> 当 0 用：<code>amount + NULL</code> 还是 <code>NULL</code>，要先用 <code>IFNULL(amount, 0)</code> 或 <code>COALESCE</code> 兜底；<code>AVG(amount)</code> 的分母是非 NULL 行数，跟 <code>SUM(amount)/COUNT(*)</code> 并不相等。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>用 <code>orders</code> 表求「每个客户两笔订单之间的最大间隔天数」，再找出间隔超过 60 天的客户（提示：自连接 + <code>DATEDIFF</code>，注意同一客户可能有多笔订单）。</li>
+      <li>不用窗口函数，求「连续 3 个月订单金额都比上个月高的客户」（提示：先按月聚合，再自连接比较相邻月份，最后用连续区间思路串联）。</li>
+      <li>把 <code>orders</code> 按「月份 × 状态」行转列成 12 行 × 3 列的报表，并思考：如果状态值是动态的，动态 SQL 方案在生产环境有什么风险？</li>
+      <li>写一条 SQL 找出「每个城市金额最高的订单」，同时要求并列时只保留订单号最大的那一条，并说明为什么 <code>ROW_NUMBER()</code> 能做到而 <code>RANK()</code> 做不到。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+/* ============================================================
+   CONFIG 与 QUZ —— 本页唯一的配置改动点
+   ============================================================ */
+const CONFIG = {
+  moduleId: "interview",
+  title: "面试高频 SQL 题型",
+  eyebrow: "MODULE 15 · SQL / 数据库",
+  lead: "把面试里反复出现的七类 SQL 题拆成可复用的套路：TopN 与分组 TopN、排名并列、连续区间、去重取最新、自连接比较、行列转换、NULL 陷阱。",
+  points: ["itv-topn","itv-rank","itv-consecutive","itv-dedup","itv-compare","itv-pivot","itv-trap"],
+  prev: "14-ops-security.html",
+  next: "16-analytics-practice.html",
+};
+
+/* 考核题目：每道题一个对象。
+   type: "quiz"(掌握度) 或 "interview"(面试延伸)；
+   q: 题干；sql: 可选，题干下方展示的 SQL 片段；
+   opts: 选项数组；ans: 正确选项下标(从0开始)；exp: 解析。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"要查「每个城市金额最高的一笔订单」，下面哪种写法才是正确且通用的分组 TopN？",
+    sql:"SELECT c.city, c.name, o.amount\nFROM orders o JOIN customers c ON c.id = o.customer_id\nWHERE o.amount = ( ? );",
+    opts:[
+      "(SELECT MAX(amount) FROM orders) —— 取全表最高金额",
+      "(SELECT MAX(o2.amount) FROM orders o2 JOIN customers c2 ON c2.id = o2.customer_id WHERE c2.city = c.city) —— 相关子查询按城市求最高",
+      "(SELECT amount FROM orders ORDER BY amount DESC LIMIT 1) —— 取排序后的第一行",
+      "(SELECT MAX(o2.amount) FROM orders o2) —— 不带任何关联条件"
+    ],
+    ans:1,
+    exp:"解析：正确答案是 B。相关子查询里的 WHERE c2.city = c.city 会随外层每一行变化，所以每个城市都拿自己的最高金额去匹配，最终返回 5 行（广州 2297、上海 1497、北京 1299、杭州 998、深圳 59）。A 和 D 都取全表最高金额，只会返回广州那一行；C 的标量子查询只返回一行 2297，同样只命中一个城市。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 8.0 里要取「每个部门薪资前 2 名员工」，下列方案最稳妥的是？",
+    opts:[
+      "GROUP BY dept ORDER BY salary DESC LIMIT 2",
+      "SELECT DISTINCT dept, salary FROM employees ORDER BY salary DESC LIMIT 2",
+      "WHERE salary >= (SELECT MAX(salary) FROM employees) 之后再 GROUP BY dept",
+      "先 ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC, id) 打序号，再在外层 WHERE rn &lt;= 2"
+    ],
+    ans:3,
+    exp:"解析：正确答案是 D。PARTITION BY dept 让排序在部门内部进行，外层筛 rn &lt;= 2 才是真正的「组内前 2」。A 的 LIMIT 作用在整个结果集上，只返回 2 行而不是每部门 2 行；B 的 DISTINCT 只消除重复的 (部门,薪资) 组合；C 的 MAX(salary) 是全局最高薪资，只有薪资等于它的行能留下。"
+  },
+  {
+    type:"quiz",
+    q:"orders 里订单 1003 与 1008 的金额都是 89.00（并列第 10 位）。要「取金额第 10 名的订单」，RANK() 与 ROW_NUMBER() 的差别是？",
+    opts:[
+      "RANK() 给两行都编号 10，两行都返回；ROW_NUMBER() 只给其中一行编号 10，只返回一行",
+      "RANK() 只返回一行，ROW_NUMBER() 返回两行",
+      "两者完全等价，MySQL 会自动处理并列值",
+      "RANK() 会跳过第 11 名，但 ROW_NUMBER() 也会跳过，所以结果行数相同"
+    ],
+    ans:0,
+    exp:"解析：正确答案是 A。RANK() 对并列值给出相同排名（10、10）并跳过 11 直接到 12，因此筛 rk = 10 会返回两行；ROW_NUMBER() 强制给每行唯一序号（10、11），筛 rn = 10 只返回一行。C 错在两者语义完全不同；D 的 ROW_NUMBER() 从不跳号。若需求是「去重后的第 10 个金额」，才该用 DENSE_RANK()。"
+  },
+  {
+    type:"quiz",
+    q:"面试官要求「不许用窗口函数」，在 MySQL 里求每个部门内的薪资排名，可以怎么做？",
+    opts:[
+      "GROUP BY dept 后对 salary 使用 MAX() 函数",
+      "ORDER BY dept, salary DESC 之后加 LIMIT 10",
+      "用相关子查询统计同部门中比自己薪资高的人数，该人数 + 1 就是排名",
+      "用 COUNT(DISTINCT salary) 按部门分组计数"
+    ],
+    ans:2,
+    exp:"解析：正确答案是 C。这是窗口函数的经典替代：比我高的人数 + 1 即名次，并列时得到相同排名（等价于 RANK）。A 的 MAX 只能给出组内最高值；B 的 LIMIT 只截断整个结果集，且不产生名次列；D 的 COUNT(DISTINCT salary) 是「有多少个不同薪资档位」，与个人排名无关。代价方面，相关子查询是每行一次比较，最坏 O(n²)，大表应改用窗口函数。"
+  },
+  {
+    type:"quiz",
+    q:"「连续 3 天登录」的经典解法是「日期 − 序号 = 常量」，相同常量分到一组再 HAVING COUNT(*) &gt;= 3。这个常量为什么能标记连续区间？",
+    opts:[
+      "因为日期本身唯一，减去序号后不会重复",
+      "连续的日子里日期每天 +1、序号也每天 +1，差值保持不变；一旦断档，日期跳变而序号只 +1，差值改变，于是断点自然分成新组",
+      "因为 DATEDIFF 会把日期折算成月份，同月自动归为一组",
+      "因为 MySQL 会对日期列自动排序并去重"
+    ],
+    ans:1,
+    exp:"解析：正确答案是 B。差值是「日期增量 − 序号增量」：连续时两者都是 1，差值恒定；断档时日期增量大于 1 而序号增量仍是 1，差值就会整体偏移，断点后的行自动进入新分组。A 与日期唯一性无关（真正需要唯一性的是先按天去重）；C 的 DATEDIFF 返回天数差不是月份；D 的排序是 ORDER BY 显式指定、去重是 DISTINCT 显式写的，引擎不会自动做。"
+  },
+  {
+    type:"quiz",
+    q:"关于「连续 N 天」的解法，下列说法错误的是？",
+    opts:[
+      "同一用户必须先按天去重（DISTINCT sign_date），否则同一天多条记录会把序号算错",
+      "分组键必须同时包含 user_id 与「日期 − 序号」，只按差值分组会把不同用户混成一段",
+      "HAVING COUNT(*) &gt;= N 是对分组结果筛选，不能改写成 WHERE",
+      "只要日期字段是 DATETIME，连续判断仍然只看日期部分，不需要 DATE() 归一化"
+    ],
+    ans:3,
+    exp:"解析：正确答案是 D（它是错误说法）。DATETIME 带时分秒时，DATEDIFF 或日期比较会把同一天的不同时刻当成不同行，必须先 DATE(sign_date) 归一化。A、B、C 都是正确做法：本页数据里用户 2 与用户 4 出现过相同的差值 8826，只按差值分组就会把两个用户错误地拼成一段。"
+  },
+  {
+    type:"quiz",
+    q:"要「每个客户只保留最新一笔订单」，下列写法正确的是？",
+    opts:[
+      "WHERE o.order_date = (SELECT MAX(o2.order_date) FROM orders o2 WHERE o2.customer_id = o.customer_id)",
+      "GROUP BY customer_id 后直接 SELECT *，MySQL 会自动取最新那行",
+      "ORDER BY order_date DESC 之后加 LIMIT 1",
+      "SELECT DISTINCT customer_id, order_date 就能完成去重并保留最新"
+    ],
+    ans:0,
+    exp:"解析：正确答案是 A。相关子查询为每个客户算出最大日期，外层只保留日期等于该值的行，示例数据上返回 7 行。B 错在 MySQL 8.0 默认 ONLY_FULL_GROUP_BY，裸列直接报错，即使关闭该模式结果也不确定；C 的 LIMIT 1 只留全局一行；D 的 DISTINCT 只对 (客户,日期) 组合去重，不表达优先级。若同一天可能有多笔，应改用 ROW_NUMBER() 配多级排序键。"
+  },
+  {
+    type:"quiz",
+    q:"用自连接求「每个客户的订单金额环比（与上一笔的差额）」，连接条件写成哪个才对？",
+    sql:"FROM orders o JOIN orders p ON ?",
+    opts:[
+      "p.customer_id = o.customer_id AND p.id = o.id - 1",
+      "p.customer_id = o.customer_id",
+      "p.customer_id = o.customer_id AND p.order_date &lt; o.order_date，必要时再用 p.id = (子查询取最近一条) 收敛成一行",
+      "p.id = o.id + 1"
+    ],
+    ans:2,
+    exp:"解析：正确答案是 C。自连接的参照行必须用业务排序键（日期）定位，再加子查询或窗口函数收敛成唯一一行。A 假设主键连续且同客户相邻，真实数据里订单号可能跳号或跨客户；B 只按客户关联会退化成笛卡尔积，一个客户两笔订单就产生 2 行匹配；D 把方向写反了，取到的是「下一条」而不是上一条。"
+  },
+  {
+    type:"quiz",
+    q:"把订单按状态「行转列」成报表（每行一个客户，列是 paid / refunded / cancelled 金额），MySQL 里最常用的写法是？",
+    opts:[
+      "SELECT * FROM orders PIVOT (SUM(amount) FOR status IN ('paid','refunded','cancelled'))",
+      "SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS 已付金额 等三个条件聚合，再 GROUP BY 客户",
+      "GROUP BY status 之后加 ORDER BY amount DESC",
+      "用 UNION 把三种状态拼成三列"
+    ],
+    ans:1,
+    exp:"解析：正确答案是 B。MySQL 没有 PIVOT 语法（Oracle、SQL Server 才有），行转列的标准做法是条件聚合：每列一个 SUM(CASE WHEN … THEN … ELSE 0 END)，再按行维度 GROUP BY。C 只是按状态分组，输出仍是行不是列；D 的 UNION 是纵向拼接结果集，永远不会产生新列。列数不固定时只能拼动态 SQL（GROUP_CONCAT + PREPARE）。"
+  },
+  {
+    type:"interview",
+    q:"面试题：统计「没有下过订单的客户数」，下面哪条 SQL 正确且不受 NULL 影响？",
+    opts:[
+      "SELECT COUNT(*) FROM customers WHERE id NOT IN (SELECT customer_id FROM orders)",
+      "SELECT COUNT(*) FROM customers c JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL",
+      "SELECT COUNT(*) FROM customers WHERE id &lt;&gt; ALL (SELECT customer_id FROM orders)",
+      "SELECT COUNT(*) FROM customers c LEFT JOIN orders o ON o.customer_id = c.id WHERE o.id IS NULL"
+    ],
+    ans:3,
+    exp:"解析：正确答案是 D。LEFT JOIN 保留所有客户，没有订单的客户在右表侧全为 NULL，用 o.id IS NULL 精确筛出，示例数据答案是 1（周涛）。A 的 NOT IN 只要子查询结果里出现一个 NULL，整个条件对所有行都变成 UNKNOWN，语句返回 0 行——本页 orders.customer_id 恰好没有 NULL 才侥幸正确；B 的 INNER JOIN 已经把无订单客户过滤掉，IS NULL 永远匹配不到；C 的 &lt;&gt; ALL 与 NOT IN 同源，同样受 NULL 影响。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：orders 表里同一客户同一天可能有多笔订单。要「每个客户保留最新一天中金额最大的那一笔」，下列思路正确的是？",
+    opts:[
+      "先用 (customer_id, order_date) 定位最新日期，再在同日期内取金额最大的一笔；或用 ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, amount DESC, id DESC) 一次排序取 rn = 1",
+      "只取 MAX(order_date) 就够了，同一天多笔订单无所谓",
+      "用 DISTINCT customer_id 之后取任意一行即可",
+      "用 GROUP BY customer_id 配合 MAX(amount)，就一定能保证日期是最新的"
+    ],
+    ans:0,
+    exp:"解析：正确答案是 A。判据是「日期优先、金额次之、id 兜底」，用 ROW_NUMBER() 的多级排序键一次排序取 rn = 1 最稳；用两层相关子查询也能实现但可读性差。B 会在同一天多笔时返回多行，不满足「一笔」；C 的 DISTINCT customer_id 只留下客户 id 这一列，其它信息全部丢失；D 的 MAX(amount) 是金额最大，可能来自更早的日期，与「最新一天」无关。"
+  },
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1），
+   键内元素形如 "模块id::知识点id"。在详解页勾选 = 大纲同步打勾。
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   演示面板 ①：面试题演算器（模式 C：分步揭示）
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("calcOut"), log = document.getElementById("calcLog");
+  const sel = document.getElementById("calcSel");
+  if(!out || !sel) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tbl = (cols, rows, hi) => `<table class="dt"><thead><tr>` +
+    cols.map(c=>`<th>${esc(c)}</th>`).join("") + `</tr></thead><tbody>` +
+    rows.map((r,i)=>`<tr class="${hi && hi.indexOf(i) >= 0 ? "hl" : ""}">` +
+      r.map(v=>v===null?`<td class="null">NULL</td>`:`<td>${esc(v)}</td>`).join("") + `</tr>`).join("") +
+    `</tbody></table>`;
+
+  const ORDERS = [
+    [1001,1,"2024-01-05",247.00,"paid"],
+    [1002,1,"2024-01-20",1299.00,"paid"],
+    [1003,2,"2024-01-08",89.00,"paid"],
+    [1004,3,"2024-02-11",2297.00,"paid"],
+    [1005,3,"2024-02-15",318.00,"refunded"],
+    [1006,4,"2024-02-20",59.00,"paid"],
+    [1007,5,"2024-03-01",998.00,"paid"],
+    [1008,5,"2024-03-12",89.00,"paid"],
+    [1009,6,"2024-03-18",129.00,"cancelled"],
+    [1010,7,"2024-04-02",1458.00,"paid"],
+    [1011,7,"2024-04-15",178.00,"paid"],
+    [1012,2,"2024-04-22",1497.00,"paid"]
+  ];
+  const CITY = {1:"北京",2:"上海",3:"广州",4:"深圳",5:"杭州",6:"北京",7:"上海"};
+  const NAME = {1:"张伟",2:"李娜",3:"王强",4:"刘敏",5:"陈晨",6:"赵磊",7:"孙悦"};
+
+  const JOINED = ORDERS.map(r=>[r[0], CITY[r[1]], NAME[r[1]], r[3]]);
+  const SORTED = ORDERS.slice().sort((a,b)=> b[3]-a[3] || a[0]-b[0]);
+  const CITY_MAX = [["广州",2297.00],["上海",1497.00],["北京",1299.00],["杭州",998.00],["深圳",59.00]];
+
+  const CASES = {
+    cityTop: {
+      title: "每个城市金额最高的订单（分组 TopN）",
+      steps: [
+        { t:"步骤 1 · FROM orders o（原始 12 行）",
+          html: tbl(["id","customer_id","order_date","amount","status"], ORDERS),
+          note:"先拿到原始订单表，共 12 行。" },
+        { t:"步骤 2 · JOIN customers c ON c.id = o.customer_id",
+          html: tbl(["订单号","城市","客户","金额"], JOINED),
+          note:"关联客户表后每行都带上了城市，行数仍是 12。" },
+        { t:"步骤 3 · 相关子查询：按城市求 MAX(amount)",
+          html: tbl(["城市","该城市最高金额"], CITY_MAX, [0,1,2,3,4]),
+          note:"子查询随外层每个城市变化，得到 5 个城市的最高金额。" },
+        { t:"步骤 4 · WHERE o.amount = 子查询结果 → 最终答案",
+          html: tbl(["城市","客户","订单号","金额"], [["广州","王强",1004,2297.00],["上海","李娜",1012,1497.00],["北京","张伟",1002,1299.00],["杭州","陈晨",1007,998.00],["深圳","刘敏",1006,59.00]], [0,1,2,3,4]),
+          note:"最终返回 5 行，每个城市恰好一行。" }
+      ]
+    },
+    top3: {
+      title: "订单金额 Top 3（全局 TopN）",
+      steps: [
+        { t:"步骤 1 · FROM orders（原始 12 行）",
+          html: tbl(["id","customer_id","order_date","amount","status"], ORDERS),
+          note:"原始订单表，共 12 行。" },
+        { t:"步骤 2 · ORDER BY amount DESC, id（排序后）",
+          html: tbl(["订单号","客户","金额"], SORTED.map(r=>[r[0], NAME[r[1]], r[3]]), [0,1,2]),
+          note:"按金额降序排好，高亮的三行就是前 3 名。" },
+        { t:"步骤 3 · LIMIT 3 → 最终答案",
+          html: tbl(["订单号","客户","金额"], SORTED.slice(0,3).map(r=>[r[0], NAME[r[1]], r[3]]), [0,1,2]),
+          note:"全局 TopN 用 ORDER BY + LIMIT 即可，注意 LIMIT 不是分组截断工具。" }
+      ]
+    },
+    tenth: {
+      title: "金额第 10 名的订单（并列处理）",
+      steps: [
+        { t:"步骤 1 · 按金额降序编号（并列处在第 10 位）",
+          html: tbl(["订单号","金额","RANK()","DENSE_RANK()"],
+            SORTED.map((r,i)=>[r[0], r[3], (r[3]===89?10:(r[3]===59?12:i+1)), (r[3]===89?10:(r[3]===59?11:i+1))]), [9,10,11]),
+          note:"1003 与 1008 金额都是 89.00，RANK 都给 10 并跳过 11；DENSE_RANK 不跳号。" },
+        { t:"步骤 2 · 不用窗口函数：统计比我高的行数",
+          html: tbl(["订单号","金额","比我高的行数","排名 = 行数 + 1"],
+            SORTED.map((r,i)=>[r[0], r[3], (r[3]===89?9:i), (r[3]===89?10:i+1)]), [9,10]),
+          note:"两行 89.00 都比 9 行小，所以排名都是 10——与 RANK 等价。" },
+        { t:"步骤 3 · WHERE 排名 = 10 → 最终答案",
+          html: tbl(["订单号","客户","金额"], [[1003,"李娜",89.00],[1008,"陈晨",89.00]], [0,1]),
+          note:"并列第 10 名返回 2 行；若用 ROW_NUMBER() 则只会返回其中 1 行，且具体是哪一行不确定。" }
+      ]
+    }
+  };
+
+  let i = -1;
+  function render(){
+    const c = CASES[sel.value];
+    if(i < 0){
+      out.innerHTML = `<div style="font-weight:700;color:#1e5b4f;margin-bottom:6px">${esc(c.title)}</div>` +
+        `<p style="color:#857c6b;font-size:13.5px;margin:0">共 ${c.steps.length} 步，点「下一步」逐步展开。</p>`;
+      log.textContent = "点「下一步」开始…";
+      return;
+    }
+    const s = c.steps[i];
+    out.innerHTML = `<div style="font-weight:700;color:#1e5b4f;margin-bottom:6px">${esc(c.title)}</div>` +
+      `<div style="font-weight:600;color:#514b3f;margin-bottom:6px">${esc(s.t)}</div>` + s.html;
+    log.innerHTML = `<b>第 ${i+1} / ${c.steps.length} 步</b>：${esc(s.note)}`;
+  }
+
+  document.getElementById("calcStep").addEventListener("click", ()=>{
+    const c = CASES[sel.value];
+    i = Math.min(i+1, c.steps.length-1);
+    render();
+  });
+  document.getElementById("calcReset").addEventListener("click", ()=>{ i = -1; render(); });
+  sel.addEventListener("change", ()=>{ i = -1; render(); });
+  render();
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ②：TopN 解法对比器（模式 B：切换看差异）
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("topnOut"), log = document.getElementById("topnLog");
+  if(!out) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const NAME = {1:"张伟",2:"李娜",3:"王强",4:"刘敏",5:"陈晨",6:"赵磊",7:"孙悦"};
+  const ROWS = [
+    {id:1004, c:3, amt:2297.00, rn:1,  rk:1,  dr:1},
+    {id:1012, c:2, amt:1497.00, rn:2,  rk:2,  dr:2},
+    {id:1010, c:7, amt:1458.00, rn:3,  rk:3,  dr:3},
+    {id:1002, c:1, amt:1299.00, rn:4,  rk:4,  dr:4},
+    {id:1007, c:5, amt:998.00,  rn:5,  rk:5,  dr:5},
+    {id:1005, c:3, amt:318.00,  rn:6,  rk:6,  dr:6},
+    {id:1001, c:1, amt:247.00,  rn:7,  rk:7,  dr:7},
+    {id:1011, c:7, amt:178.00,  rn:8,  rk:8,  dr:8},
+    {id:1009, c:6, amt:129.00,  rn:9,  rk:9,  dr:9},
+    {id:1003, c:2, amt:89.00,   rn:10, rk:10, dr:10},
+    {id:1008, c:5, amt:89.00,   rn:11, rk:10, dr:10},
+    {id:1006, c:4, amt:59.00,   rn:12, rk:12, dr:11}
+  ];
+  const GROUP = [["广州","王强",1004,2297.00],["上海","李娜",1012,1497.00],["北京","张伟",1002,1299.00],["杭州","陈晨",1007,998.00],["深圳","刘敏",1006,59.00]];
+
+  const VIEWS = {
+    limit: {
+      cols:["订单号","客户","金额"],
+      rows: ROWS.slice(0,3).map(r=>[r.id, NAME[r.c], r.amt]),
+      hl:[0,1,2],
+      note:"ORDER BY amount DESC LIMIT 3 —— 只作用于整个结果集，无法按组截断；并列时可能被截掉一半。"
+    },
+    rownumber: {
+      cols:["订单号","客户","金额","ROW_NUMBER()"],
+      rows: ROWS.map(r=>[r.id, NAME[r.c], r.amt, r.rn]),
+      hl:[0,1,2],
+      note:"ROW_NUMBER() 序号唯一：取 rn &lt;= 3 得到 3 行；并列的 89.00 被拆成 10 和 11，具体谁在前面不确定。"
+    },
+    rank: {
+      cols:["订单号","客户","金额","RANK()"],
+      rows: ROWS.map(r=>[r.id, NAME[r.c], r.amt, r.rk]),
+      hl:[9,10,11],
+      note:"RANK() 并列同名并跳号（10、10、12）：取 rk &lt;= 10 会返回 2 行，条数多于 N，但并列不丢。"
+    },
+    dense: {
+      cols:["订单号","客户","金额","DENSE_RANK()"],
+      rows: ROWS.map(r=>[r.id, NAME[r.c], r.amt, r.dr]),
+      hl:[9,10,11],
+      note:"DENSE_RANK() 并列同名不跳号（10、10、11）：适合「取第 N 个不同金额」这类需求。"
+    },
+    group: {
+      cols:["城市","客户","订单号","金额"],
+      rows: GROUP,
+      hl:[0,1,2,3,4],
+      note:"分组内 TopN：PARTITION BY city ORDER BY amount DESC 取 rn = 1，返回 5 行；相关子查询 = 组内 MAX 效果相同。"
+    }
+  };
+
+  function render(k){
+    const v = VIEWS[k];
+    document.querySelectorAll('[data-k]').forEach(b=>b.classList.toggle("on", b.dataset.k===k));
+    out.innerHTML = `<table class="dt"><thead><tr>` +
+      v.cols.map(c=>`<th>${esc(c)}</th>`).join("") + `</tr></thead><tbody>` +
+      v.rows.map((r,i)=>`<tr class="${v.hl.indexOf(i) >= 0 ? "hl" : ""}">` +
+        r.map(x=>`<td>${esc(x)}</td>`).join("") + `</tr>`).join("") +
+      `</tbody></table>`;
+    log.innerHTML = `<b>${esc(k)}</b>：${v.note}`;
+  }
+
+  document.querySelectorAll('[data-k]').forEach(b=>b.addEventListener("click", ()=>render(b.dataset.k)));
+  render("limit");
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ③：连续区间手算器（模式 C：分步揭示）
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("consecOut"), log = document.getElementById("consecLog");
+  if(!out) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const tbl = (cols, rows, hi) => `<table class="dt"><thead><tr>` +
+    cols.map(c=>`<th>${esc(c)}</th>`).join("") + `</tr></thead><tbody>` +
+    rows.map((r,i)=>`<tr class="${hi && hi.indexOf(i) >= 0 ? "hl" : ""}">` +
+      r.map(v=>v===null?`<td class="null">NULL</td>`:`<td>${esc(v)}</td>`).join("") + `</tr>`).join("") +
+    `</tbody></table>`;
+
+  const RAW = [
+    [1,"2024-03-01"],[1,"2024-03-02"],[1,"2024-03-03"],[1,"2024-03-04"],
+    [2,"2024-03-01"],[2,"2024-03-03"],[2,"2024-03-04"],
+    [3,"2024-03-05"],[3,"2024-03-06"],[3,"2024-03-07"],
+    [4,"2024-03-02"],[4,"2024-03-10"]
+  ];
+  const RN = [[1,"2024-03-01",1],[1,"2024-03-02",2],[1,"2024-03-03",3],[1,"2024-03-04",4],
+    [2,"2024-03-01",1],[2,"2024-03-03",2],[2,"2024-03-04",3],
+    [3,"2024-03-05",1],[3,"2024-03-06",2],[3,"2024-03-07",3],
+    [4,"2024-03-02",1],[4,"2024-03-10",2]];
+  const GRP = [[1,"2024-03-01",8826,1,8825],[1,"2024-03-02",8827,2,8825],[1,"2024-03-03",8828,3,8825],[1,"2024-03-04",8829,4,8825],
+    [2,"2024-03-01",8826,1,8825],[2,"2024-03-03",8828,2,8826],[2,"2024-03-04",8829,3,8826],
+    [3,"2024-03-05",8830,1,8829],[3,"2024-03-06",8831,2,8829],[3,"2024-03-07",8832,3,8829],
+    [4,"2024-03-02",8827,1,8826],[4,"2024-03-10",8835,2,8833]];
+  const AGG = [[1,8825,"2024-03-01","2024-03-04",4],[2,8825,"2024-03-01","2024-03-01",1],
+    [2,8826,"2024-03-03","2024-03-04",2],[3,8829,"2024-03-05","2024-03-07",3],
+    [4,8826,"2024-03-02","2024-03-02",1],[4,8833,"2024-03-10","2024-03-10",1]];
+
+  const STEPS = [
+    { t:"步骤 1 · FROM signins（原始 12 行）",
+      html: tbl(["user_id","sign_date"], RAW),
+      note:"先看原始签到记录，共 12 行、4 个用户。" },
+    { t:"步骤 2 · 按天去重 + 按用户编号 ROW_NUMBER()",
+      html: tbl(["user_id","sign_date","rn"], RN),
+      note:"每个用户内部按日期升序编号；注意去重必须在编号之前做。" },
+    { t:"步骤 3 · 分组键 = DATEDIFF(sign_date,'2000-01-01') − rn",
+      html: tbl(["user_id","sign_date","d","rn","d − rn"], GRP, [0,1,2,3,4,7,8,9]),
+      note:"用户 1 的四天差值都是 8825（一段）；用户 2 出现断点，差值从 8825 跳到 8826。" },
+    { t:"步骤 4 · GROUP BY user_id, 分组键 → 聚合每个连续段",
+      html: tbl(["user_id","分组键","起始日期","结束日期","天数"], AGG, [0,3]),
+      note:"共得到 6 段，高亮的两段天数为 4 和 3。" },
+    { t:"步骤 5 · HAVING COUNT(*) >= 3 → 最终答案",
+      html: tbl(["user_id","起始日期","结束日期","连续天数"],
+        [[1,"2024-03-01","2024-03-04",4],[3,"2024-03-05","2024-03-07",3]], [0,1]),
+      note:"连续 ≥ 3 天只有用户 1 和用户 3；用户 2 最长只有 2 天，被 HAVING 筛掉。" }
+  ];
+
+  let i = -1;
+  function render(){
+    if(i < 0){
+      out.innerHTML = "<p style='color:#857c6b;font-size:13.5px;margin:0'>共 5 步：原始数据 → 编号 → 算分组键 → 分组聚合 → HAVING 筛选。点「下一步」开始。</p>";
+      log.textContent = "点「下一步」开始…";
+      return;
+    }
+    const s = STEPS[i];
+    out.innerHTML = `<div style="font-weight:600;color:#514b3f;margin-bottom:6px">${esc(s.t)}</div>` + s.html;
+    log.innerHTML = `<b>第 ${i+1} / ${STEPS.length} 步</b>：${esc(s.note)}`;
+  }
+  document.getElementById("consecStep").addEventListener("click", ()=>{ i = Math.min(i+1, STEPS.length-1); render(); });
+  document.getElementById("consecReset").addEventListener("click", ()=>{ i = -1; render(); });
+  render();
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ④：SQL 练习台（模式 A）
+   补充辅助表 signins 用于「连续 N 天」题型，与内置示例数据合并
+   ------------------------------------------------------------ */
+const sandboxHost = document.getElementById("demo-sandbox");
+if(window.SQLSandbox && sandboxHost){
+SQLSandbox.mount(sandboxHost, {
+  query: "SELECT o.id, o.customer_id, o.order_date, o.amount, p.amount AS prev_amount, o.amount - p.amount AS diff\nFROM orders o\nJOIN orders p ON p.customer_id = o.customer_id AND p.order_date < o.order_date\nORDER BY o.customer_id, o.order_date;",
+  presets: [
+    {label:"分组 TopN（按城市取最高订单）", sql:"SELECT c.city, c.name, o.id AS order_id, o.amount\nFROM orders o\nJOIN customers c ON c.id = o.customer_id\nWHERE o.amount = (SELECT MAX(o2.amount) FROM orders o2 JOIN customers c2 ON c2.id = o2.customer_id WHERE c2.city = c.city)\nORDER BY o.amount DESC;"},
+    {label:"分组 TopN（按客户取最高金额）", sql:"SELECT c.name, t.mx AS max_amount\nFROM customers c\nJOIN (SELECT customer_id, MAX(amount) AS mx FROM orders GROUP BY customer_id) t ON t.customer_id = c.id\nORDER BY t.mx DESC;"},
+    {label:"去重保留最新", sql:"SELECT o.id, o.customer_id, o.order_date, o.amount\nFROM orders o\nWHERE o.order_date = (SELECT MAX(o2.order_date) FROM orders o2 WHERE o2.customer_id = o.customer_id)\nORDER BY o.customer_id;"},
+    {label:"自连接环比（严格上一条）", sql:"SELECT o.id, o.customer_id, o.order_date, o.amount, p.amount AS prev_amount\nFROM orders o\nJOIN orders p ON p.id = (SELECT o2.id FROM orders o2 WHERE o2.customer_id = o.customer_id AND o2.order_date < o.order_date ORDER BY o2.order_date DESC, o2.id DESC LIMIT 1)\nORDER BY o.customer_id, o.order_date;"},
+    {label:"没有订单的客户（反连接）", sql:"SELECT c.id, c.name\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL;"}
+  ],
+  tables: {
+    signins: {
+      columns: ["id","user_id","sign_date"],
+      rows: [
+        [1,1,"2024-03-01"],[2,1,"2024-03-02"],[3,1,"2024-03-03"],[4,1,"2024-03-04"],
+        [5,2,"2024-03-01"],[6,2,"2024-03-03"],[7,2,"2024-03-04"],
+        [8,3,"2024-03-05"],[9,3,"2024-03-06"],[10,3,"2024-03-07"],
+        [11,4,"2024-03-02"],[12,4,"2024-03-10"]
+      ]
+    }
+  }
+});
+}
+</script>
+</body>
+</html>

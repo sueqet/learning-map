@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据建模与数仓 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 数据建模与数仓：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 12 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">数据建模与数仓</h1>
+    <p class="lead" id="pageLead"></p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能用<b>事实表（fact table）+ 维度表（dimension table）</b>拆解一个业务过程，并说清<b>粒度（grain）</b>决定什么。</li>
+      <li>能画出星型模型与雪花模型的 ER 图，并说明二者在 <b>JOIN 数量、冗余、查询代价</b>上的取舍。</li>
+      <li>能解释 <b>ODS / DWD / DWS / ADS</b> 各层的职责、粒度与典型产出表，说清为什么要分层。</li>
+      <li>能实现 <b>SCD Type 1 / 2 / 3</b>（缓慢变化维），并知道哪种类型必须用时间区间关联事实表。</li>
+      <li>能写清一个指标的完整口径（原子指标 + 修饰词 + 时间周期），并判断某维度该不该冗余进宽表。</li>
+      <li>能从需求出发走完一次建模：<b>选业务过程 → 定粒度 → 选维度 → 定事实</b>。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：<code class="inl">SELECT / JOIN / GROUP BY</code>（模块 02–04）、主键外键与范式（模块 08）、索引与执行计划（模块 09）。本页示例数据统一使用内置示例表 <code class="inl">customers</code>（8 行）、<code class="inl">orders</code>（12 行）、<code class="inl">products</code>（6 行）、<code class="inl">order_items</code>（15 行）、<code class="inl">employees</code>（9 行）；数仓表名（<code class="inl">dim_*</code> / <code class="inl">fact_*</code>）由这些业务表演化而来。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">12</span>从业务过程到指标<br>把「能查」变成「可复用」</h2>
+  </section>
+
+  <!-- ========== 知识点 1 ========== -->
+  <section class="topic" id="model-dim">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>维度建模：事实表与维度表<span class="pt">model-dim · 建模的地基</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="modeling::model-dim"><span>已学会</span></label>
+    </div>
+    <p><b>维度建模（dimensional modeling）</b>是 Kimball 提出的一套数据仓库建模方法：先识别<b>业务过程（business process）</b>，再把每个过程拆成一张<b>事实表（fact table）</b>加若干<b>维度表（dimension table）</b>。事实表回答「发生了什么、发生了多少」，维度表回答「谁、什么、何时、何地」，两者通过<b>代理键（surrogate key）</b>关联。</p>
+    <p>动手前必须先定<b>粒度（grain）</b>：事实表的一行到底代表什么。粒度是建模的第一决策，事后改粒度几乎等于重建模型——「一行 = 一个订单商品」和「一行 = 一个订单」会得出完全不同的表结构与指标结果。</p>
+    <ul>
+      <li><b>事实表</b>：行数极大、列数很少，主要由外键 + 度量（measure）组成，一般只追加不修改。</li>
+      <li><b>维度表</b>：行数较小、列数多（宽而扁平），存放描述性属性与层级（品类 → 子品类）。</li>
+      <li><b>代理键</b>：数仓自增的整数主键，与业务主键（natural key）解耦，便于处理缓慢变化维与历史版本。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>dim-fact.sql</div>
+      <pre><code>-- 维度表：客户（代理键 customer_sk + 业务键 customer_id）
+-- 数据来源：内置表 customers（8 行）
+CREATE TABLE dim_customer (
+  customer_sk BIGINT      NOT NULL AUTO_INCREMENT,
+  customer_id INT         NOT NULL COMMENT '业务主键，对应 customers.id',
+  name        VARCHAR(50) NOT NULL,
+  city        VARCHAR(50),
+  gender      CHAR(1),
+  level       VARCHAR(20) NOT NULL COMMENT '金卡 / 银卡 / 普通',
+  PRIMARY KEY (customer_sk),
+  KEY idx_nk (customer_id)
+) ENGINE=InnoDB;
+
+-- 事实表：订单商品明细（粒度 = 一行一个订单商品）
+-- 数据来源：内置表 order_items（15 行）关联 orders（12 行）
+CREATE TABLE fact_order_item (
+  order_item_id BIGINT        NOT NULL AUTO_INCREMENT,
+  order_id      INT           NOT NULL,
+  customer_sk   BIGINT        NOT NULL COMMENT '指向 dim_customer',
+  product_sk    BIGINT        NOT NULL COMMENT '指向 dim_product',
+  date_sk       INT           NOT NULL COMMENT '指向 dim_date，形如 20240105',
+  qty           INT           NOT NULL,
+  amount        DECIMAL(12,2) NOT NULL COMMENT '度量：qty * unit_price',
+  status        VARCHAR(20)   NOT NULL COMMENT '退化维度：paid / refunded / cancelled',
+  PRIMARY KEY (order_item_id),
+  KEY idx_cust (customer_sk),
+  KEY idx_prod (product_sk),
+  KEY idx_date (date_sk)
+) ENGINE=InnoDB;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>对比项</th><th>事实表 fact table</th><th>维度表 dimension table</th></tr></thead>
+      <tbody>
+        <tr><td>存什么</td><td>度量（可加和的数值）+ 外键</td><td>描述性属性、层级、编码</td></tr>
+        <tr><td>行数规模</td><td>极大，随业务持续增长</td><td>小，千级到百万级</td></tr>
+        <tr><td>列数形态</td><td>窄（列少）</td><td>宽（列多，可冗余）</td></tr>
+        <tr><td>是否可变</td><td>只追加，历史不改写</td><td>属性会随时间变化（见 SCD）</td></tr>
+        <tr><td>主键</td><td>代理键或复合键</td><td>代理键 + 业务键</td></tr>
+        <tr><td>本页例子</td><td class="mono">fact_order_item（15 行）</td><td class="mono">dim_customer（8 行）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mermaid">
+erDiagram
+  dim_customer ||--o{ fact_order_item : "customer_sk"
+  dim_product  ||--o{ fact_order_item : "product_sk"
+  dim_date     ||--o{ fact_order_item : "date_sk"
+  dim_customer {
+    bigint customer_sk PK
+    int customer_id
+    string level
+  }
+  fact_order_item {
+    bigint order_item_id PK
+    bigint customer_sk FK
+    decimal amount
+  }
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>度量放事实表、属性放维度表；先定粒度再建表。粒度一旦确定，维度与指标都只是它的上卷（roll-up）结果。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把可加和的度量塞进维度表（例如把「订单金额」冗余进 <code class="inl">dim_customer</code>），客户属性一变历史金额就被改写；反过来，在一张事实表里混两种粒度（订单级 + 商品级），<code class="inl">COUNT</code> 与 <code class="inl">SUM</code> 会成倍放大。</p></div>
+
+    <div id="demo-dim"></div>
+  </section>
+
+  <!-- ========== 知识点 2 ========== -->
+  <section class="topic" id="model-star">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>星型模型与雪花模型<span class="pt">model-star · 维度的两种摆法</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="modeling::model-star"><span>已学会</span></label>
+    </div>
+    <p><b>星型模型（star schema）</b>是维度建模的默认形态：一张事实表居中，周围一圈维度表，维度表只做一层、不再继续规范化。因为形状像星星，所以叫星型。</p>
+    <p><b>雪花模型（snowflake schema）</b>是把星型里的维度表继续做规范化（3NF）：例如把 <code class="inl">dim_product</code> 里的品类信息拆成独立的 <code class="inl">dim_category</code>，把城市信息拆成 <code class="inl">dim_city</code>。好处是减少冗余、属性一致性更强；代价是查询要多连几层表。</p>
+    <ul>
+      <li>数仓实践普遍推荐<b>星型</b>：存储便宜、JOIN 是主要代价，减少 JOIN 比省几列更划算。</li>
+      <li>雪花适合「维度层级很深、属性变更频繁、必须严格消除冗余」的场景，常见于规范化要求高的企业模型。</li>
+      <li>两种模型的事实表结构完全相同，差异只在维度表的拆分层数，所以可以随时由星型演进成雪花（或反向冗余回来）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>star-vs-snow.sql</div>
+      <pre><code>-- 星型：事实表 + 2 个扁平维度表，共 2 次 JOIN
+SELECT d.year_no AS 年份,
+       p.category AS 品类,
+       SUM(f.amount) AS 销售额
+FROM fact_order_item f
+JOIN dim_product p ON f.product_sk = p.product_sk
+JOIN dim_date    d ON f.date_sk    = d.date_sk
+GROUP BY d.year_no, p.category;
+
+-- 雪花：品类被拆到 dim_category，多一层 JOIN（共 3 次）
+SELECT d.year_no AS 年份,
+       cat.category AS 品类,
+       SUM(f.amount) AS 销售额
+FROM fact_order_item f
+JOIN dim_product  p   ON f.product_sk  = p.product_sk
+JOIN dim_category cat ON p.category_sk = cat.category_sk
+JOIN dim_date     d   ON f.date_sk     = d.date_sk
+GROUP BY d.year_no, cat.category;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>对比项</th><th>星型模型 star schema</th><th>雪花模型 snowflake schema</th></tr></thead>
+      <tbody>
+        <tr><td>维度表层数</td><td>一层，扁平</td><td>多层，逐层规范化</td></tr>
+        <tr><td>典型查询 JOIN 次数</td><td>少（维度数 = JOIN 次数）</td><td>多（每拆一层多一次 JOIN）</td></tr>
+        <tr><td>数据冗余</td><td>有冗余（品类名重复存放）</td><td>冗余小，属性只存一处</td></tr>
+        <tr><td>查询性能</td><td>更好（JOIN 少、易做列存裁剪）</td><td>较差（JOIN 多，优化器压力大）</td></tr>
+        <tr><td>维护成本</td><td>维度变更要同步刷新冗余列</td><td>改一处即可，一致性更好</td></tr>
+        <tr><td>适用场景</td><td>BI 报表、指标平台（主流）</td><td>维度层级深、规范化要求高</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>星型 = 少 JOIN、多一点冗余；雪花 = 少冗余、多几层 JOIN。选型的实际判据是「查询端能不能接受多几次 JOIN」。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>雪花模型连表多，一旦漏写某个 JOIN 或把一对多维度接错，结果行数会成倍膨胀；星型里的冗余列（如 <code class="inl">dim_product.category</code>）在源系统改名后必须重刷，否则会出现「同一品类两个名字」的口径分裂。</p></div>
+
+    <div id="demo-star"></div>
+  </section>
+
+  <!-- ========== 知识点 3 ========== -->
+  <section class="topic" id="model-layer">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>数仓分层（ODS / DWD / DWS / ADS）<span class="pt">model-layer · 数据的流水线</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="modeling::model-layer"><span>已学会</span></label>
+    </div>
+    <p>数仓分层（data warehouse layering）是把「从业务库到报表」的加工过程切成几段，每段只做一件事。最通用的四层是 <b>ODS → DWD → DWS → ADS</b>：ODS 贴源、DWD 清洗、DWS 汇总、ADS 应用。</p>
+    <p>分层的价值在于<b>复用与口径统一</b>：同一个「支付订单数」只在一处计算，所有报表都引用它；某一层出问题可以只重跑该层，不影响其它层；原始数据始终留档，随时可回溯重算。</p>
+    <ul>
+      <li><b>ODS（Operational Data Store）</b>：与业务库同构，只同步与分区，不做清洗，保留原样。</li>
+      <li><b>DWD（Data Warehouse Detail）</b>：清洗（去重、剔无效单、统一单位）、换代理键、退化维度，粒度仍是最细。</li>
+      <li><b>DWS（Data Warehouse Summary）</b>：按主题 + 粒度轻度汇总，是复用性最高的一层。</li>
+      <li><b>ADS（Application Data Store）</b>：面向报表、看板、接口，只保留展示需要的列。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>layer-pipeline.sql</div>
+      <pre><code>-- ODS：原样落地，只加分区列 etl_date
+CREATE TABLE ods_order_item (
+  etl_date DATE NOT NULL,
+  id INT, order_id INT, product_id INT, qty INT, unit_price DECIMAL(10,2)
+) ENGINE=InnoDB;
+
+-- DWD：清洗 + 业务键换代理键，粒度不变（一行一个订单商品）
+INSERT INTO dwd_order_item
+  (order_item_id, order_id, customer_sk, product_sk, date_sk, qty, amount, status)
+SELECT oi.id, oi.order_id, dc.customer_sk, dp.product_sk,
+       CAST(REPLACE(o.order_date, '-', '') AS UNSIGNED) AS date_sk,
+       oi.qty, oi.qty * oi.unit_price AS amount, o.status
+FROM ods_order_item oi
+JOIN orders o        ON oi.order_id   = o.id
+JOIN dim_customer dc ON o.customer_id = dc.customer_id
+JOIN dim_product dp  ON oi.product_id = dp.product_id
+WHERE o.status &lt;&gt; 'cancelled';        -- 剔除取消单，保留退款单（金额口径另行处理）
+
+-- DWS：按「天 × 客户等级」轻度汇总
+INSERT INTO dws_customer_level_day (stat_date, customer_level, order_cnt, item_cnt, gmv)
+SELECT d.date_value, c.level,
+       COUNT(DISTINCT f.order_id) AS order_cnt,
+       SUM(f.qty)                 AS item_cnt,
+       SUM(f.amount)              AS gmv
+FROM dwd_order_item f
+JOIN dim_date     d ON f.date_sk    = d.date_sk
+JOIN dim_customer c ON f.customer_sk = c.customer_sk
+GROUP BY d.date_value, c.level;
+
+-- ADS：派生客单价，只留看板要的列
+INSERT INTO ads_customer_level_report
+  (stat_date, customer_level, gmv, order_cnt, aov)
+SELECT stat_date, customer_level, gmv, order_cnt,
+       ROUND(gmv / NULLIF(order_cnt, 0), 2) AS aov   -- NULLIF 防除零
+FROM dws_customer_level_day;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>层</th><th>职责</th><th>粒度</th><th>典型表</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">ODS</td><td>贴源同步，不做加工，可回溯</td><td>与源表一致</td><td class="mono">ods_order_item</td></tr>
+        <tr><td class="mono">DWD</td><td>清洗、规范化、换代理键</td><td>最细明细</td><td class="mono">dwd_order_item</td></tr>
+        <tr><td class="mono">DWS</td><td>按主题轻度汇总，供多方可复用</td><td>天 × 维度</td><td class="mono">dws_customer_level_day</td></tr>
+        <tr><td class="mono">ADS</td><td>面向报表与接口，出宽表 / 指标表</td><td>看板维度</td><td class="mono">ads_customer_level_report</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mermaid">
+flowchart LR
+  SRC["业务库<br>customers / orders / order_items"] --> ODS["ODS 贴源<br>ods_order_item"]
+  ODS --> DWD["DWD 明细<br>dwd_order_item"]
+  DWD --> DWS["DWS 汇总<br>dws_customer_level_day"]
+  DWS --> ADS["ADS 应用<br>ads_customer_level_report"]
+  ADS --> BI["报表 / 看板 / 接口"]
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>每一层都要有明确的复用价值。判断要不要加一层，只看一个问题：这层的产出会不会被两个以上的下游引用。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>提醒：</b>ODS 不是备份层，只同步真正需要的表；清洗规则必须集中在 DWD，若把业务规则散落到 DWS / ADS，口径就会随报表需求漂移，跨表对数永远对不上。</p></div>
+
+    <div id="demo-layer"></div>
+  </section>
+
+  <!-- ========== 知识点 4 ========== -->
+  <section class="topic" id="model-scd">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>缓慢变化维 SCD<span class="pt">model-scd · 维度怎么变</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="modeling::model-scd"><span>已学会</span></label>
+    </div>
+    <p><b>缓慢变化维（slowly changing dimension, SCD）</b>处理的是「维度属性随时间变化」这件事：客户从银卡升级为金卡、商品改了品类、员工换了部门。维度表不像事实表那样只追加，它的属性会变，因此必须提前决定：变了之后怎么记？</p>
+    <p>三种经典做法：<b>Type 1</b> 直接覆盖旧值（不保留历史）；<b>Type 2</b> 关闭旧行 + 新增一行，配合生效 / 失效时间与当前标志（完整保留历史，生产环境最常用）；<b>Type 3</b> 在原行上新增一列保存上一个值（只保留有限历史）。</p>
+    <ul>
+      <li>Type 2 让「订单发生时的客户等级」可以被还原，是分析类需求的刚需。</li>
+      <li>Type 1 最省事，适合「改错了要纠正」这类不需要留痕的属性（如拼写纠错）。</li>
+      <li>Type 3 只能记住一版，属性频繁变化时会丢历史，一般只用于「对比上一版」的简单场景。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>scd-type2.sql</div>
+      <pre><code>-- 场景：客户 5「陈晨」在 2024-06-01 由银卡升级为金卡
+
+-- 第 1 步：关闭旧版本（失效时间 = 变更日前一天，当前标志置 0）
+UPDATE dim_customer
+SET end_date   = DATE_SUB('2024-06-01', INTERVAL 1 DAY),
+    is_current = 0
+WHERE customer_id = 5 AND is_current = 1;
+
+-- 第 2 步：插入新版本
+INSERT INTO dim_customer
+  (customer_id, name, city, level, start_date, end_date, is_current)
+VALUES
+  (5, '陈晨', '杭州', '金卡', '2024-06-01', '9999-12-31', 1);
+
+-- 事实表按「订单时间落在维度版本区间」关联，才能还原历史真相
+SELECT o.id, o.order_date, c.level AS 下单时等级
+FROM orders o
+JOIN dim_customer c
+  ON c.customer_id = o.customer_id
+ AND o.order_date &gt;= c.start_date
+ AND o.order_date &lt;  c.end_date
+ORDER BY o.order_date;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>类型</th><th>改动方式</th><th>是否保留历史</th><th>行数 / 列数</th><th>适用场景</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">Type 1</td><td>直接覆盖旧值</td><td class="null">不保留</td><td>行数不变、列数不变</td><td>纠正错误、无需留痕的属性</td></tr>
+        <tr><td class="mono">Type 2</td><td>关闭旧行 + 新增一行</td><td>完整保留</td><td>行数增加、列数不变</td><td>分析类需求，需要还原历史</td></tr>
+        <tr><td class="mono">Type 3</td><td>原行新增一列存旧值</td><td>只保留上一版</td><td>行数不变、列数 +1</td><td>只做「与上一版对比」</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>Type 2 的维度表如果只用 <code class="inl">is_current = 1</code> 关联事实表，所有历史订单都会被算成「当前等级」，去年同期报表会随时间悄悄变化。必须用订单时间落在 <code class="inl">[start_date, end_date)</code> 区间关联。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>提醒：</b>区间关联请用<b>左闭右开</b>（<code class="inl">&gt;= start_date AND &lt; end_date</code>），否则变更当天会被两个版本同时命中，行数翻倍。MySQL 8.0 本身不提供 SCD 组件，实际由 ETL 任务或 Hive / Spark 作业实现。</p></div>
+
+    <div id="demo-scd"></div>
+  </section>
+
+  <!-- ========== 知识点 5 ========== -->
+  <section class="topic" id="model-metrics">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>指标口径与宽表设计<span class="pt">model-metrics · 说清一个数</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="modeling::model-metrics"><span>已学会</span></label>
+    </div>
+    <p><b>指标口径（metric definition）</b>是把一个业务名词翻译成唯一可执行的算法。标准写法是「<b>原子指标 + 修饰词 + 时间周期</b>」：原子指标是业务过程的最小度量（订单金额），修饰词限定范围（支付成功、不含退款），时间周期指明统计窗口（日 / 月）。</p>
+    <p><b>一致性维度（conformed dimension）</b>指同一维度在多张事实表里含义、粒度、编码完全一致，这是跨业务过程对齐指标的前提。在一致性维度之上，把高频查询用到的维度冗余进一张大表，就得到<b>宽表（wide table）</b>——用空间和更新成本换查询端的零 JOIN。</p>
+    <ul>
+      <li>宽表适合放在 DWS / ADS 层，DWD 保持明细与规范；把宽表做在 DWD 会让上游一变就全量重刷。</li>
+      <li>值得冗余的维度：查询频率高、基数低、变更不频繁（如客户等级、品类、城市）。</li>
+      <li>不值得冗余的维度：高基数（用户 id）、变更频繁（实时库存）、只在个别报表用到。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>metric-wide.sql</div>
+      <pre><code>-- 指标表：口径写进表结构注释，一行 = 一天 × 一个客户等级
+CREATE TABLE dws_customer_level_day (
+  stat_date      DATE          NOT NULL,
+  customer_level VARCHAR(20)   NOT NULL,
+  order_cnt      BIGINT        NOT NULL COMMENT '支付成功订单数（去重到订单）',
+  gmv            DECIMAL(18,2) NOT NULL COMMENT '支付成功订单金额，退款前口径',
+  PRIMARY KEY (stat_date, customer_level)
+) ENGINE=InnoDB;
+
+-- 宽表：把常用维度一次性打平，查询端零 JOIN
+CREATE TABLE ads_customer_wide (
+  stat_date      DATE          NOT NULL,
+  customer_level VARCHAR(20)   NOT NULL,
+  city           VARCHAR(50),
+  order_cnt      BIGINT        NOT NULL,
+  gmv            DECIMAL(18,2) NOT NULL,
+  aov            DECIMAL(18,2) NOT NULL COMMENT '客单价 = gmv / order_cnt',
+  PRIMARY KEY (stat_date, customer_level, city)
+) ENGINE=InnoDB;
+
+-- 用内置示例数据验算口径：金卡 / 银卡 / 普通 的支付订单数与销售额
+SELECT c.level AS 客户等级,
+       COUNT(DISTINCT o.id)            AS 支付订单数,
+       SUM(oi.qty * oi.unit_price)     AS 销售额
+FROM order_items oi
+JOIN orders    o ON oi.order_id   = o.id
+JOIN customers c ON o.customer_id = c.id
+WHERE o.status = 'paid'
+GROUP BY c.level
+ORDER BY 销售额 DESC;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>指标</th><th>原子指标</th><th>修饰词</th><th>时间周期</th><th>口径说明</th></tr></thead>
+      <tbody>
+        <tr><td>支付订单数</td><td>订单数</td><td>支付成功</td><td>日</td><td class="mono">status='paid'，COUNT(DISTINCT order_id)</td></tr>
+        <tr><td>GMV</td><td>订单金额</td><td>支付成功</td><td>日</td><td class="mono">SUM(qty * unit_price)，退款前</td></tr>
+        <tr><td>客单价 AOV</td><td>—（派生）</td><td>支付成功</td><td>日</td><td class="mono">GMV / 支付订单数</td></tr>
+        <tr><td>退款率</td><td>—（派生）</td><td>退款</td><td>月</td><td class="mono">退款订单数 / 支付订单数</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>验算结果（内置数据）</th><th>支付订单数</th><th>销售额</th></tr></thead>
+      <tbody>
+        <tr><td>金卡</td><td class="mono">5</td><td class="mono">5479.00</td></tr>
+        <tr><td>银卡</td><td class="mono">4</td><td class="mono">2673.00</td></tr>
+        <tr><td>普通</td><td class="mono">1</td><td class="mono">59.00</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>「销售额」在运营、财务、技术三方往往不是同一个数——含不含退款、含不含运费、按下单时间还是支付时间，都会差出一截。建模时把口径写进字段注释与指标字典，并让所有报表引用同一个字段，否则跨表对数永远对不上。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>宽表不是越宽越好。只有「高频查询 + 低基数 + 变更不频繁」的维度才值得冗余；否则查询快了一点，重刷成本和口径风险却成倍上升。</p></div>
+  </section>
+
+  <!-- ========== 知识点 6 ========== -->
+  <section class="topic" id="model-case">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>建模实战案例<span class="pt">model-case · 从需求到表</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="modeling::model-case"><span>已学会</span></label>
+    </div>
+    <p>需求：「分析各品类、各客户等级的销售表现，支持按天看趋势。」下面按固定四步走完：<b>① 选业务过程</b>（下单支付）→ <b>② 定粒度</b>（一行 = 一个订单商品，最细，可上卷到订单 / 天 / 品类）→ <b>③ 选维度</b>（客户、商品、日期、状态）→ <b>④ 定事实</b>（数量、金额可加和；单价不可加和，只用于算均价）。</p>
+    <p>四步顺序不能颠倒。若先画维度再想粒度，几乎一定返工：粒度决定了哪些维度是合法的（例如「一行 = 一个订单」时，商品维度就不能直接放进来）。</p>
+    <ul>
+      <li>事实表落地后，绝大多数报表都是「事实表 + 若干维度表 + 聚合」，不再新建业务表。</li>
+      <li>不可加和的度量（单价、折扣率）不要直接 <code class="inl">SUM</code>，要用「总金额 / 总数量」重算。</li>
+      <li>状态类字段（paid / refunded / cancelled）作为<b>退化维度（degenerate dimension）</b>直接放进事实表，便于过滤与分组。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>case-end2end.sql</div>
+      <pre><code>-- ① 维度：日期（date_sk 用 YYYYMMDD 整数，便于分区裁剪）
+CREATE TABLE dim_date (
+  date_sk    INT      NOT NULL,
+  date_value DATE     NOT NULL,
+  year_no    SMALLINT NOT NULL,
+  month_no   TINYINT  NOT NULL,
+  day_no     TINYINT  NOT NULL,
+  PRIMARY KEY (date_sk)
+) ENGINE=InnoDB;
+
+-- ② 事实：订单商品（粒度 = 一行一个订单商品）
+CREATE TABLE fact_order_item (
+  order_item_id BIGINT        NOT NULL AUTO_INCREMENT,
+  order_id      INT           NOT NULL,
+  customer_sk   BIGINT        NOT NULL,
+  product_sk    BIGINT        NOT NULL,
+  date_sk       INT           NOT NULL,
+  qty           INT           NOT NULL,
+  amount        DECIMAL(12,2) NOT NULL,
+  status        VARCHAR(20)   NOT NULL,
+  PRIMARY KEY (order_item_id),
+  KEY idx_dim (date_sk, customer_sk, product_sk)
+) ENGINE=InnoDB;
+
+-- ③ 端到端查询：品类 × 客户等级的销售额与客单价
+SELECT p.category  AS 品类,
+       c.level     AS 客户等级,
+       COUNT(DISTINCT f.order_id) AS 订单数,
+       SUM(f.amount)              AS 销售额,
+       ROUND(SUM(f.amount) / NULLIF(COUNT(DISTINCT f.order_id), 0), 2) AS 客单价
+FROM fact_order_item f
+JOIN dim_product  p ON f.product_sk  = p.product_sk
+JOIN dim_customer c ON f.customer_sk = c.customer_sk
+JOIN dim_date     d ON f.date_sk     = d.date_sk
+WHERE d.year_no = 2024
+  AND f.status = 'paid'
+GROUP BY p.category, c.level
+ORDER BY 销售额 DESC;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>报表需求</th><th>主表</th><th>粒度</th><th>关键指标</th></tr></thead>
+      <tbody>
+        <tr><td>每日 GMV 趋势</td><td class="mono">dws_customer_level_day</td><td>天</td><td class="mono">SUM(gmv)</td></tr>
+        <tr><td>品类销售 TopN</td><td class="mono">fact_order_item + dim_product</td><td>订单商品</td><td class="mono">SUM(amount)</td></tr>
+        <tr><td>客户等级客单价</td><td class="mono">fact_order_item + dim_customer</td><td>订单商品</td><td class="mono">SUM(amount) / COUNT(DISTINCT order_id)</td></tr>
+        <tr><td>新客首单分析</td><td class="mono">fact_order_item + dim_customer</td><td>客户</td><td class="mono">MIN(order_date)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="mermaid">
+flowchart TD
+  A["① 选业务过程<br>下单支付"] --> B["② 定粒度<br>一行 = 一个订单商品"]
+  B --> C["③ 选维度<br>客户 / 商品 / 日期 / 状态"]
+  C --> D["④ 定事实<br>qty / amount（可加和）"]
+  D --> E["⑤ 落地表结构<br>fact_order_item + dim_*"]
+    </div>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>建模顺序固定：业务过程 → 粒度 → 维度 → 事实。记住「粒度先行」，大部分返工都能避免。</p></div>
+    <div class="callout warn"><span class="i">◆</span><p><b>提醒：</b>本案例把 <code class="inl">status</code> 作为退化维度放进事实表，是为了过滤方便。如果订单状态会多次流转（下单 → 支付 → 退款），正确做法是另建 <code class="inl">fact_order_status</code> 事件流水表，用事件时间建模，而不是在事实表上反复覆盖。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>把内置表 <code class="inl">customers</code> / <code class="inl">orders</code> / <code class="inl">order_items</code> / <code class="inl">products</code> 手工映射成 <code class="inl">dim_customer</code> / <code class="inl">dim_product</code> / <code class="inl">dim_date</code> / <code class="inl">fact_order_item</code>，并说明每张表的代理键与业务键分别是什么。</li>
+      <li>把知识点 2 的星型查询改成雪花模型：把 <code class="inl">dim_product.category</code> 拆成 <code class="inl">dim_category</code>，写出两条 SQL 并比较 JOIN 次数与结果是否一致。</li>
+      <li>为 <code class="inl">dim_customer.level</code> 设计 Type 2 方案：写出建表 DDL、一次变更的两条语句，以及「统计 2024 年 1 月各等级订单数」的区间关联查询。</li>
+      <li>给「退款率」写一份完整口径：原子指标、修饰词、时间周期、边界（跨月退款算哪个月、部分退款怎么算），并说明它会落在数仓的哪一层。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">存储引擎、锁与 MVCC</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">高级函数与特性</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "modeling",
+  title: "数据建模与数仓",
+  eyebrow: "MODULE 12 · SQL / 数据库",
+  lead: "从业务过程出发，用事实表与维度表搭出星型 / 雪花模型，再沿 ODS → DWD → DWS → ADS 把数据加工成口径统一的指标。三个可交互面板带你切换模型、逐层加工、观察维度变化。",
+  points: ["model-dim","model-star","model-layer","model-scd","model-metrics","model-case"],
+  prev: "11-storage-locks.html",
+  next: "13-advanced-sql.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于事实表与维度表，下列说法正确的是：",
+    opts:["事实表列多而宽，维度表列少而窄","事实表通常只追加不改历史，度量列一般可加和","维度表应当包含度量列，方便直接出报表","事实表必须使用业务主键，不能用代理键"],
+    ans:1,
+    exp:"事实表窄（列少）而长（行多），维度表宽而短，A 说反了；度量应放在事实表，放进维度表会随维度属性变化而污染历史，C 错；数仓普遍用自增代理键与业务键解耦，D 错。"
+  },
+  {
+    type:"quiz",
+    q:"维度建模中「粒度（grain）」指的是：",
+    opts:["事实表一行所代表的业务细节层级","维度表的行数规模","数仓分层的层数","分区表的分区大小"],
+    ans:0,
+    exp:"粒度描述「一行代表什么」，例如「一行 = 一个订单商品」。它决定可用的维度与指标，是最先要定下来的决策。行数规模、分层数、分区大小都是粒度的结果或无关项，不能反过来定义粒度。"
+  },
+  {
+    type:"quiz",
+    q:"星型模型与雪花模型的核心区别是：",
+    opts:["星型模型不允许有维度表","雪花模型只适用于 OLTP 事务系统","星型模型要求维度表必须满足 3NF","雪花模型把维度表继续规范化拆成多层，查询需要更多 JOIN"],
+    ans:3,
+    exp:"两种模型的事实表结构相同，差别只在维度表是否继续拆分：星型维度扁平一层，雪花把维度按 3NF 继续拆开，因此查询要多连几层。星型当然有维度表（A 错），雪花用于分析场景而非 OLTP（B 错），要求 3NF 的是雪花而非星型（C 错）。"
+  },
+  {
+    type:"quiz",
+    q:"一个星型模型的事实表关联 4 个扁平维度表；改成雪花模型后，其中 2 个维度各拆出 1 层下级维度。典型查询的 JOIN 次数如何变化？",
+    opts:["不变，仍是 4 次","从 4 次增加到 6 次","从 4 次减少到 2 次","取决于是否有索引，无法判断"],
+    ans:1,
+    exp:"每拆分一个维度就多一次 JOIN：4 + 2 = 6 次。索引影响的是每次 JOIN 的扫描代价，不会改变 JOIN 的次数；JOIN 次数也不会因为拆分而减少。"
+  },
+  {
+    type:"quiz",
+    q:"DWD 层（明细层）的主要职责是：",
+    opts:["直接面向报表，做最终展示","原样落地业务库数据，不做任何清洗","清洗、规范化并保留最细粒度明细","只做月度汇总，不保留明细"],
+    ans:2,
+    exp:"DWD 的定位是「清洗后的最细明细」：去重、剔无效单、统一单位、业务键换代理键。面向报表是 ADS（A 错），原样落地是 ODS（B 错），只做汇总是 DWS（D 错）。"
+  },
+  {
+    type:"quiz",
+    q:"数仓分层的首要目的是：",
+    opts:["复用与口径统一：让同一指标在多处引用同一份加工结果","让 SQL 写得更短","减少磁盘占用","避免使用 JOIN"],
+    ans:0,
+    exp:"分层的核心价值是复用与口径统一，同时带来可回溯、可局部重跑。分层反而会增加表数量与存储（C 错），也不以减少 JOIN 或缩短 SQL 为目标（B、D 错）。"
+  },
+  {
+    type:"quiz",
+    q:"要完整保留客户等级的历史变化，应该使用哪种缓慢变化维方案？",
+    opts:["Type 0：属性永不变化","Type 2：关闭旧行并新增一行，维护生效 / 失效时间","Type 1：直接覆盖旧值","Type 3：原行新增一列保存上一个值"],
+    ans:1,
+    exp:"Type 2 通过新增行 + 时间区间完整保留每个历史版本，是分析场景的标准做法。Type 1 覆盖后历史永久丢失，Type 3 只能记住上一版，Type 0 假定属性不变——三者都无法完整留痕。"
+  },
+  {
+    type:"interview",
+    q:"面试题：事实表要还原「订单发生时的客户等级」，关联 dim_customer 时应该怎么写？",
+    sql:"-- dim_customer: customer_sk, customer_id, level, start_date, end_date, is_current",
+    opts:["用 is_current = 1 关联即可","用最大的 customer_sk 关联","用客户姓名关联","用订单时间落在 [start_date, end_date) 区间关联"],
+    ans:3,
+    exp:"只有按订单时间落在维度版本的有效区间内关联，才能取到「当时的」等级。is_current = 1 会把所有历史订单都算成当前等级，报表会随时间变化；取最大代理键等价于只取最新版本；姓名既非唯一键也不带时间信息，无法还原历史。"
+  },
+  {
+    type:"quiz",
+    q:"「客单价 AOV（GMV / 支付订单数）」在指标口径里属于：",
+    opts:["原子指标","修饰词","派生指标","维度属性"],
+    ans:2,
+    exp:"原子指标是业务过程的最小度量（如订单金额），修饰词限定范围（支付成功），派生指标由原子指标经四则运算得出——客单价正是 GMV 除以订单数。它显然不是修饰词，也不是维度表上的属性。"
+  },
+  {
+    type:"interview",
+    q:"面试延伸：拿到「分析各品类销售表现」的需求，维度建模的第一步应该做什么？",
+    opts:["先把 dim_product 的所有字段都建好","确定业务过程与事实表粒度（一行代表什么）","先写报表 SQL，再倒推表结构","先决定用星型还是雪花模型"],
+    ans:1,
+    exp:"建模顺序是业务过程 → 粒度 → 维度 → 事实。粒度决定哪些维度合法、指标如何计算，先定粒度才能避免返工。先建维度表或先定模型形态都属于顺序颠倒；先写报表 SQL 倒推，会把单个报表的口径固化成模型，后期难以复用。"
+  }
+];
+
+/* 进度：与学习大纲共享 sql_outline_progress_v1 */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ============================================================
+   演示一：SQL 练习台 —— 用内置示例数据模拟「事实表 + 维度表」
+   ============================================================ */
+SQLSandbox && SQLSandbox.mount(document.getElementById("demo-dim"), {
+  query: "SELECT c.level AS 客户等级,\n       COUNT(DISTINCT o.id)        AS 支付订单数,\n       SUM(oi.qty * oi.unit_price) AS 销售额\nFROM order_items oi\nJOIN orders    o ON oi.order_id   = o.id\nJOIN customers c ON o.customer_id = c.id\nWHERE o.status = 'paid'\nGROUP BY c.level\nORDER BY 销售额 DESC;",
+  presets: [
+    {label:"维度表 + 事实表聚合（客户等级）", sql:"SELECT c.level AS 客户等级,\n       COUNT(DISTINCT o.id)        AS 支付订单数,\n       SUM(oi.qty * oi.unit_price) AS 销售额\nFROM order_items oi\nJOIN orders    o ON oi.order_id   = o.id\nJOIN customers c ON o.customer_id = c.id\nWHERE o.status = 'paid'\nGROUP BY c.level\nORDER BY 销售额 DESC;"},
+    {label:"换一个维度（商品品类）", sql:"SELECT p.category AS 品类,\n       SUM(oi.qty * oi.unit_price) AS 销售额\nFROM order_items oi\nJOIN products p ON oi.product_id = p.id\nJOIN orders   o ON oi.order_id   = o.id\nWHERE o.status = 'paid'\nGROUP BY p.category\nORDER BY 销售额 DESC;"},
+    {label:"确认事实表粒度（15 行 / 12 单）", sql:"SELECT COUNT(*) AS 明细行数, COUNT(DISTINCT order_id) AS 订单数\nFROM order_items;"}
+  ]
+});
+
+/* ============================================================
+   演示二：星型 vs 雪花模型切换器（表结构 + JOIN 路径 + 连表数）
+   ============================================================ */
+(function(){
+  const host = document.getElementById("demo-star");
+  if(!host) return;
+  const esc = (window.SQLSandbox && SQLSandbox.esc) ? SQLSandbox.esc : function(s){ return String(s); };
+
+  const MODELS = {
+    star: {
+      label: "星型模型",
+      brief: "1 张事实表 + 3 张扁平维度表，维度不再拆分",
+      tables: [
+        {name:"fact_order_item", kind:"事实表", cols:"order_item_id, order_id, customer_sk, product_sk, date_sk, qty, amount, status"},
+        {name:"dim_customer", kind:"维度表", cols:"customer_sk, customer_id, name, city, gender, level"},
+        {name:"dim_product", kind:"维度表", cols:"product_sk, product_id, name, category, price"},
+        {name:"dim_date", kind:"维度表", cols:"date_sk, date_value, year_no, month_no, day_no"}
+      ],
+      joins: [
+        "fact_order_item.product_sk → dim_product.product_sk",
+        "fact_order_item.customer_sk → dim_customer.customer_sk",
+        "fact_order_item.date_sk → dim_date.date_sk"
+      ],
+      joinCount: 3,
+      cost: "品类 / 客户等级 / 日期都在一层维度表里",
+      sql: "SELECT p.category, c.level, SUM(f.amount)\nFROM fact_order_item f\nJOIN dim_product  p ON f.product_sk  = p.product_sk\nJOIN dim_customer c ON f.customer_sk = c.customer_sk\nGROUP BY p.category, c.level;"
+    },
+    snow: {
+      label: "雪花模型",
+      brief: "维度表继续规范化：品类、城市各自拆成独立维度表",
+      tables: [
+        {name:"fact_order_item", kind:"事实表", cols:"order_item_id, order_id, customer_sk, product_sk, date_sk, qty, amount, status"},
+        {name:"dim_customer", kind:"维度表（一层）", cols:"customer_sk, customer_id, name, city_sk, gender, level"},
+        {name:"dim_city", kind:"维度表（二层）", cols:"city_sk, city, province, region"},
+        {name:"dim_product", kind:"维度表（一层）", cols:"product_sk, product_id, name, category_sk, price"},
+        {name:"dim_category", kind:"维度表（二层）", cols:"category_sk, category, dept"},
+        {name:"dim_date", kind:"维度表（一层）", cols:"date_sk, date_value, year_no, month_no, day_no"}
+      ],
+      joins: [
+        "fact_order_item.product_sk → dim_product.product_sk",
+        "dim_product.category_sk → dim_category.category_sk",
+        "fact_order_item.customer_sk → dim_customer.customer_sk",
+        "dim_customer.city_sk → dim_city.city_sk",
+        "fact_order_item.date_sk → dim_date.date_sk"
+      ],
+      joinCount: 5,
+      cost: "品类要多穿一层 dim_category，城市要多穿一层 dim_city",
+      sql: "SELECT cat.category, c.level, SUM(f.amount)\nFROM fact_order_item f\nJOIN dim_product  p   ON f.product_sk  = p.product_sk\nJOIN dim_category cat ON p.category_sk = cat.category_sk\nJOIN dim_customer c   ON f.customer_sk = c.customer_sk\nGROUP BY cat.category, c.level;"
+    }
+  };
+
+  host.innerHTML = '<div class="demo">' +
+    '<div class="dh"><span class="t">🖥 演示：星型 vs 雪花模型切换器</span><span class="hint">切换看表结构与 JOIN 路径</span></div>' +
+    '<div class="db">' +
+      '<div class="ctl" id="mdCtl"><label>模型</label>' +
+        Object.keys(MODELS).map(function(k){ return '<button class="b" data-md="'+k+'">'+MODELS[k].label+'</button>'; }).join("") +
+      '</div>' +
+      '<div id="mdTables"></div>' +
+      '<div class="log" id="mdLog"></div>' +
+      '<div class="log" id="mdSql" style="white-space:pre-wrap"></div>' +
+      '<div class="foot">两个模型共用同一张事实表 fact_order_item，差异只在维度表被拆成几层。</div>' +
+    '</div>' +
+  '</div>';
+
+  const tableBox = host.querySelector("#mdTables");
+  const logBox = host.querySelector("#mdLog");
+  const sqlBox = host.querySelector("#mdSql");
+
+  function render(key){
+    const m = MODELS[key];
+    host.querySelectorAll("#mdCtl .b").forEach(function(b){ b.classList.toggle("on", b.dataset.md === key); });
+    tableBox.innerHTML = '<table class="dt"><caption>' + esc(m.label) + '：表结构（共 ' + m.tables.length + ' 张）</caption>' +
+      '<thead><tr><th>表名</th><th>类型</th><th>字段</th></tr></thead><tbody>' +
+      m.tables.map(function(t){
+        return '<tr class="' + (t.kind === "事实表" ? "hl" : "") + '"><td class="key">' + esc(t.name) + '</td><td>' + esc(t.kind) + '</td><td>' + esc(t.cols) + '</td></tr>';
+      }).join("") +
+      '</tbody></table>';
+    logBox.innerHTML = '<b>' + esc(m.label) + '</b> — ' + esc(m.brief) + '<br>' +
+      'JOIN 路径（' + m.joins.length + ' 条）：<br>' +
+      m.joins.map(function(j){ return '&nbsp;&nbsp;· ' + esc(j); }).join("<br>") + '<br>' +
+      '一次典型查询需要连的表数：<b>' + m.joinCount + ' 张</b>（' + esc(m.cost) + '）';
+    sqlBox.textContent = m.sql;
+  }
+
+  host.querySelectorAll("#mdCtl .b").forEach(function(b){
+    b.addEventListener("click", function(){ render(b.dataset.md); });
+  });
+  render("star");
+})();
+
+/* ============================================================
+   演示三：数仓分层流转演示（ODS → DWD → DWS → ADS）
+   ============================================================ */
+(function(){
+  const host = document.getElementById("demo-layer");
+  if(!host) return;
+  const esc = (window.SQLSandbox && SQLSandbox.esc) ? SQLSandbox.esc : function(s){ return String(s); };
+
+  const LAYERS = [
+    {
+      key: "ODS", title: "ODS 原始层", sub: "贴源，不加工",
+      inputs: ["业务库 customers / orders / order_items（每日 02:00 全量同步）"],
+      logic: "字段原样保留，只加 etl_date 分区列；不清洗、不去重、不改类型",
+      out: {
+        name: "ods_order_item",
+        cols: ["etl_date","id","order_id","product_id","qty","unit_price"],
+        rows: [["2024-04-23",1,1001,2,1,129.00],["2024-04-23",2,1001,4,2,59.00],["2024-04-23",3,1002,3,1,1299.00]]
+      },
+      tip: "行数与源表一致（15 行），可随时回刷重算"
+    },
+    {
+      key: "DWD", title: "DWD 明细层", sub: "清洗 + 规范化，粒度不变",
+      inputs: ["ods_order_item", "orders", "dim_customer", "dim_product"],
+      logic: "剔除 cancelled 单；业务键换成代理键；amount = qty × unit_price；status 作为退化维度保留",
+      out: {
+        name: "dwd_order_item",
+        cols: ["order_item_id","order_id","customer_sk","product_sk","date_sk","qty","amount"],
+        rows: [[1,1001,1,2,20240105,1,129.00],[2,1001,1,4,20240105,2,118.00],[3,1002,1,3,20240120,1,1299.00]]
+      },
+      tip: "行数 15 → 14（剔除取消单 1009 的 1 行明细）"
+    },
+    {
+      key: "DWS", title: "DWS 汇总层", sub: "轻度汇总，按主题复用",
+      inputs: ["dwd_order_item", "dim_date", "dim_customer"],
+      logic: "按「天 × 客户等级」聚合：订单数去重计数、件数求和、GMV 求和",
+      out: {
+        name: "dws_customer_level_day",
+        cols: ["stat_date","customer_level","order_cnt","item_cnt","gmv"],
+        rows: [["2024-01-05","金卡",1,3,247.00],["2024-01-08","银卡",1,1,89.00],["2024-01-20","金卡",1,1,1299.00]]
+      },
+      tip: "行数从万级明细压缩到「天数 × 等级数」量级"
+    },
+    {
+      key: "ADS", title: "ADS 应用层", sub: "面向报表 / 看板 / 接口",
+      inputs: ["dws_customer_level_day"],
+      logic: "只保留看板需要的列，派生客单价 AOV = GMV / 订单数（NULLIF 防除零）",
+      out: {
+        name: "ads_customer_level_report",
+        cols: ["stat_date","customer_level","gmv","order_cnt","aov"],
+        rows: [["2024-01-05","金卡",247.00,1,247.00],["2024-01-08","银卡",89.00,1,89.00],["2024-01-20","金卡",1299.00,1,1299.00]]
+      },
+      tip: "查询端零 JOIN，BI 工具直接出图"
+    }
+  ];
+
+  host.innerHTML = '<div class="demo">' +
+    '<div class="dh"><span class="t">🖥 演示：数仓分层流转 ODS → DWD → DWS → ADS</span><span class="hint">点「逐层加工」看数据怎么变</span></div>' +
+    '<div class="db">' +
+      '<div class="ctl" id="lyCtl"><label>层级</label>' +
+        LAYERS.map(function(l){ return '<button class="b" data-ly="'+l.key+'">'+l.key+'</button>'; }).join("") +
+        '<button class="b" id="lyStep">▶ 逐层加工</button>' +
+        '<button class="b" id="lyReset">↺ 重置</button>' +
+      '</div>' +
+      '<div class="log" id="lyLog"></div>' +
+      '<div id="lyOut"></div>' +
+      '<div class="foot">示例链路基于内置数据：order_items 15 行 → 剔除取消单后 14 行 → 按「天 × 客户等级」汇总。</div>' +
+    '</div>' +
+  '</div>';
+
+  const logBox = host.querySelector("#lyLog");
+  const outBox = host.querySelector("#lyOut");
+  let step = 0;
+
+  function render(idx){
+    step = idx;
+    const l = LAYERS[idx];
+    host.querySelectorAll("#lyCtl .b[data-ly]").forEach(function(b){ b.classList.toggle("on", b.dataset.ly === l.key); });
+    const track = LAYERS.map(function(x, i){
+      return i === idx ? '<b>' + x.key + '</b>' : x.key;
+    }).join(" → ");
+    logBox.innerHTML = '当前层级：<b>' + esc(l.title) + '</b> — ' + esc(l.sub) + '<br>' +
+      '加工链路：' + track + '<br>' +
+      '输入表：' + l.inputs.map(function(t){ return '<b>' + esc(t) + '</b>'; }).join(" + ") + '<br>' +
+      '加工逻辑：' + esc(l.logic) + '<br>' +
+      '输出表：<b>' + esc(l.out.name) + '</b>（' + esc(l.tip) + '）';
+    outBox.innerHTML = '<table class="dt"><caption>' + esc(l.out.name) + '（前 3 行示例）</caption><thead><tr>' +
+      l.out.cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      l.out.rows.map(function(r){
+        return '<tr>' + r.map(function(v){
+          return v === null ? '<td class="null">NULL</td>' : '<td>' + esc(v) + '</td>';
+        }).join("") + '</tr>';
+      }).join("") +
+      '</tbody></table>';
+  }
+
+  host.querySelectorAll("#lyCtl .b[data-ly]").forEach(function(b){
+    b.addEventListener("click", function(){
+      const i = LAYERS.findIndex(function(x){ return x.key === b.dataset.ly; });
+      if(i >= 0) render(i);
+    });
+  });
+  host.querySelector("#lyStep").addEventListener("click", function(){
+    if(step < LAYERS.length - 1){ render(step + 1); }
+    else {
+      logBox.innerHTML = logBox.innerHTML + '<br><span class="bad">已到最后一层（ADS），点「↺ 重置」回到 ODS 重新看一遍。</span>';
+    }
+  });
+  host.querySelector("#lyReset").addEventListener("click", function(){ render(0); });
+  render(0);
+})();
+
+/* ============================================================
+   演示四：SCD 类型演示器（Type 1 / 2 / 3 的维表变化）
+   ============================================================ */
+(function(){
+  const host = document.getElementById("demo-scd");
+  if(!host) return;
+  const esc = (window.SQLSandbox && SQLSandbox.esc) ? SQLSandbox.esc : function(s){ return String(s); };
+
+  const TYPES = {
+    t1: {
+      label: "Type 1 覆盖",
+      cols: ["customer_sk","customer_id","name","city","level"],
+      before: [
+        [1,1,"张伟","北京","金卡"],
+        [5,5,"陈晨","杭州","银卡"],
+        [6,6,"赵磊","北京","普通"],
+        [7,7,"孙悦","上海","金卡"]
+      ],
+      after: [
+        [1,1,"张伟","北京","金卡"],
+        [5,5,"陈晨","杭州","金卡"],
+        [6,6,"赵磊","北京","普通"],
+        [7,7,"孙悦","上海","金卡"]
+      ],
+      hlBefore: [1], hlAfter: [1],
+      change: "直接覆盖 level 列（银卡 → 金卡），旧值消失",
+      keep: "不保留",
+      shape: "行数不变（4 行）、列数不变",
+      note: "实现最简单、查询最快，但「2024 年 1 月这位客户是银卡」这件事永远查不回来了。"
+    },
+    t2: {
+      label: "Type 2 新增行（拉链）",
+      cols: ["customer_sk","customer_id","name","city","level","start_date","end_date","is_current"],
+      before: [
+        [1,1,"张伟","北京","金卡","2023-01-05","9999-12-31",1],
+        [5,5,"陈晨","杭州","银卡","2023-05-18","9999-12-31",1],
+        [6,6,"赵磊","北京","普通","2023-06-25","9999-12-31",1],
+        [7,7,"孙悦","上海","金卡","2023-07-30","9999-12-31",1]
+      ],
+      after: [
+        [1,1,"张伟","北京","金卡","2023-01-05","9999-12-31",1],
+        [5,5,"陈晨","杭州","银卡","2023-05-18","2024-05-31",0],
+        [5,5,"陈晨","杭州","金卡","2024-06-01","9999-12-31",1],
+        [6,6,"赵磊","北京","普通","2023-06-25","9999-12-31",1],
+        [7,7,"孙悦","上海","金卡","2023-07-30","9999-12-31",1]
+      ],
+      hlBefore: [1], hlAfter: [1,2],
+      change: "旧行 end_date 置 2024-05-31、is_current 置 0；再 INSERT 一行新版本",
+      keep: "完整保留",
+      shape: "行数 4 → 5、列数不变",
+      note: "事实表必须按 [start_date, end_date) 区间关联，才能取到订单发生时的等级。"
+    },
+    t3: {
+      label: "Type 3 新增列",
+      cols: ["customer_sk","customer_id","name","city","level","prev_level"],
+      before: [
+        [1,1,"张伟","北京","金卡",null],
+        [5,5,"陈晨","杭州","银卡",null],
+        [6,6,"赵磊","北京","普通",null],
+        [7,7,"孙悦","上海","金卡",null]
+      ],
+      after: [
+        [1,1,"张伟","北京","金卡",null],
+        [5,5,"陈晨","杭州","金卡","银卡"],
+        [6,6,"赵磊","北京","普通",null],
+        [7,7,"孙悦","上海","金卡",null]
+      ],
+      hlBefore: [1], hlAfter: [1],
+      change: "原行 level 覆盖为金卡，同时把旧值写入 prev_level 列",
+      keep: "只保留上一版",
+      shape: "行数不变（4 行）、列数 +1",
+      note: "只能记住一版，属性变化第三次时第一版就丢了，因此很少用于分析场景。"
+    }
+  };
+
+  let cur = "t2";
+  let changed = false;
+
+  host.innerHTML = '<div class="demo">' +
+    '<div class="dh"><span class="t">🖥 演示：SCD 类型演示器（客户 5 陈晨 银卡 → 金卡）</span><span class="hint">切换类型 + 触发变更</span></div>' +
+    '<div class="db">' +
+      '<div class="ctl" id="scdCtl"><label>SCD 类型</label>' +
+        Object.keys(TYPES).map(function(k){ return '<button class="b" data-scd="'+k+'">'+TYPES[k].label+'</button>'; }).join("") +
+        '<button class="b" id="scdGo">▶ 触发变更</button>' +
+        '<button class="b" id="scdReset">↺ 重置</button>' +
+      '</div>' +
+      '<div id="scdTables"></div>' +
+      '<div class="log" id="scdLog"></div>' +
+      '<div class="foot">变更事件：2024-06-01 客户 5「陈晨」由银卡升级为金卡。</div>' +
+    '</div>' +
+  '</div>';
+
+  const tableBox = host.querySelector("#scdTables");
+  const logBox = host.querySelector("#scdLog");
+
+  function dt(caption, cols, rows, hl){
+    return '<table class="dt"><caption>' + esc(caption) + '</caption><thead><tr>' +
+      cols.map(function(c){ return '<th>' + esc(c) + '</th>'; }).join("") + '</tr></thead><tbody>' +
+      rows.map(function(r, i){
+        return '<tr class="' + (hl.indexOf(i) >= 0 ? "hl" : "") + '">' + r.map(function(v){
+          return v === null ? '<td class="null">NULL</td>' : '<td>' + esc(v) + '</td>';
+        }).join("") + '</tr>';
+      }).join("") + '</tbody></table>';
+  }
+
+  function render(){
+    const t = TYPES[cur];
+    host.querySelectorAll("#scdCtl .b[data-scd]").forEach(function(b){ b.classList.toggle("on", b.dataset.scd === cur); });
+    let html = dt(t.label + " · 变更前的 dim_customer", t.cols, t.before, changed ? [] : t.hlBefore);
+    if(changed) html += dt(t.label + " · 变更后的 dim_customer", t.cols, t.after, t.hlAfter);
+    tableBox.innerHTML = html;
+    if(changed){
+      logBox.innerHTML = '<b>' + esc(t.label) + '</b>：' + esc(t.change) + '<br>' +
+        '是否保留历史：<b>' + esc(t.keep) + '</b> &nbsp;·&nbsp; 形态变化：' + esc(t.shape) + '<br>' +
+        esc(t.note);
+    } else {
+      logBox.innerHTML = '<b>' + esc(t.label) + '</b> — 当前显示变更前的维表。<br>' +
+        '点「▶ 触发变更」看看这个类型会怎么改：' + esc(t.change);
+    }
+  }
+
+  host.querySelectorAll("#scdCtl .b[data-scd]").forEach(function(b){
+    b.addEventListener("click", function(){ cur = b.dataset.scd; changed = false; render(); });
+  });
+  host.querySelector("#scdGo").addEventListener("click", function(){ changed = true; render(); });
+  host.querySelector("#scdReset").addEventListener("click", function(){ changed = false; render(); });
+  render();
+})();
+</script>
+</body>
+</html>

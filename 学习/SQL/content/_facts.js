@@ -1,0 +1,22 @@
+require("D:/DSH/Project/User/学习/SQL/content/assets/sql-sandbox.js");
+const S = globalThis.SQLSandbox;
+const q = (label, sql, tables) => {
+  const r = S.run(sql, tables);
+  console.log("— " + label);
+  console.log("  " + (r.error ? "ERR: " + r.error : JSON.stringify(r.rows)));
+};
+q("全部订单按月", "SELECT DATE_FORMAT(order_date,'%Y-%m') ym, SUM(amount) s FROM orders GROUP BY ym ORDER BY ym;");
+q("paid 订单按月", "SELECT DATE_FORMAT(order_date,'%Y-%m') ym, SUM(amount) s FROM orders WHERE status='paid' GROUP BY ym ORDER BY ym;");
+q("paid 品类销售额", "SELECT p.category, SUM(oi.qty*oi.unit_price) s FROM order_items oi JOIN products p ON oi.product_id=p.id JOIN orders o ON oi.order_id=o.id WHERE o.status='paid' GROUP BY p.category ORDER BY s DESC;");
+q("全部品类销售额", "SELECT p.category, SUM(oi.qty*oi.unit_price) s FROM order_items oi JOIN products p ON oi.product_id=p.id GROUP BY p.category ORDER BY s DESC;");
+q("paid 总额", "SELECT SUM(amount) s, COUNT(*) n FROM orders WHERE status='paid';");
+q("全部总额", "SELECT SUM(amount) s, COUNT(*) n FROM orders;");
+q("各城市客户数", "SELECT city, COUNT(*) n FROM customers GROUP BY city ORDER BY n DESC, city;");
+q("各等级客户数", "SELECT level, COUNT(*) n FROM customers GROUP BY level;");
+q("各状态订单", "SELECT status, COUNT(*) n, SUM(amount) s FROM orders GROUP BY status ORDER BY n DESC;");
+q("每客户订单数（含0）", "SELECT c.name, COUNT(o.id) n FROM customers c LEFT JOIN orders o ON c.id=o.customer_id GROUP BY c.name ORDER BY n DESC;");
+q("员工部门薪资", "SELECT dept, COUNT(*) n, SUM(salary) s, ROUND(AVG(salary),2) a FROM employees GROUP BY dept ORDER BY s DESC;");
+q("品类件数", "SELECT p.category, SUM(oi.qty) q FROM order_items oi JOIN products p ON oi.product_id=p.id GROUP BY p.category ORDER BY q DESC;");
+q("全部订单按月", "SELECT DATE_FORMAT(order_date,'%Y-%m') ym, SUM(amount) s, COUNT(*) n FROM orders GROUP BY DATE_FORMAT(order_date,'%Y-%m') ORDER BY 1;");
+q("paid 订单按月", "SELECT DATE_FORMAT(order_date,'%Y-%m') ym, SUM(amount) s FROM orders WHERE status='paid' GROUP BY DATE_FORMAT(order_date,'%Y-%m') ORDER BY 1;");
+q("GROUP BY 别名是否支持", "SELECT status AS st, COUNT(*) n FROM orders GROUP BY st;");

@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>查询优化与慢 SQL · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 查询优化与慢 SQL：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 10 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">这里是本模块的一句话引言，用来说明你将学到什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能从慢查询日志与 <code>performance_schema</code> 中捞出「最贵的 SQL」，并说出它贵在哪一步。</li>
+      <li>能识别 6 类常见反模式（函数包裹索引列、<code>SELECT *</code>、<code>NOT IN</code>、相关子查询、<code>OR</code> 跨列、前导通配符）并写出等价改写。</li>
+      <li>能区分 NLJ / BNL / Hash Join 的触发条件与代价量级，并读懂 <code>EXPLAIN</code> 里的连接方式。</li>
+      <li>能用延迟关联或游标分页把深分页的扫描行数从 O(offset) 降到 O(n)。</li>
+      <li>能设计分批 + 幂等的批量写入方案，并用基线指标证明优化确实有效。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要先掌握：单表查询与多表连接（模块 02–04）、聚合与分组（模块 03）、子查询（模块 05）、索引与 EXPLAIN 基础（模块 09）。会读 <code>EXPLAIN</code> 的 <code>type</code>、<code>rows</code>、<code>Extra</code> 三列即可跟上本节。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>先定位，再改写<br>把「哪条 SQL 慢、慢在哪」说清楚</h2>
+  </section>
+
+  <!-- ========== 知识点 1 ========== -->
+  <section class="topic" id="tune-slowlog">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>慢查询日志与问题定位<span class="pt">slow query log · 找到真正贵的 SQL</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="tuning::tune-slowlog"><span>已学会</span></label>
+    </div>
+    <p>慢查询日志（slow query log）是 MySQL 记录「执行时间超过 <code>long_query_time</code> 的语句」的机制，是优化工作的入口。没有它，你只能靠用户投诉去猜哪条 SQL 有问题；有了它，慢 SQL 会自己浮出水面，还附带 <code>Query_time</code>、<code>Lock_time</code>、<code>rows_examined</code>、<code>rows_sent</code> 四个关键数字。</p>
+    <p>光看日志文件不够：日志是「逐条流水」，同一个语句模板可能每天执行几百万次，单次只有 200 ms 但累计吃掉一半 CPU。因此定位要分两层——<strong>先用聚合统计找出「总耗时最贵」的语句模板</strong>（<code>performance_schema.events_statements_summary_by_digest</code>），<strong>再用单条样本 + <code>EXPLAIN</code> 看它具体贵在哪一步</strong>。</p>
+    <ul>
+      <li>「慢」的定义由 <code>long_query_time</code> 决定，生产上常设 0.5–1 秒；它只影响记录，不改变执行。</li>
+      <li><code>rows_examined / rows_sent</code> 的比值是判断「扫了太多行」最直接的信号，比值远大于 1 通常意味着索引没用好。</li>
+      <li>慢日志只记录<strong>已经执行完</strong>的语句；正在锁等待、卡住的语句要靠 <code>SHOW FULL PROCESSLIST</code> 或 <code>performance_schema</code> 抓。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>slowlog.sql</div>
+      <pre><code>-- 1) 打开慢查询日志（MySQL 8.0，动态生效，无需重启）
+SET GLOBAL slow_query_log = ON;
+SET GLOBAL long_query_time = 1;              -- 单位：秒，可写小数如 0.5
+SET GLOBAL log_output = 'TABLE';             -- FILE / TABLE，双写用 'FILE,TABLE'
+SET GLOBAL log_queries_not_using_indexes = ON;
+
+-- 2) 用 performance_schema 按「总耗时」找 TOP 10 语句模板
+SELECT DIGEST_TEXT                     AS 语句模板,
+       COUNT_STAR                      AS 执行次数,
+       ROUND(SUM_TIMER_WAIT / 1e12, 2) AS 总耗时秒,
+       ROUND(AVG_TIMER_WAIT / 1e9, 2)  AS 平均毫秒,
+       SUM_ROWS_EXAMINED               AS 总扫描行,
+       SUM_ROWS_SENT                   AS 总返回行
+FROM performance_schema.events_statements_summary_by_digest
+WHERE SCHEMA_NAME = 'shop'
+ORDER BY SUM_TIMER_WAIT DESC
+LIMIT 10;
+
+-- 3) 命令行快速聚合慢日志（-s c 按出现次数排序，-t 10 取前 10 条）
+-- mysqldumpslow -s c -t 10 /var/lib/mysql/slow.log
+
+-- 4) 抓「正在跑 / 正在等锁」的语句（慢日志看不到这些）
+SHOW FULL PROCESSLIST;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>定位手段</th><th>能看到什么</th><th>局限</th></tr></thead>
+      <tbody>
+        <tr><td>慢查询日志 slow query log</td><td>执行时间 ≥ 阈值的完整语句，含 Query_time / Lock_time / rows_examined / rows_sent</td><td>只记录执行完的语句；量大需轮转，文本参数被原样写出</td></tr>
+        <tr><td><code>performance_schema</code> digest 表</td><td>语句模板级聚合：执行次数、总耗时、平均耗时、总扫描行</td><td>需开启对应 consumer；语句被归一化成模板，看不到具体参数</td></tr>
+        <tr><td><code>SHOW FULL PROCESSLIST</code></td><td>当前正在执行或等待锁的语句与状态</td><td>只是瞬时快照，执行完就消失</td></tr>
+        <tr><td><code>EXPLAIN</code> / <code>EXPLAIN ANALYZE</code></td><td>访问方式、预估行数（ANALYZE 还能给实际耗时与实际行数）</td><td>得先把慢 SQL 捞出来，无法自动发现问题</td></tr>
+        <tr><td><code>SHOW ENGINE INNODB STATUS</code></td><td>最近一次死锁详情、当前事务与锁等待</td><td>只保留最近一次，历史需靠监控</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>定位慢 SQL 看三层数字——「总耗时」（谁最贵）、「平均耗时 × 次数」（值不值得优化）、「rows_examined / rows_sent」（贵在哪一步）。一个平均 5 ms 但每秒 20 万次的语句，比一条 3 秒的报表 SQL 更值得先动手。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>慢日志不是万能的。被锁阻塞的语句、还没执行完的长事务都不会进慢日志；只看慢日志容易漏掉「锁等待导致的雪崩」。另外 <code>log_queries_not_using_indexes = ON</code> 在小表上会产生大量噪音日志，生产环境务必配合 <code>log_throttle_queries_not_using_indexes</code> 限流。</p></div>
+  </section>
+
+  <!-- ========== 知识点 2 ========== -->
+  <section class="topic" id="tune-rewrite">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>SQL 重写技巧<span class="pt">query rewrite · 不改索引也能变快</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="tuning::tune-rewrite"><span>已学会</span></label>
+    </div>
+    <p>SQL 重写（query rewrite）是指在不改变业务语义的前提下，把语句换成优化器更容易用上索引、扫描更少行的等价形式。它是最便宜、见效最快的优化手段：不需要加索引、不需要改表结构，很多慢 SQL 只是被写成了「索引无法使用」的形状。</p>
+    <p>重写的核心原则只有一句话：<strong>让索引列保持「裸露」</strong>——不要在 <code>WHERE</code> 的条件列上套函数、做算术、做隐式类型转换，也不要让列被 <code>OR</code>、<code>NOT IN</code>、前导 <code>%</code> 破坏掉可定位性。其次才是减少搬运：<code>SELECT *</code> 会让「覆盖索引」这条捷径失效。</p>
+    <ul>
+      <li><code>WHERE YEAR(order_date) = 2024</code> 中的 <code>YEAR()</code> 让 <code>order_date</code> 索引失效，改成范围条件即可命中。</li>
+      <li><code>NOT IN (子查询)</code> 遇到内表 NULL 时结果恒为空，性能与语义都有坑，优先用 <code>NOT EXISTS</code> 或 <code>LEFT JOIN ... IS NULL</code>。</li>
+      <li>相关子查询（correlated subquery）会对驱动表每一行执行一次内层查询，绝大多数场景可改写成 <code>JOIN + GROUP BY</code> 一次扫描完成。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>rewrite.sql</div>
+      <pre><code>-- ❌ 反模式 1：函数包裹索引列 → 索引失效，全表扫描
+SELECT id, amount FROM orders WHERE YEAR(order_date) = 2024;
+-- ✅ 改写：换成范围条件，order_date 索引可用
+SELECT id, amount FROM orders
+WHERE order_date &gt;= '2024-01-01' AND order_date &lt; '2025-01-01';
+
+-- ❌ 反模式 2：SELECT * → 无法用覆盖索引，必定回表
+SELECT * FROM orders WHERE customer_id = 3;
+-- ✅ 改写：只取需要的列
+SELECT id, order_date, amount FROM orders WHERE customer_id = 3;
+
+-- ❌ 反模式 3：NOT IN 子查询（内表含 NULL 时结果恒空）
+SELECT * FROM customers c
+WHERE c.id NOT IN (SELECT o.customer_id FROM orders o);
+-- ✅ 改写：NOT EXISTS（或 LEFT JOIN ... WHERE o.customer_id IS NULL）
+SELECT c.* FROM customers c
+WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.id);
+
+-- ❌ 反模式 4：相关子查询，外层每行执行一次内层查询
+SELECT c.name,
+       (SELECT SUM(o.amount) FROM orders o WHERE o.customer_id = c.id) AS 总额
+FROM customers c;
+-- ✅ 改写：JOIN + GROUP BY，一次扫描完成
+SELECT c.name, SUM(o.amount) AS 总额
+FROM customers c LEFT JOIN orders o ON o.customer_id = c.id
+GROUP BY c.id, c.name;
+
+-- ❌ 反模式 5：OR 跨列，单索引无法同时命中
+SELECT id, customer_id, status FROM orders
+WHERE customer_id = 3 OR status = 'paid';
+-- ✅ 改写：UNION ALL 拆成两条各自可走索引的查询（用 &lt;&gt; 避免重复行）
+SELECT id, customer_id, status FROM orders WHERE customer_id = 3
+UNION ALL
+SELECT id, customer_id, status FROM orders WHERE status = 'paid' AND customer_id &lt;&gt; 3;
+
+-- ❌ 反模式 6：前导通配符，B+ 树无法定位
+SELECT id, name FROM products WHERE name LIKE '%手机%';
+-- ✅ 改写：前缀匹配可用索引；全文检索需求请用 FULLTEXT 索引
+SELECT id, name FROM products WHERE name LIKE '手机%';</code></pre>
+    </div>
+    <p>注意：最后两条（<code>UNION ALL</code> 与前导通配符）在下方练习台里跑不了，练习台只支持 <code>SELECT</code> 的常规语法，请到真实数据库里用 <code>EXPLAIN</code> 验证改写效果。</p>
+
+    <table class="tbl">
+      <thead><tr><th>反模式</th><th>为什么慢</th><th>改写方向</th></tr></thead>
+      <tbody>
+        <tr><td><code>WHERE YEAR(col) = 2024</code></td><td>条件列被函数包裹，索引无法定位 → 全表扫描</td><td>改成 <code>col &gt;= A AND col &lt; B</code> 的范围条件</td></tr>
+        <tr><td><code>SELECT *</code></td><td>传输多、必定回表、覆盖索引失效</td><td>只列需要的字段，必要时把过滤列也放进索引</td></tr>
+        <tr><td><code>NOT IN (子查询)</code></td><td>内表有 NULL 时结果恒空；半连接优化易被破坏</td><td><code>NOT EXISTS</code> / <code>LEFT JOIN ... IS NULL</code></td></tr>
+        <tr><td>相关子查询</td><td>驱动表每行执行一次内层查询，复杂度 O(n×m)</td><td><code>JOIN + GROUP BY</code> 或窗口函数一次扫描</td></tr>
+        <tr><td><code>OR</code> 跨不同列</td><td>单一索引无法同时满足两侧条件，易退化为全扫</td><td><code>UNION ALL</code> 拆成多条可走索引的查询</td></tr>
+        <tr><td><code>LIKE '%xx%'</code></td><td>前导通配符无法用 B+ 树做范围定位</td><td>改前缀匹配 <code>'xx%'</code>，或使用 <code>FULLTEXT</code> 索引</td></tr>
+        <tr><td><code>WHERE varchar_col = 123</code></td><td>隐式类型转换等价于对列做函数运算，索引失效</td><td>补上引号，保持类型一致</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>重写的第一优先级是「让索引可用」：索引列不参与运算、不做隐式转换、不被 <code>OR</code> 拆散。第二优先级是「少搬数据」：只取需要的列，让覆盖索引真正生效。语义等价是底线，改完必须比对结果集行数与关键值。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>NOT IN</code> 与 <code>NOT EXISTS</code> 在<strong>内表有 NULL</strong> 时结果不同：前者返回空集，后者正常返回。改写前先确认连接列是否 <code>NOT NULL</code>，否则你改的是 bug 不是性能。另外 <code>OR</code> 改 <code>UNION ALL</code> 时记得用 <code>&lt;&gt;</code> 排除重叠条件，否则行数会翻倍。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：SQL 重写对比器</span><span class="hint">点场景按钮，看坏写法 / 好写法与代价对比</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>改写场景</label>
+          <button class="b" data-rw="0">日期函数 → 范围</button>
+          <button class="b" data-rw="1">SELECT * → 取列</button>
+          <button class="b" data-rw="2">NOT IN → NOT EXISTS</button>
+          <button class="b" data-rw="3">相关子查询 → JOIN</button>
+          <button class="b" data-rw="4">OR 跨列 → UNION ALL</button>
+        </div>
+        <div id="rwOut"></div>
+        <div id="rwBars" style="margin-top:12px"></div>
+        <div class="log" id="rwLog"></div>
+        <div class="foot">提示：估算基于 orders 约 100 万行的生产规模——内置示例表只有 12 行订单，数据量太小看不出差距，这里用行数量级说明代价差异。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>连接与分页<br>代价最大的两块</h2>
+  </section>
+
+  <!-- ========== 知识点 3 ========== -->
+  <section class="topic" id="tune-join-algo">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>JOIN 算法（NLJ / BNL / Hash Join）<span class="pt">join algorithms · 决定多表查询的量级</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="tuning::tune-join-algo"><span>已学会</span></label>
+    </div>
+    <p>MySQL 8.0 的 <code>EXPLAIN FORMAT=JSON</code> 会把整棵连接计划包在一个 <code>nested_loop</code> 里，但「嵌套循环」只是骨架，真正决定代价的是每一步用哪种算法：被驱动表的连接列<strong>有索引</strong>时用索引嵌套循环（Index Nested-Loop Join，INLJ）；<strong>没索引</strong>时 8.0.18 之前用块嵌套循环（Block Nested-Loop Join，BNL），8.0.18 引入、8.0.20 起全面替代 BNL 的是哈希连接（Hash Join）。</p>
+    <p>理解它们只需要抓住「谁被扫、扫几次」：INLJ 里驱动表的每一行都去被驱动表做一次索引查找，代价是 <code>驱动行数 × log(被驱动行数)</code>；BNL 把驱动表按 <code>join_buffer_size</code> 分块，每块全扫一遍被驱动表，代价是 <code>被驱动行数 × 块数</code>；Hash Join 用较小的表在内存建哈希表，大表只探测一次，代价约 <code>两表行数之和</code>。</p>
+    <ul>
+      <li>等值连接 + 被驱动表连接列有索引 → 优化器首选 INLJ，这是最理想的情况。</li>
+      <li>被驱动表无索引的等值连接 → 8.0.20 之后用 Hash Join；老版本用 BNL，靠调大 <code>join_buffer_size</code> 减少块数来缓解。</li>
+      <li>Hash Join 只适用于等值连接（<code>=</code>）；范围连接、非等值连接仍走嵌套循环。</li>
+      <li>优化顺序永远是：<strong>先给被驱动表的连接列建索引</strong>，再考虑驱动表选择与连接顺序。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>join-algo.sql</div>
+      <pre><code>-- 1) 看清连接算法与顺序：8.0 用 nested_loop 包裹整棵计划
+EXPLAIN FORMAT=JSON
+SELECT c.name, o.amount
+FROM orders o
+JOIN customers c ON c.id = o.customer_id
+WHERE o.status = 'paid';
+-- 关注：blockNestedLoop / usingJoinBuffer / hashJoin 等字段，
+-- 以及 customers 的 type 是否为 eq_ref（INLJ 的理想形态）
+
+-- 2) 8.0.18+ 的优化器提示：强制或禁用 Hash Join
+SELECT /*+ HASH_JOIN(c, o) */ c.name, o.amount
+FROM orders o JOIN customers c ON c.id = o.customer_id;
+
+SELECT /*+ NO_HASH_JOIN(c, o) NO_BNL(c) */ c.name, o.amount
+FROM orders o JOIN customers c ON c.id = o.customer_id;
+
+-- 3) 老版本 BNL 的关键参数：缓冲区越大，被驱动表全扫的块数越少
+SHOW VARIABLES LIKE 'join_buffer_size';
+
+-- 4) 最根本的优化：给被驱动表的连接列建索引，让它从 BNL/Hash 变成 INLJ
+CREATE INDEX idx_orders_customer ON orders (customer_id);</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>算法</th><th>触发条件</th><th>代价量级</th><th>EXPLAIN 特征</th></tr></thead>
+      <tbody>
+        <tr><td>INLJ（Index Nested-Loop Join）</td><td>被驱动表连接列有索引</td><td>驱动表行数 × 一次索引查找</td><td>被驱动表 <code>type=ref/eq_ref</code>，<code>Extra</code> 无 join buffer 提示</td></tr>
+        <tr><td>BNL（Block Nested-Loop Join）</td><td>被驱动表无索引，8.0.18 之前</td><td>被驱动表全扫 × 分块数</td><td><code>Extra: Using join buffer (Block Nested Loop)</code></td></tr>
+        <tr><td>Hash Join</td><td>等值连接且无可用索引，8.0.18+</td><td>约「两表行数之和」，各扫一次</td><td><code>Extra: Using join buffer (hash join)</code></td></tr>
+        <tr><td>Simple NLJ</td><td>无索引且无法使用 join buffer</td><td>笛卡尔积级别，MySQL 实际极少使用</td><td>计划中直接嵌套全扫</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>多表查询的优化口诀——「小表驱动大表 + 被驱动表连接列必须有索引」。有了索引就是 INLJ，量级从「乘积」降为「和」；没有索引才会掉进 BNL 或 Hash Join。看到 <code>Using join buffer</code> 就该先想「这里是不是缺一个索引」。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>8.0.20 起 BNL 已逐步被 Hash Join 取代，网上大量「调大 <code>join_buffer_size</code> 优化 BNL」的老经验需要重新验证；在 8.0.20+ 上调这个参数通常不再有效。另外 Hash Join 在内存不足时会落盘（Grace Hash Join），反而变慢，别盲目用 hint 强制它。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：JOIN 算法演示器</span><span class="hint">切换算法，看行处理量与适用条件</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>连接算法</label>
+          <button class="b" data-ja="inlj">INLJ</button>
+          <button class="b" data-ja="bnl">BNL</button>
+          <button class="b" data-ja="hash">Hash Join</button>
+        </div>
+        <div id="jaOut"></div>
+        <div id="jaBars" style="margin-top:12px"></div>
+        <div class="log" id="jaLog"></div>
+        <div class="foot">场景：orders 约 100 万行（status='paid' 约 70 万行）、customers 8 万行，按 customer_id 等值连接。数字为量级估算，用于比较算法优劣，不代表精确值。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 知识点 4 ========== -->
+  <section class="topic" id="tune-paging">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>深分页优化<span class="pt">deep pagination · 把 O(offset) 降到 O(n)</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="tuning::tune-paging"><span>已学会</span></label>
+    </div>
+    <p>深分页（deep pagination）指的是 <code>LIMIT offset, n</code> 中 <code>offset</code> 很大的场景，比如第 50000 页。很多人以为 <code>LIMIT</code> 会让 MySQL「只取 20 行」，其实恰恰相反：<strong>MySQL 必须先按 <code>ORDER BY</code> 定位并读取前 <code>offset + n</code> 行，然后丢弃前 <code>offset</code> 行</strong>。offset 越大，扫描行数线性增长，而且如果查询用到非索引列，还要回表 <code>offset + n</code> 次。</p>
+    <p>优化思路有三条，代价从高到低：<strong>延迟关联</strong>（deferred join）先在索引上翻页拿到主键，再回表只取 n 行，把回表次数从 <code>offset+n</code> 降到 <code>n</code>，但仍要扫 <code>offset+n</code> 行索引；<strong>游标分页</strong>（keyset pagination）用「上一页最后一条的排序键」作为起点，扫描行数恒定为 <code>n</code>，代价与页深无关；<strong>覆盖索引</strong>让整个翻页过程不回表。</p>
+    <ul>
+      <li><code>LIMIT offset, n</code> 的代价与 offset 成正比，是深分页的根因，不是索引「没建好」。</li>
+      <li>延迟关联适合必须支持「跳到任意页」的旧接口；游标分页适合「下一页 / 下拉加载」的产品形态。</li>
+      <li>游标分页的排序键必须<strong>唯一且稳定</strong>，否则可能出现漏行或重复行（常见做法是 <code>(created_at, id)</code> 复合游标）。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>paging.sql</div>
+      <pre><code>-- ① 朴素深分页：扫描 offset + n 行，回表 offset + n 次
+SELECT id, customer_id, order_date, amount
+FROM orders
+ORDER BY id
+LIMIT 1000000, 20;
+
+-- ② 延迟关联：先在索引上翻页拿到主键，再回表只取 20 行
+SELECT o.id, o.customer_id, o.order_date, o.amount
+FROM orders o
+JOIN (SELECT id FROM orders ORDER BY id LIMIT 1000000, 20) t ON t.id = o.id;
+
+-- ③ 游标分页：记住上一页最后一条的主键，直接定位，代价恒定
+SELECT id, customer_id, order_date, amount
+FROM orders
+WHERE id &gt; 1000020          -- 上一页最后一条的 id
+ORDER BY id
+LIMIT 20;
+
+-- ④ 复合游标：排序键不唯一时用 (order_date, id) 保证不漏行
+SELECT id, order_date, amount
+FROM orders
+WHERE (order_date, id) &gt; ('2024-06-01', 1000020)
+ORDER BY order_date, id
+LIMIT 20;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>方案</th><th>扫描行数</th><th>优点</th><th>限制</th></tr></thead>
+      <tbody>
+        <tr><td><code>LIMIT offset, n</code></td><td>offset + n，回表 offset + n 次</td><td>写法最简单，支持任意跳页</td><td>页越深越慢，代价线性增长</td></tr>
+        <tr><td>延迟关联</td><td>offset + n 索引行 + n 次回表</td><td>回表次数从 offset+n 降到 n</td><td>仍要扫 offset + n 行索引</td></tr>
+        <tr><td>游标分页</td><td>n</td><td>代价恒定，与页深无关</td><td>只能「下一页」，不能随机跳页</td></tr>
+        <tr><td>覆盖索引 + 主键区间</td><td>n（不回表）</td><td>最快，可直接定位</td><td>需要单调递增主键或时间戳</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>深分页的本质是「MySQL 要数到 offset 才能开始取」，任何在 <code>LIMIT</code> 前加 <code>ORDER BY</code> 的写法都逃不掉这一步。真正的解法是<strong>不要用 offset 定位</strong>——改用「上一页最后一条的排序键」做游标；确实要支持跳页时，用延迟关联把回表次数压到 n。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>游标分页在并发插入场景下是「稳定但不重复」的：新插入的行不会出现在后续页里，这通常是可接受的；但如果业务要求「绝对快照」，就得改用时间范围 + 快照读。另外 <code>ORDER BY</code> 的列必须与游标条件列一致，否则索引失效、退化成全表排序。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：深分页优化器</span><span class="hint">拖动滑块调 offset，看扫描行数与回表次数</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>offset</label>
+          <input type="range" id="pgRange" min="0" max="20000" step="100" value="4000" style="width:220px">
+          <span class="log" id="pgVal" style="margin:0;padding:4px 10px"></span>
+        </div>
+        <div id="pgCurve"></div>
+        <div id="pgOut" style="margin-top:10px"></div>
+        <div class="log" id="pgLog"></div>
+        <div class="foot">场景：orders 约 200 万行，每页 20 条。曲线为「朴素 LIMIT offset,n」的扫描行数随 offset 增长；游标分页是一条贴近横轴的水平线。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>统计与写入<br>优化器怎么看表，我们怎么写</h2>
+  </section>
+
+  <!-- ========== 知识点 5 ========== -->
+  <section class="topic" id="tune-count">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>COUNT 与统计信息<span class="pt">count &amp; statistics · 语义差别与优化器决策</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="tuning::tune-count"><span>已学会</span></label>
+    </div>
+    <p><code>COUNT</code> 家族的写法看着差不多，语义和代价却不同：<code>COUNT(*)</code> 与 <code>COUNT(1)</code> 统计行数、不忽略 NULL；<code>COUNT(col)</code> 只统计该列非空的行；<code>COUNT(DISTINCT col)</code> 统计去重后的非空个数，代价明显更高。在 InnoDB 里，<code>COUNT(*)</code> 并不读取每一行的全部数据，而是选择一棵较小的二级索引扫描计数——所以「<code>COUNT(*)</code> 比 <code>COUNT(1)</code> 慢」是过时的说法，MySQL 8.0 中二者等价。</p>
+    <p>统计信息（statistics）是优化器决策的依据：它靠 <code>table_rows</code>（表行数估算）、索引 <code>Cardinality</code>（列基数估算）和数据分布来估算「走索引还是全表扫」「选哪张表做驱动表」。统计信息一旦过期或采样偏差大，优化器就可能选错索引——这类「昨天还快、今天突然慢」的问题，第一步就是 <code>ANALYZE TABLE</code> 再重看 <code>EXPLAIN</code>。</p>
+    <ul>
+      <li>InnoDB 不保存精确行数，<code>information_schema.tables.table_rows</code> 只是估算值，不能当 <code>COUNT(*)</code> 用。</li>
+      <li><code>COUNT(DISTINCT col)</code> 需要去重，代价高；海量数据上的「大致有多少」可以接受估算值或汇总表。</li>
+      <li><code>ANALYZE TABLE</code> 重新采样统计信息；8.0 默认 <code>innodb_stats_auto_recalc = ON</code>，但大表仍会有采样误差。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>count-stats.sql</div>
+      <pre><code>-- 1) COUNT 家族的语义差别（customers 共 8 行，id=8 的 city 为 NULL）
+SELECT COUNT(*)             AS 全表行数,      -- 8：不忽略任何行
+       COUNT(city)          AS 非空城市数,    -- 7：忽略 NULL
+       COUNT(DISTINCT city) AS 去重城市数,    -- 5：北京 / 上海 / 广州 / 深圳 / 杭州
+       COUNT(1)             AS 等价写法      -- 8：与 COUNT(*) 等价
+FROM customers;
+
+-- 2) 统计信息：优化器靠它估行数、选索引
+SELECT table_name, table_rows, avg_row_length
+FROM information_schema.tables
+WHERE table_schema = 'shop' AND table_name = 'orders';   -- table_rows 是估算值
+
+SHOW INDEX FROM orders;      -- 关注 Cardinality（索引基数估算）
+ANALYZE TABLE orders;        -- 重新采样，解决「选错索引」
+
+-- 3) 验证估算准不准：EXPLAIN 的 rows 是估算，EXPLAIN ANALYZE 给实际行数
+EXPLAIN SELECT id FROM orders WHERE status = 'paid' AND customer_id = 3;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>写法</th><th>语义</th><th>是否忽略 NULL</th><th>性能提示</th></tr></thead>
+      <tbody>
+        <tr><td><code>COUNT(*)</code></td><td>行数</td><td>不忽略</td><td>InnoDB 选较小二级索引扫描计数，最常用</td></tr>
+        <tr><td><code>COUNT(1)</code></td><td>行数</td><td>不忽略</td><td>与 <code>COUNT(*)</code> 等价，8.0 中无性能差异</td></tr>
+        <tr><td><code>COUNT(col)</code></td><td>col 非空值个数</td><td>忽略</td><td>需判断该列是否为 NULL</td></tr>
+        <tr><td><code>COUNT(DISTINCT col)</code></td><td>去重后的非空个数</td><td>忽略</td><td>代价高，可用汇总表或估算值替代</td></tr>
+      </tbody>
+    </table>
+
+    <table class="tbl">
+      <thead><tr><th>统计信息来源</th><th>内容</th><th>特点</th></tr></thead>
+      <tbody>
+        <tr><td><code>information_schema.tables.table_rows</code></td><td>表行数估算</td><td>来自统计信息，不精确，不能当 <code>COUNT(*)</code> 用</td></tr>
+        <tr><td><code>SHOW INDEX ... Cardinality</code></td><td>索引列基数估算</td><td>决定优化器是否愿意走该索引</td></tr>
+        <tr><td><code>ANALYZE TABLE</code></td><td>重新采样统计信息</td><td>大表有采样误差，频繁执行有成本</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>两句话记住——① <code>COUNT(*)</code> 与 <code>COUNT(1)</code> 在 InnoDB 中完全等价，别再背「<code>COUNT(1)</code> 更快」；② <code>table_rows</code> 是估算值，优化器用它做决策，但业务上要精确数字只能老老实实 <code>COUNT(*)</code> 或维护汇总表。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>用 <code>COUNT(col)</code> 去统计「有多少条记录」会漏掉 NULL 行（比如 <code>COUNT(city)</code> 得到 7 而不是 8）。另一个坑是分页总数：每次请求都 <code>SELECT COUNT(*)</code> 大表，代价可能比查询本身还高，常见做法是「最多数到 1000 条」或维护计数汇总表。</p></div>
+
+    <div id="demo-count"></div>
+  </section>
+
+  <!-- ========== 知识点 6 ========== -->
+  <section class="topic" id="tune-batch">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>批量操作与大事务拆分<span class="pt">batch &amp; transaction splitting · 控制影响面</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="tuning::tune-batch"><span>已学会</span></label>
+    </div>
+    <p>一次影响几百万行的 <code>DELETE</code> / <code>UPDATE</code> / <code>INSERT</code> 会形成一个大事务（long transaction）：undo 日志持续膨胀、行锁/间隙锁长时间持有、binlog 里出现一个巨大的事务，从库要等它全部执行完才能推进——主从延迟就是这么来的。批量操作优化的核心不是「让语句更快」，而是<strong>把一个大动作切成许多小动作</strong>，让每个事务都短小可控。</p>
+    <p>标准做法是「分批 + 按主键推进 + 逐批提交 + 批间留间隔」：每批处理 500–2000 行，用主键区间或 <code>ORDER BY id LIMIT n</code> 推进，批间 <code>SLEEP</code> 一小段时间让从库追上；同时必须保证操作<strong>幂等</strong>，因为中途失败后你只会重跑某一批，而不是从头再来。批量插入则相反，要把多条 <code>VALUES</code> 合并成一条 <code>INSERT</code>，减少网络往返与解析开销。</p>
+    <ul>
+      <li>大事务的风险：undo 膨胀、锁等待、主从延迟、失败回滚成本高、binlog 暴涨。</li>
+      <li>分批的关键参数：批大小（500–2000 行）、批间 sleep、每批独立的提交边界、进度可续跑。</li>
+      <li>在线 DDL 用 <code>pt-online-schema-change</code> / <code>gh-ost</code>，不要直接 <code>ALTER</code> 千万行大表。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>batch.sql</div>
+      <pre><code>-- ❌ 大事务：一次删除 500 万行，undo 膨胀 + 锁持有久 + 主从延迟
+DELETE FROM orders WHERE status = 'cancelled';
+
+-- ✅ 分批删除：按主键区间推进，每批 1000 行，逐批提交
+DELETE FROM orders
+WHERE status = 'cancelled' AND id BETWEEN 1 AND 1000;
+
+-- ✅ 循环推进（伪代码）：每批提交后把上界 +1000，批间 sleep 观察复制延迟
+-- WHILE 上批受影响行数 &gt; 0:
+--   DELETE FROM orders WHERE status = 'cancelled' AND id &gt; :last_id
+--   ORDER BY id LIMIT 1000;
+--   SELECT SLEEP(0.1);
+
+-- ✅ 批量插入：一条 INSERT 多组值，比逐条插入快一个数量级
+INSERT INTO order_items (order_id, product_id, qty, unit_price) VALUES
+  (1, 1, 2, 9.90), (1, 2, 1, 19.90), (2, 3, 3, 5.50);
+
+-- ✅ 批量更新：用派生表 JOIN 一次更新多行，避免逐行往返
+UPDATE products p
+JOIN (SELECT 1 AS id, 8.80 AS price UNION ALL SELECT 2, 18.80) t ON t.id = p.id
+SET p.price = t.price;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>维度</th><th>一个大事务（500 万行）</th><th>分批（每批 1000 行）</th></tr></thead>
+      <tbody>
+        <tr><td>undo / redo 日志</td><td>持续膨胀，可能撑爆 undo 表空间</td><td>每批结束后可回收</td></tr>
+        <tr><td>锁持有时间</td><td>全程持有，阻塞其他写入</td><td>每批短暂持有，冲突面小</td></tr>
+        <tr><td>主从复制延迟</td><td>单个大 binlog 事务，从库长时间追不上</td><td>批间间隔可控，延迟可观察</td></tr>
+        <tr><td>失败重试成本</td><td>整体回滚，前面的工作全部白做</td><td>只需重跑当前批（要求幂等）</td></tr>
+        <tr><td>原子性</td><td>天然原子</td><td>需靠幂等 + 进度记录来保证最终一致</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>批量操作的黄金公式——「小批次 + 主键推进 + 逐批提交 + 批间间隔 + 幂等可重跑」。批大小不是越小越好：太小会让事务数量暴涨、开销占比升高，500–2000 行是常用区间，最终要用实测的主从延迟与 IO 使用率来定。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>分批删除时若 <code>WHERE</code> 只有非索引条件，每批仍会全表扫描，必须配合主键或索引条件推进。批间不 sleep、不监控复制延迟，会把从库拖垮；另外别忘了 <code>DELETE ... LIMIT</code> 在某些隔离级别下可能扩大锁范围，建议先 <code>EXPLAIN</code> 确认走的索引。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">04</span>闭环<br>从「感觉快了」到「证明快了」</h2>
+  </section>
+
+  <!-- ========== 知识点 7 ========== -->
+  <section class="topic" id="tune-flow">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>优化流程与效果验证<span class="pt">optimization workflow · 可复现、可回滚、可度量</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="tuning::tune-flow"><span>已学会</span></label>
+    </div>
+    <p>优化不是「改完试试看」，而是一个闭环：<strong>发现 → 采集基线 → 定位瓶颈 → 提出假设并验证 → 灰度上线 → 记录结论并回归监控</strong>。其中最容易跳过、也最关键的一步是「采集基线」：没有优化前的 <code>rows_examined</code>、平均耗时、P99 和 <code>EXPLAIN</code> 计划，你根本无法判断改动到底有没有用，也无法在出问题时回滚。</p>
+    <p>验证要落到可对比的数字上：同一份数据量、同一条 SQL、同一套参数，优化前后各跑一次，对比「扫描行数、返回行数、平均耗时、P99、回表次数、复制延迟」。特别要注意 <strong><code>EXPLAIN</code> 的 <code>rows</code> 是估算值</strong>，<code>EXPLAIN ANALYZE</code>（8.0.18+）才会给出实际执行行数与耗时，两者结合才能判断优化器是否「估准了」。</p>
+    <ul>
+      <li>基线三件套：<code>EXPLAIN ANALYZE</code> 输出、同一语句的耗时统计、慢日志/监控里的 P99 曲线。</li>
+      <li>每次只改一个变量（要么改 SQL、要么加索引），否则无法归因。</li>
+      <li>上线要灰度：先在从库或小流量验证，观察复制延迟与错误率，准备好回滚脚本。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>verify.sql</div>
+      <pre><code>-- ① 采集基线：优化前后用同一语句模板对比（清空后再采集更干净）
+TRUNCATE TABLE performance_schema.events_statements_summary_by_digest;
+
+SELECT DIGEST_TEXT,
+       COUNT_STAR,
+       ROUND(AVG_TIMER_WAIT / 1e9, 2) AS 平均毫秒,
+       SUM_ROWS_EXAMINED              AS 总扫描行,
+       SUM_ROWS_SENT                  AS 总返回行
+FROM performance_schema.events_statements_summary_by_digest
+ORDER BY SUM_TIMER_WAIT DESC
+LIMIT 5;
+
+-- ② 看清计划：EXPLAIN 给估算，EXPLAIN ANALYZE 给实际行数与耗时
+EXPLAIN ANALYZE
+SELECT c.name, SUM(o.amount) AS 总额
+FROM customers c JOIN orders o ON o.customer_id = c.id
+WHERE o.order_date &gt;= '2024-01-01'
+GROUP BY c.id, c.name
+ORDER BY 总额 DESC
+LIMIT 10;
+
+-- ③ 上线后回归：确认统计信息与新索引被正确使用
+SHOW INDEX FROM orders;
+ANALYZE TABLE orders;</code></pre>
+    </div>
+
+    <div class="mermaid">
+flowchart TD
+  A["发现慢 SQL：慢日志 / 监控告警"] --> B["采集基线：耗时 + rows_examined + EXPLAIN"]
+  B --> C["定位瓶颈：扫描行 / 回表 / 排序 / 锁等待"]
+  C --> D["提出假设并验证：改 SQL / 加索引 / 调参数"]
+  D --> E["灰度上线：观察 P99 与主从延迟"]
+  E --> F["记录结论：沉淀规范与监控项"]
+</div>
+
+    <table class="tbl">
+      <thead><tr><th>指标</th><th>优化前</th><th>优化后</th><th>怎么取</th></tr></thead>
+      <tbody>
+        <tr><td>扫描行数 rows_examined</td><td>1,000,000</td><td>205,000</td><td><code>EXPLAIN ANALYZE</code> / digest 统计</td></tr>
+        <tr><td>返回行数 rows_sent</td><td>20</td><td>20</td><td>同上，与扫描行比值越接近 1 越好</td></tr>
+        <tr><td>平均耗时</td><td>1,850 ms</td><td>42 ms</td><td>慢日志 / digest 统计</td></tr>
+        <tr><td>P99 耗时</td><td>3,200 ms</td><td>90 ms</td><td>监控系统</td></tr>
+        <tr><td>回表次数</td><td>1,000,020</td><td>20</td><td><code>EXPLAIN</code> 的 type 与 Extra</td></tr>
+        <tr><td>主从复制延迟</td><td>12 s</td><td>&lt; 1 s</td><td><code>SHOW REPLICA STATUS</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>没有基线的优化等于没做。结论要能写成一句话：「这条 SQL 的扫描行数从 100 万降到 20.5 万，P99 从 3.2 s 降到 90 ms，依据是 <code>EXPLAIN ANALYZE</code> 的 actual rows 与监控 P99 曲线」。同时把这次的经验沉淀成规范或监控项，避免同类问题再犯。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>只在开发库小数据上验证——示例表 12 行订单走全表扫描也很快，优化器的选择与百万行时完全不同；用「感觉快多了」当结论；以及忘记 <code>EXPLAIN</code> 的 <code>rows</code> 只是估算值，误把估算当实际。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>给定 <code>SELECT * FROM orders WHERE DATE_FORMAT(order_date,'%Y-%m') = '2024-03' AND amount + 0 &gt; 100</code>，写出两条等价改写，并分别说明它们能命中哪个索引、为什么。</li>
+      <li>orders 表 2000 万行，产品要求「能跳到第 50 万页」。请设计一个既支持跳页又把代价压到最低的方案（提示：覆盖索引子查询 + 延迟关联，或改为时间范围筛选）。</li>
+      <li>一条更新 300 万行的语句在业务高峰期执行，导致主从延迟 40 分钟。写出完整的分批 + 幂等 + 监控方案，包括批大小、推进条件、间隔与回滚思路。</li>
+      <li>如何用 <code>performance_schema</code> 与 <code>EXPLAIN ANALYZE</code> 证明一次优化「确实有效」而不是「感觉变快了」？请列出你要采集的 4 个指标和采集顺序。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "tuning",
+  title: "查询优化与慢 SQL",
+  eyebrow: "MODULE 10 · SQL / 数据库",
+  lead: "学会把一条慢 SQL 从「发现问题」到「证明优化有效」走完闭环：定位慢日志、重写语句、读懂连接算法、消灭深分页、管住大事务。",
+  points: ["tune-slowlog","tune-rewrite","tune-join-algo","tune-paging","tune-count","tune-batch","tune-flow"],
+  prev: "09-index-explain.html",
+  next: "11-storage-locks.html",
+};
+
+/* 考核题目：8–12 道，覆盖每个知识点，含 1 道面试延伸题。 */
+const QUZ = [
+  {
+    type:"quiz",
+    q:"关于用慢查询日志定位问题，下列说法正确的是？",
+    opts:[
+      "long_query_time 只能设成整数秒，最小值为 1 秒",
+      "慢查询日志能记录仍在锁等待、尚未执行完的语句",
+      "打开 log_queries_not_using_indexes 后日志量不会明显增长",
+      "判断一条 SQL 是否「扫了太多行」，应重点看 rows_examined 与 rows_sent 的比值"
+    ],
+    ans:3,
+    exp:"解析：rows_examined / rows_sent 的比值远大于 1，说明读了大量行却只返回少量结果，通常是索引没用好，这是最直接的信号。A 错在 long_query_time 支持小数（如 0.5）；B 错在慢日志只记录已经执行完的语句，锁等待中的语句要靠 SHOW FULL PROCESSLIST；C 错在小表或未建索引的查询会产生大量噪音日志，需要 log_throttle_queries_not_using_indexes 限流。"
+  },
+  {
+    type:"quiz",
+    q:"order_date 上已有普通索引，下面这条语句为什么慢？应该怎么改？",
+    sql:"SELECT id, amount FROM orders WHERE YEAR(order_date) = 2024;",
+    opts:[
+      "条件列被函数包裹导致索引失效，应改为 order_date >= '2024-01-01' AND order_date < '2025-01-01' 的范围条件",
+      "索引方向不对，应把索引改成前缀索引 idx(order_date(4))",
+      "优化器不够聪明，加 FORCE INDEX(order_date) 强制走索引即可",
+      "WHERE 不能和聚合函数混用，应改成 HAVING YEAR(order_date) = 2024"
+    ],
+    ans:0,
+    exp:"解析：YEAR(order_date) 让优化器无法用索引定位范围，只能全表扫描；改成对裸列的范围条件后，order_date 索引可正常做范围扫描。B 错在前缀索引按字符/字节前缀，与年份语义无关；C 错在强制走索引也不能解决「函数包裹列」的问题，FORCE INDEX 只是让优化器优先选某索引；D 错在 HAVING 是分组后过滤，此处没有 GROUP BY，语义与性能都不对。"
+  },
+  {
+    type:"quiz",
+    q:"下面这条 SQL 既有性能隐患又有语义陷阱，哪项改写最合适？",
+    sql:"SELECT * FROM customers c\nWHERE c.id NOT IN (SELECT o.customer_id FROM orders o);",
+    opts:[
+      "改成 NOT IN (SELECT IFNULL(o.customer_id, 0) FROM orders o)，用 IFNULL 消掉 NULL",
+      "加 /*+ NO_SEMIJOIN */ 提示阻止半连接优化，保持 NOT IN 不变",
+      "改成 NOT EXISTS 或 LEFT JOIN ... WHERE o.customer_id IS NULL，并确认连接列非空",
+      "给 orders.customer_id 建索引后保持 NOT IN 写法不动"
+    ],
+    ans:2,
+    exp:"解析：NOT IN 在内表出现 NULL 时结果恒为空集（三值逻辑），既是语义 bug 也阻碍优化；NOT EXISTS 或 LEFT JOIN ... IS NULL 既保留正确语义，又便于走索引。A 用 0 替换 NULL 是伪造数据，若存在 customer_id=0 会算错；B 阻止半连接优化只会更慢；D 建索引能缓解性能，但 NULL 语义问题依然存在。"
+  },
+  {
+    type:"quiz",
+    q:"MySQL 8.0.20 之后，被驱动表的连接列没有索引的等值连接，通常由哪种算法接管？",
+    opts:[
+      "Simple Nested-Loop Join，笛卡尔积式全扫",
+      "Hash Join，BNL 已逐步被它取代",
+      "Index Nested-Loop Join，靠索引查找被驱动表",
+      "Batched Key Access，靠 MRR 批量回表"
+    ],
+    ans:1,
+    exp:"解析：8.0.18 引入 Hash Join，8.0.20 起在没有可用索引的等值连接上全面取代 BNL，用小表建哈希表、大表探测一次，代价约为两表行数之和。A 在 MySQL 中极少使用；C 需要被驱动表连接列有索引，正好与题干「没有索引」矛盾；D 的 BKA 是借助 MRR 优化回表的方式，仍需索引存在。"
+  },
+  {
+    type:"quiz",
+    q:"这条深分页语句在 orders 表有主键索引的情况下，扫描行数大约是多少？",
+    sql:"SELECT id, customer_id, order_date, amount\nFROM orders ORDER BY id LIMIT 1000000, 20;",
+    opts:[
+      "只取 20 行，扫描 20 行",
+      "扫描 100 万行，与 offset 无关",
+      "约扫描 100 万零 20 行，并且回表约 100 万次",
+      "取决于 ORDER BY 是否走索引，与 offset 大小无关"
+    ],
+    ans:2,
+    exp:"解析：MySQL 必须按 ORDER BY 定位并读取前 offset + n 行，再丢弃前 offset 行，因此扫描量是 100 万零 20 行；由于查询列不在索引中，还要对每一行回表，回表约 100 万次。A 是常见误解；B 忽略了 n 且描述错误；D 错在代价恰恰与 offset 成正比，这正是深分页的根因。"
+  },
+  {
+    type:"quiz",
+    q:"在 InnoDB 中执行 SELECT COUNT(*) FROM orders; 的执行特点是？",
+    opts:[
+      "InnoDB 不保存精确行数，优化器会选一棵较小的二级索引扫描计数",
+      "直接读元数据 table_rows，代价为 O(1)",
+      "会锁表并全表扫描聚簇索引，必须改成 COUNT(1) 才快",
+      "结果一定等于 information_schema.tables 里的 table_rows"
+    ],
+    ans:0,
+    exp:"解析：InnoDB 不像 MyISAM 那样维护精确行数，COUNT(*) 需要实际扫描，但优化器会挑选最小的可用二级索引来减少 IO。B 混淆了「估算」与「精确」，table_rows 是统计信息估算值；C 错在 COUNT(*) 与 COUNT(1) 在 8.0 中完全等价，且普通 COUNT 不加锁；D 错在 table_rows 是采样估算，可能与真实行数相差很大。"
+  },
+  {
+    type:"quiz",
+    q:"把一条删除 500 万行的大事务拆成小批次，下列做法最稳妥的是？",
+    opts:[
+      "拆成 5000 条 DELETE，但全部放在同一个事务里最后一起提交",
+      "一次 DELETE ... LIMIT 1000000 重复 5 次，中间不停顿",
+      "用 TRUNCATE 代替 DELETE，忽略 WHERE 条件",
+      "按主键区间分批 DELETE（如每批 1000 行）并逐批提交，批间留出间隔观察主从延迟"
+    ],
+    ans:3,
+    exp:"解析：分批的价值在于让每个事务都短小：undo 可回收、锁持有时间短、binlog 小、失败只需重跑当前批；批间留间隔是为了让从库追上。A 把提交合并成一个，等于还是一个大事务；B 单批过大且无间隔，仍会长时间持锁并压垮从库；C 的 TRUNCATE 会清空整表，与带条件的删除语义完全不同。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪一项才算是「可验证的优化效果」？",
+    opts:[
+      "同事反馈改完之后感觉快多了",
+      "优化前后在相同数据量下的 rows_examined、平均耗时 P99 与 EXPLAIN 计划对照记录",
+      "把 long_query_time 调大，让这条语句不再出现在慢日志里",
+      "给 WHERE 里出现过的每一列都加一个单列索引"
+    ],
+    ans:1,
+    exp:"解析：优化结论必须建立在可对比的数字上——同一份数据量、同一条 SQL，前后对比扫描行数、耗时与执行计划。A 是主观感受，无法归因；C 只是把问题藏起来，语句依然慢；D 盲目加索引会拖慢写入、占空间，还可能让优化器选错索引，属于典型反模式。"
+  },
+  {
+    type:"interview",
+    q:"面试官问：「一张 5000 万行的订单表按 user_id 分页，前 10 页很快，第 100 万页很慢，你怎么回答？」最完整的回答是？",
+    opts:[
+      "加内存、调大 innodb_buffer_pool_size 就能解决",
+      "把 offset 换成 IN (SELECT id ... LIMIT offset,20) 子查询，其他不用改",
+      "先说明深分页本质是必须扫描 offset + n 行；优先把产品改为游标分页（WHERE id > 上次最大 id LIMIT 20），兼容旧接口时用延迟关联把回表压到 n 行，并确认排序键有索引且唯一",
+      "用 LIMIT 20 忽略 offset，靠前端过滤掉前面几条"
+    ],
+    ans:2,
+    exp:"解析：这道题考的是「能不能把原理、方案、取舍讲全」。正确答案先点出根因（代价与 offset 成正比），再给出首选方案（游标分页，代价恒定），并说明兼容方案（延迟关联只回表 n 行）与前提（排序键有序唯一）。A 与问题无关；B 的延迟关联只解决回表，仍要扫 offset + n 行索引，且没提前提条件；D 会导致数据错乱，属于错误实现。"
+  },
+  {
+    type:"quiz",
+    q:"一条本来走索引的查询，某天突然变成了全表扫描，最可能的原因是？",
+    opts:[
+      "InnoDB 不支持索引统计信息，只能靠优化器提示指定索引",
+      "索引一定损坏了，必须 REBUILD 全部索引",
+      "只要需要加 FORCE INDEX，就说明统计信息必然有问题",
+      "统计信息过期或基数估算偏差，可先 ANALYZE TABLE 再重看 EXPLAIN 的 rows"
+    ],
+    ans:3,
+    exp:"解析：优化器靠 table_rows、Cardinality 等统计信息估算代价，统计过期或采样偏差会让它误判「全表扫更便宜」，重新 ANALYZE TABLE 后常能恢复正确计划。A 错在 InnoDB 明确维护索引统计信息；B 属于过度处理，索引损坏通常表现为报错而非计划改变；C 把结论绝对化，加 hint 也可能只是因为业务数据分布变化。"
+  },
+  {
+    type:"quiz",
+    q:"为控制大事务风险，下列哪项做法最不推荐？",
+    opts:[
+      "把批量写入拆成每批 1000 行并逐批提交",
+      "选择业务低峰期执行，并持续监控复制延迟",
+      "为了「原子性」，把百万行更新全部放进一个事务直到全部完成",
+      "用 pt-online-schema-change / gh-ost 做在线 DDL"
+    ],
+    ans:2,
+    exp:"解析：为了原子性把百万行塞进一个事务，会带来 undo 膨胀、长时间持锁、巨大 binlog 与严重主从延迟，失败时还要整体回滚，是最不推荐的做法。A 是标准分批方案；B 的低峰期 + 延迟监控是必要保障；D 的在线 DDL 工具能在不长时间锁表的前提下改结构，正是为了避免大事务式的风险。"
+  },
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1）
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ============================================================
+   演示面板挂载区
+   ============================================================ */
+
+/* ---------- 面板 ①：SQL 重写对比器 ---------- */
+(function(){
+  const out = document.getElementById("rwOut");
+  const barsBox = document.getElementById("rwBars");
+  const log = document.getElementById("rwLog");
+  if(!out || !barsBox || !log) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const RW = [
+    {
+      label:"日期函数 → 范围条件",
+      metric:"扫描行数",
+      bad:{ sql:"SELECT id, amount FROM orders\nWHERE YEAR(order_date) = 2024;",
+            val:1000000, disp:"100 万行",
+            why:"YEAR() 包裹索引列 → order_date 索引失效，全表扫描" },
+      good:{ sql:"SELECT id, amount FROM orders\nWHERE order_date >= '2024-01-01'\n  AND order_date < '2025-01-01';",
+             val:205000, disp:"20.5 万行",
+             why:"裸列范围条件 → 走 order_date 索引，只扫一年的数据" }
+    },
+    {
+      label:"SELECT * → 只取需要列",
+      metric:"传输数据量",
+      bad:{ sql:"SELECT * FROM orders\nWHERE customer_id = 3;",
+            val:200, disp:"200 MB",
+            why:"返回全部列（含大字段），必定回表，无法用覆盖索引" },
+      good:{ sql:"SELECT id, order_date, amount\nFROM orders\nWHERE customer_id = 3;",
+             val:8, disp:"8 MB",
+             why:"只取 3 列，若索引覆盖过滤列可完全免回表" }
+    },
+    {
+      label:"NOT IN → NOT EXISTS",
+      metric:"行访问次数",
+      bad:{ sql:"SELECT * FROM customers c\nWHERE c.id NOT IN (\n  SELECT o.customer_id FROM orders o\n);",
+            val:80000000, disp:"8000 万次",
+            why:"内表含 NULL 时结果恒空；比较代价高，半连接优化易被破坏" },
+      good:{ sql:"SELECT c.* FROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o\n  WHERE o.customer_id = c.id\n);",
+             val:1000000, disp:"100 万次",
+             why:"相关 EXISTS 可用 orders.customer_id 索引做半连接查找" }
+    },
+    {
+      label:"相关子查询 → JOIN",
+      metric:"子查询执行次数",
+      bad:{ sql:"SELECT c.name,\n  (SELECT SUM(o.amount) FROM orders o\n   WHERE o.customer_id = c.id) AS 总额\nFROM customers c;",
+            val:80000, disp:"8 万次",
+            why:"外层每一行都执行一次内层聚合，复杂度 O(n×m)" },
+      good:{ sql:"SELECT c.name, SUM(o.amount) AS 总额\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nGROUP BY c.id, c.name;",
+             val:1, disp:"1 次哈希连接",
+             why:"一次扫描完成聚合，LEFT JOIN 保证无订单客户不丢" }
+    },
+    {
+      label:"OR 跨列 → UNION ALL",
+      metric:"扫描行数",
+      bad:{ sql:"SELECT id, customer_id, status FROM orders\nWHERE customer_id = 3 OR status = 'paid';",
+            val:1000000, disp:"100 万行",
+            why:"单索引无法同时命中两侧条件，常退化为全表扫描" },
+      good:{ sql:"SELECT id, customer_id, status FROM orders\nWHERE customer_id = 3\nUNION ALL\nSELECT id, customer_id, status FROM orders\nWHERE status = 'paid' AND customer_id <> 3;",
+             val:125000, disp:"12.5 万行",
+             why:"两条子查询各自走索引；用 <> 排除重叠，避免行数翻倍" }
+    }
+  ];
+
+  function bar(nm, val, max, disp, cls){
+    const w = Math.max(1.5, Math.min(100, val / max * 100));
+    return `<div class="bar"><span class="nm">${esc(nm)}</span>` +
+           `<span class="track"><span class="${cls}" style="width:${w.toFixed(2)}%"></span></span>` +
+           `<span class="val">${esc(disp)}</span></div>`;
+  }
+
+  function render(i){
+    document.querySelectorAll("[data-rw]").forEach(b=>b.classList.toggle("on", +b.dataset.rw === i));
+    const d = RW[i], max = Math.max(d.bad.val, d.good.val);
+    out.innerHTML =
+      `<div style="display:flex;gap:14px;flex-wrap:wrap">` +
+        `<div class="codewrap" style="flex:1 1 280px;margin:0">` +
+          `<div class="cl"><span class="d" style="background:#e0654b"></span>坏写法 · 慢</div>` +
+          `<pre><code>${esc(d.bad.sql)}</code></pre></div>` +
+        `<div class="codewrap" style="flex:1 1 280px;margin:0">` +
+          `<div class="cl"><span class="d" style="background:#57b05b"></span>好写法 · 快</div>` +
+          `<pre><code>${esc(d.good.sql)}</code></pre></div>` +
+      `</div>` +
+      `<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:13.5px">` +
+        `<div style="flex:1 1 280px;color:#a8412c"><b>问题：</b>${esc(d.bad.why)}</div>` +
+        `<div style="flex:1 1 280px;color:#1e5b4f"><b>改写后：</b>${esc(d.good.why)}</div>` +
+      `</div>`;
+    barsBox.innerHTML =
+      `<div style="font-size:13px;color:#857c6b;margin-bottom:6px">代价对比 · 指标：${esc(d.metric)}（条形长度按本场景最大值归一化）</div>` +
+      `<div class="bars">` +
+        bar("坏写法", d.bad.val, max, d.bad.disp, "bad") +
+        bar("好写法", d.good.val, max, d.good.disp, "good") +
+      `</div>`;
+    const ratio = d.bad.val / Math.max(d.good.val, 1);
+    log.innerHTML = `<b>${esc(d.label)}</b>：${esc(d.metric)}从 ${esc(d.bad.disp)} 降到 ${esc(d.good.disp)}` +
+      (ratio >= 2 ? `，约改善 ${ratio >= 1000 ? Math.round(ratio/1000) + "000" : ratio.toFixed(ratio < 10 ? 1 : 0)} 倍。` : `。`);
+  }
+
+  document.querySelectorAll("[data-rw]").forEach(b=>b.addEventListener("click", ()=>render(+b.dataset.rw)));
+  render(0);
+})();
+
+/* ---------- 面板 ②：深分页优化器（滑块 → 实时计算 + 曲线） ---------- */
+(function(){
+  const range = document.getElementById("pgRange");
+  const val = document.getElementById("pgVal");
+  const curve = document.getElementById("pgCurve");
+  const out = document.getElementById("pgOut");
+  const log = document.getElementById("pgLog");
+  if(!range || !out) return;
+
+  const N = 20;              // 每页条数
+  const TOTAL = 2000000;     // 表行数
+  const MAXOFF = 20000;      // 滑块最大 offset
+
+  function calc(off){
+    return {
+      naive:   { scan: off + N, back: off + N },
+      defer:   { scan: off + N, back: N },
+      cursor:  { scan: N,       back: N }
+    };
+  }
+
+  function bar(nm, val, max, disp){
+    const w = Math.max(1.2, Math.min(100, val / max * 100));
+    return `<div class="bar"><span class="nm">${nm}</span>` +
+           `<span class="track"><span style="width:${w.toFixed(2)}%"></span></span>` +
+           `<span class="val">${disp}</span></div>`;
+  }
+
+  function fmt(n){
+    if(n >= 10000) return (n/10000).toFixed(n % 10000 === 0 ? 0 : 1) + " 万";
+    return String(n);
+  }
+
+  const W = 520, H = 120, PAD = 6;
+  function curveSvg(off){
+    const yMax = MAXOFF + N;
+    const px = o => PAD + (o / MAXOFF) * (W - 2*PAD);
+    const py = v => H - PAD - (Math.min(v, yMax) / yMax) * (H - 2*PAD);
+    const line = f => {
+      let pts = [];
+      for(let i = 0; i <= 40; i++){
+        const o = MAXOFF * i / 40;
+        pts.push(px(o).toFixed(1) + "," + py(f(o)).toFixed(1));
+      }
+      return pts.join(" ");
+    };
+    const cx = px(off).toFixed(1), cy = py(off + N).toFixed(1);
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="深分页扫描行数曲线" style="display:block">` +
+      `<line x1="${PAD}" y1="${H-PAD}" x2="${W-PAD}" y2="${H-PAD}" stroke="#e3dcc9" stroke-width="1"/>` +
+      `<line x1="${PAD}" y1="${PAD}" x2="${PAD}" y2="${H-PAD}" stroke="#e3dcc9" stroke-width="1"/>` +
+      `<polyline points="${line(o=>o+N)}" fill="none" stroke="#a8412c" stroke-width="2.5"/>` +
+      `<polyline points="${line(()=>N)}" fill="none" stroke="#1e5b4f" stroke-width="2.5"/>` +
+      `<circle cx="${cx}" cy="${cy}" r="4.5" fill="#a8412c"/>` +
+      `<text x="${PAD+6}" y="${PAD+14}" font-size="12" fill="#a8412c">朴素 LIMIT offset,n</text>` +
+      `<text x="${PAD+6}" y="${H-PAD-6}" font-size="12" fill="#1e5b4f">游标分页（恒定）</text>` +
+      `<text x="${W-PAD-60}" y="${H-PAD-6}" font-size="11" fill="#857c6b">offset →</text>` +
+      `</svg>`;
+  }
+
+  function render(){
+    const off = +range.value;
+    const r = calc(off);
+    val.textContent = "offset = " + off + "，第 " + (Math.floor(off/N) + 1) + " 页";
+    curve.innerHTML = curveSvg(off);
+
+    const maxScan = Math.max(r.naive.scan, r.cursor.scan, 1);
+    const maxBack = Math.max(r.naive.back, r.cursor.back, 1);
+    out.innerHTML =
+      `<div style="font-size:13px;color:#857c6b;margin-bottom:6px">扫描行数（越小越好）</div>` +
+      `<div class="bars">` +
+        bar("LIMIT offset,n", r.naive.scan, maxScan, fmt(r.naive.scan) + " 行") +
+        bar("延迟关联", r.defer.scan, maxScan, fmt(r.defer.scan) + " 行（索引）") +
+        bar("游标分页", r.cursor.scan, maxScan, fmt(r.cursor.scan) + " 行") +
+      `</div>` +
+      `<div style="font-size:13px;color:#857c6b;margin:12px 0 6px">回表次数（真正压垮深分页的部分）</div>` +
+      `<div class="bars">` +
+        bar("LIMIT offset,n", r.naive.back, maxBack, fmt(r.naive.back) + " 次") +
+        bar("延迟关联", r.defer.back, maxBack, fmt(r.defer.back) + " 次") +
+        bar("游标分页", r.cursor.back, maxBack, fmt(r.cursor.back) + " 次") +
+      `</div>`;
+
+    const saved = r.naive.back - r.defer.back;
+    log.innerHTML = `当前 offset = <b>${off}</b>：朴素写法扫描 <b>${fmt(r.naive.scan)}</b> 行、回表 <b>${fmt(r.naive.back)}</b> 次；` +
+      `延迟关联把回表降到 <b>${fmt(r.defer.back)}</b> 次（省掉 ${fmt(saved)} 次）；` +
+      `游标分页扫描与回表都恒为 <b>${N}</b> 次，与 offset 无关。表总行数约 ${fmt(TOTAL)} 行。`;
+  }
+
+  range.addEventListener("input", render);
+  render();
+})();
+
+/* ---------- 面板 ③：JOIN 算法演示器 ---------- */
+(function(){
+  const out = document.getElementById("jaOut");
+  const barsBox = document.getElementById("jaBars");
+  const log = document.getElementById("jaLog");
+  if(!out || !barsBox || !log) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  const JA = {
+    inlj: {
+      name:"INLJ · Index Nested-Loop Join",
+      rows:[
+        ["驱动表 orders 过滤 status='paid'", "约 70 万行"],
+        ["每行用 customers 主键索引查一次", "约 70 万次索引查找"],
+        ["B+ 树约 3 层，含页访问", "约 280 万次页访问"]
+      ],
+      total:2800000,
+      totalDisp:"约 280 万",
+      extra:"Extra 无 join buffer 提示；被驱动表 type=eq_ref / ref",
+      fit:["被驱动表连接列有索引（最优解）","驱动表较小或过滤后行数少","等值连接、范围连接都适用"],
+      bad:["索引缺失时会退化为全扫","驱动表行数极大时索引查找次数仍然很多"],
+      note:"这是理想形态：量级 = 驱动行数 × 一次索引查找，而不是乘积。"
+    },
+    bnl: {
+      name:"BNL · Block Nested-Loop Join",
+      rows:[
+        ["驱动表 customers 按 join_buffer 分块", "8 万行 → 约 8 块"],
+        ["每块对被驱动表 orders 做一次全表扫描", "100 万行 × 8 块"],
+        ["合计行处理量", "约 800 万行"]
+      ],
+      total:8000000,
+      totalDisp:"约 800 万",
+      extra:"Extra: Using join buffer (Block Nested Loop)",
+      fit:["被驱动表连接列无索引（8.0.18 之前）","无法用索引的范围/非等值连接","join_buffer_size 越大，块数越少"],
+      bad:["被驱动表被反复全扫，量级最差","8.0.20 起已被 Hash Join 取代，调 buffer 往往无效"],
+      note:"本质是「少扫几遍」：缓冲区越大块数越少，但被驱动表每块仍要全扫一遍。"
+    },
+    hash: {
+      name:"Hash Join（MySQL 8.0.18+）",
+      rows:[
+        ["小表 customers 在内存建哈希表", "8 万行"],
+        ["大表 orders 探测哈希表一次", "70 万行"],
+        ["合计行处理量", "约 78 万行"]
+      ],
+      total:780000,
+      totalDisp:"约 78 万",
+      extra:"Extra: Using join buffer (hash join)",
+      fit:["等值连接且无可用索引（8.0.20+ 全面替代 BNL）","两表都较大时优势明显","内存充足时几乎线性"],
+      bad:["仅支持等值连接（=）","内存不足会落盘（Grace Hash Join），反而变慢"],
+      note:"量级约等于两表行数之和：建表一次 + 探测一次，比 BNL 的全扫 × 块数好得多。"
+    }
+  };
+
+  function render(k){
+    document.querySelectorAll("[data-ja]").forEach(b=>b.classList.toggle("on", b.dataset.ja === k));
+    const d = JA[k];
+    const max = Math.max(JA.inlj.total, JA.bnl.total, JA.hash.total);
+    out.innerHTML =
+      `<table class="dt"><thead><tr><th>关键步骤</th><th>行处理量</th></tr></thead><tbody>` +
+        d.rows.map((r,i)=>`<tr class="${i === d.rows.length-1 ? "hl" : ""}"><td>${esc(r[0])}</td><td class="key">${esc(r[1])}</td></tr>`).join("") +
+      `</tbody></table>` +
+      `<div style="margin-top:10px;font-size:13.5px;color:#5b5346">` +
+        `<div><b>EXPLAIN 特征：</b>${esc(d.extra)}</div>` +
+        `<div style="margin-top:6px;color:#1e5b4f"><b>适用条件：</b>${d.fit.map(esc).join(" · ")}</div>` +
+        `<div style="margin-top:4px;color:#a8412c"><b>注意：</b>${d.bad.map(esc).join(" · ")}</div>` +
+      `</div>`;
+    barsBox.innerHTML =
+      `<div style="font-size:13px;color:#857c6b;margin-bottom:6px">行处理量量级对比（归一化到最差算法）</div>` +
+      `<div class="bars">` +
+        `<div class="bar"><span class="nm">INLJ</span><span class="track"><span style="width:${(JA.inlj.total/max*100).toFixed(2)}%"></span></span><span class="val">${JA.inlj.totalDisp}</span></div>` +
+        `<div class="bar"><span class="nm">BNL</span><span class="track"><span style="width:${(JA.bnl.total/max*100).toFixed(2)}%"></span></span><span class="val">${JA.bnl.totalDisp}</span></div>` +
+        `<div class="bar"><span class="nm">Hash Join</span><span class="track"><span style="width:${(JA.hash.total/max*100).toFixed(2)}%"></span></span><span class="val">${JA.hash.totalDisp}</span></div>` +
+      `</div>`;
+    log.innerHTML = `<b>${esc(d.name)}</b>：${esc(d.note)}`;
+  }
+
+  document.querySelectorAll("[data-ja]").forEach(b=>b.addEventListener("click", ()=>render(b.dataset.ja)));
+  render("inlj");
+})();
+
+/* ---------- 面板 ④：COUNT 家族 SQL 练习台 ---------- */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-count");
+  if(!host) return;
+  SQLSandbox.mount(host, {
+    query: "SELECT COUNT(*) AS total, COUNT(city) AS with_city, COUNT(DISTINCT city) AS city_kinds, COUNT(1) AS cnt1 FROM customers;",
+    presets: [
+      {label:"COUNT 家族对比", sql:"SELECT COUNT(*) AS total, COUNT(city) AS with_city, COUNT(DISTINCT city) AS city_kinds, COUNT(1) AS cnt1 FROM customers;"},
+      {label:"各城市订单数", sql:"SELECT c.city, COUNT(*) AS n FROM customers c JOIN orders o ON c.id = o.customer_id GROUP BY c.city ORDER BY n DESC;"},
+      {label:"每个客户的订单数", sql:"SELECT c.name, COUNT(o.id) AS n FROM customers c LEFT JOIN orders o ON o.customer_id = c.id GROUP BY c.id, c.name ORDER BY n DESC;"}
+    ],
+    tables: null
+  });
+})();
+</script>
+</body>
+</html>

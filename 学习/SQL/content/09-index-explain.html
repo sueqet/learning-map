@@ -1,0 +1,1519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>索引原理与执行计划 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 索引原理与执行计划：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 00 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">这里是本模块的一句话引言，用来说明你将学到什么、为什么重要。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能画出 B+ 树的层次结构，解释为什么三层高度就能支撑千万级数据表。</li>
+      <li>能区分聚簇索引与二级索引，说清「回表」在什么条件下发生、代价有多大。</li>
+      <li>能用最左前缀原则判断任意一个 <code>WHERE</code> 条件能否用上某个联合索引。</li>
+      <li>能读懂 <code>EXPLAIN</code> 的 <code>type / key / rows / Extra</code>，判断一条 SQL 是快是慢。</li>
+      <li>能列出至少 6 种导致索引失效的写法，并给出可落地的改写方案。</li>
+      <li>能为一个真实查询设计索引，同时说明它的空间占用与写入代价。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">会写 <code>SELECT / WHERE / JOIN / GROUP BY / ORDER BY</code>；知道主键、唯一约束、字段类型（尤其 varchar 与数值类型）的区别；了解「磁盘页 page」「随机 I/O 比顺序 I/O 慢」这两件事会更容易理解本模块。</p>
+  </section>
+
+  <!-- ============================================================
+       知识点正文区
+       ============================================================ -->
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">01</span>索引的结构与存储<br>B+ 树如何把「找一行」从翻遍全表变成走三层楼梯</h2>
+  </section>
+
+  <!-- ==================== idx-btree ==================== -->
+  <section class="topic" id="idx-btree">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>B+ 树索引结构<span class="pt">B+ tree index · 一切索引优化的地基</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="index::idx-btree"><span>已学会</span></label>
+    </div>
+
+    <p><strong>B+ 树（B+ tree）</strong>是 InnoDB 默认的索引数据结构，一棵「多路平衡查找树（multi-way balanced search tree）」。它有两个关键特征：一是<strong>非叶子节点只存键值和子节点指针</strong>，不存数据行，所以一个节点能塞下几百个键；二是<strong>所有数据都在叶子节点，且叶子节点之间用双向链表相连</strong>，并按键值有序排列。</p>
+
+    <p>为什么长成这样？因为数据库的瓶颈是磁盘 I/O，一次读盘读的是「一页（page，InnoDB 默认 16KB）」。非叶子节点不存数据行，就能让每页存更多的键，树就变得更「矮胖」：一个三层 B+ 树通常能索引约两千万行数据，查任意一行最多 3 次磁盘 I/O。相比之下，B 树把数据散落在所有节点上，节点能存的键更少、树更高，而且范围查询要在不同层之间来回跳。</p>
+
+    <p>叶子节点的有序双向链表还免费送了两个能力：<code>WHERE id BETWEEN 3 AND 6</code> 这样的<strong>范围查询</strong>只需定位到起点，然后顺着链表向右扫；<code>ORDER BY id</code> 也可以直接沿索引顺序读出，省掉排序。这两点正是 B+ 树统治数据库索引的原因。</p>
+
+    <ul>
+      <li>根节点 → 中间节点 → 叶子节点，逐层比较键值，每层确定一个子节点（3 层树最多 3 次 I/O）。</li>
+      <li>非叶子节点存「键 + 子节点指针」，叶子节点存「键 + 数据（聚簇索引）或主键（二级索引）」。</li>
+      <li>所有叶子在同一层，天然平衡，不存在某条路径特别长的情况。</li>
+      <li>叶子按序双向链表相连 → 范围查询、<code>ORDER BY</code>、<code>GROUP BY</code> 都能顺水推舟。</li>
+    </ul>
+
+    <div class="mermaid">
+graph TD
+  R["根节点<br/>键: 9"] --> M1["中间节点<br/>键: 5"]
+  R --> M2["中间节点<br/>键: 13"]
+  M1 --> L1["叶子 1,3"]
+  M1 --> L2["叶子 5,7"]
+  M2 --> L3["叶子 9,11"]
+  M2 --> L4["叶子 13,15"]
+  L1 --- L2
+  L2 --- L3
+  L3 --- L4
+    </div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>index-structure.sql</div>
+      <pre><code>-- 1) 看一张表上有哪些索引、每个索引的列顺序与基数
+SHOW INDEX FROM customers;
+
+-- 2) 看索引的物理信息：页大小、行格式、索引长度
+SHOW TABLE STATUS LIKE 'customers'\G
+
+-- 3) 等值查找：从根一路比较到叶子，命中即返回
+SELECT * FROM customers WHERE id = 3;
+
+-- 4) 范围查找：定位起点后沿叶子链表顺序扫（B+ 树的看家本领）
+SELECT id, name FROM customers WHERE id BETWEEN 3 AND 6 ORDER BY id;
+
+-- 5) 查看索引占用空间（单位 MB），理解「索引也要花钱」
+SELECT database_name, table_name, index_name,
+       ROUND(stat_value * @@innodb_page_size / 1024 / 1024, 2) AS size_mb
+FROM mysql.innodb_index_stats
+WHERE stat_name = 'size' AND database_name = 'shop';</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>高度</th><th>每层可容纳</th><th>大约可索引行数（理论上限）</th><th>查一行最多几次磁盘 I/O</th></tr></thead>
+      <tbody>
+        <tr><td>1 层（只有根，即叶子）</td><td>约 1000 个键 / 页</td><td>约 10³</td><td>1</td></tr>
+        <tr><td>2 层</td><td>根 1000 × 叶子 1000</td><td>约 10⁶（百万）</td><td>2</td></tr>
+        <tr><td>3 层</td><td>根 1000 × 中间 1000 × 叶子 1000</td><td>约 10⁹（十亿）</td><td>3</td></tr>
+        <tr><td>4 层</td><td>再乘 1000</td><td>约 10¹²</td><td>4</td></tr>
+      </tbody>
+    </table>
+
+    <p>表中的「约 1000 个键 / 页」是<b>理论估算</b>：按 8 字节 BIGINT 主键 + 6 字节页号指针计算，一个 16KB 页大约能放上千个键。实际能索引多少行还取决于键的宽度、行的大小与页填充率，所以真实环境里三层树常见是「千万级到亿级」，而不是一律十亿。</p>
+
+    <table class="tbl">
+      <thead><tr><th>对比项</th><th>B+ 树</th><th>B 树</th></tr></thead>
+      <tbody>
+        <tr><td>数据存放位置</td><td>只在叶子节点</td><td>所有节点都可能存数据</td></tr>
+        <tr><td>非叶子节点内容</td><td>只存键 + 指针，扇出大</td><td>键 + 数据 + 指针，扇出小</td></tr>
+        <tr><td>叶子是否链表</td><td>是，双向有序链表</td><td>否，需中序遍历</td></tr>
+        <tr><td>范围查询</td><td>定位起点后顺序扫叶子</td><td>反复回溯上层，I/O 更多</td></tr>
+        <tr><td>树高（同数据量）</td><td>更矮（一般 3 层）</td><td>更高</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>B+ 树的优势可以一句话概括——<b>矮、胖、叶子有序</b>。矮胖降低了单点查找的 I/O 次数（O(log n)），叶子有序链表让范围查询和排序几乎免费。面试时把「非叶子不存数据」和「叶子双向链表」这两点讲出来，基本就到位了。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>不要以为「建了索引，查询就一定会变快」。B+ 树的定位是 <b>O(log n)</b>，但每一次比较、每一次回表都是真实开销；当查询要返回表中大部分行（例如 <code>WHERE gender = '男'</code> 命中 50% 数据）时，优化器会认为<b>顺着叶子链表扫索引再回表</b>还不如直接全表扫描，于是主动放弃索引。索引是「找少数行」的利器，不是万能加速器。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：B+ 树查找动画（3 层树）</span><span class="hint">选一个值 → 点「查找」逐步高亮 根 → 中间 → 叶子</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>要查的值</label>
+          <select id="btVal">
+            <option value="1">1</option>
+            <option value="3">3</option>
+            <option value="5">5</option>
+            <option value="7">7</option>
+            <option value="9">9</option>
+            <option value="11">11</option>
+            <option value="13">13</option>
+            <option value="15">15</option>
+          </select>
+          <button class="b" id="btGo">▶ 查找</button>
+          <button class="b" id="btReset">↺ 重来</button>
+        </div>
+        <div id="btOut"></div>
+        <div class="log" id="btLog">选择一个值后点「查找」，观察比较次数。</div>
+        <div class="foot">提示：叶子节点之间是双向链表，所以范围查询只要定位到起点就能顺着向右扫，不必回到上层。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== idx-clustered ==================== -->
+  <section class="topic" id="idx-clustered">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>聚簇索引与二级索引<span class="pt">clustered / secondary index · 回表的根源</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="index::idx-clustered"><span>已学会</span></label>
+    </div>
+
+    <p>InnoDB 是「索引组织表（index-organized table）」：数据行本身存放在<strong>聚簇索引（clustered index）</strong>的叶子节点上，而聚簇索引就是主键索引。换句话说，<b>表就是一棵按主键排序的 B+ 树</b>——叶子节点里放的不是主键值，而是完整的一行数据。这也解释了为什么 InnoDB 必须有主键：没有显式主键时，它会选第一个非空唯一索引顶上；再没有，就生成一个 6 字节的隐藏列 <code>row_id</code>。</p>
+
+    <p>除聚簇索引外的所有索引都叫<strong>二级索引（secondary index，也叫辅助索引）</strong>。二级索引的叶子节点存的不是行地址，而是<strong>索引列的值 + 主键值</strong>。所以用二级索引查一个不包含在索引里的列时，必须走两步：先在二级索引里找到主键，再拿主键去聚簇索引里取出整行——这一步就叫<strong>回表（bookmark lookup）</strong>。</p>
+
+    <p>回表是随机 I/O，代价远高于顺序读，而且可能触发大量页访问。理解「回表」是后面覆盖索引、最左前缀、索引失效所有优化的共同前提：<b>能少回一次表，就少一次随机 I/O</b>。</p>
+
+    <ul>
+      <li>聚簇索引叶子 = 完整行数据；一张表只有一个聚簇索引（就是主键）。</li>
+      <li>二级索引叶子 = 索引列值 + 主键值；每多一个二级索引，写入时就要多维护一棵树。</li>
+      <li>通过二级索引取非索引列 → 必须回表；取「索引列 + 主键」→ 不需要回表。</li>
+      <li>主键越小越好：所有二级索引都要复制一份主键，主键膨胀会让每个二级索引一起膨胀。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>clustered.sql</div>
+      <pre><code>-- 建表：主键即聚簇索引，idx_city 是二级索引
+CREATE TABLE customers (
+  id          INT PRIMARY KEY AUTO_INCREMENT,   -- 聚簇索引
+  name        VARCHAR(50) NOT NULL,
+  city        VARCHAR(20) DEFAULT NULL,
+  gender      CHAR(1)     DEFAULT NULL,
+  signup_date DATE        NOT NULL,
+  level       TINYINT     NOT NULL,
+  KEY idx_city (city)                           -- 二级索引：叶子存 city + id
+) ENGINE=InnoDB;
+
+-- 走聚簇索引：叶子节点直接就是整行，不需要回表
+SELECT * FROM customers WHERE id = 3;
+
+-- 走二级索引 idx_city：先拿到 id，再回聚簇索引取整行（回表 1 次/行）
+SELECT * FROM customers WHERE city = '北京';
+
+-- 只取 city 与 id：二级索引叶子已包含这两列，无需回表
+SELECT id, city FROM customers WHERE city = '北京';
+
+-- 看主键与二级索引的定义
+SHOW INDEX FROM customers;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>对比项</th><th>聚簇索引（主键索引）</th><th>二级索引（如 idx_city）</th></tr></thead>
+      <tbody>
+        <tr><td>叶子节点内容</td><td>完整的一行数据</td><td>索引列值 + 主键值</td></tr>
+        <tr><td>数量</td><td>每表 1 个</td><td>可以有多个</td></tr>
+        <tr><td>能否直接取到所有列</td><td>能</td><td>不能，非索引列要回表</td></tr>
+        <tr><td>是否物理有序</td><td>数据行按主键顺序存放</td><td>按索引列顺序，与行物理位置无关</td></tr>
+        <tr><td>典型访问</td><td><code>WHERE id = 3</code></td><td><code>WHERE city = '北京'</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「二级索引的叶子节点存的是主键，不是行地址」——这句话是 InnoDB 索引优化的总纲。它决定了：主键要短、回表要少、覆盖索引有效、<code>UPDATE</code> 主键代价极高（要把所有二级索引里的主键副本都改掉）。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>主键用 <code>UUID()</code> 或随机字符串是常见坑。随机主键会让插入位置在整棵树里乱跳，引发<b>页分裂（page split）</b>与碎片；同时 36 字节的 UUID 会被复制进每一个二级索引，索引体积成倍增长。InnoDB 更推荐<b>自增 BIGINT</b> 这类单调、紧凑的主键。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">02</span>从索引到查询计划<br>联合索引怎么排、覆盖索引为什么能省掉回表</h2>
+  </section>
+
+  <!-- ==================== idx-composite ==================== -->
+  <section class="topic" id="idx-composite">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>联合索引与最左前缀原则<span class="pt">composite index / leftmost prefix · 索引列顺序决定成败</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="index::idx-composite"><span>已学会</span></label>
+    </div>
+
+    <p><strong>联合索引（composite index，多列索引）</strong>是把多个列按定义顺序拼成一个键来排序的索引，例如 <code>KEY idx_city_level_name (city, level, name)</code>。它的排序规则是：先按 <code>city</code> 排，<code>city</code> 相同的再按 <code>level</code> 排，<code>level</code> 也相同的再按 <code>name</code> 排——就像电话簿先按城市、再按姓名排序一样。</p>
+
+    <p>由此推出<strong>最左前缀原则（leftmost prefix rule）</strong>：联合索引只能被「从最左列开始的连续前缀」利用。<code>(city, level, name)</code> 支持 <code>city</code>、<code>city+level</code>、<code>city+level+name</code> 三种定位方式；而 <code>WHERE level = 'VIP'</code> 或 <code>WHERE name = '张三'</code> 跳过了最左列，<b>无法用于定位</b>，只能退化成全表扫描（或全索引扫描后过滤）。</p>
+
+    <p>还有一条容易忽略的规则：<strong>范围查询之后的列失去定位能力</strong>。<code>WHERE city = '北京' AND level &gt; 2 AND name = '张三'</code> 中，<code>city</code> 是等值、<code>level</code> 是范围，一旦 <code>level</code> 用了范围，<code>name</code> 就无法继续在 B+ 树里定位了（MySQL 5.6+ 可以用索引条件下推 ICP 在索引层做过滤，但仍不能用于缩小扫描区间）。所以设计联合索引的顺序口诀是：<b>等值列在前，范围列放最后，区分度高的列优先</b>。</p>
+
+    <ul>
+      <li>联合索引 = 按列顺序拼接的多列 B+ 树，列顺序一旦定下就不能「随便换用」。</li>
+      <li>能用的前缀：<code>city</code>、<code>city+level</code>、<code>city+level+name</code>；不能用的：<code>level</code>、<code>name</code>、<code>level+name</code>。</li>
+      <li>范围条件（<code>&gt; &lt; BETWEEN LIKE 'x%'</code>）之后的列只能被 ICP 过滤，不能用于索引定位。</li>
+      <li>联合索引也能服务 <code>ORDER BY city, level</code>：只要排序方向与索引列顺序一致即可避免额外排序。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>composite.sql</div>
+      <pre><code>-- 建立联合索引：列顺序 = 等值查询列在前、范围列在后
+ALTER TABLE customers ADD INDEX idx_city_level_name (city, level, name);
+
+-- ✅ 命中 1 列：city
+SELECT id FROM customers WHERE city = '北京';
+
+-- ✅ 命中 2 列：city + level
+SELECT id FROM customers WHERE city = '北京' AND level = 2;
+
+-- ✅ 命中 3 列：city + level + name
+SELECT id FROM customers WHERE city = '北京' AND level = 2 AND name = '张三';
+
+-- ❌ 跳过最左列 level：无法定位，退化为全表扫描
+SELECT id FROM customers WHERE level = 2;
+
+-- ⚠️ city 等值 + level 范围：只有 city、level 能定位，name 只能 ICP 过滤
+SELECT id FROM customers WHERE city = '北京' AND level &gt; 2 AND name = '张三';
+
+-- ✅ 前缀匹配仍可用于定位（'北%' 是有序前缀）
+SELECT id FROM customers WHERE city LIKE '北%';
+
+-- ❌ 前导通配符破坏有序性，索引失效
+SELECT id FROM customers WHERE city LIKE '%北京%';
+
+-- 顺序一致时，联合索引可直接消除排序
+SELECT id, level, name FROM customers
+WHERE city = '北京' ORDER BY level, name;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>查询条件</th><th>能否用 idx_city_level_name</th><th>可定位的索引列</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><code>WHERE city = '北京'</code></td><td>✅ 能</td><td>city</td><td>只用最左前缀 1 列</td></tr>
+        <tr><td><code>WHERE city = '北京' AND level = 2</code></td><td>✅ 能</td><td>city, level</td><td>连续前缀 2 列</td></tr>
+        <tr><td><code>WHERE city = '北京' AND level = 2 AND name = '张三'</code></td><td>✅ 能</td><td>city, level, name</td><td>完整前缀，效率最高</td></tr>
+        <tr><td><code>WHERE level = 2</code></td><td>❌ 不能</td><td>—</td><td>跳过最左列，全表扫描</td></tr>
+        <tr><td><code>WHERE name = '张三'</code></td><td>❌ 不能</td><td>—</td><td>同样跳过最左列</td></tr>
+        <tr><td><code>WHERE city = '北京' AND name = '张三'</code></td><td>⚠️ 部分</td><td>city</td><td>跳过 level，name 只能过滤</td></tr>
+        <tr><td><code>WHERE city = '北京' AND level &gt; 2 AND name = '张三'</code></td><td>⚠️ 部分</td><td>city, level</td><td>范围列之后的 name 不能定位</td></tr>
+        <tr><td><code>WHERE city LIKE '%北京%'</code></td><td>❌ 不能</td><td>—</td><td>前导通配符破坏有序性</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>判断能否用联合索引，只要问一句：<b>「这个查询的等值条件，能不能凑出从最左列开始的连续前缀？」</b>能凑几列，就能定位几列；范围条件出现后，后面的列一律只能过滤。所以联合索引的列顺序应当按「等值 → 范围 → 仅排序/覆盖」排列。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>不要以为「把区分度最高的列放第一位」永远正确。最左列必须是<b>查询里经常出现的列</b>，否则这个索引对大多数 SQL 都不可用；正确做法是先用「等值列」组成前缀，再在这个前缀内部按区分度从高到低排。另外 MySQL 8.0 支持<b>索引跳跃扫描（Index Skip Scan）</b>，在特定条件下能部分弥补最左列缺失，但它依赖优化器判断、命中不稳定，不能当作设计依据。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：最左前缀判定器</span><span class="hint">点一个查询条件，看索引 idx_city_level_name (city, level, name) 各列能否定位</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>WHERE 条件</label>
+          <select id="pfSel">
+            <option value="c1">city = '北京'</option>
+            <option value="c2">city = '北京' AND level = 2</option>
+            <option value="c3">city = '北京' AND level = 2 AND name = '张三'</option>
+            <option value="c4">level = 2</option>
+            <option value="c5">name = '张三'</option>
+            <option value="c6">city = '北京' AND name = '张三'</option>
+            <option value="c7">city = '北京' AND level &gt; 2 AND name = '张三'</option>
+            <option value="c8">city LIKE '%北京%'</option>
+          </select>
+        </div>
+        <div id="pfOut"></div>
+        <div class="log" id="pfLog"></div>
+        <div class="foot">提示：绿色=用于定位，蓝色=仅 ICP 过滤，灰色=用不上。绿色列必须从最左列开始连续。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== idx-covering ==================== -->
+  <section class="topic" id="idx-covering">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>覆盖索引与回表<span class="pt">covering index · 少一次随机 I/O 就是快一截</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="index::idx-covering"><span>已学会</span></label>
+    </div>
+
+    <p><strong>回表（bookmark lookup）</strong>指通过二级索引找到主键后，再回到聚簇索引取整行数据的过程。一次回表意味着一次额外的 B+ 树查找，而且这些查找的主键在物理上可能分散，属于随机 I/O。当命中行数很多时，回表会成为查询的主要成本。</p>
+
+    <p><strong>覆盖索引（covering index）</strong>是指：查询需要的<strong>所有列</strong>都能从某个索引里拿到，因此完全不必回表。判断标准很简单——把 <code>SELECT</code> 的列、<code>WHERE</code> 的列、<code>ORDER BY / GROUP BY</code> 的列放在一起，看它们是否都是某个索引的列（记得二级索引自带主键）。命中覆盖索引时，<code>EXPLAIN</code> 的 <code>Extra</code> 会显示 <code>Using index</code>。</p>
+
+    <p>它的价值在于把「N 次随机回表」变成「一次顺序扫索引」。代价则体现在写入侧：索引越宽，占的空间越大，<code>INSERT / UPDATE / DELETE</code> 维护的代价越高。所以覆盖索引是典型的<strong>读写权衡</strong>——读多写少的表很划算，写密集的表要谨慎。</p>
+
+    <ul>
+      <li>二级索引叶子 = 索引列 + 主键 → 只查这些列时天然不回表。</li>
+      <li><code>Extra: Using index</code> = 覆盖索引；<code>Using index condition</code> = ICP，不等于覆盖索引。</li>
+      <li><code>SELECT *</code> 几乎永远无法被覆盖（除非索引包含了全部列）。</li>
+      <li>覆盖索引能省 I/O，但会加宽索引、拖慢写入，需要按读写比权衡。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>covering.sql</div>
+      <pre><code>-- 建一个「刚好覆盖常见查询」的联合索引
+ALTER TABLE customers ADD INDEX idx_city_level (city, level);
+
+-- ❌ 需要回表：SELECT * 要取 name、signup_date 等索引里没有的列
+SELECT * FROM customers WHERE city = '北京' AND level = 2;
+
+-- ✅ 覆盖索引：city、level 都在索引里，id 是二级索引自带的主键
+SELECT id, city, level FROM customers WHERE city = '北京' AND level = 2;
+
+-- ✅ 用 EXPLAIN 确认：Extra 出现 Using index 即为覆盖索引
+EXPLAIN SELECT id, city, level FROM customers WHERE city = '北京' AND level = 2;
+
+-- ⚠️ 常见误解：Using index condition 是 ICP（索引条件下推），仍会回表
+EXPLAIN SELECT * FROM customers WHERE city = '北京' AND level &gt; 2;
+
+-- 只取主键：二级索引即可满足，最省
+SELECT id FROM customers WHERE city = '北京';
+
+-- 计数也可以被覆盖索引加速（扫索引比扫表小得多）
+SELECT COUNT(*) FROM customers WHERE city = '北京';</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>查询写法</th><th>使用的索引</th><th>是否回表</th><th>EXPLAIN Extra</th></tr></thead>
+      <tbody>
+        <tr><td><code>SELECT * FROM customers WHERE id = 3</code></td><td>PRIMARY（聚簇）</td><td>否（叶子即整行）</td><td><code>NULL</code></td></tr>
+        <tr><td><code>SELECT id, city FROM customers WHERE city = '北京'</code></td><td>idx_city</td><td>否（id 在二级索引里）</td><td><code>Using index</code></td></tr>
+        <tr><td><code>SELECT id, city, level FROM customers WHERE city = '北京' AND level = 2</code></td><td>idx_city_level</td><td>否</td><td><code>Using index</code></td></tr>
+        <tr><td><code>SELECT * FROM customers WHERE city = '北京'</code></td><td>idx_city</td><td>是，每行 1 次</td><td><code>Using index condition</code></td></tr>
+        <tr><td><code>SELECT name FROM customers WHERE city = '北京'</code></td><td>idx_city</td><td>是（name 不在索引里）</td><td><code>Using index condition</code></td></tr>
+        <tr><td><code>SELECT * FROM customers WHERE city = '北京' AND level &gt; 2</code></td><td>idx_city_level</td><td>是（level 仅 ICP 过滤）</td><td><code>Using index condition</code></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>把常用查询的返回列精简到「索引列 + 主键」，就能把它变成覆盖索引，<code>Extra</code> 里出现 <code>Using index</code> 即证明不再回表。实战中最有效的一招是<b>把 <code>SELECT *</code> 改成明确列名</b>——很多慢查询因此直接省掉了成千上万次回表。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>别把 <code>Using index condition</code> 当成覆盖索引。前者是<b>索引条件下推 ICP</b>，意思是「部分过滤条件被下推到存储引擎层在索引上完成」，但被选中的列仍需回表；后者才是「完全不需要回表」。看 EXPLAIN 时一定要盯准 <code>Using index</code> 这五个字，多一个 <code>condition</code> 含义就完全不同。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Learning Points · 知识点</div>
+    <h2><span class="num">03</span>读懂执行计划与索引设计<br>用 EXPLAIN 诊断、用设计原则收尾</h2>
+  </section>
+
+  <!-- ==================== idx-explain ==================== -->
+  <section class="topic" id="idx-explain">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>EXPLAIN 执行计划解读<span class="pt">EXPLAIN / execution plan · 优化器的自白书</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="index::idx-explain"><span>已学会</span></label>
+    </div>
+
+    <p><code>EXPLAIN</code> 会打印 MySQL 优化器为这条 SQL 选定的<strong>执行计划（execution plan）</strong>：用哪个索引、按什么顺序连接表、预估扫描多少行、有没有额外的排序或临时表。它不会真正执行语句（<code>EXPLAIN ANALYZE</code> 才会执行并给出实际耗时），因此可以放心地拿它做诊断。</p>
+
+    <p>看执行计划时优先级最高的四个字段是：<code>type</code>（访问类型，反映定位精度）、<code>key</code>（实际用到的索引，<code>NULL</code> 表示没用索引）、<code>rows</code>（预估扫描行数，越小越好）、<code>Extra</code>（额外信息，<code>Using filesort</code> / <code>Using temporary</code> 是典型的坏信号）。<code>type</code> 的优劣顺序是：<code>system</code> &gt; <code>const</code> &gt; <code>eq_ref</code> &gt; <code>ref</code> &gt; <code>range</code> &gt; <code>index</code> &gt; <code>ALL</code>，其中 <code>ALL</code> 就是全表扫描。</p>
+
+    <p>还要注意：<code>rows</code> 和 <code>filtered</code> 都是<strong>统计信息估算值</strong>，不是精确值。它们来自 InnoDB 的采样统计（可用 <code>ANALYZE TABLE</code> 刷新），因此偶尔会与真实情况偏差很大；当你怀疑优化器选错索引时，可以用 <code>EXPLAIN FORMAT=JSON</code> 或 <code>EXPLAIN ANALYZE</code> 看到更细的代价估算与实际行数。</p>
+
+    <ul>
+      <li><code>id</code>：查询序号，同一 id 表示同一个 SELECT；<code>id</code> 越大越先执行。</li>
+      <li><code>select_type</code>：<code>SIMPLE</code>、<code>PRIMARY</code>、<code>SUBQUERY</code>、<code>DERIVED</code> 等。</li>
+      <li><code>type</code>：定位精度，最差是 <code>ALL</code>；<code>index</code> 是「扫整个索引」，也不算好。</li>
+      <li><code>key_len</code>：实际使用的索引字节数，可用于反推联合索引用了几列。</li>
+      <li><code>Extra</code>：<code>Using index</code> 好；<code>Using filesort</code>、<code>Using temporary</code> 差。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>explain.sql</div>
+      <pre><code>-- 1) 最基本的用法：看计划而不执行
+EXPLAIN SELECT * FROM customers WHERE id = 3;
+
+-- 2) 看连接顺序与被驱动表的访问方式（多行输出，自上而下）
+EXPLAIN
+SELECT o.id, o.amount, c.name
+FROM orders o
+JOIN customers c ON o.customer_id = c.id
+WHERE c.city = '北京';
+
+-- 3) MySQL 8.0.18+：真正执行并给出实际耗时与实际行数
+EXPLAIN ANALYZE
+SELECT city, COUNT(*) FROM customers GROUP BY city;
+
+-- 4) MySQL 8.0.16+ 默认 FORMAT=TREE，看分层代价
+EXPLAIN FORMAT=TREE SELECT * FROM customers WHERE city = '北京';
+
+-- 5) 传统表格格式，便于逐字段比对
+EXPLAIN FORMAT=TRADITIONAL SELECT * FROM customers WHERE name LIKE '%伟';
+
+-- 6) 刷新统计信息，避免优化器因过期统计选错索引
+ANALYZE TABLE customers;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>type 取值</th><th>含义</th><th>好坏</th><th>典型场景</th></tr></thead>
+      <tbody>
+        <tr><td><code>system</code></td><td>表中只有一行</td><td>最好</td><td>系统常量表</td></tr>
+        <tr><td><code>const</code></td><td>通过主键/唯一索引等值定位到一行</td><td>很好</td><td><code>WHERE id = 3</code></td></tr>
+        <tr><td><code>eq_ref</code></td><td>连接时被驱动表用主键/唯一索引等值匹配</td><td>很好</td><td><code>JOIN ... ON c.id = o.customer_id</code></td></tr>
+        <tr><td><code>ref</code></td><td>非唯一索引等值匹配，可能多行</td><td>好</td><td><code>WHERE city = '北京'</code></td></tr>
+        <tr><td><code>range</code></td><td>索引范围扫描</td><td>较好</td><td><code>BETWEEN</code>、<code>&gt;</code>、<code>IN</code></td></tr>
+        <tr><td><code>index</code></td><td>扫整棵索引树（比全表略好）</td><td>一般</td><td>覆盖索引但无过滤条件</td></tr>
+        <tr><td><code>ALL</code></td><td>全表扫描</td><td>最差</td><td>无索引可用 / 索引失效</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>读 EXPLAIN 的口诀是「<b>先看 type，再看 key，然后 rows，最后 Extra</b>」。<code>type = ALL</code> 或 <code>key = NULL</code> 说明这条 SQL 在裸奔；<code>rows</code> 很大而 <code>filtered</code> 很低说明扫了很多又丢了很多；<code>Extra</code> 里出现 <code>Using filesort</code> 或 <code>Using temporary</code> 说明还有排序/临时表的额外成本。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>①<code>rows</code> 是估算值，别把它当成真实扫描行数，需要精确值时用 <code>EXPLAIN ANALYZE</code>。②<code>type = index</code> 名字里有「index」，但它其实是<b>全索引扫描</b>，数据量大时依然很慢，不要误以为「用了索引就一定快」。③<code>possible_keys</code> 有值而 <code>key</code> 为 <code>NULL</code>，说明<b>有索引但优化器没用</b>——通常是索引区分度太低或统计信息过期。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：EXPLAIN 解读器</span><span class="hint">选一条 SQL，看仿真执行计划 + 逐字段中文解释</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>SQL</label>
+          <select id="exSel">
+            <option value="e1">WHERE id = 3（主键等值）</option>
+            <option value="e2">WHERE city = '北京'（二级索引）</option>
+            <option value="e3">WHERE name LIKE '%伟'（前导模糊）</option>
+            <option value="e4">GROUP BY city（覆盖索引）</option>
+            <option value="e5">WHERE YEAR(signup_date) = 2023（函数）</option>
+            <option value="e6">两表 JOIN（驱动表 + 被驱动表）</option>
+          </select>
+        </div>
+        <div id="exOut"></div>
+        <div class="log" id="exLog"></div>
+        <div class="foot">提示：这里的行数与代价是仿真值（假设表内 100 万行、city 取值 8 种），用于演示字段含义；真实环境请以 EXPLAIN 输出为准。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== idx-fail ==================== -->
+  <section class="topic" id="idx-fail">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>索引失效的常见场景<span class="pt">index invalidation · 明明建了索引，为什么还是全表扫</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="index::idx-fail"><span>已学会</span></label>
+    </div>
+
+    <p>索引失效的本质是：<strong>查询条件破坏了索引的有序性</strong>，或者优化器算出来「用索引反而更贵」。前者是写法问题（改 SQL 就能解决），后者是代价问题（索引区分度太低、命中行数太多），两者要分开判断。</p>
+
+    <p>最常见的写法问题有六类：<strong>对索引列做函数或运算</strong>（<code>YEAR(signup_date) = 2023</code>、<code>id + 1 = 4</code>）——B+ 树按 <code>signup_date</code> 原值排序，按年份比较就无法定位；<strong>隐式类型转换</strong>（<code>WHERE name = 123</code>，而 <code>name</code> 是 varchar）——MySQL 会把列转成数字再比较，等价于对列做函数；<strong>前导模糊匹配</strong>（<code>LIKE '%伟'</code>）——字符串前缀未知，有序性失效；<strong>违反最左前缀</strong>；<strong><code>OR</code> 连接了没有索引的列</strong>；<strong>负向条件</strong>（<code>!=</code>、<code>NOT IN</code>、<code>NOT LIKE</code>）——它们通常需要扫描大部分行，优化器直接放弃索引。</p>
+
+    <p>注意：<code>OR</code> 并非一定失效——如果 <code>OR</code> 两侧的列都有索引，MySQL 可以使用<b>索引合并（index merge）</b>；同理 <code>IS NULL</code> 也能走索引。判断的唯一可靠方式仍然是看 <code>EXPLAIN</code> 的 <code>key</code> 与 <code>type</code>。</p>
+
+    <ul>
+      <li>索引列上出现函数/运算/类型转换 → 失效。改写：把列单独放在等号左边，用范围表达。</li>
+      <li><code>LIKE 'x%'</code> 可用；<code>LIKE '%x'</code> 与 <code>LIKE '%x%'</code> 失效（考虑全文索引或反向列）。</li>
+      <li>跳过最左列、范围列之后再接等值列 → 部分失效。</li>
+      <li><code>OR</code> 两侧只要有一侧没索引就可能退化为全表扫描。</li>
+      <li>区分度极低的列（如 <code>gender</code>）即使建了索引，优化器也可能选择全表扫描。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>index-fail.sql</div>
+      <pre><code>-- ❌ 索引列上做函数 → 失效
+SELECT * FROM customers WHERE YEAR(signup_date) = 2023;
+-- ✅ 改写为范围条件 → 走 range 扫描
+SELECT * FROM customers WHERE signup_date &gt;= '2023-01-01' AND signup_date &lt; '2024-01-01';
+
+-- ❌ 索引列参与运算 → 失效
+SELECT * FROM customers WHERE id + 1 = 4;
+-- ✅ 把运算移到等号右边
+SELECT * FROM customers WHERE id = 3;
+
+-- ❌ 隐式类型转换（name 是 varchar，右边是数字）→ 失效
+SELECT * FROM customers WHERE name = 123;
+-- ✅ 用字符串字面量比较
+SELECT * FROM customers WHERE name = '123';
+
+-- ❌ 前导通配符 → 失效
+SELECT * FROM customers WHERE name LIKE '%伟';
+-- ✅ 前缀匹配 → 走 range
+SELECT * FROM customers WHERE name LIKE '张%';
+
+-- ❌ OR 一侧无索引 → 可能全表扫描
+SELECT * FROM customers WHERE city = '北京' OR gender = 'M';
+-- ✅ 两侧都有索引时可考虑索引合并；否则拆成两条 UNION ALL
+SELECT * FROM customers WHERE city = '北京'
+UNION ALL
+SELECT * FROM customers WHERE gender = 'M' AND city &lt;&gt; '北京';
+
+-- ❌ 负向条件通常扫大部分数据
+SELECT * FROM customers WHERE city &lt;&gt; '北京';
+-- ✅ 若能穷举取值，改成 IN
+SELECT * FROM customers WHERE city IN ('上海','广州','深圳');
+
+-- 验证：看 key 是否为 NULL、type 是否为 ALL
+EXPLAIN SELECT * FROM customers WHERE YEAR(signup_date) = 2023;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>失效场景</th><th>典型写法</th><th>EXPLAIN 表现</th><th>改写方案</th></tr></thead>
+      <tbody>
+        <tr><td>索引列上做函数</td><td><code>YEAR(signup_date) = 2023</code></td><td>type=ALL, key=NULL</td><td>改成日期区间 <code>&gt;= '2023-01-01' AND &lt; '2024-01-01'</code></td></tr>
+        <tr><td>索引列参与运算</td><td><code>id + 1 = 4</code></td><td>type=ALL, key=NULL</td><td>移项为 <code>id = 3</code></td></tr>
+        <tr><td>隐式类型转换</td><td><code>name = 123</code>（varchar 列）</td><td>type=ALL, key=NULL</td><td>加引号 <code>name = '123'</code></td></tr>
+        <tr><td>前导模糊</td><td><code>LIKE '%伟'</code></td><td>type=ALL, key=NULL</td><td>改前缀匹配或用全文索引</td></tr>
+        <tr><td>违反最左前缀</td><td>联合索引 (city, level) 上写 <code>level = 2</code></td><td>type=ALL 或 index</td><td>调整索引列顺序，或补建 (level) 索引</td></tr>
+        <tr><td>范围列后接等值列</td><td><code>city = '北京' AND level &gt; 2 AND name = '张三'</code></td><td>key_len 只到 level</td><td>把范围列放到索引最后</td></tr>
+        <tr><td><code>OR</code> 连接无索引列</td><td><code>city = '北京' OR gender = 'M'</code></td><td>type=ALL</td><td>两侧建索引（索引合并）或拆 UNION ALL</td></tr>
+        <tr><td>负向条件</td><td><code>!=</code>、<code>NOT IN</code>、<code>NOT LIKE</code></td><td>type=ALL</td><td>尽量改 <code>IN</code> 枚举</td></tr>
+        <tr><td>区分度过低</td><td><code>gender = 'M'</code>（命中约 50%）</td><td>possible_keys 有值但 key=NULL</td><td>不建该列索引，或建联合索引</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>记住一条铁律——<b>索引列必须「单独」出现在比较符的一侧</b>。<code>WHERE 索引列 = 常量</code> 是最理想的形式；任何函数、运算、类型转换、前导通配符都会让 B+ 树失去有序性。判断是否失效，永远以 <code>EXPLAIN</code> 的 <code>key</code> 是否为空为准，不要凭感觉。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>①<code>LIKE '张%'</code> 能走索引，但 <code>LIKE '%张%'</code> 不行，这个差别在代码 review 里经常被放过。②<code>UNION ALL</code> 拆分 <code>OR</code> 时一定要处理重复行（第二条加 <code>AND city &lt;&gt; '北京'</code>），否则结果会多出重复记录；需要去重时用 <code>UNION</code>（但要付出排序代价）。③PostgreSQL 有 <code>ILIKE</code> 等 MySQL 不支持的写法，跨库迁移时索引行为会变。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：索引 vs 全表扫描对比器</span><span class="hint">选一条查询，看是否走索引、扫描行数、是否回表</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>查询</label>
+          <select id="scSel">
+            <option value="s1">WHERE id = 3（聚簇索引）</option>
+            <option value="s2">WHERE city = '北京'（有 idx_city）</option>
+            <option value="s3">WHERE city = '北京'（无索引）</option>
+            <option value="s4">SELECT city, level WHERE city = '北京'（覆盖索引）</option>
+            <option value="s5">WHERE YEAR(signup_date) = 2023（函数）</option>
+            <option value="s6">WHERE name LIKE '%伟'（前导模糊）</option>
+          </select>
+        </div>
+        <div id="scOut"></div>
+        <div class="log" id="scLog"></div>
+        <div class="foot">提示：代价条按「预估访问行数」相对全表扫描（100 万行 = 100%）折算，仅用于直观对比。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== idx-design ==================== -->
+  <section class="topic" id="idx-design">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>索引设计原则与代价<span class="pt">index design &amp; cost · 索引不是越多越好</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="index::idx-design"><span>已学会</span></label>
+    </div>
+
+    <p>索引不是免费的：每个二级索引都是一棵独立的 B+ 树，要占磁盘空间、占 buffer pool，并且每次 <code>INSERT / UPDATE / DELETE</code> 都要同步维护。索引越多，写入越慢——一张表挂 8 个索引，写一行就要改 9 棵树（含聚簇索引）。所以索引设计的本质是<b>用写入成本换读取速度</b>。</p>
+
+    <p>设计时先看查询：为 <code>WHERE</code> 的等值列、<code>JOIN ... ON</code> 的关联列、<code>ORDER BY / GROUP BY</code> 的列建索引，并尽量用<b>一个联合索引覆盖多条 SQL 的公共前缀</b>。然后看<b>区分度（selectivity）</b>：区分度 = <code>COUNT(DISTINCT col) / COUNT(*)</code>，越接近 1 越适合建索引；<code>gender</code> 这种只有两三个取值的列单独建索引意义很小，更适合作为联合索引的一部分。</p>
+
+    <p>最后要清理：避免<b>冗余索引</b>（已有 <code>(city, level)</code> 时，再建 <code>(city)</code> 就是浪费），长字符串用<b>前缀索引</b><code>KEY idx_name (name(6))</code> 节省空间，定期用 <code>sys.schema_unused_indexes</code> 找出从未被使用过的索引并删除。线上变更索引要走 <code>ALTER TABLE</code>，大表上建议用 <code>ALGORITHM=INPLACE, LOCK=NONE</code> 或工具（如 gh-ost / pt-online-schema-change）避免长时间锁表。</p>
+
+    <ul>
+      <li>建索引的四个目标位置：<code>WHERE</code> 等值列、<code>JOIN ON</code> 关联列、<code>ORDER BY</code>、<code>GROUP BY</code>。</li>
+      <li>优先建联合索引并复用最左前缀；单表索引数量一般控制在 5～6 个以内。</li>
+      <li>区分度低的列不要单独建索引；长字符串用前缀索引。</li>
+      <li>及时删除冗余与未使用索引，减少写入负担与空间占用。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>index-design.sql</div>
+      <pre><code>-- 1) 先量区分度：越接近 1 越适合建索引
+SELECT COUNT(DISTINCT city)   / COUNT(*) AS sel_city,
+       COUNT(DISTINCT gender) / COUNT(*) AS sel_gender,
+       COUNT(DISTINCT name)   / COUNT(*) AS sel_name
+FROM customers;
+-- 结论：city、name 区分度高；gender 只有 2 个取值，不适合单独建索引
+
+-- 2) 为「按城市 + 等级查客户」设计一个联合索引（等值列在前）
+ALTER TABLE customers ADD INDEX idx_city_level (city, level);
+
+-- 3) 覆盖索引：把常用返回列也放进索引，避免回表
+ALTER TABLE customers ADD INDEX idx_city_level_name (city, level, name);
+
+-- 4) 长字符串用前缀索引，省空间（注意：前缀索引不能用于覆盖索引）
+ALTER TABLE customers ADD INDEX idx_name_prefix (name(6));
+
+-- 5) 大表在线加索引：InnoDB 支持不锁表的在线 DDL
+ALTER TABLE customers ADD INDEX idx_signup (signup_date),
+      ALGORITHM=INPLACE, LOCK=NONE;
+
+-- 6) 找出从未被使用过的索引（MySQL 8.0 自带 sys 库）
+SELECT object_schema, object_name, index_name
+FROM sys.schema_unused_indexes
+WHERE object_schema = 'shop';
+
+-- 7) 删除冗余索引，减少写入负担
+ALTER TABLE customers DROP INDEX idx_city;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>决策点</th><th>应该建索引</th><th>不该建 / 要谨慎</th></tr></thead>
+      <tbody>
+        <tr><td>列的使用频率</td><td>高频出现在 <code>WHERE</code>、<code>JOIN ON</code> 中</td><td>几乎不出现在查询条件里</td></tr>
+        <tr><td>区分度</td><td><code>COUNT(DISTINCT col)/COUNT(*)</code> 高（如 name、id）</td><td>只有 2～3 个取值（如 gender）</td></tr>
+        <tr><td>表读写比</td><td>读多写少（报表、订单查询）</td><td>写极密集（日志、埋点），索引要克制</td></tr>
+        <tr><td>列宽度</td><td>窄列（INT、DATE）</td><td>超长字符串，考虑前缀索引</td></tr>
+        <tr><td>与已有索引的关系</td><td>能作为新联合索引的前缀或补足</td><td>是已有索引的冗余前缀</td></tr>
+        <tr><td>更新频率</td><td>很少更新的列</td><td>频繁更新的列（维护代价高）</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>索引设计的三步法——<b>① 列出高频查询的过滤/排序列；② 用联合索引合并公共前缀，等值在前、范围在后；③ 删除冗余与未使用索引</b>。判断一个索引是否值得，先算区分度，再看它能不能顺带变成覆盖索引，最后别忘了写入代价。</p></div>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>①<code>COUNT(DISTINCT col)/COUNT(*)</code> 时 <code>COUNT(*)</code> 不计 NULL 行，而 <code>COUNT(col)</code> 会跳过 NULL——计算区分度时用 <code>COUNT(*)</code> 做分母更符合直觉。②<b>前缀索引无法用于覆盖索引</b>，因为索引里只有前缀，无法确认完整值。③不要为了「看起来很全」给每个列都建索引，索引膨胀会让写入和空间双双恶化，收益是负的。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。（题目在下方 JS 的 QUZ 数组维护）</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>现有索引 <code>KEY idx_a_b (city, level)</code> 与 <code>KEY idx_c (level)</code>。请判断 <code>idx_c</code> 是否冗余，并说明在什么情况下它仍有存在价值。</li>
+      <li>一条 SQL 在测试环境很快、上线后变慢，<code>EXPLAIN</code> 显示同一索引的 <code>rows</code> 从 200 变成 800000。请列出至少 3 种可能原因与对应的排查动作。</li>
+      <li>为「查询某城市最近 30 天的订单，按金额倒序取前 20 条」设计索引（涉及 <code>orders</code> 与 <code>customers</code>），并说明如何避免 <code>Using filesort</code>。</li>
+      <li>一张 5000 万行的表需要新增一个索引，但业务要求不停机。请给出可执行方案，并说明为什么不能直接用 <code>ALTER TABLE ... ADD INDEX</code>。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "index",
+  title: "索引原理与执行计划",
+  eyebrow: "MODULE 09 · SQL / 数据库",
+  lead: "从 B+ 树的结构讲到 EXPLAIN 的每一个字段：为什么加索引会快、什么时候索引会失效、一条 SQL 到底怎么被执行，以及如何为一个真实查询设计出「不冗余、不回表、不拖慢写入」的索引。",
+  points: ["idx-btree","idx-clustered","idx-composite","idx-covering","idx-explain","idx-fail","idx-design"],
+  prev: "08-schema-design.html",
+  next: "10-query-tuning.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"在 InnoDB 的 B+ 树索引中，非叶子节点（根节点与中间节点）存储的是什么？",
+    opts:[
+      "完整的行数据，便于快速返回结果",
+      "索引列的值 + 主键值",
+      "索引键值 + 指向子节点的指针，不存数据行",
+      "索引列的哈希值，用于快速等值比较"
+    ],
+    ans:2,
+    exp:"解析：B+ 树把数据全部放在叶子节点，非叶子节点只存键值和子节点指针。正因为不存数据行，一个 16KB 的页才能容纳几百个键，树才能保持「矮胖」，三层即可索引千万级数据。A 错在那是聚簇索引叶子的内容；B 错在那是二级索引叶子的内容；D 错在哈希是 MEMORY/InnoDB 自适应哈希索引的机制，与 B+ 树节点结构无关。"
+  },
+  {
+    type:"quiz",
+    q:"B+ 树特别适合范围查询（如 BETWEEN、>、ORDER BY），最直接的原因是什么？",
+    opts:[
+      "所有叶子节点按序排列且用双向链表相连，定位起点后可顺序扫描",
+      "非叶子节点也保存了数据行，可以边走边取数据",
+      "B+ 树的每一层都做了哈希索引，范围查询可以二分",
+      "范围查询时优化器会自动关闭回表，只扫索引"
+    ],
+    ans:0,
+    exp:"解析：B+ 树叶子节点在同一层、按键值有序、并用双向链表串联，所以范围查询只要定位到起点，就能沿链表向右顺序读取，同时天然满足 ORDER BY。B 错在非叶子节点不存数据行；C 错在 B+ 树是树形查找而非哈希，哈希本身不支持范围查询；D 错在回表与是否范围查询无关，取决于返回列是否被索引覆盖。"
+  },
+  {
+    type:"quiz",
+    q:"InnoDB 二级索引（如 idx_city）的叶子节点中存放的是什么？",
+    opts:[
+      "索引列的值 + 该行在数据文件中的物理地址",
+      "只有索引列的值，取整行时再按主键全表查找",
+      "索引列的值 + 完整行数据的副本",
+      "索引列的值 + 主键值"
+    ],
+    ans:3,
+    exp:"解析：InnoDB 二级索引的叶子节点存「索引列值 + 主键值」，这正是回表的根源——拿到主键后再去聚簇索引取整行。A 错在物理地址是 MyISAM 的做法，InnoDB 用主键代替行地址（这样行移动或页分裂时二级索引不必更新）；B 错在若只有索引列，连主键都取不到就无法回表；C 错在存整行副本会让每个二级索引体积等于整张表，InnoDB 不这么做。"
+  },
+  {
+    type:"quiz",
+    q:"为什么用随机 UUID 作为 InnoDB 表主键通常不是好选择？",
+    opts:[
+      "UUID 无法作为主键，MySQL 会直接报错",
+      "随机主键导致插入位置乱跳、引发页分裂与碎片，且主键会被复制进每个二级索引使其膨胀",
+      "UUID 是字符串类型，MySQL 不支持对字符串建索引",
+      "UUID 会让二级索引直接失效，所有查询都变成全表扫描"
+    ],
+    ans:1,
+    exp:"解析：InnoDB 按主键顺序组织数据，自增主键总是追加到最右侧，写入高效；随机 UUID 会把新行插到树中间，引发页分裂和空间碎片。同时二级索引叶子要存主键值，36 字节的 UUID 会让每个二级索引显著变大。A 错在 UUID 完全可以用作主键（只是性能差）；C 错在 MySQL 支持字符串索引，只是比较成本更高；D 错在索引是否失效取决于查询写法，与主键类型无直接关系。"
+  },
+  {
+    type:"quiz",
+    q:"表上只有联合索引 idx_city_level_name (city, level, name)。下面哪个查询条件无法利用该索引进行定位？",
+    opts:[
+      "WHERE city = '北京'",
+      "WHERE city = '北京' AND level = 2",
+      "WHERE level = 2",
+      "WHERE city = '北京' AND level = 2 AND name = '张三'"
+    ],
+    ans:2,
+    exp:"解析：最左前缀原则要求条件从索引最左列开始连续，city、city+level、city+level+name 都可以定位；而 WHERE level = 2 跳过了最左列 city，索引的有序性无法被利用，只能退化为全表扫描或全索引扫描后过滤。A、B、D 分别对应 1、2、3 列的最左前缀，都能走索引，其中 D 定位最精确。"
+  },
+  {
+    type:"quiz",
+    q:"联合索引为 idx_city_level_name (city, level, name)。执行下面的查询时，name 这一列能用于索引定位吗？",
+    sql:"SELECT id FROM customers\nWHERE city = '北京' AND level > 2 AND name = '张三';",
+    opts:[
+      "不能，范围条件 level > 2 之后的列只能用于索引条件下推（ICP）过滤，无法继续定位",
+      "能，因为三列都在索引里，优化器会把它们全部用于缩小扫描区间",
+      "不能，因为 name 的区分度低于 city，索引会跳过它",
+      "能，只要把 name 的条件写在 city 之前就可以定位"
+    ],
+    ans:0,
+    exp:"解析：B+ 树在同一层内按键值有序，city 等值可以定位、level 范围可以定位，但一旦 level 用了范围，name 就落在「不连续的区间」里，无法继续二分定位；MySQL 5.6+ 可用 ICP 把 name 的过滤下推到索引层，减少回表，但扫描区间仍由 city+level 决定。B 错在范围之后无法定位；C 错在列是否参与定位由位置决定，与区分度无关；D 错在 SQL 条件的书写顺序不影响索引使用，决定因素只有索引定义顺序。"
+  },
+  {
+    type:"quiz",
+    q:"EXPLAIN 的 Extra 列显示 Using index，最准确的解释是？",
+    opts:[
+      "查询使用了一个或多个索引来过滤数据，但返回列仍需回表",
+      "查询把过滤条件下推到了存储引擎层，即索引条件下推（ICP）",
+      "查询使用了索引合并，把多个索引的结果取交集",
+      "查询所需的全部列都能从该索引中取得，属于覆盖索引，无需回表"
+    ],
+    ans:3,
+    exp:"解析：Using index 表示覆盖索引命中——SELECT 需要的列全部包含在索引中（二级索引天然含主键），因此不需要回到聚簇索引取行数据。A 描述的是普通用索引但仍回表的情况；B 对应的是 Using index condition，多一个 condition 含义完全不同；C 对应 Extra 中的 Using intersect(...) 等索引合并提示，与覆盖索引无关。"
+  },
+  {
+    type:"quiz",
+    q:"在 EXPLAIN 的 type 列中，下列哪一种访问类型的效率最差（需要扫描的数据量最大）？",
+    opts:[
+      "const",
+      "ALL",
+      "range",
+      "ref"
+    ],
+    ans:1,
+    exp:"解析：type 的优劣顺序为 system > const > eq_ref > ref > range > index > ALL，ALL 表示全表扫描，是最差的一档，通常意味着没有可用索引或索引失效。const 是主键/唯一索引等值定位到一行，最快；ref 是非唯一索引等值匹配，通常只命中少量行；range 是索引范围扫描，也优于全表扫描。注意 index（全索引扫描）虽然比 ALL 略好，但依然不理想。"
+  },
+  {
+    type:"quiz",
+    q:"下列哪条 SQL 会让 signup_date 上的索引失效？",
+    opts:[
+      "SELECT * FROM customers WHERE YEAR(signup_date) = 2023;",
+      "SELECT * FROM customers WHERE signup_date >= '2023-01-01' AND signup_date < '2024-01-01';",
+      "SELECT * FROM customers WHERE signup_date = '2023-05-12';",
+      "SELECT * FROM customers WHERE signup_date BETWEEN '2023-01-01' AND '2023-12-31';"
+    ],
+    ans:0,
+    exp:"解析：索引按 signup_date 的原值排序，一旦对列施加 YEAR() 函数，就必须对每一行求值后才能比较，索引的有序性无从利用，只能全表扫描。B、C、D 都是把索引列单独放在比较符一侧（等值、范围、BETWEEN），可以正常使用索引。这类改写的通用套路是：把函数运算从「列」移到「常量」上，用区间表达。"
+  },
+  {
+    type:"interview",
+    q:"面试题：线上一条查询突然变慢，你如何定位并优化？请选出最合理的排查顺序。",
+    opts:[
+      "先加内存再看情况，如果还慢就给每个查询列都建上索引",
+      "直接把 SQL 改成 SELECT * 以便缓存更多数据，再重启数据库",
+      "先用 EXPLAIN 看 type/key/rows/Extra 确认是否走索引，再判断是索引缺失、索引失效还是 SQL 写法问题，最后考虑改写 SQL 或补联合/覆盖索引并回归验证",
+      "把表整体迁移到另一个库，通常能立刻解决性能问题"
+    ],
+    ans:2,
+    exp:"解析：正确的排查是「先观测、再假设、后验证」：用 EXPLAIN（必要时 EXPLAIN ANALYZE）看 type 是否退化为 ALL、key 是否为 NULL、rows 是否异常、Extra 是否出现 Using filesort/temporary，由此区分三类原因——没有合适索引、有索引但失效（函数/隐式转换/前导模糊）、命中行数太多导致优化器放弃索引。A 是盲目加资源加索引，可能反而拖慢写入；B 的 SELECT * 只会加重回表与网络传输；D 属于逃避问题且无法根治。补充加分点：确认统计信息是否过期（ANALYZE TABLE）、是否发生锁等待、是否因数据量增长导致执行计划翻转。"
+  },
+  {
+    type:"quiz",
+    q:"表上已有联合索引 idx_city_level (city, level)。关于「索引设计代价」，下列说法正确的是？",
+    opts:[
+      "再建一个单列索引 idx_city (city) 没有意义，它是 idx_city_level 的冗余前缀，只会增加空间与写入负担",
+      "索引越多查询越快，因此应给 WHERE 里出现过的每一列都单独建索引",
+      "只要建了索引，写入性能就不会受影响，因为索引是异步维护的",
+      "gender 只有两个取值，因此它上面的索引区分度最高、最值得单独建立"
+    ],
+    ans:0,
+    exp:"解析：idx_city 是 idx_city_level 的最左前缀，任何能用 idx_city 的查询都能用 idx_city_level，因此它属于冗余索引，白白占空间并增加 INSERT/UPDATE/DELETE 的维护成本。B 错在索引越多写入越慢、空间越大，收益可能为负；C 错在 InnoDB 索引是同步维护的（随事务一起写入），不存在异步维护；D 错在取值只有 2 个意味着区分度极低（约 0.5 以下），单独建索引价值很小，通常只作为联合索引的一部分出现。"
+  },
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1），
+   键内元素形如 "模块id::知识点id"。在详解页勾选 = 大纲同步打勾。
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);   // 多个标签页之间也能同步
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   交互演示面板挂载区（本页共 4 个面板，全部纯原生 JS）
+   ① B+ 树查找动画  ② 最左前缀判定器  ③ EXPLAIN 解读器  ④ 索引 vs 全表扫描
+   ------------------------------------------------------------ */
+(function(){
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  /* ============ ① B+ 树查找动画 ============ */
+  (function(){
+    const out = document.getElementById("btOut"), log = document.getElementById("btLog");
+    if(!out) return;
+    const TREE = {
+      root: {keys:[9], label:"根节点"},
+      M1:   {keys:[5],  label:"中间节点"},
+      M2:   {keys:[13], label:"中间节点"},
+      L1:   {keys:[1,3],  label:"叶子节点"},
+      L2:   {keys:[5,7],  label:"叶子节点"},
+      L3:   {keys:[9,11], label:"叶子节点"},
+      L4:   {keys:[13,15],label:"叶子节点"}
+    };
+    const ORDER = ["root","M1","M2","L1","L2","L3","L4"];
+
+    function box(id){
+      const n = TREE[id];
+      const keys = n.keys.map(k=>`<span data-cell="${id}-${k}" style="display:inline-block;min-width:26px;padding:2px 5px;margin:1px;border-radius:6px;background:#f5f1e6;font-family:'JetBrains Mono',monospace;font-size:13px;transition:background .2s">${k}</span>`).join("");
+      return `<div data-node="${id}" style="border:2px solid #cfc6b0;border-radius:10px;padding:5px 9px;background:#fff;text-align:center;transition:all .25s">
+        <div style="font-size:11px;color:#857c6b;margin-bottom:3px">${n.label}</div><div>${keys}</div></div>`;
+    }
+    out.innerHTML = `<div style="display:flex;flex-direction:column;gap:14px;align-items:center;padding:6px 0">
+        <div style="display:flex;gap:24px">${box("root")}</div>
+        <div style="display:flex;gap:24px">${box("M1")}${box("M2")}</div>
+        <div style="display:flex;gap:10px">${box("L1")}${box("L2")}${box("L3")}${box("L4")}</div>
+        <div style="font-size:12px;color:#857c6b">← 叶子节点之间是双向链表，按 1,3,5,7,9,11,13,15 顺序相连 →</div>
+      </div>`;
+
+    function pathOf(v){
+      const mid = v < 9 ? "M1" : "M2";
+      let leaf;
+      if(mid === "M1") leaf = v < 5 ? "L1" : "L2";
+      else leaf = v < 13 ? "L3" : "L4";
+      return ["root", mid, leaf];
+    }
+
+    function clearAll(){
+      out.querySelectorAll("[data-node]").forEach(el=>{
+        el.style.borderColor = "#cfc6b0";
+        el.style.background = "#fff";
+        el.style.boxShadow = "none";
+        el.style.opacity = "1";
+      });
+      out.querySelectorAll("[data-cell]").forEach(el=>{ el.style.background = "#f5f1e6"; el.style.color = "#2f2b23"; el.style.fontWeight = "400"; });
+    }
+
+    let step = 0, path = null, target = 1, cmps = 0;
+    const NAMES = {root:"根节点", M1:"中间节点 M1", M2:"中间节点 M2", L1:"叶子节点 L1", L2:"叶子节点 L2", L3:"叶子节点 L3", L4:"叶子节点 L4"};
+
+    function highlight(id, isLeaf){
+      const el = out.querySelector(`[data-node="${id}"]`);
+      if(!el) return;
+      el.style.borderColor = "#1e5b4f";
+      el.style.background = "#e8f3ef";
+      el.style.boxShadow = "0 0 0 3px rgba(30,91,79,.14)";
+      if(isLeaf){
+        const cell = out.querySelector(`[data-cell="${id}-${target}"]`);
+        if(cell){ cell.style.background = "#1e5b4f"; cell.style.color = "#fff"; cell.style.fontWeight = "700"; }
+      }
+    }
+
+    function render(){
+      clearAll();
+      if(step === 0){
+        log.textContent = "目标值 " + target + "：准备就绪，点「查找」开始（每点一次下探一层）。";
+        return;
+      }
+      for(let i=0;i<step;i++) highlight(path[i], i===2);
+      const cur = path[step-1];
+      if(step === 1){
+        log.innerHTML = `<b>第 1 次比较</b>：根节点只有键 9，${target} ${target<9?"&lt;":"&gt;="} 9 → 沿${target<9?"左":"右"}指针下探到 ${NAMES[path[1]]}。累计比较 <b>1</b> 次。`;
+      } else if(step === 2){
+        const midKey = TREE[path[1]].keys[0];
+        log.innerHTML = `<b>第 2 次比较</b>：${NAMES[path[1]]} 的键为 ${midKey}，${target} ${target<midKey?"&lt;":"&gt;="} ${midKey} → 进入 ${NAMES[path[2]]}。累计比较 <b>2</b> 次。`;
+      } else {
+        const keys = TREE[path[2]].keys;
+        const pos = keys.indexOf(target);
+        const c = pos + 1;
+        log.innerHTML = `<b>第 ${2+c} 次比较</b>：在 ${NAMES[path[2]]} [${keys.join(", ")}] 内依次比较，第 ${c} 个键命中 <b>${target}</b> → 取出该键对应的行指针（聚簇索引即整行）。<b>共比较 ${2+c} 次、磁盘 I/O 3 次。</b>`;
+      }
+    }
+
+    document.getElementById("btGo").addEventListener("click", ()=>{
+      const v = +document.getElementById("btVal").value;
+      if(v !== target || !path){ target = v; path = pathOf(v); step = 0; }
+      step = (step >= 3) ? 0 : step + 1;
+      if(step === 0){ path = pathOf(target); }
+      render();
+    });
+    document.getElementById("btReset").addEventListener("click", ()=>{
+      target = +document.getElementById("btVal").value; path = pathOf(target); step = 0; render();
+    });
+    target = +document.getElementById("btVal").value;
+    path = pathOf(target);
+    render();
+  })();
+
+  /* ============ ② 最左前缀判定器 ============ */
+  (function(){
+    const out = document.getElementById("pfOut"), log = document.getElementById("pfLog");
+    if(!out) return;
+    const COLS = ["city","level","name"];
+    const STATE = {
+      c1:{w:"WHERE city = '北京'", s:["eq","none","none"], v:"索引定位 1 列"},
+      c2:{w:"WHERE city = '北京' AND level = 2", s:["eq","eq","none"], v:"索引定位 2 列"},
+      c3:{w:"WHERE city = '北京' AND level = 2 AND name = '张三'", s:["eq","eq","eq"], v:"索引定位 3 列（最优）"},
+      c4:{w:"WHERE level = 2", s:["none","none","none"], v:"跳过最左列，用不上索引"},
+      c5:{w:"WHERE name = '张三'", s:["none","none","none"], v:"跳过最左列，用不上索引"},
+      c6:{w:"WHERE city = '北京' AND name = '张三'", s:["eq","none","filter"], v:"定位 1 列；跳过 level 后 name 只能过滤"},
+      c7:{w:"WHERE city = '北京' AND level > 2 AND name = '张三'", s:["eq","range","filter"], v:"定位 2 列；范围列之后的 name 只能 ICP 过滤"},
+      c8:{w:"WHERE city LIKE '%北京%'", s:["none","none","none"], v:"前导通配符破坏有序性，索引失效"}
+    };
+    const TONE = {
+      eq:{bg:"#e8f3ef", bd:"#1e5b4f", tx:"等值定位"},
+      range:{bg:"#fdf3dd", bd:"#b8860b", tx:"范围定位"},
+      filter:{bg:"#e7eefb", bd:"#3a6ea5", tx:"仅 ICP 过滤"},
+      none:{bg:"#f2efe6", bd:"#c9c0ab", tx:"未使用"}
+    };
+    function render(k){
+      const d = STATE[k];
+      let html = `<table class="dt"><thead><tr><th>索引列（按定义顺序）</th><th>状态</th><th>说明</th></tr></thead><tbody>`;
+      COLS.forEach((c,i)=>{
+        const st = d.s[i], t = TONE[st];
+        html += `<tr class="${st==="eq"?"match":(st==="none"?"dim":"")}">
+          <td class="key">${c}</td>
+          <td><span style="display:inline-block;padding:2px 8px;border-radius:6px;border:1px solid ${t.bd};background:${t.bg};color:${t.bd};font-size:12.5px">${t.tx}</span></td>
+          <td>${st==="eq"?"可作为等值前缀定位":st==="range"?"范围条件，可定位但后续列失效":st==="filter"?"不在连续前缀内，只能过滤":"该列及其后列均无法定位"}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      const usable = d.s.filter(x=>x==="eq"||x==="range").length;
+      html += `<div style="margin-top:8px;font-size:13.5px">索引 <code>idx_city_level_name (city, level, name)</code> 中，可用于定位的列数：<b style="color:${usable?"#1e5b4f":"#c0392b"}">${usable}</b> / 3</div>`;
+      out.innerHTML = html;
+      log.innerHTML = `<b>${esc(d.w)}</b> → ${d.v}`;
+    }
+    const sel = document.getElementById("pfSel");
+    sel.addEventListener("change", ()=>render(sel.value));
+    render(sel.value);
+  })();
+
+  /* ============ ③ EXPLAIN 解读器 ============ */
+  (function(){
+    const out = document.getElementById("exOut"), log = document.getElementById("exLog");
+    if(!out) return;
+    const GOOD = "#1e5b4f", MID = "#b8860b", BAD = "#c0392b";
+    const DATA = {
+      e1:{
+        sql:"SELECT * FROM customers WHERE id = 3;",
+        rows:[["1","SIMPLE","customers","const","PRIMARY","1","NULL"]],
+        note:"主键等值查询，聚簇索引叶子就是整行，1 次 I/O 搞定。",
+        expl:[
+          ["type","const",GOOD,"通过主键或唯一索引定位到唯一一行，最高效的访问类型之一"],
+          ["key","PRIMARY",GOOD,"实际使用了主键（聚簇索引），叶子节点直接返回整行，无需回表"],
+          ["rows","1",GOOD,"预估只扫描 1 行，代价几乎为常数"],
+          ["Extra","NULL",GOOD,"没有额外操作：不需要排序、不需要临时表、不需要回表"]
+        ]
+      },
+      e2:{
+        sql:"SELECT * FROM customers WHERE city = '北京';",
+        rows:[["1","SIMPLE","customers","ref","idx_city","125000","Using index condition"]],
+        note:"走了二级索引，但 SELECT * 需要 city 之外的列，每行都要回表。",
+        expl:[
+          ["type","ref",GOOD,"非唯一索引等值匹配，能缩小到 city='北京' 的区间，好于 range 与 ALL"],
+          ["key","idx_city",GOOD,"实际使用了 idx_city；若这里是 NULL，就要警惕索引失效"],
+          ["rows","125000",MID,"预估扫描 12.5 万行（假设 100 万行、city 取值 8 种）。命中的行越多，回表代价越大"],
+          ["Extra","Using index condition",MID,"ICP 只把过滤下推到索引层，返回列仍需回表；若出现 Using index 才是覆盖索引、不用回表"]
+        ]
+      },
+      e3:{
+        sql:"SELECT * FROM customers WHERE name LIKE '%伟';",
+        rows:[["1","SIMPLE","customers","ALL",null,"1000000","Using where"]],
+        note:"前导通配符让索引失效，退化为全表扫描 + 逐行过滤。",
+        expl:[
+          ["type","ALL",BAD,"全表扫描，type 中最差的一档：必须逐页读取整张表"],
+          ["key","NULL",BAD,"没有使用任何索引，possible_keys 也可能为空"],
+          ["rows","1000000",BAD,"预估扫描全表 100 万行，随数据增长线性恶化"],
+          ["Extra","Using where",MID,"在存储引擎返回行之后再由 Server 层逐行过滤，说明大量行被白白读出"]
+        ]
+      },
+      e4:{
+        sql:"SELECT city, COUNT(*) AS n FROM customers GROUP BY city;",
+        rows:[["1","SIMPLE","customers","index","idx_city","1000000","Using index"]],
+        note:"全索引扫描：虽然 type 是 index，但索引本身就是有序的，省掉了排序与回表。",
+        expl:[
+          ["type","index",MID,"扫整棵索引树而非全表，比 ALL 略好，但仍是线性扫描；这里因为索引已按 city 有序，收益明显"],
+          ["key","idx_city",GOOD,"使用了 idx_city，GROUP BY city 可直接沿索引顺序分组，避免临时表"],
+          ["rows","1000000",MID,"预估扫描 100 万行索引项；索引比整行窄，I/O 总量小于全表扫描"],
+          ["Extra","Using index",GOOD,"覆盖索引：所需列（city 与主键）全在索引里，不需要回表"]
+        ]
+      },
+      e5:{
+        sql:"SELECT * FROM customers WHERE YEAR(signup_date) = 2023;",
+        rows:[["1","SIMPLE","customers","ALL",null,"1000000","Using where"]],
+        note:"对索引列施加函数，有序性被破坏，索引失效。",
+        expl:[
+          ["type","ALL",BAD,"函数作用于索引列，无法用索引定位，只能全表扫描"],
+          ["key","NULL",BAD,"即使 signup_date 上有索引也用不上（possible_keys 可能有值，key 仍为 NULL）"],
+          ["rows","1000000",BAD,"扫描全部行，每行都要计算一次 YEAR()"],
+          ["Extra","Using where",MID,"过滤发生在取出行之后；改写为日期区间即可变成 range 扫描"]
+        ]
+      },
+      e6:{
+        sql:"SELECT o.id, o.amount, c.name\nFROM orders o\nJOIN customers c ON o.customer_id = c.id\nWHERE c.city = '北京';",
+        rows:[
+          ["1","SIMPLE","o","ALL",null,"1000000","NULL"],
+          ["1","SIMPLE","c","eq_ref","PRIMARY","1","Using where"]
+        ],
+        note:"执行计划自上而下：o 是驱动表，c 是被驱动表，用主键等值匹配。",
+        expl:[
+          ["type（第 1 行 o）","ALL",BAD,"驱动表 orders 走了全表扫描，是这条 JOIN 的主要成本；应为 o.customer_id 建索引或改写连接顺序"],
+          ["type（第 2 行 c）","eq_ref",GOOD,"被驱动表 customers 用主键等值匹配，每行只取 1 行，效率很高"],
+          ["key（第 2 行）","PRIMARY",GOOD,"被驱动表命中主键索引；连接列上必须有索引，否则每次匹配都会变成全表扫描"],
+          ["rows（合计）","约 1000001",BAD,"驱动表扫 100 万行，每行再到 c 里找 1 行；优化重点是先过滤掉不需要的驱动表行"]
+        ]
+      }
+    };
+    function render(k){
+      const d = DATA[k];
+      let html = `<div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;background:#f7f4ea;border:1px solid #e3dcc9;border-radius:8px;padding:8px 10px;white-space:pre-wrap;margin-bottom:10px">${esc(d.sql)}</div>`;
+      html += `<table class="dt"><thead><tr><th>id</th><th>select_type</th><th>table</th><th>type</th><th>key</th><th>rows</th><th>Extra</th></tr></thead><tbody>`;
+      d.rows.forEach(r=>{
+        html += `<tr>`;
+        r.forEach((c,ci)=>{
+          const isNull = (c === null);
+          const tone = (ci===3) ? (["const","eq_ref","ref"].includes(c)?GOOD:(c==="range"?"#b8860b":(c==="index"?MID:BAD))) : null;
+          const cls = (ci===4 && isNull) ? ' class="null"' : (ci===4 ? ' class="key"' : "");
+          const txt = isNull ? "NULL" : esc(c);
+          html += tone
+            ? `<td><span style="color:${tone};font-weight:700">${txt}</span></td>`
+            : `<td${cls}>${txt}</td>`;
+        });
+        html += `</tr>`;
+      });
+      html += `</tbody></table>`;
+      html += `<div style="margin-top:10px;display:flex;flex-direction:column;gap:6px;font-size:13.5px">`;
+      d.expl.forEach(e=>{
+        const mark = e[2]===GOOD ? "✓ 好" : (e[2]===BAD ? "✗ 差" : "⚠ 注意");
+        html += `<div style="border-left:3px solid ${e[2]};padding:4px 0 4px 9px;background:#fbf9f3;border-radius:0 6px 6px 0">
+          <b>${esc(e[0])}</b> = <code style="color:${e[2]}">${esc(e[1])}</code>
+          <span style="color:${e[2]};font-size:12px">${mark}</span>
+          <div style="color:#5c554a;font-size:12.8px;margin-top:2px">${esc(e[3])}</div></div>`;
+      });
+      html += `</div>`;
+      out.innerHTML = html;
+      log.textContent = d.note;
+    }
+    const sel = document.getElementById("exSel");
+    sel.addEventListener("change", ()=>render(sel.value));
+    render(sel.value);
+  })();
+
+  /* ============ ④ 索引 vs 全表扫描对比器 ============ */
+  (function(){
+    const out = document.getElementById("scOut"), log = document.getElementById("scLog");
+    if(!out) return;
+    const TOTAL = 1000000;
+    const DATA = {
+      s1:{
+        sql:"SELECT * FROM customers WHERE id = 3;",
+        idx:"PRIMARY（聚簇索引）", type:"const", rows:1, back:"否", cost:1,
+        note:"主键等值：直接从聚簇索引定位到唯一一行，1 次 I/O。"
+      },
+      s2:{
+        sql:"SELECT * FROM customers WHERE city = '北京';",
+        idx:"idx_city（二级索引）", type:"ref", rows:125000, back:"是，每行 1 次", cost:35,
+        note:"走二级索引定位到 12.5 万行，但 SELECT * 需要回表，随机 I/O 是主要成本。"
+      },
+      s3:{
+        sql:"SELECT * FROM customers WHERE city = '北京';  -- 无 idx_city",
+        idx:"无（索引被删除）", type:"ALL", rows:1000000, back:"否（直接读表）", cost:100,
+        note:"没有索引可用，只能全表扫描 100 万行再过滤，代价拉满。"
+      },
+      s4:{
+        sql:"SELECT city, level FROM customers WHERE city = '北京';",
+        idx:"idx_city_level（覆盖索引）", type:"ref", rows:125000, back:"否（Using index）", cost:22,
+        note:"返回列全部在索引里，省掉 12.5 万次回表，是同一查询的最优解。"
+      },
+      s5:{
+        sql:"SELECT * FROM customers WHERE YEAR(signup_date) = 2023;",
+        idx:"无（索引失效）", type:"ALL", rows:1000000, back:"否（直接读表）", cost:100,
+        note:"对索引列做函数，signup_date 索引失效；改成日期区间即可恢复 range 扫描。"
+      },
+      s6:{
+        sql:"SELECT * FROM customers WHERE name LIKE '%伟';",
+        idx:"无（索引失效）", type:"ALL", rows:1000000, back:"否（直接读表）", cost:100,
+        note:"前导通配符破坏有序性，索引失效；改前缀匹配或用全文索引。"
+      }
+    };
+    const fmt = n => n.toLocaleString("en-US");
+    function render(k){
+      const d = DATA[k];
+      const pct = Math.max(1, Math.round(d.rows / TOTAL * 100));
+      let html = `<div style="font-family:'JetBrains Mono',monospace;font-size:12.5px;background:#f7f4ea;border:1px solid #e3dcc9;border-radius:8px;padding:8px 10px;white-space:pre-wrap;margin-bottom:10px">${esc(d.sql)}</div>`;
+      html += `<table class="dt"><thead><tr><th>检查项</th><th>结果</th></tr></thead><tbody>
+        <tr><td>使用索引</td><td${d.idx.indexOf("无")===0?' class="null"':' class="key"'}>${esc(d.idx)}</td></tr>
+        <tr><td>访问类型 type</td><td><span style="color:${d.type==="ALL"?"#c0392b":"#1e5b4f"};font-weight:700">${d.type}</span></td></tr>
+        <tr><td>预估扫描行数</td><td>${fmt(d.rows)} 行 / 全表 ${fmt(TOTAL)} 行</td></tr>
+        <tr><td>是否回表</td><td>${esc(d.back)}</td></tr>
+      </tbody></table>`;
+      html += `<div class="bars" style="margin-top:10px">
+        <div class="bar"><span class="nm">当前方案</span><span class="track"><span style="width:${pct}%;background:${d.type==="ALL"?"#c0392b":"#1e5b4f"}"></span></span><span class="val">${fmt(d.rows)}</span></div>
+        <div class="bar"><span class="nm">全表扫描</span><span class="track"><span style="width:100%;background:#c9c0ab"></span></span><span class="val">${fmt(TOTAL)}</span></div>
+      </div>`;
+      html += `<div style="margin-top:8px;font-size:13.5px">相对代价：<b style="color:${d.cost>=100?"#c0392b":"#1e5b4f"}">${d.cost}%</b>（以全表扫描为 100%）</div>`;
+      out.innerHTML = html;
+      log.textContent = d.note;
+    }
+    const sel = document.getElementById("scSel");
+    sel.addEventListener("change", ()=>render(sel.value));
+    render(sel.value);
+  })();
+})();
+</script>
+</body>
+</html>

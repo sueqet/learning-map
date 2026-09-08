@@ -1,0 +1,1228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运维、安全与分布式 · SQL / 数据库</title>
+<meta name="description" content="SQL / 数据库学习网页 —— 运维、安全与分布式：学习目标、知识点讲解、交互演示面板、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+     SQL 学习网页 · 共享设计系统（请勿改动本 <style> 块）
+     与「数据结构与算法」「Python」「Git」「Linux」学习包保持同一套视觉。
+     ============================================================ */
+  :root{
+    --paper:#f5f1e8;        /* 页面底色 */
+    --paper-2:#fdfbf5;      /* 卡片底 */
+    --ink:#231f18;          /* 主文字 */
+    --ink-soft:#514b3f;     /* 次级文字 */
+    --muted:#857c6b;        /* 弱化文字 */
+    --line:#e3dcc9;         /* 边框 */
+    --line-2:#d3c9b0;       /* 深一点边框 */
+    --green:#1e5b4f;        /* 主题绿 */
+    --green-soft:#e4efeb;   /* 主题绿浅底 */
+    --amber:#b7791f;        /* 强调琥珀 */
+    --amber-soft:#f7eee0;   /* 琥珀浅底 */
+    --red:#b8392a;          /* 错误红 */
+    --red-soft:#f9e9e6;
+    --blue:#3a6b8f;         /* 信息蓝 */
+    --blue-soft:#e8f0f6;
+    --code-bg:#1f2318;
+    --code-ink:#e9e5d6;
+    --radius:14px;
+    --maxw:920px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);
+    background-image:
+      radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.06), transparent 60%),
+      radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.05), transparent 55%),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");
+    line-height:1.75;-webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .mono{font-family:var(--font-mono)}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  /* 顶部导航 */
+  .topnav{position:sticky;top:0;z-index:60;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px}
+  .topnav a.back{display:inline-flex;align-items:center;gap:6px;font-size:14px;color:var(--ink-soft);padding:6px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);transition:.15s}
+  .topnav a.back:hover{color:var(--green);border-color:var(--green);text-decoration:none}
+  .topnav .crumb{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .topnav .crumb b{color:var(--ink)}
+  .topnav .pager{margin-left:auto;display:flex;gap:8px}
+  .topnav .pager a{font-family:var(--font-mono);font-size:12.5px;padding:6px 12px;border:1px solid var(--line-2);border-radius:999px;background:var(--paper-2);color:var(--ink-soft)}
+  .topnav .pager a:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .topnav .pager a.disabled{opacity:.38;pointer-events:none}
+
+  /* Hero */
+  .hero{padding:44px 0 8px;position:relative}
+  .eyebrow{
+    display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;
+    color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2);
+  }
+  .eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+  .hero h1{
+    font-family:var(--font-display);font-weight:900;font-size:clamp(30px,4.6vw,44px);line-height:1.14;margin:18px 0 6px;letter-spacing:-.01em;
+  }
+  .hero h1 .accent{color:var(--green);position:relative;white-space:nowrap}
+  .hero h1 .accent::after{content:"";position:absolute;left:0;right:0;bottom:5px;height:10px;background:var(--green-soft);z-index:-1;transform:rotate(-1.2deg)}
+  .hero p.lead{font-size:16px;color:var(--ink-soft);max-width:720px;margin:0 0 20px}
+  .hero p.lead b{color:var(--ink)}
+
+  /* 页内锚点偏移 */
+  section{scroll-margin-top:78px}
+  .topic{scroll-margin-top:78px}
+
+  /* 卡片 */
+  .card{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+
+  /* 目标块 */
+  .goals{padding:18px 22px;margin:22px 0;position:relative;overflow:hidden}
+  .goals::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--green)}
+  .goals h2{margin:0 0 12px;font-size:19px;font-weight:800;display:flex;align-items:center;gap:9px}
+  .goals h2 .ic{width:22px;height:22px;border-radius:6px;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;flex:none}
+  .goals ul{margin:0;padding-left:20px;font-size:15px;color:var(--ink-soft)}
+  .goals ul li{margin:6px 0}
+
+  .prereq{padding:14px 22px;margin:0 0 32px;background:var(--blue-soft);border:1px solid #cfe0dc}
+  .prereq .l{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--blue);margin-bottom:6px}
+  .prereq p{margin:0;font-size:14px;color:var(--ink-soft)}
+
+  /* 章节 */
+  .chap{padding:26px 0 4px}
+  .chap .ch{font-family:var(--font-mono);font-size:12px;letter-spacing:.18em;color:var(--amber);text-transform:uppercase}
+  .chap h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,28px);margin:6px 0 0;letter-spacing:-.01em}
+  .chap h2 .num{color:var(--green);font-family:var(--font-mono);font-size:.6em;vertical-align:middle;margin-right:5px}
+
+  /* 知识点正文 */
+  .topic{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 26px 22px;margin:18px 0}
+  .topic .topic-head{display:flex;align-items:flex-start;gap:14px;margin:0 0 14px}
+  .topic h3{margin:0;font-size:20px;font-weight:800;display:flex;align-items:baseline;gap:10px;flex:1;min-width:0;flex-wrap:wrap}
+  .topic h3 .kno{flex:none;font-family:var(--font-mono);font-size:11.5px;color:var(--green);background:var(--green-soft);border:1px solid var(--line-2);padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .topic h3 .pt{font-family:var(--font-mono);font-size:12px;color:var(--muted);font-weight:500}
+  .topic p{margin:0 0 12px;font-size:15.5px;color:var(--ink-soft)}
+  .topic p b,.topic li b{color:var(--ink)}
+  .topic ul,.topic ol{margin:0 0 12px;padding-left:22px;font-size:15px;color:var(--ink-soft)}
+  .topic li{margin:5px 0}
+  .topic li::marker{color:var(--green);font-weight:700}
+
+  /* 每个知识点的「已学会」勾选（与大纲共享进度） */
+  .ptmark{flex:none;display:inline-flex;align-items:center;gap:7px;cursor:pointer;font-size:12.5px;color:var(--muted);
+    border:1px solid var(--line-2);background:var(--paper);border-radius:999px;padding:5px 12px;transition:.14s;user-select:none;white-space:nowrap}
+  .ptmark:hover{border-color:var(--green);color:var(--green)}
+  .ptmark input{width:15px;height:15px;accent-color:var(--green);cursor:pointer;margin:0}
+  .ptmark.on{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+
+  table.tbl{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px;overflow:hidden;border-radius:10px;border:1px solid var(--line)}
+  table.tbl th,table.tbl td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  table.tbl th{background:var(--green-soft);color:var(--green);font-weight:700;white-space:nowrap}
+  table.tbl tr:nth-child(even) td{background:var(--paper)}
+  table.tbl td .mono{font-size:12.5px}
+  table.tbl td.null{color:var(--red);font-style:italic}
+
+  /* 代码块 */
+  .codewrap{margin:14px 0;border-radius:10px;overflow:hidden;background:var(--code-bg);box-shadow:var(--shadow)}
+  .codewrap .cl{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#262b1e;font-family:var(--font-mono);font-size:11px;color:#a9a794;border-bottom:1px solid #333a28}
+  .codewrap .cl .d{width:9px;height:9px;border-radius:50%}
+  .codewrap pre{margin:0;padding:14px 16px;overflow-x:auto;font-family:var(--font-mono);font-size:13px;line-height:1.7;color:var(--code-ink);tab-size:2}
+  .codewrap code{font-family:inherit}
+  code.inl{background:var(--paper);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
+
+  /* callout */
+  .callout{display:flex;gap:12px;margin:14px 0;padding:14px 16px;border-radius:10px;border:1px solid var(--line);font-size:14.5px;color:var(--ink-soft)}
+  .callout .i{flex:none;width:26px;height:26px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:14px}
+  .callout.warn{background:#fdf7ec;border-color:#ecdcbc}.callout.warn .i{background:var(--amber);color:#fff}
+  .callout.key{background:var(--green-soft);border-color:#cfe0dc}.callout.key .i{background:var(--green);color:#fff}
+  .callout.danger{background:var(--red-soft);border-color:#e6c7c2}.callout.danger .i{background:var(--red);color:#fff}
+  .callout p{margin:0}
+  .callout p+p{margin-top:8px}
+
+  .complexity{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:14px 0}
+  .complexity .cx{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+  .complexity .cx .k{font-family:var(--font-mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .complexity .cx .v{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--green);margin-top:3px}
+
+  /* Mermaid 图解 */
+  .mermaid{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px;overflow-x:auto;margin:14px 0;text-align:center}
+
+  /* ============================================================
+     交互演示面板（自定义 demo 用这套 class，视觉才统一）
+     ============================================================ */
+  .demo{margin:18px 0;border:1px solid var(--line-2);border-radius:12px;background:var(--paper);overflow:hidden;box-shadow:var(--shadow)}
+  .demo .dh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 16px;background:var(--blue-soft);border-bottom:1px solid #cfe0dc}
+  .demo .dh .t{font-weight:800;font-size:14px;color:var(--blue)}
+  .demo .dh .hint{margin-left:auto;font-size:12px;color:var(--muted);font-family:var(--font-mono)}
+  .demo .db{padding:14px 16px}
+  .demo .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .demo .ctl label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .demo button.b{cursor:pointer;border:1px solid var(--line-2);background:#fff;color:var(--ink-soft);font-size:12.5px;padding:6px 13px;border-radius:999px;font-family:inherit;transition:.14s}
+  .demo button.b:hover{border-color:var(--green);color:var(--green);background:var(--green-soft)}
+  .demo button.b.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .demo select{font-family:var(--font-mono);font-size:12.5px;padding:6px 10px;border:1px solid var(--line-2);border-radius:8px;background:#fff;color:var(--ink);outline:none}
+  .demo select:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .demo .log{margin-top:10px;padding:10px 12px;border:1px dashed var(--line-2);border-radius:10px;background:var(--paper-2);font-family:var(--font-mono);font-size:12.5px;color:var(--ink-soft);line-height:1.8}
+  .demo .log b{color:var(--green)}
+  .demo .log .bad{color:var(--red)}
+  .demo .foot{margin-top:10px;font-size:12.5px;color:var(--muted)}
+
+  table.dt{width:100%;border-collapse:collapse;font-size:13px;font-family:var(--font-mono);background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:8px 0}
+  table.dt th,table.dt td{padding:7px 11px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  table.dt th{background:var(--green-soft);color:var(--green);font-weight:700}
+  table.dt tr:nth-child(even) td{background:#faf8f2}
+  table.dt td.null{color:var(--red);font-style:italic}
+  table.dt tr.hl td{background:#fdf1d8 !important;color:var(--ink);font-weight:700}
+  table.dt tr.dim td{opacity:.35}
+  table.dt tr.match td{background:var(--green-soft) !important}
+  table.dt td.key{color:var(--green);font-weight:700}
+  table.dt caption{caption-side:top;text-align:left;font-family:var(--font-body);font-size:12.5px;color:var(--muted);padding:0 0 6px}
+
+  /* 小图示 */
+  .venn{display:block;margin:10px auto;max-width:100%}
+  .bars{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+  .bars .bar{display:flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12.5px}
+  .bars .bar .nm{flex:none;width:90px;color:var(--muted)}
+  .bars .bar .track{flex:1;height:16px;background:var(--line);border-radius:999px;overflow:hidden}
+  .bars .bar .track span{display:block;height:100%;background:linear-gradient(90deg,var(--green),#3f8a76);border-radius:999px;transition:width .35s ease}
+  .bars .bar .val{flex:none;width:70px;text-align:right;color:var(--green);font-weight:700}
+
+  /* 考核 / 答题 */
+  .quiz{padding:26px;margin:34px 0 10px;background:linear-gradient(180deg,var(--paper-2),var(--amber-soft));border:1px solid #ecdcbc;border-radius:var(--radius);box-shadow:var(--shadow)}
+  .quiz .qhead{display:flex;align-items:center;gap:12px;margin-bottom:4px}
+  .quiz .qhead .ic{width:34px;height:34px;border-radius:10px;background:var(--amber);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:17px}
+  .quiz h2{margin:0;font-size:22px;font-weight:900;font-family:var(--font-display)}
+  .quiz .sub{font-size:13.5px;color:var(--muted);margin:4px 0 20px}
+  .qcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;margin:14px 0;box-shadow:var(--shadow)}
+  .qcard .qt{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:700;color:var(--ink)}
+  .qcard .qt .qi{flex:none;font-family:var(--font-mono);width:26px;height:26px;border-radius:8px;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+  .qcard .qsql{margin:10px 0 2px;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap;line-height:1.7}
+  .qcard .tagline{display:inline-flex;align-items:center;gap:5px;margin:8px 0 2px;font-size:12px;color:var(--amber);font-family:var(--font-mono)}
+  .qcard .opt{display:block;margin:8px 0;padding:11px 14px;border:1px solid var(--line);border-radius:10px;cursor:pointer;font-size:15px;color:var(--ink-soft);transition:.12s;position:relative}
+  .qcard .opt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qcard .opt input{margin-right:9px;accent-color:var(--green)}
+  .qcard .opt.correct{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:700}
+  .qcard .opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+  .qcard .opt.disabled{pointer-events:none;opacity:.9}
+  .qcard .fb{display:none;margin-top:10px;padding:12px 14px;border-radius:10px;font-size:14.5px;line-height:1.6}
+  .qcard .fb.show{display:block}
+  .qcard .fb.ok{background:var(--green-soft);color:#16463d;border:1px solid #cfe0dc}
+  .qcard .fb.bad{background:var(--red-soft);color:#8a2a1e;border:1px solid #e6c7c2}
+  .qcard .fb b{font-weight:800}
+  .qcard .act{margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line-2);background:#fff;color:var(--ink);padding:9px 16px;border-radius:999px;font-size:14px;cursor:pointer;transition:.14s;box-shadow:var(--shadow);font-family:inherit}
+  .btn:hover{border-color:var(--green);color:var(--green)}
+  .btn.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .btn.pri:hover{background:#17504a}
+  .btn:disabled{opacity:.4;pointer-events:none}
+  .qscore{display:flex;align-items:center;gap:14px;margin-top:16px;padding:14px 18px;background:var(--paper);border:1px solid var(--line);border-radius:12px;flex-wrap:wrap}
+  .qscore .ring{position:relative;width:64px;height:64px;flex:none}
+  .qscore .ring svg{transform:rotate(-90deg)}
+  .qscore .ring .mid{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-weight:700;font-size:16px;color:var(--green)}
+  .qscore .st{font-size:14.5px;color:var(--ink-soft)}
+  .qscore .st b{color:var(--ink);font-size:17px}
+
+  /* 挑战 */
+  .challenge{margin:20px 0;padding:22px;background:var(--paper-2);border:1px dashed var(--line-2);border-radius:var(--radius)}
+  .challenge h3{margin:0 0 10px;font-size:17px;font-weight:800;color:var(--amber);display:flex;gap:8px;align-items:center}
+  .challenge ul{margin:0;padding-left:20px;font-size:14.5px;color:var(--ink-soft)}
+  .challenge li{margin:5px 0}
+
+  /* 掌握标记 */
+  .master{margin:26px 0 6px;text-align:center}
+  .master .btn{border-radius:12px;padding:12px 26px;font-size:15px;font-weight:700}
+  .master .btn.done{background:var(--green);color:#fff;border-color:var(--green)}
+  .master .tip{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+  /* 底部 */
+  .footer{margin-top:40px;border-top:1px solid var(--line);padding:30px 0 56px}
+  .fn{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .fn a.card{flex:1;min-width:200px;padding:16px 20px;border-radius:var(--radius);display:block}
+  .fn a.card .d{font-size:12px;font-family:var(--font-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.1em}
+  .fn a.card .t{font-size:17px;font-weight:800;margin-top:4px;color:var(--ink)}
+  .fn a.card:hover{text-decoration:none;border-color:var(--green);transform:translateY(-2px);box-shadow:0 18px 34px -22px rgba(35,31,24,.5)}
+  .fn a.card.nxt{text-align:right}
+  .home{text-align:center;margin-top:22px;font-size:14px}
+  .home a{color:var(--muted)}
+
+  @media (max-width:640px){
+    .topnav .crumb{display:none}
+    .fn a.card{min-width:100%}
+    .topic{padding:20px 18px 18px}
+  }
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">SQL / 数据库 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 00 · SQL / 数据库</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">这里是本模块的一句话引言。</p>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- 学习目标 -->
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul id="goalList">
+      <li>能说清「逻辑备份 / 物理备份 / binlog」三件套的分工，并写出一次完整的时间点恢复（PITR）流程。</li>
+      <li>会按最小授权原则创建账号与角色，知道哪些权限属于红线、哪些要用列级授权或视图替代。</li>
+      <li>能画出主从复制的数据流向，解释主从延迟的成因，并给出「写后立刻读」的一致性方案。</li>
+      <li>能判断一张表该不该分库分表、分片键怎么选，并说出跨分片查询与全局 ID 的代价。</li>
+      <li>能复现一次 SQL 注入并说明为什么参数化查询（预编译）能从根本上防住它。</li>
+      <li>会写脱敏视图、会区分审计手段，知道合规场景下数据「最小必要、可追溯、可删除」怎么落地。</li>
+    </ul>
+  </section>
+
+  <!-- 前置知识 -->
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p id="prereqText">需要已经掌握：SELECT / JOIN / 聚合分组（模块 02–04）、事务与锁（模块 07）、索引与 EXPLAIN（模块 09–10）、用户表与建表规范（模块 08）。本模块更偏工程与架构，SQL 语法难度不高，但概念必须记准。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part A · 运维与高可用</div>
+    <h2><span class="num">01</span>备份、权限与复制<br>（把数据库当成「会出故障的系统」来管）</h2>
+  </section>
+
+  <!-- ===================== ops-backup ===================== -->
+  <section class="topic" id="ops-backup">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>备份与恢复<span class="pt">backup &amp; recovery · 数据丢了能救回来，才叫有备份</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ops::ops-backup"><span>已学会</span></label>
+    </div>
+    <p>备份（backup）是把数据库在某一时刻的状态复制成一份可以独立还原的副本；恢复（recovery）是把它重新装载回数据库的过程。运维里衡量备份价值的两个指标是 <b>RPO</b>（Recovery Point Objective，能容忍丢多少数据）与 <b>RTO</b>（Recovery Time Objective，能容忍停多久）。只有「全量备份 + 增量日志」配合，才能做到秒级 RPO 的<b>时间点恢复</b>（PITR，Point-In-Time Recovery）。</p>
+    <p>MySQL 里最常用的两条路线：<b>逻辑备份</b>用 <code>mysqldump</code> 导出 SQL 文本，跨版本、跨平台、能挑表，但慢、恢复也慢；<b>物理备份</b>用 <code>XtraBackup</code> 直接复制 InnoDB 数据文件，大库首选，能热备不停机。两者都只是「某个时刻的快照」，快照之后发生的写入必须靠 <b>binlog</b> 补齐，这就是 PITR 的核心思路。</p>
+    <ul>
+      <li>备份不是目的，<b>能恢复</b>才是；没演练过的备份等于没有备份。</li>
+      <li>RPO 由「全量备份频率 + binlog 是否完整」决定，RTO 由「备份体积 + 恢复方式」决定。</li>
+      <li>binlog 必须与备份文件分开存放，并定期校验；生产库建议开启 <code>binlog_format = ROW</code>。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>backup.sh</div>
+      <pre><code># 1) 逻辑全量备份：--single-transaction 让 InnoDB 在一个一致性快照里导出，不长时间锁表
+mysqldump -uroot -p --single-transaction --source-data=2 \
+  --routines --triggers --events --set-gtid-purged=ON \
+  --databases shop &gt; /backup/shop_full_$(date +%F).sql
+
+# 2) 切一个新的 binlog，并把它复制到异地（PITR 的原料）
+mysqladmin -uroot -p flush-logs
+cp /var/lib/mysql/binlog.* /backup/binlog/
+
+# 3) 时间点恢复：先还原全量，再用 binlog 回放到误操作之前
+mysql -uroot -p &lt; /backup/shop_full_2024-05-01.sql
+mysqlbinlog --stop-datetime="2024-05-01 12:29:59" /backup/binlog/binlog.000012 | mysql -uroot -p
+
+# 4) 物理热备：大库首选，备份期间不阻塞写入
+xtrabackup --backup --target-dir=/backup/xtra_20240501 -u root -p
+xtrabackup --prepare --target-dir=/backup/xtra_20240501</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>方式</th><th>备份内容</th><th>优点</th><th>缺点 / 适用场景</th></tr></thead>
+      <tbody>
+        <tr><td><code>mysqldump</code></td><td>SQL 文本（结构 + 数据）</td><td>跨版本、可单表、体积小易传输</td><td>慢、恢复更慢；适合中小库、逻辑迁移</td></tr>
+        <tr><td><code>XtraBackup</code></td><td>InnoDB 物理文件</td><td>快、热备、支持增量</td><td>版本与平台敏感；适合大库日常备份</td></tr>
+        <tr><td>binlog</td><td>所有数据变更日志</td><td>能做到秒级 PITR、也用于复制</td><td>不能单独恢复，必须配全量备份</td></tr>
+        <tr><td>快照 / 从库</td><td>存储层或另一实例</td><td>秒级可用、可做读扩展</td><td>快照依赖云盘；从库会同步误删</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>恢复公式 = <b>最近一次全量备份 + 之后的全部 binlog</b>。所以「binlog 有没有丢」比「备份文件有多大」更致命，两者必须异地分开保存。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>① <code>mysqldump</code> 不加 <code>--single-transaction</code> 会锁表，线上高峰直接阻塞写入；② 该参数只对 InnoDB 有效，MyISAM 表仍会锁；③ 从库不能当备份用——主库误删 <code>DELETE FROM customers</code>，从库会照样删掉。</p></div>
+  </section>
+
+  <!-- ===================== ops-user ===================== -->
+  <section class="topic" id="ops-user">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>用户、权限与最小授权<span class="pt">users &amp; privileges · 只给够用的，绝不多给</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ops::ops-user"><span>已学会</span></label>
+    </div>
+    <p>MySQL 的账号由「用户名 + 来源主机」共同确定，例如 <code>'app_rw'@'10.0.1.%'</code> 和 <code>'app_rw'@'%'</code> 是两个完全不同的账号。权限（privilege）按粒度分层：全局 <code>*.*</code> → 库 <code>shop.*</code> → 表 <code>shop.orders</code> → 列 <code>SELECT (name, city)</code>。<b>最小授权原则</b>（principle of least privilege）要求：账号只拿到完成它职责所必需的最小权限、最小范围、最小来源。</p>
+    <p>MySQL 8.0 引入了<b>角色</b>（role）：把一组权限打包成一个角色，再把角色授予多个账号，权限变更时只改角色一处即可。这对「读账号、应用账号、运维账号」这类固定职责特别有用，也避免 <code>GRANT ALL</code> 满天飞。</p>
+    <ul>
+      <li>应用账号禁止使用 root；每个应用一套独立账号，便于审计与单独回收。</li>
+      <li>写账号不要带 <code>DELETE</code> 与 <code>DROP</code>；删除业务上用软删（<code>status = 'cancelled'</code>）代替物理删。</li>
+      <li>限制来源主机（<code>'10.0.1.%'</code> 而不是 <code>'%'</code>），并强制 TLS：<code>REQUIRE SSL</code>。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>grants.sql</div>
+      <pre><code>-- 1) 应用写账号：只给业务必需的表与动作，并限制来源主机 + 强制加密连接
+CREATE USER 'app_rw'@'10.0.1.%' IDENTIFIED BY 'S3cure#Pass' REQUIRE SSL;
+GRANT SELECT, INSERT, UPDATE ON shop.orders    TO 'app_rw'@'10.0.1.%';
+GRANT SELECT, INSERT, UPDATE ON shop.customers TO 'app_rw'@'10.0.1.%';
+GRANT SELECT                 ON shop.products  TO 'app_rw'@'10.0.1.%';
+-- 注意：没有 DELETE、没有 DROP、没有 GRANT OPTION
+
+-- 2) 只读账号给报表 / BI：全库只读，绝不能写
+CREATE USER 'bi_ro'@'10.0.2.%' IDENTIFIED BY 'R0Pass#2024' REQUIRE SSL;
+GRANT SELECT ON shop.* TO 'bi_ro'@'10.0.2.%';
+
+-- 3) 列级授权：HR 只能看员工的工号、姓名、部门，看不到工资
+CREATE USER 'hr_ro'@'10.0.3.%' IDENTIFIED BY 'Hr#Pass2024';
+GRANT SELECT (id, name, dept, hire_date) ON shop.employees TO 'hr_ro'@'10.0.3.%';
+
+-- 4) 角色：把权限打包，批量授予、统一回收
+CREATE ROLE 'role_readonly';
+GRANT SELECT ON shop.* TO 'role_readonly';
+GRANT 'role_readonly' TO 'bi_ro'@'10.0.2.%';
+SET DEFAULT ROLE ALL TO 'bi_ro'@'10.0.2.%';
+
+-- 5) 审计与回收：先看清楚，再收紧
+SHOW GRANTS FOR 'app_rw'@'10.0.1.%';
+REVOKE UPDATE ON shop.customers FROM 'app_rw'@'10.0.1.%';
+DROP USER 'temp_test'@'%';</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>账号类型</th><th>典型权限</th><th>红线（绝对不能给）</th></tr></thead>
+      <tbody>
+        <tr><td>只读 / 报表</td><td><code>SELECT</code>（可到表或列级）</td><td>任何写权限、<code>PROCESS</code> 之外的元数据权限</td></tr>
+        <tr><td>应用写账号</td><td><code>SELECT / INSERT / UPDATE</code>，按表授予</td><td><code>DELETE</code>、<code>DROP</code>、<code>ALTER</code>、<code>GRANT OPTION</code></td></tr>
+        <tr><td>运维 / DBA</td><td>DDL、用户管理、<code>REPLICATION</code>、备份恢复</td><td>用个人账号直连生产；应走跳板机 + 双人复核</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b><code>GRANT ALL PRIVILEGES ON *.* TO 'app'@'%'</code> 是最常见的生产事故来源；<code>WITH GRANT OPTION</code> 会让被授权者自己再授权，等于把权限彻底交出去。另外 MySQL 8.0 默认认证插件是 <code>caching_sha2_password</code>，旧版客户端连不上时需要升级客户端而不是降级插件。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>最小授权 = 最小<b>动作</b>（只 SELECT） + 最小<b>对象</b>（只某张表/某几列） + 最小<b>来源</b>（只内网网段）。三个维度都要收，只收一个不算。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：权限矩阵 · 换账号看能做什么</span><span class="hint">点按钮切换账号</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>账号</label>
+          <button class="b" data-p="ro">只读账号 bi_ro</button>
+          <button class="b" data-p="app">应用账号 app_rw</button>
+          <button class="b" data-p="dba">DBA / 运维账号</button>
+        </div>
+        <div id="permOut"></div>
+        <div class="log" id="permLog"></div>
+        <div class="foot">提示：绿色行 = 允许，灰色行 = 明确禁止。切换账号时注意「最小授权建议」里的 SQL 差异。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ops-replica ===================== -->
+  <section class="topic" id="ops-replica">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>主从复制与读写分离<span class="pt">replication · 一台写、多台读，但要小心延迟</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ops::ops-replica"><span>已学会</span></label>
+    </div>
+    <p><b>主从复制</b>（replication）让从库自动重放主库的数据变更：主库把变更写进 <b>binlog</b>，从库的 IO 线程把 binlog 拉到本地变成 <b>relay log</b>，再由 SQL 线程重放。有了这份实时副本，就能做<b>读写分离</b>（写走主库、读走从库）来分摊读压力，也能在故障时快速切换。</p>
+    <p>代价是<b>主从延迟</b>（replication lag）：从库永远比主库慢一点。延迟来自大事务、大表 DDL、从库单线程/并行度不足、无主键表在 ROW 格式下的全表扫描、以及网络带宽。于是「刚写入的数据立刻去从库读」就可能读到旧值——这就是读写分离最典型的坑。</p>
+    <ul>
+      <li>写请求只能走主库；读请求默认走从库，但关键业务的「写后读」要强制走主库。</li>
+      <li><code>Seconds_Behind_Source</code> 是估算值，不能作为唯一判据；更可靠的是对比 GTID 位点。</li>
+      <li>MySQL 8.0.23 起复制命令改为 <code>CHANGE REPLICATION SOURCE TO</code> / <code>START REPLICA</code>，旧写法是 <code>CHANGE MASTER TO</code> / <code>START SLAVE</code>。</li>
+    </ul>
+
+    <div class="mermaid">
+flowchart LR
+  App["应用 / 连接池"] -->|"写请求"| M[("主库 primary<br/>binlog")]
+  App -->|"读请求"| R[("从库 replica<br/>relay log")]
+  M -->|"binlog dump 线程"| R
+  R -->|"Seconds_Behind_Source"| App
+    </div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>replication.sql</div>
+      <pre><code>-- 主库：建复制专用账号（只要 REPLICATION SLAVE，不要业务权限）
+CREATE USER 'repl'@'10.0.1.%' IDENTIFIED BY 'Repl#2024';
+GRANT REPLICATION SLAVE ON *.* TO 'repl'@'10.0.1.%';
+
+-- 主库：确认 binlog 与 GTID 已开启
+SHOW VARIABLES LIKE 'log_bin';
+SHOW VARIABLES LIKE 'gtid_mode';
+
+-- 从库（MySQL 8.0.23+ 语法）：指向主库，GTID 模式自动定位位点
+CHANGE REPLICATION SOURCE TO
+  SOURCE_HOST     = '10.0.1.10',
+  SOURCE_PORT     = 3306,
+  SOURCE_USER     = 'repl',
+  SOURCE_PASSWORD = 'Repl#2024',
+  SOURCE_AUTO_POSITION = 1;
+START REPLICA;
+
+-- 从库：观察复制健康度
+SHOW REPLICA STATUS\G
+--   Replica_IO_Running  = Yes   ← 能否拉到 binlog
+--   Replica_SQL_Running = Yes   ← 能否重放 relay log
+--   Seconds_Behind_Source       ← 延迟估算（秒）
+--   Retrieved_Gtid_Set / Executed_Gtid_Set  ← 位点差异才是硬证据</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>延迟原因</th><th>表现</th><th>常见对策</th></tr></thead>
+      <tbody>
+        <tr><td>主库大事务 / 批量 DML</td><td>从库突然落后几十秒后追平</td><td>拆小批量提交、控制单事务行数</td></tr>
+        <tr><td>从库单线程重放</td><td>写并发高时延迟持续累积</td><td>开启并行复制（<code>replica_parallel_workers</code>）</td></tr>
+        <tr><td>大表 DDL</td><td>DDL 期间从库长时间阻塞</td><td>用 <code>gh-ost</code> / <code>pt-online-schema-change</code></td></tr>
+        <tr><td>无主键表</td><td>ROW 格式下逐行全表扫描</td><td>补主键或唯一键</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>「用户下单成功后跳到订单详情页」这类<b>写后立刻读</b>的请求如果被路由到从库，用户会看到「订单不存在」。解决办法：关键读强制走主库、写后 1–2 秒内会话粘住主库、或把订单详情直接从写事务返回的数据渲染。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>读写分离提升的是<b>读吞吐</b>，不解决写瓶颈；一致性问题的本质是「延迟不可预测」，所以要用<b>路由策略</b>兜住，而不是等延迟变小。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：读写分离路由器</span><span class="hint">切请求类型 + 拖复制延迟</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>请求类型</label>
+          <button class="b" data-r="write">写请求</button>
+          <button class="b" data-r="read">读请求</button>
+        </div>
+        <div class="ctl">
+          <label>复制延迟</label>
+          <input type="range" id="lagRange" min="0" max="5" value="2" style="width:200px">
+          <span class="log" id="lagVal" style="margin:0;padding:4px 10px"></span>
+        </div>
+        <div id="repOut"></div>
+        <div class="log" id="repLog"></div>
+        <div class="foot">提示：把延迟拖到 0 秒再看读请求，会发现风险降低但依然存在微小窗口——这就是为什么关键读要走主库。</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part B · 拆分与安全</div>
+    <h2><span class="num">02</span>拆得开、守得住<br>（数据量上去了要拆，数据敏感了要防）</h2>
+  </section>
+
+  <!-- ===================== ops-shard ===================== -->
+  <section class="topic" id="ops-shard">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>分库分表与水平拆分<span class="pt">sharding · 最后手段，不是第一选择</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ops::ops-shard"><span>已学会</span></label>
+    </div>
+    <p>当单表数据量到千万甚至亿级，索引再优化也救不了写入与维护成本时，就要考虑<b>分库分表</b>。它有三种常见形态：<b>垂直分库</b>（按业务把不同表拆到不同库，如订单库、用户库）、<b>垂直分表</b>（把大字段或低频字段拆到附表，让主表更窄）、<b>水平分表</b>（按某个分片键 sharding key 把同一张表的数据行分散到多张表/多个库）。</p>
+    <p>水平拆分的核心是<b>分片键选择</b>与<b>路由规则</b>。规则通常是哈希取模（<code>customer_id % 4</code>）或范围（按时间/ID 区间）。分片键要满足两点：一是<b>高频查询条件里带它</b>，二是<b>同一业务主体的数据落在同一片</b>，否则跨片事务、跨片 JOIN、跨片聚合会迅速把复杂度拉满。</p>
+    <ul>
+      <li>拆分前先做完这些：SQL 与索引优化、读写分离、缓存、归档冷数据。分库分表是<b>最后</b>一步。</li>
+      <li>主键不能再依赖单表自增，要用<b>全局唯一 ID</b>（雪花算法、号段模式、Redis 自增）。</li>
+      <li>扩容时哈希取模要重分布数据，所以生产上常用「预分片 + 一致性哈希 / 双倍扩容」降低迁移量。</li>
+    </ul>
+
+    <div class="mermaid">
+flowchart TD
+  Q["订单写入 / 查询"] --> RT{"路由：customer_id % 4"}
+  RT -->|"余 0"| T0["orders_0"]
+  RT -->|"余 1"| T1["orders_1"]
+  RT -->|"余 2"| T2["orders_2"]
+  RT -->|"余 3"| T3["orders_3"]
+    </div>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>sharding.sql</div>
+      <pre><code>-- 分片表结构：每片结构完全一致，只是表名后缀不同
+CREATE TABLE orders_1 (
+  id          BIGINT       NOT NULL COMMENT '全局唯一 ID，由号段/雪花算法生成',
+  customer_id BIGINT       NOT NULL,
+  order_date  DATE         NOT NULL,
+  amount      DECIMAL(10,2) NOT NULL,
+  status      VARCHAR(16)  NOT NULL DEFAULT 'paid',
+  PRIMARY KEY (id),
+  KEY idx_customer_date (customer_id, order_date)
+) ENGINE=InnoDB;
+
+-- 带分片键的查询：中间件改写后只落到 1 片，等价于单表查询
+SELECT customer_id, COUNT(*) AS n, SUM(amount) AS total
+FROM orders_1
+WHERE customer_id = 5 AND order_date &gt;= '2024-01-01'
+GROUP BY customer_id;
+
+-- 不带分片键的查询：只能广播到 4 片再归并，代价是单表查询的 4 倍以上
+SELECT COUNT(*) FROM orders_0 WHERE status = 'refunded';
+SELECT COUNT(*) FROM orders_1 WHERE status = 'refunded';
+SELECT COUNT(*) FROM orders_2 WHERE status = 'refunded';
+SELECT COUNT(*) FROM orders_3 WHERE status = 'refunded';</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>拆分方式</th><th>怎么拆</th><th>解决的问题</th><th>代价</th></tr></thead>
+      <tbody>
+        <tr><td>垂直分库</td><td>按业务域分到不同库</td><td>单实例连接数 / IO 瓶颈</td><td>跨库 JOIN 消失，需服务层组装</td></tr>
+        <tr><td>垂直分表</td><td>宽表按冷热字段拆成主表 + 附表</td><td>单行过大、缓存命中率低</td><td>多一次关联查询</td></tr>
+        <tr><td>水平分表</td><td>按分片键哈希/范围分散行</td><td>单表数据量与写入压力</td><td>跨片查询、全局 ID、扩容重分布</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>分片键选错等于白拆。例如按 <code>order_date</code> 分片，用户查自己的订单就要扫全部分片；按 <code>status</code> 分片会让数据倾斜。另外跨分片 <code>JOIN</code>、跨分片 <code>ORDER BY … LIMIT</code> 深分页、跨片聚合都是性能陷阱，必须在设计阶段就想清楚。</p></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>分片键的验收标准是「80% 以上的核心查询都带它」。带上它 → 单分片路由；不带 → 广播 + 归并，代价随分片数线性上升。</p></div>
+
+    <div id="demo-shard"></div>
+  </section>
+
+  <!-- ===================== sec-injection ===================== -->
+  <section class="topic" id="sec-injection">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>SQL 注入原理与防护<span class="pt">SQL injection · 数据被当成代码执行</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ops::sec-injection"><span>已学会</span></label>
+    </div>
+    <p><b>SQL 注入</b>（SQL injection）的本质是：程序把用户输入<b>拼进 SQL 文本</b>，于是输入里的引号、<code>OR</code>、<code>UNION</code> 被数据库当成<b>语法</b>而不是<b>数据</b>来解释，攻击者就能改写查询逻辑。经典例子：登录查询写成 <code>WHERE name = '用户输入'</code>，攻击者输入 <code>' OR '1'='1</code>，条件恒真，返回全部用户。</p>
+    <p>防护的第一原则是<b>参数化查询</b>（parameterized query，即预编译 prepared statement）：SQL 语句结构先发送给数据库编译，参数随后以「值」的身份单独传输，无论内容是什么都不会改变语法。其次是<b>白名单</b>（表名、列名、<code>ORDER BY</code> 方向这类无法参数化的部分）、<b>最小权限</b>（应用账号没有 <code>DROP</code>，注入也删不掉库）和输入校验。</p>
+    <ul>
+      <li>参数化不是「转义」，而是<b>让数据和代码在协议层就分离</b>，所以它不怕新的绕过技巧。</li>
+      <li>转义函数（<code>addslashes</code>）依赖字符集与驱动实现，属于「补救」而非「根治」。</li>
+      <li>错误信息不要回显给前端：<code>--param</code> 类的报错会泄露库表结构。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>injection.sql</div>
+      <pre><code>-- ✗ 危险：字符串拼接。当输入是 ' OR '1'='1 时，WHERE 变成恒真条件
+SELECT id, name, city FROM customers WHERE name = '' OR '1'='1';
+-- 结果：返回全部 8 位客户（本意只是查一个人）
+
+-- ✗ 危险：拼接还能用 UNION 直接读别的表
+SELECT id, name FROM customers WHERE name = '' UNION SELECT id, salary FROM employees;
+-- 结果：员工工资被当作客户姓名一起返回
+
+-- ✓ 安全：参数化查询。SQL 结构先编译，问号参数只当值使用
+PREPARE stmt FROM 'SELECT id, name, city FROM customers WHERE name = ?';
+SET @n = ''' OR ''1''=''1';
+EXECUTE stmt USING @n;
+-- 结果：0 行 —— 数据库在找「名字真的叫 ' OR '1'='1 的客户」
+DEALLOCATE PREPARE stmt;
+
+-- ✓ 安全：无法参数化的部分（排序方向、表名）用白名单映射
+-- 前端传 sort=amount，后端映射为固定字符串，绝不直接拼接
+SELECT id, amount FROM orders ORDER BY amount DESC LIMIT 10;</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>攻击手法</th><th>典型输入</th><th>后果</th><th>防护</th></tr></thead>
+      <tbody>
+        <tr><td>联合查询注入</td><td><code>' UNION SELECT …</code></td><td>直接读出其它表数据</td><td>参数化 + 最小权限</td></tr>
+        <tr><td>布尔盲注</td><td><code>' AND 1=1 --</code></td><td>逐位猜出数据</td><td>参数化 + 关闭错误回显</td></tr>
+        <tr><td>时间盲注</td><td><code>' AND SLEEP(5) --</code></td><td>靠响应时间推断</td><td>参数化 + 请求超时告警</td></tr>
+        <tr><td>堆叠注入</td><td><code>'; DROP TABLE …</code></td><td>执行第二条语句</td><td>参数化 + 禁用多语句</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>防注入的优先级是<b>参数化 &gt; 白名单 &gt; 最小权限 &gt; 输入校验 &gt; WAF</b>。前三条是根治与兜底，最后两条只是加固。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>表名、列名、<code>ORDER BY</code> 的列和方向、<code>LIMIT</code> 的偏移量<b>不能用参数标记</b>（它们属于语法结构），必须用白名单枚举映射；很多「我们用了参数化」的漏洞都出在这里。</p></div>
+
+    <div class="demo">
+      <div class="dh"><span class="t">🖥 演示：SQL 注入 —— 拼接 vs 参数化</span><span class="hint">改输入框看两种做法</span></div>
+      <div class="db">
+        <div class="ctl">
+          <label>用户名输入</label>
+          <input type="text" id="injInput" value="' OR '1'='1" style="width:220px">
+          <button class="b" id="injRun">▶ 执行查询</button>
+        </div>
+        <div id="injOut"></div>
+        <div class="log" id="injLog"></div>
+        <div class="foot">提示：把输入改回「张伟」再看一次，两种做法结果一致；只有在恶意输入下才会出现「返回全部用户」。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== sec-audit ===================== -->
+  <section class="topic" id="sec-audit">
+    <div class="topic-head">
+      <h3><span class="kno">知识点</span>审计、脱敏与合规<span class="pt">audit &amp; masking · 谁能看到什么，都要说得清</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ops::sec-audit"><span>已学会</span></label>
+    </div>
+    <p><b>审计</b>（audit）记录「谁在什么时候对哪些数据做了什么」，用于事后追责与异常发现；<b>脱敏</b>（data masking）让敏感字段在被查看时变成不可还原或不可识别的形式；<b>合规</b>（compliance）则要求数据「最小必要、用途明确、可追溯、可删除」。三者是一套组合拳：权限控制决定「能不能看」，脱敏决定「看到什么」，审计决定「看完留不留痕」。</p>
+    <p>落地手段上，最轻量的是<b>脱敏视图</b>——把真实表锁死，只把掩码后的视图授权给 BI、客服等外部角色；再配合列级授权、动态脱敏插件（MySQL 企业版 <code>Data Masking</code>）和传输加密（TLS）、静态加密（TDE）。审计方面，MySQL 企业版有 <code>audit_log</code> 插件，社区版可用 <code>general_log</code>、代理层审计或云数据库自带审计。</p>
+    <ul>
+      <li>脱敏要区分「掩码」（如 <code>张*</code>）、「泛化」（年龄 → 年龄段）与「哈希」，选择取决于业务是否需要还原。</li>
+      <li>审计日志本身也是敏感数据：里面可能有明文 SQL，要加密存储、限制访问、定期轮转。</li>
+      <li>「可删除」意味着设计时就要能按主体定位数据（例如全部用 <code>customer_id</code> 关联），否则注销请求无从执行。</li>
+    </ul>
+
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>audit_mask.sql</div>
+      <pre><code>-- 1) 审计：社区版可用 general_log 应急排障，写入表方便查询
+SET GLOBAL log_output = 'TABLE';       -- 记录到 mysql.general_log
+SET GLOBAL general_log  = ON;          -- 排障完务必关闭，它会显著影响性能
+SELECT event_time, user_host, argument
+FROM mysql.general_log
+WHERE argument LIKE '%customers%'
+ORDER BY event_time DESC LIMIT 20;
+
+-- 2) 脱敏视图：真实表不给外部角色，只授权视图
+CREATE OR REPLACE VIEW v_customers_masked AS
+SELECT id,
+       CONCAT(LEFT(name,1), REPEAT('*', CHAR_LENGTH(name)-1)) AS name_masked,
+       city,
+       CASE WHEN gender IS NULL THEN NULL ELSE 'X' END AS gender_code,
+       level
+FROM customers;
+
+CREATE USER 'bi_ro'@'10.0.2.%' IDENTIFIED BY 'R0Pass#2024' REQUIRE SSL;
+GRANT SELECT ON shop.v_customers_masked TO 'bi_ro'@'10.0.2.%';
+-- 注意：绝不 GRANT SELECT ON shop.customers
+
+-- 3) 验证脱敏效果
+SELECT * FROM v_customers_masked WHERE id = 1;
+-- id | name_masked | city | gender_code | level
+--  1 | 张**        | 北京 | X           | 金卡</code></pre>
+    </div>
+
+    <table class="tbl">
+      <thead><tr><th>手段</th><th>作用</th><th>适用层</th><th>注意事项</th></tr></thead>
+      <tbody>
+        <tr><td>脱敏视图 / 列级授权</td><td>让外部角色只看到掩码数据</td><td>数据库</td><td>视图要 <code>SQL SECURITY DEFINER</code>，避免绕过</td></tr>
+        <tr><td>动态脱敏插件</td><td>按账号规则实时改写返回值</td><td>数据库 / 代理</td><td>企业版或中间件能力</td></tr>
+        <tr><td>TLS + TDE</td><td>传输与静态加密</td><td>网络 / 存储</td><td>解决「被截获 / 磁盘被拿走」</td></tr>
+        <tr><td>审计日志</td><td>操作留痕、异常追溯</td><td>数据库 / 代理</td><td>有性能开销，需轮转与权限隔离</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>合规三问——<b>能不能看</b>（最小授权）、<b>看到什么</b>（脱敏 / 泛化）、<b>看过留痕吗</b>（审计）。三问都答得出来，才叫数据治理到位。</p></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>长期开着 <code>general_log</code> 会记录包含明文密码的全量 SQL，既拖慢性能又制造新的泄露面；把脱敏视图建好了却忘了回收原表的 <code>SELECT</code> 权限，等于没脱敏。</p></div>
+  </section>
+
+  <!-- 考核 / 答题 -->
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点击「提交」查看对错与解析。全部答完可见得分与评语。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <!-- 进阶挑战 -->
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul id="challengeList">
+      <li>假设 <code>orders</code> 表已有 3 亿行，要求「按 customer_id 查最近 10 笔订单」稳定在 20ms 内。请写出你的方案顺序（索引 → 缓存 → 归档 → 读写分离 → 水平分片），并说明每一步的验收指标。</li>
+      <li>设计一套「订单库」的分片方案：分几片、分片键选谁、全局 ID 怎么生成、扩容时如何做到不停机迁移？请给出路由表结构与迁移步骤。</li>
+      <li>某应用需要「客服能看到客户姓名首字 + 城市，但绝不能看到完整姓名」。请用视图 + 角色 + 审计三件套写出完整 SQL，并说明为什么不能只靠前端隐藏。</li>
+      <li>复盘一次误删事故：写出从发现到恢复的时间线（停止写入 → 定位位点 → 全量恢复 → binlog 回放 → 数据校验 → 复盘改进），并指出每一步的关键命令。</li>
+    </ul>
+  </section>
+
+  <!-- 掌握标记 -->
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">勾选后会记录在本机浏览器（localStorage），回到学习大纲即可看到本节已打勾；大纲里打勾也会同步到这里。</div>
+  </div>
+
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t" id="footPrevT">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t" id="footNextT">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「SQL / 数据库」学习大纲</a></div>
+  </div>
+</footer>
+
+<script src="assets/sql-sandbox.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<script>
+const CONFIG = {
+  moduleId: "ops",
+  title: "运维、安全与分布式",
+  eyebrow: "MODULE 14 · SQL / 数据库",
+  lead: "把数据库当成会出故障、会被攻击、会撑爆的系统来管：备份恢复、最小授权、主从复制与读写分离、分库分表、SQL 注入防护，以及审计与脱敏合规。",
+  points: ["ops-backup","ops-user","ops-replica","ops-shard","sec-injection","sec-audit"],
+  prev: "13-advanced-sql.html",
+  next: "15-interview-patterns.html",
+};
+
+const QUZ = [
+  {
+    type:"quiz",
+    q:"用一份全量备份加上之后的 binlog，把数据恢复到「误删发生前的一秒」，这项能力叫什么？",
+    opts:["冷备 cold backup","双写 double write","时间点恢复 PITR","半同步复制 semi-sync"],
+    ans:2,
+    exp:"解析：全量备份 + binlog 回放到指定时间点，就是 Point-In-Time Recovery（PITR）。冷备只是「停机做的备份」，与恢复到哪一刻无关；double write 是 InnoDB 防止页写入撕裂的机制；半同步复制是复制模式，保证至少一个从库收到日志，都不提供按时间点回放的能力。"
+  },
+  {
+    type:"quiz",
+    q:"关于 mysqldump 的一致性，下面哪种说法正确？",
+    opts:[
+      "InnoDB 表加 --single-transaction 可在一致性快照中导出，不长时间锁表",
+      "mysqldump 默认锁全库，因此无法备份 InnoDB 表",
+      "mysqldump 只能导出表结构，不能导出数据行",
+      "mysqldump 生成的备份无法用于跨版本恢复"
+    ],
+    ans:0,
+    exp:"解析：--single-transaction 在 REPEATABLE READ 下开启一个一致性读事务，导出期间不阻塞写入，这是 InnoDB 逻辑备份的标准做法。选项 B 错在「默认锁全库」和「无法备份 InnoDB」——它恰恰是为 InnoDB 设计的；选项 C 错，默认就同时导出结构与数据；选项 D 错，逻辑备份是 SQL 文本，跨版本迁移正是它的长处（注意字符集与排序规则差异）。"
+  },
+  {
+    type:"quiz",
+    q:"应用账号需要「查询客户、写入订单」，最符合最小授权原则的做法是？",
+    opts:[
+      "GRANT ALL PRIVILEGES ON *.* TO 'app'@'%'，省得以后加权限",
+      "只给 GRANT SELECT ON shop.*，写订单时再临时用 root",
+      "直接让应用使用 root 账号，排障最方便",
+      "按表授予 customers 的 SELECT 与 orders 的 SELECT/INSERT/UPDATE，并把来源限制在内网网段"
+    ],
+    ans:3,
+    exp:"解析：最小授权要求动作、对象、来源三个维度都收窄，选项 D 三者齐全。A 是典型的生产事故来源，一旦注入或代码出错，攻击者可读写删全库；B 用 root 做业务写，等于绕开了所有权限边界；C 让应用持有 root，风险与 A 同级，而且无法审计到具体应用。"
+  },
+  {
+    type:"quiz",
+    q:"关于 MySQL 8.0 的角色（role）与权限回收，正确的是？",
+    opts:[
+      "权限一旦授予就无法回收，只能删号重建",
+      "可以用 CREATE ROLE 打包权限，再 GRANT 角色给账号，用 REVOKE 回收",
+      "角色只对企业版有效，社区版不支持",
+      "SHOW GRANTS 只能查看当前登录账号自己的权限"
+    ],
+    ans:1,
+    exp:"解析：MySQL 8.0 社区版就支持角色，把权限授予角色、再把角色授予账号，权限变更只改一处，回收用 REVOKE（回收角色或权限均可）。A 错，REVOKE 可以精确回收某个权限；C 错，角色是 8.0 的通用特性；D 错，拥有相应权限时可以 SHOW GRANTS FOR '用户'@'主机' 查看他人权限，这也是权限审计的常用手段。"
+  },
+  {
+    type:"quiz",
+    q:"从库的 Seconds_Behind_Source 持续增大，下面哪一项最不可能是原因？",
+    opts:[
+      "主库存在大事务或批量 DML，从库重放慢",
+      "从库磁盘 IO 或 CPU 已成为瓶颈",
+      "主库开启了 binlog，所以复制必然产生延迟",
+      "表缺少主键，ROW 格式下从库重放需要全表扫描"
+    ],
+    ans:2,
+    exp:"解析：开启 binlog 是复制的前提条件，但它本身不导致延迟——延迟来自「重放速度跟不上产生速度」。A、B、D 都是典型原因：大事务让单个事务重放时间变长；从库硬件不足直接限制吞吐；无主键表在 ROW 格式下定位行要靠全表扫描，代价极高。"
+  },
+  {
+    type:"quiz",
+    q:"读写分离架构下，用户「下单成功后立刻查看订单列表」，最稳妥的处理方式是？",
+    opts:[
+      "这类写后立刻读的请求强制走主库，或写后短时间内把会话粘住主库",
+      "把从库配置升到和主库一样，延迟自然消失",
+      "关闭主库 binlog 来减少复制开销",
+      "给从库多建几个索引，让读取更快"
+    ],
+    ans:0,
+    exp:"解析：问题的根源是复制延迟不可预测，因此要靠路由策略保证一致性：关键读走主库、写后短暂粘主库、或直接返回写事务的结果。B 只能缩短延迟不能消除；C 会让复制直接失效；D 优化的是读性能，与「读到旧数据」无关。"
+  },
+  {
+    type:"quiz",
+    q:"要把 orders 表水平拆成 4 张表，最合适的分片键是哪一个？",
+    opts:["order_date（按日期分片，方便归档）","amount（按金额区间分片，负载更均衡）","status（取值少，天然均匀）","customer_id（同一用户的订单同片，且高频查询都带它）"],
+    ans:3,
+    exp:"解析：分片键的验收标准是「核心查询大多带它」且「同一业务主体的数据落在同片」。用 customer_id 后，「查某用户的订单」只落到 1 片，写入也不会跨片。按日期分片虽然利于归档，但用户查自己的订单要扫全部分片；按金额或 status 分片会导致数据倾斜（绝大多数订单都是 paid），且这两种条件很少单独作为查询入口。"
+  },
+  {
+    type:"quiz",
+    q:"分库分表之后，下面哪一项最容易被忽略、而代价又最高？",
+    opts:[
+      "表名变长导致 SQL 可读性下降",
+      "跨分片 JOIN / 聚合 / 深分页，以及全局唯一 ID 与扩容时的数据重分布",
+      "单表数据量变小，索引失去意义",
+      "分片越多，备份文件数量越多"
+    ],
+    ans:1,
+    exp:"解析：跨分片查询需要广播到所有分片再归并，深分页更是灾难；同时自增主键失效必须引入全局 ID，哈希取模扩容还要重分布数据——这三点是分库分表真正的复杂度所在。A 只是可读性问题；C 说反了，单表变小反而让索引更高效；D 属于运维成本，可控且有成熟方案。"
+  },
+  {
+    type:"quiz",
+    q:"下面哪种写法能从根本上防止 SQL 注入？",
+    opts:[
+      "用 addslashes 之类的转义函数处理所有引号",
+      "把单引号统一替换成两个单引号",
+      "使用参数化查询（预编译语句），让 SQL 结构与数据在协议层分离",
+      "在前端用 JavaScript 校验输入只能是字母和数字"
+    ],
+    ans:2,
+    exp:"解析：参数化查询先编译 SQL 结构，参数以值的形式单独传输，无论内容含什么引号或关键字都不会改变语法，因此是根治手段。A、B 依赖字符集与驱动实现，遇到多字节编码绕过或数字型注入就失效；D 前端校验可被绕过（直接调用接口），只能算辅助。"
+  },
+  {
+    type:"quiz",
+    q:"为什么把输入 ' OR '1'='1 拼进下面这条 SQL 后，会返回全部客户？",
+    sql:"SELECT id, name, city FROM customers WHERE name = '' OR '1'='1';",
+    opts:[
+      "拼接后 WHERE 被改写成恒真条件，语义从「精确匹配姓名」变成了「全部行」",
+      "MySQL 会自动忽略空字符串作为条件的部分",
+      "因为 name 列上没有建立索引，只能全表返回",
+      "因为 OR 的运算优先级低于等号，条件被重新分组"
+    ],
+    ans:0,
+    exp:"解析：注入的本质是用户输入被当成语法解析。原意是 name = '用户输入'，注入后变成 name = '' OR '1'='1'，第二个条件恒真，于是整行条件恒真，返回全部 8 位客户。B 错，空字符串是合法比较值；C 错，有无索引只影响执行方式，不影响结果集；D 错，MySQL 中 = 优先级高于 OR，本例恰恰是这个优先级让恒真条件生效，而不是被重新分组。"
+  },
+  {
+    type:"quiz",
+    q:"要给 BI 账号开放客户数据用于分析，最符合合规要求的做法是？",
+    opts:[
+      "直接授予 customers 全表 SELECT，分析起来最灵活",
+      "只授予脱敏视图的 SELECT（姓名掩码、性别泛化），并按需最小授权",
+      "把数据导出成 CSV，用邮件发给分析师",
+      "给账号 WITH GRANT OPTION，让它按需分配给同事"
+    ],
+    ans:1,
+    exp:"解析：合规要求最小必要与可追溯，脱敏视图把敏感字段掩码后再授权，既满足分析需求又不暴露原值，还能随时收回视图权限。A 直接暴露全量原始数据；C 把数据带出受控环境，是最典型的泄露路径且无法审计；D 等于放弃权限管理，被授权者可以继续扩散。"
+  },
+  {
+    type:"interview",
+    q:"面试场景：线上一条忘记写 WHERE 的 DELETE 删掉了 customers 全表，DBA 立刻做了什么才救得回来？",
+    opts:[
+      "直接从从库把表复制回来即可，从库数据一定是最新的",
+      "重启数据库，InnoDB 会自动回滚这条 DELETE",
+      "用 mysqldump 备份覆盖整库，因为逻辑备份恢复总是比 binlog 快",
+      "先停止写入（或锁表）防止 binlog 继续增长，再用最近的全量备份恢复，并用 binlog 回放到误删前的时间点"
+    ],
+    ans:3,
+    exp:"解析：正确流程是「止损 → 定位 → 恢复 → 回放 → 校验」：先停止写入，避免覆盖与日志继续膨胀；再找出误删在 binlog 中的位置；然后恢复最近全量备份，用 mysqlbinlog --stop-datetime（或 --stop-position）回放到误删前一刻；最后抽样校验数据。A 错，从库会同步这条 DELETE，数据同样没了；B 错，DELETE 是已提交事务，重启不会回滚；C 错，逻辑备份恢复通常更慢，而且「覆盖整库」会丢掉备份之后的全部写入。"
+  },
+];
+
+/* ------------------------------------------------------------
+   进度：与学习大纲共享同一个 localStorage 键（sql_outline_progress_v1）
+   ------------------------------------------------------------ */
+(function(){
+  const KEY = "sql_outline_progress_v1";
+  const get = () => { try{ return new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); }catch(e){ return new Set(); } };
+  const set = s => { try{ localStorage.setItem(KEY, JSON.stringify([...s])); }catch(e){} };
+  const box = document.getElementById("masterBtn");
+  const boxes = () => document.querySelectorAll('.ptmark input[data-key]');
+
+  function sync(){
+    const done = get();
+    boxes().forEach(inp=>{
+      inp.checked = done.has(inp.dataset.key);
+      inp.closest(".ptmark").classList.toggle("on", inp.checked);
+    });
+    const total = CONFIG.points.length;
+    const n = CONFIG.points.filter(id => done.has(CONFIG.moduleId + "::" + id)).length;
+    box.classList.toggle("done", n === total && total > 0);
+    box.textContent = (n === total && total > 0) ? "✓ 本节已掌握（" + total + "/" + total + "）" : "标记：我已掌握本节（" + n + "/" + total + "）";
+  }
+
+  boxes().forEach(inp=>{
+    inp.addEventListener("change", ()=>{
+      const done = get(); const k = inp.dataset.key;
+      if(inp.checked) done.add(k); else done.delete(k);
+      set(done); sync();
+    });
+  });
+
+  box.addEventListener("click", ()=>{
+    const done = get();
+    const all = CONFIG.points.map(id => CONFIG.moduleId + "::" + id);
+    const full = all.every(k => done.has(k));
+    all.forEach(k => full ? done.delete(k) : done.add(k));
+    set(done); sync();
+  });
+
+  window.addEventListener("storage", sync);
+  sync();
+})();
+
+/* 标题 / 导航 / 翻页 */
+(function(){
+  document.getElementById("navTitle").textContent = CONFIG.title;
+  document.getElementById("eyebrow").textContent = CONFIG.eyebrow;
+  document.getElementById("pageTitle").textContent = CONFIG.title;
+  document.getElementById("pageLead").textContent = CONFIG.lead;
+  document.title = CONFIG.title + " · SQL / 数据库";
+
+  function setup(el, href){ if(href){ el.href = href; el.classList.remove("disabled"); } else { el.classList.add("disabled"); el.removeAttribute("href"); } }
+  setup(document.getElementById("prevLink"), CONFIG.prev);
+  setup(document.getElementById("nextLink"), CONFIG.next);
+  setup(document.getElementById("footPrev"), CONFIG.prev);
+  setup(document.getElementById("footNext"), CONFIG.next);
+})();
+
+/* 考核渲染与计分 */
+(function(){
+  const box = document.getElementById("quizBox");
+  const letter = "ABCDEFGHIJ";
+  const render = (q,i)=>`<div class="qcard" data-i="${i}">
+      <div class="qt"><span class="qi">${i+1}</span><span>${q.q}</span></div>
+      ${q.sql?`<div class="qsql">${q.sql}</div>`:""}
+      <div class="tagline">${q.type==="interview"?"⌁ 面试延伸":"✎ 掌握度自测"}</div>
+      ${q.opts.map((o,j)=>`<label class="opt"><input type="radio" name="q${i}" value="${j}">${letter[j]}. ${o}</label>`).join('')}
+      <div class="act"><button class="btn" data-submit="1">提交此题</button></div>
+      <div class="fb"></div>
+    </div>`;
+  box.innerHTML = QUZ.map(render).join('');
+
+  const results = QUZ.map(()=>null);
+  box.querySelectorAll('[data-submit]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const card = btn.closest('.qcard'), i = +card.dataset.i, q = QUZ[i];
+      const sel = card.querySelector('input:checked');
+      const fb = card.querySelector('.fb');
+      if(!sel){ fb.className="fb show"; fb.innerHTML="请先选择一个选项。"; return; }
+      const selIdx = +sel.value, ok = selIdx===q.ans;
+      results[i] = ok;
+      card.querySelectorAll('.opt').forEach((o,j)=>{
+        o.classList.add('disabled');
+        if(j===q.ans) o.classList.add('correct');
+        if(j===selIdx && !ok) o.classList.add('wrong');
+      });
+      btn.disabled = true;
+      fb.className = "fb show " + (ok?"ok":"bad");
+      fb.innerHTML = (ok?"✅ 回答正确！":"❌ 回答错误。") + " <b>" + (q.opts[q.ans]) + "</b><br>" + q.exp;
+      updateScore();
+    });
+  });
+
+  function updateScore(){
+    const got = results.filter(x=>x===true);
+    const pct = Math.round(got.length/results.length*100);
+    const fg = document.getElementById("ringFg"), len = 2*Math.PI*27;
+    fg.style.strokeDasharray = len; fg.style.strokeDashoffset = len*(1-pct/100);
+    document.getElementById("ringPct").textContent = pct+"%";
+    const sc = document.getElementById("qscore");
+    if(results.some(x=>x===null)){ sc.style.display="none"; return; }
+    sc.style.display="flex";
+    document.getElementById("scoreText").innerHTML = (got.length===results.length)
+      ? `🎉 全部答对，共 <b>${results.length}</b> 题！你已牢牢掌握本模块核心。
+      <br><span style="color:var(--muted);font-size:13px">建议继续做「进阶挑战」，并把错题记进笔记。</span>`
+      : `你答对 <b>${got.length} / ${results.length}</b> 题。${pct>=60?"已基本掌握，建议回看错题对应的知识点。":"还需回顾错题对应的知识点，再测一次。"}`;
+  }
+})();
+
+/* Mermaid */
+try{ if(window.mermaid) mermaid.initialize({ startOnLoad:true, theme:"neutral" }); }catch(e){}
+
+/* ------------------------------------------------------------
+   演示面板 ①：分片查询练习台（SELECT 可表达的部分）
+   ------------------------------------------------------------ */
+(function(){
+  if(!window.SQLSandbox) return;
+  const host = document.getElementById("demo-shard");
+  if(!host) return;
+  SQLSandbox.mount(host, {
+    query: "SELECT customer_id, COUNT(*) AS n, SUM(amount) AS total\nFROM orders\nWHERE status = 'paid'\nGROUP BY customer_id\nORDER BY total DESC;",
+    presets: [
+      {label:"跨片聚合（不带分片键）", sql:"SELECT status, COUNT(*) AS n, SUM(amount) AS total FROM orders GROUP BY status ORDER BY total DESC;"},
+      {label:"只查一个分片键", sql:"SELECT id, order_date, amount, status FROM orders WHERE customer_id = 3 ORDER BY order_date;"},
+      {label:"已支付订单按客户汇总", sql:"SELECT customer_id, COUNT(*) AS n, SUM(amount) AS total FROM orders WHERE status = 'paid' GROUP BY customer_id ORDER BY total DESC;"}
+    ]
+});
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ②：SQL 注入 —— 字符串拼接 vs 参数化查询
+   ------------------------------------------------------------ */
+(function(){
+  const inp = document.getElementById("injInput");
+  const out = document.getElementById("injOut");
+  const log = document.getElementById("injLog");
+  if(!inp || !out) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const CUST = [
+    [1,"张伟","北京"],[2,"李娜","上海"],[3,"王强","广州"],[4,"刘敏","深圳"],
+    [5,"陈晨","杭州"],[6,"赵磊","北京"],[7,"孙悦","上海"],[8,"周涛",null]
+  ];
+  const risky = raw => /['"`]|\bOR\b|\bAND\b|\bUNION\b|--|#|\/\*/i.test(raw);
+
+  function rowsTable(rows){
+    if(!rows.length){
+      return '<table class="dt"><thead><tr><th>id</th><th>name</th><th>city</th></tr></thead>' +
+        '<tbody><tr class="dim"><td colspan="3">0 行 —— 没有匹配的客户</td></tr></tbody></table>';
+    }
+    return '<table class="dt"><thead><tr><th>id</th><th>name</th><th>city</th></tr></thead><tbody>' +
+      rows.map(r => '<tr><td class="key">' + r[0] + '</td><td>' + esc(r[1]) + '</td>' +
+        (r[2] === null ? '<td class="null">NULL</td>' : '<td>' + esc(r[2]) + '</td>') + '</tr>').join('') +
+      '</tbody></table>';
+  }
+
+  function codeBox(title, sql, color){
+    return '<div class="codewrap"><div class="cl">' +
+      '<span class="d" style="background:' + color + '"></span><span class="d" style="background:#e8b34b"></span>' +
+      '<span class="d" style="background:#57b05b"></span>' + esc(title) + '</div>' +
+      '<pre><code>' + esc(sql) + '</code></pre></div>';
+  }
+
+  function render(){
+    const raw = inp.value;
+    const bad = risky(raw);
+    const hit = CUST.filter(r => r[1] === raw);
+    const concatRows = bad ? CUST : hit;
+    const concatSql = "SELECT id, name, city FROM customers WHERE name = '" + raw + "';";
+    const paramSql  = "SELECT id, name, city FROM customers WHERE name = ?;\n" +
+                      "-- 参数绑定：? = " + JSON.stringify(raw);
+
+    out.innerHTML =
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">' +
+        '<div><div style="font-weight:700;color:#8a3b2a;margin:0 0 6px">✗ 字符串拼接（危险）</div>' +
+        codeBox("concat.sql", concatSql, "#e0654b") + rowsTable(concatRows) + '</div>' +
+        '<div><div style="font-weight:700;color:#1e5b4f;margin:0 0 6px">✓ 参数化查询（安全）</div>' +
+        codeBox("prepared.sql", paramSql, "#1e5b4f") + rowsTable(hit) + '</div>' +
+      '</div>';
+
+    if(bad && concatRows.length > hit.length){
+      log.innerHTML = '⚠ 输入里含有引号 / <b>OR</b> / 注释符：拼接后 WHERE 被改写成恒真条件，返回了全部 <b>' +
+        concatRows.length + '</b> 行；参数化查询只返回 <b>' + hit.length + '</b> 行。';
+    } else if(bad){
+      log.innerHTML = '输入含特殊字符，但本例的拼接结果仍是 <b>' + concatRows.length +
+        '</b> 行。真实攻击面取决于 SQL 模板位置（如登录语句、<code>ORDER BY</code> 之后的拼接）。';
+    } else {
+      log.innerHTML = '正常输入「' + esc(raw) + '」：两种做法结果一致，都是 <b>' + hit.length +
+        '</b> 行。差异只在恶意输入时才暴露出来。';
+    }
+  }
+
+  inp.addEventListener("input", render);
+  document.getElementById("injRun").addEventListener("click", render);
+  render();
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ③：权限矩阵 —— 换账号看可用操作与最小授权建议
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("permOut");
+  const log = document.getElementById("permLog");
+  if(!out) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  const DATA = {
+    ro: {
+      name: "只读账号 bi_ro",
+      rows: [
+        ["SELECT 业务表（customers / orders / products）", 1, "只读，报表与 BI 的默认权限"],
+        ["SELECT 敏感原表（customers 真实姓名）", 0, "应改为只授权脱敏视图"],
+        ["INSERT / UPDATE / DELETE", 0, "只读账号绝不允许写"],
+        ["CREATE / ALTER / DROP（DDL）", 0, "结构变更与它无关"],
+        ["GRANT 授权给他人", 0, "没有 GRANT OPTION"],
+        ["PROCESS（查看会话 / 慢查询）", 0, "需要排障时单独授予并留痕"]
+      ],
+      sql: "-- 最小授权建议\nCREATE USER 'bi_ro'@'10.0.2.%' IDENTIFIED BY 'R0Pass#2024' REQUIRE SSL;\nGRANT SELECT ON shop.v_customers_masked TO 'bi_ro'@'10.0.2.%';\n-- 不要 GRANT SELECT ON shop.*",
+      note: "只读账号的价值在于「看得见但不改得动」。再叠加脱敏视图，就能做到既给分析、又不泄露原值。"
+    },
+    app: {
+      name: "应用账号 app_rw",
+      rows: [
+        ["SELECT customers / orders / products", 1, "业务读取必需"],
+        ["INSERT orders（下单）", 1, "核心写动作"],
+        ["UPDATE orders（改状态）", 1, "支付、发货、退款状态流转"],
+        ["DELETE orders（物理删除）", 0, "用 status='cancelled' 软删代替"],
+        ["CREATE / ALTER / DROP（DDL）", 0, "上线变更走 DBA 流程"],
+        ["GRANT 授权给他人", 0, "应用永远不该管理权限"]
+      ],
+      sql: "-- 最小授权建议\nCREATE USER 'app_rw'@'10.0.1.%' IDENTIFIED BY 'S3cure#Pass' REQUIRE SSL;\nGRANT SELECT, INSERT, UPDATE ON shop.orders    TO 'app_rw'@'10.0.1.%';\nGRANT SELECT                 ON shop.customers TO 'app_rw'@'10.0.1.%';\nGRANT SELECT                 ON shop.products  TO 'app_rw'@'10.0.1.%';",
+      note: "应用账号被注入时，权限就是最后一道防线：没有 DELETE 和 DROP，攻击者最多改数据，删不掉库。"
+    },
+    dba: {
+      name: "DBA / 运维账号",
+      rows: [
+        ["CREATE / ALTER / DROP（DDL）", 1, "结构变更与在线加索引"],
+        ["用户与权限管理（GRANT / REVOKE）", 1, "配合双人复核"],
+        ["备份恢复、复制管理（REPLICATION）", 1, "主从搭建与故障切换"],
+        ["日常业务数据读写", 0, "不应使用高权账号做日常操作"],
+        ["个人账号直连生产", 0, "必须走跳板机 + 操作审计"],
+        ["WITH GRANT OPTION 扩散权限", 0, "权限集中管理，禁止转授"]
+      ],
+      sql: "-- 最小授权建议（仅跳板机可用）\nCREATE ROLE 'role_dba';\nGRANT ALL PRIVILEGES ON *.* TO 'role_dba' WITH GRANT OPTION;\nGRANT 'role_dba' TO 'dba_zhang'@'10.0.9.%';\nSET DEFAULT ROLE ALL TO 'dba_zhang'@'10.0.9.%';",
+      note: "DBA 账号权限最大，因此约束手段不是「少给权限」，而是「独立账号 + 跳板机 + 双人复核 + 全量审计」。"
+    }
+  };
+
+  function render(k){
+    document.querySelectorAll("[data-p]").forEach(b => b.classList.toggle("on", b.dataset.p === k));
+    const d = DATA[k];
+    out.innerHTML =
+      '<div style="font-weight:700;color:#1e5b4f;margin:0 0 6px">' + esc(d.name) + ' · 权限矩阵</div>' +
+      '<table class="dt"><thead><tr><th>操作</th><th>是否允许</th><th>说明</th></tr></thead><tbody>' +
+      d.rows.map(r => '<tr class="' + (r[1] ? "match" : "dim") + '"><td>' + esc(r[0]) + '</td><td>' +
+        (r[1] ? "✅ 允许" : "⛔ 禁止") + '</td><td>' + esc(r[2]) + '</td></tr>').join('') +
+      '</tbody></table>' +
+      '<div class="codewrap" style="margin-top:12px"><div class="cl">' +
+      '<span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span>' +
+      '<span class="d" style="background:#57b05b"></span>least_privilege.sql</div><pre><code>' +
+      esc(d.sql) + '</code></pre></div>';
+    log.innerHTML = '<b>' + esc(d.name) + '</b>：' + esc(d.note);
+  }
+
+  document.querySelectorAll("[data-p]").forEach(b => b.addEventListener("click", () => render(b.dataset.p)));
+  render("ro");
+})();
+
+/* ------------------------------------------------------------
+   演示面板 ④：主从复制与读写分离路由器
+   ------------------------------------------------------------ */
+(function(){
+  const out = document.getElementById("repOut");
+  const log = document.getElementById("repLog");
+  const rng = document.getElementById("lagRange");
+  const val = document.getElementById("lagVal");
+  if(!out || !rng) return;
+
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  let kind = "write";
+
+  function bar(label, pct, text){
+    return '<div class="bars"><div class="bar"><span class="nm">' + esc(label) +
+      '</span><span class="track"><span style="width:' + pct + '%"></span></span>' +
+      '<span class="val">' + esc(text) + '</span></div></div>';
+  }
+
+  function render(){
+    const lag = +rng.value;
+    val.textContent = lag + " 秒";
+    document.querySelectorAll("[data-r]").forEach(b => b.classList.toggle("on", b.dataset.r === kind));
+
+    let html = "";
+    if(kind === "write"){
+      html =
+        '<div style="font-weight:700;color:#1e5b4f;margin:0 0 6px">路由结果：主库 primary ✅</div>' +
+        '<table class="dt"><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>' +
+        '<tr class="match"><td>目标实例</td><td>10.0.1.10（主库 primary）</td></tr>' +
+        '<tr><td>示例语句</td><td><code>UPDATE orders SET status=\'paid\' WHERE id=1013;</code></td></tr>' +
+        '<tr><td>一致性</td><td>强一致，写入立即可读</td></tr>' +
+        '<tr class="dim"><td>延迟风险</td><td>无（但会写进 binlog，由从库异步重放）</td></tr>' +
+        '</tbody></table>' +
+        bar("主库写入耗时", 20, "已提交") +
+        bar("从库重放进度", Math.max(0, 100 - lag * 20), lag === 0 ? "已追平" : "落后 " + lag + " 秒");
+      log.innerHTML = '<b>写请求</b>：只能走主库。写入成功后，变更进入 binlog，从库要等 <b>' +
+        lag + '</b> 秒才能重放完（当前延迟设定）。';
+    } else {
+      const stale = lag > 0;
+      html =
+        '<div style="font-weight:700;color:#1e5b4f;margin:0 0 6px">路由结果：从库 replica ' +
+        (stale ? "⚠ 可能读到旧数据" : "✅ 延迟可接受") + '</div>' +
+        '<table class="dt"><thead><tr><th>项目</th><th>值</th></tr></thead><tbody>' +
+        '<tr class="' + (stale ? "hl" : "match") + '"><td>目标实例</td><td>10.0.2.20（从库 replica）</td></tr>' +
+        '<tr><td>示例语句</td><td><code>SELECT id, status FROM orders WHERE customer_id=5;</code></td></tr>' +
+        '<tr class="' + (stale ? "dim" : "") + '"><td>刚下的订单 #1013</td><td>' +
+        (stale ? "查不到 —— 从库还在重放" : "可见") + '</td></tr>' +
+        '<tr><td>订单 #1007 的金额</td><td>' + (stale ? "旧值 998.00" : "998.00（一致）") + '</td></tr>' +
+        '<tr class="' + (stale ? "hl" : "dim") + '"><td>一致性风险</td><td>' +
+        (stale ? "读写不一致：用户会以为下单失败" : "窗口极小，但依然存在") + '</td></tr>' +
+        '</tbody></table>' +
+        bar("复制延迟", Math.min(100, lag * 20), lag + " 秒") +
+        bar("读到旧数据的概率", Math.min(100, lag * 18), stale ? "偏高" : "低");
+      log.innerHTML = stale
+        ? '<b>读请求</b>：走从库，但延迟 <b>' + lag + ' 秒</b>，写后立刻读会拿到旧数据。对策：关键读强制走主库 / 会话粘主库。'
+        : '<b>读请求</b>：走从库，延迟接近 0，结果基本一致；仍建议对「写后立刻读」的场景做路由兜底。';
+    }
+    out.innerHTML = html;
+  }
+
+  document.querySelectorAll("[data-r]").forEach(b => b.addEventListener("click", () => { kind = b.dataset.r; render(); }));
+  rng.addEventListener("input", render);
+  render();
+})();
+</script>
+</body>
+</html>
