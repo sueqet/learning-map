@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>技术图鉴 · 技术全景与架构选型</title>
+<meta name="description" content="技术图鉴：100 多个常见技术名词按前端、后端、数据、基础设施、AI、架构概念六层铺成一张地图。每个名词都说明它在哪一层、解决什么、代价是什么、什么时候别用、常和谁搭配、可以被谁替代。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="content/assets/learn.css">
+<script src="content/assets/theme.js"></script>
+<style>
+  .wrap{max-width:1180px}
+  .topnav .crumb{flex:1}
+  .L-fe{--lc:#3a6b8f}.L-be{--lc:#1e5b4f}.L-data{--lc:#b7791f}.L-infra{--lc:#6b4f8a}.L-ai{--lc:#a0522d}.L-arch{--lc:#5a6b2f}
+  :root[data-theme="dark"] .L-fe{--lc:#8ebbdb}:root[data-theme="dark"] .L-be{--lc:#6cc2a8}:root[data-theme="dark"] .L-data{--lc:#e3aa4f}
+  :root[data-theme="dark"] .L-infra{--lc:#b9a3e3}:root[data-theme="dark"] .L-ai{--lc:#e8a07a}:root[data-theme="dark"] .L-arch{--lc:#b3c776}
+
+  .hero{padding:38px 0 6px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 0}
+  .stat{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:10px 18px;box-shadow:var(--shadow);min-width:110px}
+  .stat .num{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--green);line-height:1.2}
+  .stat .lab{font-size:12px;color:var(--muted)}
+  .mbar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;display:flex;margin-top:12px;max-width:520px}
+  .mbar span{display:block;height:100%}
+
+  .bar{position:sticky;top:58px;z-index:40;background:var(--nav-bg);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:10px 0;margin-top:18px}
+  .bar .wrap{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .bar input[type=search]{flex:1 1 220px;min-width:180px;padding:9px 14px;border:1px solid var(--line-2);border-radius:999px;background:var(--card);color:var(--ink);font-size:14px;outline:none}
+  .bar input[type=search]:focus{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{cursor:pointer;border:1px solid var(--line-2);background:var(--card);color:var(--ink-soft);padding:6px 12px;border-radius:999px;font-size:13px;font-family:inherit;white-space:nowrap}
+  .chip:hover{border-color:var(--green);color:var(--green)}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .chip .c{font-family:var(--font-mono);font-size:11px;opacity:.7;margin-left:4px}
+  .bar select{padding:7px 10px;border:1px solid var(--line-2);border-radius:999px;background:var(--card);color:var(--ink);font-size:13px}
+
+  .band{margin:22px 0;border:1px solid var(--line);border-left:6px solid var(--lc);border-radius:16px;background:var(--paper-2);box-shadow:var(--shadow);overflow:hidden}
+  .band-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .band-h h2{margin:0;font-size:20px;font-weight:900;font-family:var(--font-display);color:var(--lc)}
+  .band-h .en{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--muted)}
+  .band-h .d{font-size:13.5px;color:var(--ink-soft)}
+  .band-h .r{margin-left:auto;display:flex;gap:10px;align-items:center;font-size:12.5px;font-family:var(--font-mono);color:var(--muted)}
+  .band-h .r a{font-family:var(--font-body);font-weight:700}
+  .groups{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:4px 18px;padding:12px 18px 16px}
+  .grp .gl{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;color:var(--muted);margin:6px 0 6px}
+  .grp .gi{display:flex;flex-wrap:wrap;gap:6px}
+  .tech{cursor:pointer;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--card);color:var(--ink);font-size:13.5px;padding:5px 11px;border-radius:10px;font-family:inherit;transition:transform .12s, box-shadow .12s, border-color .12s}
+  .tech:hover{transform:translateY(-2px);border-color:var(--lc);box-shadow:0 6px 16px -10px var(--lc)}
+  .tech .lv{width:7px;height:7px;border-radius:50%;background:var(--lc);flex:none}
+  .tech .lv.l2{opacity:.55}.tech .lv.l3{opacity:.25}
+  .tech.learning{border-color:var(--amber);background:var(--amber-soft)}
+  .tech.known{border-color:var(--green);background:var(--green-soft)}
+  .tech.known::after{content:"✓";font-size:11px;color:var(--green);font-weight:700}
+  .tech.sel{outline:2px solid var(--lc);outline-offset:2px}
+  .tech.cmp{box-shadow:inset 0 -3px 0 var(--lc)}
+  .empty{padding:40px;text-align:center;color:var(--muted)}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--muted);margin:14px 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .legend i{width:12px;height:12px;border-radius:4px;border:1px solid var(--line-2);display:inline-block}
+
+  /* 详情抽屉 */
+  .drawer{position:fixed;top:0;right:0;height:100vh;width:min(440px,100vw);background:var(--paper-2);border-left:1px solid var(--line-2);box-shadow:-24px 0 60px -30px rgba(0,0,0,.5);z-index:120;transform:translateX(105%);transition:transform .22s ease;display:flex;flex-direction:column}
+  .drawer.on{transform:none}
+  .drawer .dt-h{padding:18px 20px 12px;border-bottom:1px solid var(--line);border-top:6px solid var(--lc)}
+  .drawer .dt-h .meta{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+  .drawer .dt-h h3{margin:4px 0 2px;font-size:26px;font-family:var(--font-display);font-weight:900}
+  .drawer .dt-h .aka{font-size:12.5px;color:var(--muted)}
+  .drawer .x{position:absolute;top:12px;right:12px;border:1px solid var(--line-2);background:var(--card);color:var(--ink-soft);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px}
+  .drawer .bd{padding:14px 20px 20px;overflow:auto;flex:1}
+  .drawer .one{font-size:16px;color:var(--ink);font-weight:700;margin:0 0 12px}
+  .drawer .row{margin:0 0 12px;font-size:14px;color:var(--ink-soft)}
+  .drawer .row .k{display:block;font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:2px}
+  .drawer .row.c .k{color:var(--amber)} .drawer .row.x2 .k{color:var(--red)} .drawer .row.s .k{color:var(--green)}
+  .drawer .rel{display:flex;flex-wrap:wrap;gap:6px}
+  .drawer .acts{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0 8px}
+  .drawer .acts .btn{font-size:13px;padding:7px 13px}
+  .drawer .acts .btn.on{background:var(--green);color:var(--on-accent);border-color:var(--green)}
+  .drawer .acts .btn.warn.on{background:var(--amber);border-color:var(--amber)}
+  .drawer .links a{display:block;margin:6px 0;font-weight:700;font-size:14px}
+  .drawer .nav2{display:flex;justify-content:space-between;padding:10px 20px;border-top:1px solid var(--line);font-size:12.5px;font-family:var(--font-mono)}
+  .drawer .nav2 button{border:none;background:none;color:var(--green);cursor:pointer;font-family:inherit;font-size:12.5px}
+  .shade{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:110;display:none}
+  .shade.on{display:block}
+  @media (max-width:640px){ .drawer{top:auto;bottom:0;height:82vh;width:100vw;border-left:none;border-top:1px solid var(--line-2);border-radius:18px 18px 0 0;transform:translateY(105%)} }
+
+  /* 对比托盘与面板 */
+  .tray{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:115;background:var(--ink);color:var(--paper);border-radius:999px;padding:8px 10px 8px 18px;display:none;align-items:center;gap:10px;box-shadow:0 18px 40px -16px rgba(0,0,0,.6);max-width:calc(100vw - 24px);font-size:13px}
+  .tray.on{display:flex}
+  .tray .tk{background:rgba(255,255,255,.14);border-radius:999px;padding:3px 10px;white-space:nowrap}
+  .tray button{border:none;border-radius:999px;padding:7px 14px;cursor:pointer;font-family:inherit;font-size:13px}
+  .tray .go{background:var(--green);color:var(--on-accent);font-weight:700}
+  .tray .clr{background:transparent;color:var(--paper);opacity:.75}
+  .cmpbox{position:fixed;inset:0;z-index:130;background:rgba(20,18,14,.5);display:none;align-items:flex-start;justify-content:center;padding:8vh 14px;overflow:auto}
+  .cmpbox.on{display:flex}
+  .cmp{background:var(--paper-2);border:1px solid var(--line-2);border-radius:16px;max-width:980px;width:100%;box-shadow:0 30px 80px -20px rgba(0,0,0,.55);overflow:hidden}
+  .cmp .hd{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .cmp .hd h3{margin:0;font-size:18px}
+  .cmp .hd button{margin-left:auto}
+  .cmp .sc{overflow:auto}
+  .cmp table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:600px}
+  .cmp th,.cmp td{padding:10px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-soft)}
+  .cmp th{width:110px;font-family:var(--font-mono);font-size:11.5px;color:var(--muted);letter-spacing:.06em}
+  .cmp thead td{font-weight:900;font-size:16px;color:var(--ink);border-top:5px solid var(--lc)}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="index.html">← 学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b>技术图鉴</b></span>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>TECH ATLAS · 技术图鉴</span>
+    <h1>技术<span class="accent">图鉴</span></h1>
+    <p class="lead">把「全景地图」画成真的地图：<b id="hCount">100+</b> 个常见技术名词按六层铺开。点开任意一个，就能看到它<b>在哪一层、解决什么、代价是什么、什么时候别用、常和谁搭配、可以被谁替代</b>。认识一个就标记一个，没把握的交给 <a href="review.html">闪卡复习</a>。</p>
+    <div class="stats">
+      <div class="stat"><div class="num" id="sAll">—</div><div class="lab">名词</div></div>
+      <div class="stat"><div class="num" id="sKnown">—</div><div class="lab">已认识</div></div>
+      <div class="stat"><div class="num" id="sLearn">—</div><div class="lab">还不熟</div></div>
+      <div class="stat"><div class="num" id="sMust">—</div><div class="lab">必知项已认识</div></div>
+    </div>
+    <div class="mbar" id="mbar" title="已认识 / 还不熟 / 未标记"></div>
+    <div class="legend">
+      <span><i style="background:var(--green-soft);border-color:var(--green)"></i>已认识</span>
+      <span><i style="background:var(--amber-soft);border-color:var(--amber)"></i>还不熟</span>
+      <span><i style="background:var(--card)"></i>未标记</span>
+      <span>· 圆点越实越重要：必知 / 常见 / 了解即可</span>
+    </div>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="wrap">
+    <input type="search" id="q" placeholder="🔍 搜索名词、别名或用途：缓存、K8s、流式、幂等…" autocomplete="off">
+    <div class="chips" id="lyChips"></div>
+    <select id="lvSel" aria-label="重要程度"><option value="0">全部重要度</option><option value="1">只看必知</option><option value="2">必知 + 常见</option></select>
+    <select id="stSel" aria-label="掌握状态"><option value="all">全部状态</option><option value="todo">还没认识的</option><option value="learning">还不熟的</option><option value="known">已认识的</option></select>
+    <button class="chip" id="rnd" title="随机抽一个还没认识的名词">🎲 随机抽一张</button>
+  </div>
+</div>
+
+<div class="wrap" id="map"></div>
+
+<div class="shade" id="shade"></div>
+<aside class="drawer" id="drawer" aria-label="名词详情"></aside>
+<div class="tray" id="tray"></div>
+<div class="cmpbox" id="cmpbox"><div class="cmp" id="cmp"></div></div>
+
+<div class="wrap" style="padding:20px 22px 70px;color:var(--muted);font-size:13px">
+  图鉴数据维护在 <code class="inl">content/assets/atlas-data.js</code>：新增名词只要加一条记录，图鉴、闪卡、⌘K 搜索和详解页的悬停卡片都会自动出现。掌握状态与 <a href="review.html">闪卡复习</a> 共用，保存在本机浏览器里。
+</div>
+
+<script src="content/assets/modules.js"></script>
+<script src="content/assets/atlas-data.js"></script>
+<script>
+(function(){
+  const KEY = "arch_cards_v1", DAY = 864e5;
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const byId = Object.fromEntries(ATLAS.map(a=>[a.id, a]));
+  const LY = Object.fromEntries(ATLAS_LAYERS.map(l=>[l.k, l]));
+  const LVN = {1:"必知", 2:"常见", 3:"了解即可"};
+  const PACKS = { sql:["SQL / 数据库","../SQL/index.html"], python:["Python","../Python/index.html"], linux:["Linux","../Linux/index.html"], git:["Git 版本协作","../Git 版本协作/index.html"], dsa:["数据结构与算法","../数据结构与算法/index.html"] };
+  const load = () => { try{ return JSON.parse(localStorage.getItem(KEY) || "{}"); }catch(e){ return {}; } };
+  const save = s => { try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} };
+  let cards = load();
+  const state = id => { const c = cards[id]; return !c ? "todo" : (c.box >= 3 ? "known" : "learning"); };
+  const filt = { q:"", ly:"all", lv:0, st:"all" };
+  let cmp = [], openId = null, visibleIds = [];
+
+  document.getElementById("hCount").textContent = ATLAS.length;
+  document.getElementById("lyChips").innerHTML = `<button class="chip on" data-ly="all">全部<span class="c">${ATLAS.length}</span></button>` +
+    ATLAS_LAYERS.map(l=>`<button class="chip" data-ly="${l.k}">${l.n}<span class="c">${ATLAS.filter(a=>a.ly===l.k).length}</span></button>`).join("");
+
+  function match(a){
+    if(filt.ly !== "all" && a.ly !== filt.ly) return false;
+    if(filt.lv && a.lv > filt.lv) return false;
+    if(filt.st !== "all" && state(a.id) !== filt.st) return false;
+    if(filt.q){
+      const hay = [a.n, ...(a.aka||[]), a.cat, a.one, a.s, a.c, a.x || "", LY[a.ly].n].join(" ").toLowerCase();
+      if(!filt.q.toLowerCase().split(/\s+/).every(w=>hay.includes(w))) return false;
+    }
+    return true;
+  }
+
+  function stats(){
+    const k = ATLAS.filter(a=>state(a.id)==="known").length, l = ATLAS.filter(a=>state(a.id)==="learning").length;
+    const must = ATLAS.filter(a=>a.lv===1), mk = must.filter(a=>state(a.id)==="known").length;
+    document.getElementById("sAll").textContent = ATLAS.length;
+    document.getElementById("sKnown").textContent = k;
+    document.getElementById("sLearn").textContent = l;
+    document.getElementById("sMust").textContent = mk + "/" + must.length;
+    document.getElementById("mbar").innerHTML = `<span style="width:${k/ATLAS.length*100}%;background:var(--green)"></span><span style="width:${l/ATLAS.length*100}%;background:var(--amber)"></span>`;
+  }
+
+  function render(){
+    const map = document.getElementById("map");
+    visibleIds = [];
+    const html = ATLAS_LAYERS.map(l=>{
+      const items = ATLAS.filter(a=>a.ly===l.k && match(a));
+      if(!items.length) return "";
+      const all = ATLAS.filter(a=>a.ly===l.k), kn = all.filter(a=>state(a.id)==="known").length;
+      const cats = [...new Set(items.map(a=>a.cat.split(" · ")[0]))];
+      const groups = cats.map(c=>{
+        const its = items.filter(a=>a.cat.split(" · ")[0]===c).sort((x,y)=>x.lv-y.lv);
+        its.forEach(a=>visibleIds.push(a.id));
+        return `<div class="grp"><div class="gl">${esc(c)}</div><div class="gi">${its.map(a=>`<button class="tech ${state(a.id)} ${openId===a.id?"sel":""} ${cmp.includes(a.id)?"cmp":""}" data-id="${a.id}" title="${esc(a.one)}"><span class="lv l${a.lv}"></span>${esc(a.n)}</button>`).join("")}</div></div>`;
+      }).join("");
+      return `<section class="band L-${l.k}" id="band-${l.k}"><div class="band-h"><h2>${l.n}</h2><span class="en">${l.en}</span><span class="d">${esc(l.d)}</span>
+        <span class="r">已认识 ${kn}/${all.length}<a href="content/${l.mod}">学这一层 →</a></span></div><div class="groups">${groups}</div></section>`;
+    }).join("");
+    map.innerHTML = html || `<div class="empty">没有匹配的名词。换个关键词，或者把筛选条件放宽一点。</div>`;
+    stats();
+  }
+
+  function relChips(ids){ return (ids||[]).filter(id=>byId[id]).map(id=>`<button class="tech ${state(id)} L-${byId[id].ly}" data-id="${id}"><span class="lv l${byId[id].lv}"></span>${esc(byId[id].n)}</button>`).join("") || '<span style="color:var(--muted);font-size:13px">—</span>'; }
+
+  function openCard(id, push){
+    const a = byId[id]; if(!a) return;
+    openId = id;
+    const d = document.getElementById("drawer"), st = state(id), ly = LY[a.ly];
+    d.className = "drawer on L-" + a.ly;
+    const idx = visibleIds.indexOf(id);
+    d.innerHTML = `<div class="dt-h"><button class="x" id="dx" aria-label="关闭">×</button>
+        <div class="meta">${ly.n} · ${esc(a.cat)} · ${LVN[a.lv]}</div><h3>${esc(a.n)}</h3>${a.aka && a.aka.length ? `<div class="aka">也叫：${a.aka.map(esc).join("、")}</div>` : ""}</div>
+      <div class="bd">
+        <p class="one">${esc(a.one)}</p>
+        <div class="row s"><span class="k">解决什么</span>${esc(a.s)}</div>
+        <div class="row c"><span class="k">代价</span>${esc(a.c)}</div>
+        ${a.x ? `<div class="row x2"><span class="k">什么时候别用</span>${esc(a.x)}</div>` : ""}
+        <div class="row"><span class="k">常一起出现</span><div class="rel">${relChips(a.pair)}</div></div>
+        <div class="row"><span class="k">可以替代它的</span><div class="rel">${relChips(a.alt)}</div></div>
+        <div class="acts">
+          <button class="btn ${st==="known"?"on":""}" id="dKnow">✓ 我认识它</button>
+          <button class="btn warn ${st==="learning"?"on":""}" id="dLearn">还不熟，加入复习</button>
+          <button class="btn" id="dCmp">${cmp.includes(id) ? "移出对比" : "＋ 加入对比"}</button>
+        </div>
+        <div class="links"><a href="content/${a.mod}">📖 在详解页里学它 →</a>${a.pk && PACKS[a.pk] ? `<a href="${PACKS[a.pk][1]}">🔎 深入：${PACKS[a.pk][0]} 学习包 →</a>` : ""}<a href="review.html">⟳ 去闪卡复习 →</a></div>
+      </div>
+      <div class="nav2"><button id="dPrev" ${idx <= 0 ? "disabled" : ""}>← 上一个</button><span style="color:var(--muted)">${idx >= 0 ? (idx+1) + " / " + visibleIds.length : ""}</span><button id="dNext" ${idx < 0 || idx >= visibleIds.length - 1 ? "disabled" : ""}>下一个 →</button></div>`;
+    document.getElementById("shade").classList.add("on");
+    document.getElementById("dx").onclick = closeCard;
+    document.getElementById("dKnow").onclick = ()=>{ setState(id, "known"); };
+    document.getElementById("dLearn").onclick = ()=>{ setState(id, "learning"); };
+    document.getElementById("dCmp").onclick = ()=>{ toggleCmp(id); openCard(id); };
+    document.getElementById("dPrev").onclick = ()=>{ if(idx > 0) openCard(visibleIds[idx-1], true); };
+    document.getElementById("dNext").onclick = ()=>{ if(idx >= 0 && idx < visibleIds.length - 1) openCard(visibleIds[idx+1], true); };
+    if(push !== false && location.hash !== "#" + id) history.replaceState(null, "", "#" + id);
+    document.querySelectorAll(".tech.sel").forEach(x=>x.classList.remove("sel"));
+    document.querySelectorAll(`#map .tech[data-id="${id}"]`).forEach(x=>{ x.classList.add("sel"); });
+  }
+  function closeCard(){
+    openId = null;
+    document.getElementById("drawer").classList.remove("on");
+    document.getElementById("shade").classList.remove("on");
+    history.replaceState(null, "", location.pathname + location.search);
+    document.querySelectorAll(".tech.sel").forEach(x=>x.classList.remove("sel"));
+  }
+  function setState(id, s){
+    cards = load();
+    if(s === "known") cards[id] = { box: Math.max(3, (cards[id] && cards[id].box) || 0), due: Date.now() + 3 * DAY };
+    else cards[id] = { box: 1, due: Date.now() };
+    save(cards); render(); openCard(id, false);
+  }
+  function toggleCmp(id){
+    const i = cmp.indexOf(id);
+    if(i >= 0) cmp.splice(i, 1); else { cmp.push(id); if(cmp.length > 3) cmp.shift(); }
+    tray(); render();
+  }
+  function tray(){
+    const t = document.getElementById("tray");
+    t.classList.toggle("on", cmp.length > 0);
+    t.innerHTML = `<span>对比：</span>${cmp.map(id=>`<span class="tk">${esc(byId[id].n)}</span>`).join("")}<button class="go" id="tGo" ${cmp.length < 2 ? "disabled" : ""}>${cmp.length < 2 ? "再选 " + (2 - cmp.length) + " 个" : "开始对比"}</button><button class="clr" id="tClr">清空</button>`;
+    document.getElementById("tGo").onclick = showCmp;
+    document.getElementById("tClr").onclick = ()=>{ cmp = []; tray(); render(); };
+  }
+  function showCmp(){
+    if(openId) closeCard();
+    const as = cmp.map(id=>byId[id]);
+    const rows = [["所在层", a=>LY[a.ly].n], ["类别", a=>a.cat], ["重要度", a=>LVN[a.lv]], ["一句话", a=>a.one], ["解决什么", a=>a.s], ["代价", a=>a.c], ["别用的时候", a=>a.x || "—"],
+      ["常一起出现", a=>(a.pair||[]).map(i=>byId[i] ? byId[i].n : i).join("、") || "—"], ["可替代", a=>(a.alt||[]).map(i=>byId[i] ? byId[i].n : i).join("、") || "—"]];
+    const same = as.every(a=>a.ly === as[0].ly);
+    document.getElementById("cmp").innerHTML = `<div class="hd"><h3>对比 ${as.length} 个名词</h3><button class="btn" id="cX">关闭</button></div>
+      <div style="padding:10px 18px;font-size:13.5px;color:var(--ink-soft)">${same ? "它们在同一层，可以直接比「解决什么」和「代价」，看哪个更符合你的约束。" : "⚠ 它们<b>不在同一层</b>：通常不是「二选一」的关系，而是可以组合使用。先确认是不是在比较同一类东西（02 模块的名词分类）。"}</div>
+      <div class="sc"><table><thead><tr><th></th>${as.map(a=>`<td class="L-${a.ly}">${esc(a.n)}</td>`).join("")}</tr></thead><tbody>${rows.map(r=>`<tr><th>${r[0]}</th>${as.map(a=>`<td>${esc(r[1](a))}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+    document.getElementById("cmpbox").classList.add("on");
+    document.getElementById("cX").onclick = ()=>document.getElementById("cmpbox").classList.remove("on");
+  }
+
+  document.getElementById("map").addEventListener("click", e=>{ const b = e.target.closest(".tech"); if(b) openCard(b.dataset.id); });
+  document.getElementById("drawer").addEventListener("click", e=>{ const b = e.target.closest(".rel .tech"); if(b) openCard(b.dataset.id); });
+  document.getElementById("shade").addEventListener("click", closeCard);
+  document.getElementById("cmpbox").addEventListener("click", e=>{ if(e.target.id === "cmpbox") e.target.classList.remove("on"); });
+  document.getElementById("q").addEventListener("input", e=>{ filt.q = e.target.value.trim(); render(); });
+  document.getElementById("lvSel").addEventListener("change", e=>{ filt.lv = +e.target.value; render(); });
+  document.getElementById("stSel").addEventListener("change", e=>{ filt.st = e.target.value; render(); });
+  document.getElementById("lyChips").addEventListener("click", e=>{
+    const b = e.target.closest(".chip"); if(!b) return;
+    document.querySelectorAll("#lyChips .chip").forEach(c=>c.classList.toggle("on", c === b));
+    filt.ly = b.dataset.ly; render();
+  });
+  document.getElementById("rnd").addEventListener("click", ()=>{
+    const pool = ATLAS.filter(a=>state(a.id) !== "known");
+    const list = pool.length ? pool : ATLAS;
+    openCard(list[Math.floor(Math.random() * list.length)].id);
+  });
+  document.addEventListener("keydown", e=>{
+    if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key === "Escape"){ closeCard(); document.getElementById("cmpbox").classList.remove("on"); }
+    if(!openId) return;
+    const i = visibleIds.indexOf(openId);
+    if(e.key === "ArrowRight" && i >= 0 && i < visibleIds.length - 1) openCard(visibleIds[i+1]);
+    if(e.key === "ArrowLeft" && i > 0) openCard(visibleIds[i-1]);
+  });
+  window.addEventListener("storage", e=>{ if(e.key === KEY){ cards = load(); render(); } });
+  window.addEventListener("hashchange", ()=>{ const id = location.hash.slice(1); if(byId[id]) openCard(id, false); });
+
+  render(); tray();
+  const h = decodeURIComponent(location.hash.slice(1));
+  if(byId[h]) openCard(h, false);
+})();
+</script>
+<script src="content/assets/ui.js"></script>
+</body>
+</html>

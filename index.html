@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习地图 · 总入口</title>
+<meta name="description" content="个人学习地图总入口：先用「技术全景与架构选型」建立分层地图和判断力，再按方向进入 SQL、Python、Linux、Git、数据结构与算法等专项学习包深入。含路线规划器、技术图鉴、架构沙盘与闪卡复习。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="学习/技术全景与架构选型/content/assets/theme.js"></script>
+<style>
+  :root{
+    --paper:#f5f1e8; --paper-2:#fdfbf5; --card:#fff; --ink:#231f18; --ink-soft:#514b3f; --muted:#857c6b;
+    --line:#e3dcc9; --line-2:#d3c9b0; --green:#1e5b4f; --green-soft:#e4efeb; --amber:#b7791f; --amber-soft:#f7eee0;
+    --red:#b8392a; --red-soft:#f9e9e6; --blue:#3a6b8f; --blue-soft:#e8f0f6; --nav-bg:rgba(245,241,232,.9); --on-accent:#fff;
+    --radius:14px; --maxw:1080px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+    color-scheme:light;
+  }
+  :root[data-theme="dark"]{
+    --paper:#191814; --paper-2:#211f1b; --card:#272520; --ink:#ebe5d6; --ink-soft:#c8c0af; --muted:#9a917f;
+    --line:#38352e; --line-2:#4b473d; --green:#6cc2a8; --green-soft:#1d3530; --amber:#e3aa4f; --amber-soft:#382d1a;
+    --red:#f08b7b; --red-soft:#3b221e; --blue:#8ebbdb; --blue-soft:#1c2a35; --nav-bg:rgba(25,24,20,.88); --on-accent:#13120e;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 34px -20px rgba(0,0,0,.85); color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);line-height:1.7;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.07), transparent 60%),radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.06), transparent 55%)}
+  :root[data-theme="dark"] body{background-image:radial-gradient(1100px 560px at 88% -6%, rgba(108,194,168,.07), transparent 60%),radial-gradient(820px 480px at -8% 6%, rgba(227,170,79,.05), transparent 55%)}
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:12px;height:56px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;white-space:nowrap}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .topnav .links{margin-left:auto;display:flex;gap:4px;align-items:center;flex-wrap:nowrap;overflow-x:auto}
+  .topnav .links a{padding:6px 12px;border-radius:999px;font-size:13.5px;color:var(--ink-soft);white-space:nowrap}
+  .topnav .links a:hover{background:var(--green-soft);color:var(--green);text-decoration:none}
+  .themebtn{cursor:pointer;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-soft);font-size:12.5px;padding:5px 10px;border-radius:999px;font-family:var(--font-mono);white-space:nowrap}
+  @media (max-width:720px){ .topnav .links a.opt{display:none} }
+
+  .hero{padding:48px 0 6px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(34px,5.6vw,58px);line-height:1.1;margin:18px 0 8px;letter-spacing:-.02em}
+  .hero h1 span{color:var(--green)}
+  .hero p.lead{font-size:clamp(15px,1.8vw,17.5px);color:var(--ink-soft);max-width:780px;margin:0 0 18px}
+
+  .today{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:12px}
+  @media (max-width:900px){ .today{grid-template-columns:1fr 1fr} }
+  @media (max-width:520px){ .today{grid-template-columns:1fr} }
+  .tcard{display:flex;flex-direction:column;gap:3px;background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);color:var(--ink);transition:transform .15s,border-color .15s}
+  .tcard:hover{transform:translateY(-3px);border-color:var(--green);text-decoration:none}
+  .tcard .k{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;color:var(--muted);text-transform:uppercase}
+  .tcard b{font-size:16px}
+  .tcard span{font-size:13px;color:var(--ink-soft)}
+  .tcard .v{font-family:var(--font-mono);font-size:12.5px;color:var(--green);margin-top:auto;padding-top:4px}
+  .tcard.main{background:linear-gradient(135deg,var(--green-soft),var(--paper-2));border-color:var(--green)}
+
+  section{margin:44px 0 0}
+  h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,30px);margin:0 0 6px;letter-spacing:-.01em}
+  h2 .idx{font-family:var(--font-mono);font-size:.55em;color:var(--green);margin-right:8px;vertical-align:middle}
+  .desc{color:var(--ink-soft);margin:0 0 14px;max-width:820px;font-size:15px}
+
+  .method{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+  .method .m{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .method .m .k{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+  .method .m h3{margin:4px 0 6px;font-size:18px}
+  .method .m p{margin:0;font-size:14px;color:var(--ink-soft)}
+  .method .arrow{align-self:center;font-family:var(--font-mono);color:var(--muted);font-size:20px}
+  @media (max-width:720px){ .method{grid-template-columns:1fr} .method .arrow{transform:rotate(90deg);justify-self:center} }
+
+  /* 路线规划器 */
+  .planner{background:var(--paper-2);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px 18px}
+  .pctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .pctl .lb{font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+  .dirb{cursor:pointer;border:1px solid var(--line-2);background:var(--card);color:var(--ink-soft);padding:6px 13px;border-radius:999px;font-family:inherit;font-size:13.5px}
+  .dirb:hover{border-color:var(--green);color:var(--green)}
+  .dirb.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .pctl input[type=range]{accent-color:var(--green);width:180px}
+  .psum{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline;padding:10px 0 12px;border-bottom:1px dashed var(--line-2);margin-bottom:12px;font-size:14px;color:var(--ink-soft)}
+  .psum b{font-family:var(--font-mono);font-size:22px;color:var(--green)}
+  .weeks{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px}
+  .wk{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:10px 12px}
+  .wk.now{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .wk.done{opacity:.6}
+  .wk .wh{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:12px;color:var(--muted);margin-bottom:6px}
+  .wk .wh b{color:var(--ink)}
+  .wk a.it{display:flex;gap:8px;align-items:center;font-size:13.5px;color:var(--ink);padding:3px 0}
+  .wk a.it .d{flex:none;width:9px;height:9px;border-radius:50%;background:var(--c)}
+  .wk a.it .p{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+  .wk a.it.ok{color:var(--muted);text-decoration:line-through}
+
+  .layers{display:flex;flex-direction:column;gap:10px}
+  .layer{display:grid;grid-template-columns:170px 1fr;gap:14px;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+  .layer .n{font-weight:800;color:var(--c);font-size:15.5px}
+  .layer .n small{display:block;font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--muted);letter-spacing:.06em}
+  .layer .d{font-size:13.5px;color:var(--ink-soft);margin-bottom:6px}
+  .layer .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;margin-top:4px}
+  .layer .row .lb{font-family:var(--font-mono);font-size:11px;color:var(--muted);width:64px;flex:none}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-soft);font-size:12.5px;white-space:nowrap}
+  .pill:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .pill.deep{background:var(--green-soft);border-color:var(--green);color:var(--green);font-weight:700}
+  .pill.plan{border-style:dashed;color:var(--muted)}
+  @media (max-width:720px){ .layer{grid-template-columns:1fr;gap:4px} }
+  :root[data-theme="dark"] .L-a{--c:#6cc2a8!important}
+
+  .packs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .pack{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;transition:transform .18s ease;color:inherit}
+  .pack:hover{transform:translateY(-3px);text-decoration:none}
+  .pack.main{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft),var(--shadow)}
+  .pack .tag{align-self:flex-start;font-family:var(--font-mono);font-size:11px;padding:2px 9px;border-radius:999px;color:#fff;background:var(--c)}
+  .pack h3{margin:2px 0 0;font-size:18px}
+  .pack p{margin:0;font-size:13.5px;color:var(--ink-soft);flex:1}
+  .pack .bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:6px}
+  .pack .bar span{display:block;height:100%;background:var(--c);border-radius:999px}
+  .pack .meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+  .pack .go{margin-top:6px;font-weight:700;font-size:14px}
+
+  .note{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .footer{margin:48px 0 0;border-top:1px solid var(--line);padding:26px 0 50px;font-size:13.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span>学习地图</span>
+    <div class="links">
+      <a href="#plan" class="opt">路线规划</a>
+      <a href="#layers" class="opt">分层地图</a>
+      <a href="#packs">学习包</a>
+      <a href="职业规划网页.html">职业规划</a>
+      <button class="themebtn" id="themeBtn" title="切换主题：跟随系统 / 浅色 / 深色"></button>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="eyebrow">LEARNING MAP · 总入口</span>
+    <h1>先建地图，<br><span>再按需深入</span></h1>
+    <p class="lead">AI 时代可以少背操作细节，但不能少了系统常识和判断力。先用「技术全景与架构选型」知道每个技术<b>在哪一层、解决什么、代价是什么</b>，学会<b>会问、会判、会验</b>；再根据职业方向，进入对应的专项学习包深入一层。</p>
+    <div class="today">
+      <a class="tcard main" id="tCont" href="学习/技术全景与架构选型/index.html"><span class="k">今天</span><b id="tContT">从技术全景开始</b><span id="tContD">13 个模块，先建一张分层地图</span><span class="v" id="tContV"></span></a>
+      <a class="tcard" href="学习/技术全景与架构选型/atlas.html"><span class="k">图鉴</span><b>技术图鉴</b><span>100+ 个名词的分层地图</span><span class="v" id="tAtlas"></span></a>
+      <a class="tcard" href="学习/技术全景与架构选型/review.html"><span class="k">复习</span><b>闪卡复习</b><span>间隔重复记住名词</span><span class="v" id="tRev"></span></a>
+      <a class="tcard" href="学习/技术全景与架构选型/sandbox.html"><span class="k">挑战</span><b>架构沙盘</b><span>当一回技术负责人</span><span class="v" id="tSand"></span></a>
+    </div>
+  </div>
+
+  <section id="method">
+    <h2><span class="idx">01</span>学习方法：两层结构</h2>
+    <p class="desc">上层负责<b>全景和判断</b>，下层负责<b>在某一层深入</b>。不确定先学什么时，从上层开始。</p>
+    <div class="method">
+      <div class="m" style="--c:var(--green)"><div class="k">Layer 1 · 全景层</div><h3>技术全景与架构选型</h3><p>分层地图、语言与框架的性格、架构取舍、安全与失败模式、选型五问、产品架构拆解、AI 协作。目标：会问、会判、会验。</p></div>
+      <div class="arrow">→</div>
+      <div class="m" style="--c:var(--amber)"><div class="k">Layer 2 · 专项层</div><h3>SQL · Python · Linux · Git · 算法</h3><p>选定方向后，在对应的那一层深入：能动手写、能排障、能应对面试。全景层里的「不必深入」在这里变成「必须懂」。</p></div>
+    </div>
+  </section>
+
+  <section id="plan">
+    <h2><span class="idx">02</span>路线规划器</h2>
+    <p class="desc">选一个方向和每周能投入的时间，自动排出一份<b>按周的学习计划</b>：全景模块和专项学习包按合理顺序交替，已完成的会自动划掉，绿色框是你这周该做的。</p>
+    <div class="planner">
+      <div class="pctl" id="dirs"></div>
+      <div class="pctl"><span class="lb">每周投入</span><input type="range" id="hrs" min="2" max="20" value="6"><b id="hrsV" style="font-family:var(--font-mono)"></b></div>
+      <div class="psum" id="psum"></div>
+      <div class="weeks" id="weeks"></div>
+    </div>
+    <p class="note">时长是按「理解概念 + 做完演示和考核」估算的参考值；进度来自各学习包在本机浏览器里的勾选记录。</p>
+  </section>
+
+  <section id="layers">
+    <h2><span class="idx">03</span>分层地图</h2>
+    <p class="desc">每一层都对应「全景模块」（先理解它是什么、怎么选）和「专项学习包」（再深入怎么用）。虚线标签表示暂未建设的专项包。</p>
+    <div class="layers" id="layerBox"></div>
+  </section>
+
+  <section id="packs">
+    <h2><span class="idx">04</span>全部学习包</h2>
+    <p class="desc">进度来自各学习包在本机浏览器里保存的勾选记录（localStorage）。</p>
+    <div class="packs" id="packBox"></div>
+    <p class="note">提示：直接双击打开本地文件时，有的浏览器会把不同文件的本地存储隔离开，这里可能显示为 0；进入各学习包即可看到真实进度。通过同一个网站地址（例如 GitHub Pages）访问时会正常汇总。</p>
+  </section>
+
+  <div class="footer">
+    本仓库是纯静态的学习资料站，所有页面都可以直接用浏览器打开。目录说明与维护方式见 <a href="README.md">README.md</a>；就业方向、薪资与技能优先级见 <a href="职业规划网页.html">职业规划网页</a>。
+  </div>
+</div>
+
+<script src="学习/技术全景与架构选型/content/assets/modules.js"></script>
+<script src="学习/技术全景与架构选型/content/assets/atlas-data.js"></script>
+<script>
+/* ============================================================
+   PACKS —— 学习包数据（新增学习包时在这里加一项）
+   key：该学习包保存进度用的 localStorage 键；total：知识点 / 章节总数；hours：建议学习时长
+   ============================================================ */
+const AP = "学习/技术全景与架构选型/";
+const PACKS = [
+  { id:"arch", name:"技术全景与架构选型", tag:"全景层 · 先学", c:"#1e5b4f", href:AP + "index.html", key:"arch_outline_progress_v1", total:MODULES.reduce((a,m)=>a+m.pts.length,0), unit:"知识点", main:true,
+    desc:"13 模块 + 技术图鉴、架构沙盘、闪卡复习：分层地图、架构取舍、安全与失败模式、选型五问、产品架构拆解、AI 协作。" },
+  { id:"sql", name:"SQL / 数据库", tag:"数据层", c:"#b7791f", href:"学习/SQL/index.html", key:"sql_outline_progress_v1", total:113, unit:"知识点", hours:28,
+    desc:"17 模块：查询、连接、窗口函数、事务、索引与执行计划、调优、建模、面试题型，含可运行的 SQL 练习台。" },
+  { id:"python", name:"Python", tag:"后端语言 · AI / 数据", c:"#3a6b8f", href:"学习/Python/index.html", key:"learn:python:done", total:21, unit:"章节", hours:26,
+    desc:"21 节：语法、数据结构、面向对象、力扣专项、NumPy / Pandas，以及脚本、requests 与 FastAPI 入门。" },
+  { id:"linux", name:"Linux 与命令行", tag:"基础设施层", c:"#6b4f8a", href:"学习/Linux/index.html", key:"learn:linux:done", total:19, unit:"章节", hours:16,
+    desc:"19 节：终端、权限、Shell 编程、文件系统、进程与信号、systemd、软件包、网络、防火墙、SSH、证书。" },
+  { id:"git", name:"Git 版本协作", tag:"基础设施层", c:"#6b4f8a", href:"学习/Git 版本协作/index.html", key:"learn:git-version-collab:done", total:10, unit:"章节", hours:7,
+    desc:"10 节：三大区域、提交、分支、合并冲突、远程协作、撤销回退、标签、变基、团队工作流，含分支模拟器。" },
+  { id:"dsa", name:"数据结构与算法", tag:"通用底座", c:"#a0522d", href:"学习/数据结构与算法/index.html", key:"dsa_outline_progress_v1", total:105, unit:"知识点", hours:40,
+    desc:"17 模块：数组链表、栈与队列、串、二分、树与堆、图、哈希、并查集、排序、递归分治、贪心、动态规划、回溯与解题技巧。面试必考。" },
+];
+
+/* 方向 → 学习顺序（数字 = 全景模块编号，字符串 = 专项学习包） */
+const DIRS = {
+  undecided:{ n:"还没定方向", seq:["01","02","03","04","05","06","07","08","09","10","11","12","13","git","dsa"] },
+  backend:{ n:"后端开发", seq:["01","02","03","05","06","07","python","sql","09","10","11","linux","git","08","13"] },
+  data:{ n:"数据分析 / 开发", seq:["01","02","06","sql","python","10","12"] },
+  ai:{ n:"AI 应用 / 大模型", seq:["01","02","03","05","06","python","10","12","13","sql","dsa"] },
+  devops:{ n:"运维 / DevOps", seq:["01","02","08","linux","git","07","09","11"] },
+  frontend:{ n:"前端开发", seq:["01","02","04","05","11","git","13"] },
+  interview:{ n:"面试冲刺", seq:["07","09","10","13","dsa","sql"] }
+};
+
+/* 分层地图 */
+const A = AP + "content/";
+const LAYERS = [
+  { n:"前端层", en:"FRONTEND", c:"#3a6b8f", d:"用户看到和操作的界面：HTML / CSS / JS、Vue、React、SPA / SSR / SSG。", pano:[["04 前端层", A+"04-frontend.html"]], deep:[], plan:["前端框架专项（规划中）"] },
+  { n:"后端层", en:"BACKEND", c:"#1e5b4f", d:"业务规则、鉴权与 API：FastAPI、Django、Spring Boot、Go、同步与异步。", pano:[["03 语言性格", A+"03-lang.html"],["05 后端与 API", A+"05-backend.html"]], deep:["python"], plan:[] },
+  { n:"数据层", en:"DATA", c:"#b7791f", d:"数据放在哪：关系型与事务、NoSQL、缓存、一致性、向量数据库。", pano:[["06 数据层", A+"06-data.html"]], deep:["sql"], plan:[] },
+  { n:"基础设施层", en:"INFRA / DEVOPS", c:"#6b4f8a", d:"把代码送上线并保持运行：Git、Docker、CI/CD、Kubernetes、监控。", pano:[["08 基础设施与 DevOps", A+"08-devops.html"]], deep:["linux","git"], plan:["Docker / 容器专项（规划中）"] },
+  { n:"贯穿各层", en:"ARCH · SAFETY · DECISION", c:"#a0522d", d:"怎么组织各层、出错时怎样、如何选型、如何拆解真实产品、如何与 AI 协作。", pano:[["07 架构模式", A+"07-arch.html"],["09 安全与失败", A+"09-safety.html"],["10 选型判断", A+"10-decide.html"],["11 最小闭环", A+"11-capstone.html"],["12 AI 协作", A+"12-ai.html"],["13 产品拆解", A+"13-products.html"]], deep:[], plan:[] },
+  { n:"通用底座", en:"FOUNDATION", c:"#514b3f", d:"不属于某一层，但几乎所有技术岗位面试都要考。", pano:[["01 学习目标", A+"01-goal.html"],["02 全景地图", A+"02-map.html"]], deep:["dsa"], plan:[] },
+];
+
+(function(){
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const get = (k, d) => { try{ return JSON.parse(localStorage.getItem(k) || d); }catch(e){ return JSON.parse(d); } };
+  const byId = Object.fromEntries(PACKS.map(p=>[p.id, p]));
+  const doneOf = p => { const a = get(p.key, "[]"); return Math.min(Array.isArray(a) ? a.length : 0, p.total); };
+  const archDone = () => new Set(get("arch_outline_progress_v1", "[]"));
+
+  /* 主题按钮 */
+  const tb = document.getElementById("themeBtn");
+  const icon = () => ({ auto:"◐ 跟随系统", light:"☀ 浅色", dark:"☾ 深色" })[window.ArchTheme ? ArchTheme.pref() : "auto"];
+  tb.textContent = icon();
+  tb.onclick = () => { if(window.ArchTheme){ ArchTheme.cycle(); tb.textContent = icon(); } };
+
+  /* 今天 */
+  function today(){
+    const last = get("arch_last", "null"), cards = get("arch_cards_v1", "{}"), best = get("arch_sandbox_v1", "{}"), now = Date.now(), d = archDone();
+    let next = null;
+    for(const m of MODULES){ for(const p of m.pts){ if(!d.has(m.id + "::" + p.id)){ next = { m, p }; break; } } if(next) break; }
+    const t = id => document.getElementById(id);
+    if(last && last.href){
+      t("tCont").href = AP + last.href; t("tContT").textContent = "继续上次学习"; t("tContD").textContent = last.title;
+      t("tContV").textContent = next ? "下一个未学会：" + next.m.no + " · " + next.p.title : "全景全部学完 🎉";
+    } else if(d.size && next){
+      t("tCont").href = AP + next.m.href + "#" + next.p.id; t("tContT").textContent = "继续学习"; t("tContD").textContent = next.m.no + " · " + next.m.title;
+    }
+    const known = ATLAS.filter(a=>cards[a.id] && cards[a.id].box >= 3).length;
+    t("tAtlas").textContent = "已认识 " + known + " / " + ATLAS.length;
+    const due = Object.keys(cards).filter(id=>cards[id].due <= now).length;
+    t("tRev").textContent = due ? "今天有 " + due + " 张到期" : "还有 " + ATLAS.filter(a=>!cards[a.id]).length + " 张新卡";
+    const g = Object.keys(best).map(k=>best[k]);
+    t("tSand").textContent = g.length ? "最佳成绩 " + g.join(" · ") : "三个场景等你挑战";
+  }
+
+  /* 路线规划器 */
+  let dir = "undecided", hours = 6;
+  try{ const s = get("hub_plan", "{}"); if(DIRS[s.dir]) dir = s.dir; if(s.hours) hours = s.hours; }catch(e){}
+  document.getElementById("hrs").value = hours;
+  document.getElementById("dirs").innerHTML = '<span class="lb">方向</span>' + Object.keys(DIRS).map(k=>`<button class="dirb ${k===dir?"on":""}" data-k="${k}">${DIRS[k].n}</button>`).join("");
+  function items(){
+    const d = archDone();
+    return DIRS[dir].seq.map(x=>{
+      if(/^\d\d$/.test(x)){
+        const m = MODULES.find(m=>m.no === x), dn = m.pts.filter(p=>d.has(m.id + "::" + p.id)).length;
+        return { t: m.no + " " + m.title.split("：")[0], h: m.hours || 1.5, href: AP + m.href, frac: dn / m.pts.length, c: "#1e5b4f", cls:"L-a" };
+      }
+      const p = byId[x];
+      return { t: p.name + "（学习包）", h: p.hours, href: p.href, frac: doneOf(p) / p.total, c: p.c };
+    });
+  }
+  function plan(){
+    hours = +document.getElementById("hrs").value;
+    document.getElementById("hrsV").textContent = hours + " 小时";
+    try{ localStorage.setItem("hub_plan", JSON.stringify({ dir, hours })); }catch(e){}
+    const its = items(), weeks = [];
+    let w = { items:[], used:0 };
+    its.forEach(it=>{
+      let left = it.h * (1 - it.frac);
+      const doneItem = it.frac >= 1;
+      if(doneItem){ w.items.push(Object.assign({ part:"" }, it)); return; }
+      let part = 0;
+      while(left > 0.01){
+        const room = hours - w.used, take = Math.min(room, left);
+        part++;
+        w.items.push(Object.assign({ part: it.h > hours ? `第 ${part} 段` : (part > 1 ? "续" : "") }, it));
+        w.used += take; left -= take;
+        if(w.used >= hours - 0.01){ weeks.push(w); w = { items:[], used:0 }; }
+      }
+    });
+    if(w.items.length) weeks.push(w);
+    const totalH = its.reduce((a,i)=>a + i.h, 0), leftH = its.reduce((a,i)=>a + i.h * (1 - i.frac), 0);
+    const nowIdx = weeks.findIndex(w=>w.items.some(i=>i.frac < 1));
+    const remW = leftH < 0.01 ? 0 : weeks.length - Math.max(nowIdx, 0);
+    const finish = new Date(Date.now() + remW * 7 * 864e5);
+    document.getElementById("psum").innerHTML = `<span>全程约 <b>${Math.round(totalH)}</b> 小时</span><span>还剩 <b>${Math.round(leftH)}</b> 小时</span><span>按每周 ${hours} 小时，约 <b>${remW}</b> 周学完</span><span>预计 <b style="font-size:16px">${finish.getFullYear()}-${String(finish.getMonth()+1).padStart(2,"0")}-${String(finish.getDate()).padStart(2,"0")}</b></span>`;
+    document.getElementById("weeks").innerHTML = weeks.map((wk, i)=>{
+      const allDone = wk.items.every(it=>it.frac >= 1);
+      const seen = new Set();
+      const list = wk.items.filter(it=>{ const k = it.t + it.part; if(seen.has(k)) return false; seen.add(k); return true; })
+        .map(it=>`<a class="it ${it.frac >= 1 ? "ok" : ""} ${it.cls || ""}" href="${it.href}" style="--c:${it.c}"><span class="d"></span>${esc(it.t)}${it.part ? (it.part === "续" ? "（续）" : " · " + it.part) : ""}<span class="p">${it.frac >= 1 ? "✓" : Math.round(it.frac * 100) + "%"}</span></a>`).join("");
+      return `<div class="wk ${i === nowIdx ? "now" : ""} ${allDone ? "done" : ""}"><div class="wh"><b>第 ${i + 1} 周</b><span>${i === nowIdx ? "← 本周" : (allDone ? "已完成" : "")}</span></div>${list}</div>`;
+    }).join("");
+  }
+  document.getElementById("dirs").addEventListener("click", e=>{
+    const b = e.target.closest(".dirb"); if(!b) return;
+    dir = b.dataset.k; document.querySelectorAll(".dirb").forEach(x=>x.classList.toggle("on", x === b)); plan();
+  });
+  document.getElementById("hrs").addEventListener("input", plan);
+
+  /* 分层地图与学习包 */
+  function packs(){
+    document.getElementById("packBox").innerHTML = PACKS.map(p=>{
+      const d = doneOf(p), pct = Math.round(d / p.total * 100);
+      return `<a class="pack ${p.main ? "main" : ""}" href="${p.href}" style="--c:${p.c}"><span class="tag">${esc(p.tag)}</span><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p>
+        <div class="bar"><span style="width:${pct}%"></span></div><div class="meta"><span>${d} / ${p.total} ${p.unit}</span><span>${pct}%</span></div><span class="go" style="color:${p.c}">进入学习包 →</span></a>`;
+    }).join("");
+    document.getElementById("layerBox").innerHTML = LAYERS.map(l=>`<div class="layer" style="--c:${l.c}"><div class="n">${l.n}<small>${l.en}</small></div>
+      <div><div class="d">${esc(l.d)}</div>
+        <div class="row"><span class="lb">全景模块</span>${l.pano.map(([t,h])=>`<a class="pill" href="${h}">${esc(t)}</a>`).join("")}</div>
+        <div class="row"><span class="lb">专项深入</span>${l.deep.map(id=>{ const p = byId[id]; return `<a class="pill deep" href="${p.href}">${esc(p.name)} · ${doneOf(p)}/${p.total}</a>`; }).join("")}${l.plan.map(t=>`<span class="pill plan">${esc(t)}</span>`).join("")}${!l.deep.length && !l.plan.length ? '<span class="pill plan">以全景模块为主</span>' : ""}</div>
+      </div></div>`).join("");
+  }
+  function all(){ today(); plan(); packs(); }
+  window.addEventListener("storage", all);
+  all();
+})();
+</script>
+</body>
+</html>

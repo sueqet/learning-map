@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>基础设施与 DevOps · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 基础设施与 DevOps：Git 版本控制、Docker 容器、CI/CD 流水线、Kubernetes 编排、部署方式选择、日志指标链路与监控告警。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">基础设施与 DevOps</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 08 · 技术全景</span></span>
+    <h1 id="pageTitle">基础设施与 DevOps</h1>
+    <p class="lead" id="pageLead">把代码安全、自动地送上线的流水线。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>说出 Git / GitHub 在团队协作里的作用。</li>
+      <li>解释 <b>Docker 解决「环境不一致」</b>：镜像、容器、Dockerfile 分别是什么，容器和虚拟机有什么区别。</li>
+      <li>解释 <b>CI/CD 解决「人工上线易错」</b>：一条流水线包含哪些阶段，测试失败时会发生什么。</li>
+      <li>说出 Kubernetes 负责什么，以及小团队为什么不必急着上 K8s。</li>
+      <li>比较云服务器、PaaS、托管 K8s、Serverless 等部署方式的运维成本。</li>
+      <li>区分日志、指标、链路追踪，知道出故障时先看哪个。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="07-arch.html">07 架构模式</a>。本仓库的 <a href="../../Git 版本协作/index.html">Git 学习包</a> 和 <a href="../../Linux/index.html">Linux 学习包</a> 是这一层的专项深入。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 从代码到可运行的包</div>
+    <h2><span class="num">01</span>版本控制与容器</h2>
+  </section>
+
+  <section class="topic" id="git">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>Git / GitHub：版本控制与协作<span class="pt">Git · 谁在什么时候改了什么</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="devops::git"><span>已学会</span></label>
+    </div>
+    <p><b>Git</b> 是版本控制工具：记录每一次改动（谁、什么时候、改了什么、为什么），可以随时回到任何历史版本，多个人可以在各自的<b>分支</b>上并行开发再合并。<b>GitHub / GitLab / Gitee</b> 是托管 Git 仓库的平台，在 Git 之上提供代码评审（Pull Request）、问题跟踪、自动化流水线等协作功能。</p>
+    <table class="tbl">
+      <tr><th>概念</th><th>白话</th><th>解决什么</th></tr>
+      <tr><td>提交 commit</td><td>给当前代码拍一张带说明的快照</td><td>出问题能精确找到「哪次改动引入的」</td></tr>
+      <tr><td>分支 branch</td><td>平行宇宙，互不干扰</td><td>多人同时开发不同功能</td></tr>
+      <tr><td>合并 / Pull Request</td><td>把分支的改动合回主线，合之前让别人审一遍</td><td>代码质量和知识共享</td></tr>
+      <tr><td>回滚 revert</td><td>撤销某次改动</td><td>线上出问题时快速恢复</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>高频事故：</b>把数据库密码、API 密钥提交进 Git。即使后来删掉，它仍然留在历史记录里。密钥要放在环境变量或密钥管理服务中（09 模块细讲）。</p></div>
+  </section>
+
+  <section class="topic" id="docker">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>Docker：把应用装进标准集装箱<span class="pt">Docker · 解决「在我电脑上能跑」</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="devops::docker"><span>已学会</span></label>
+    </div>
+    <p>最经典的事故台词是：「<b>在我电脑上明明能跑！</b>」原因是开发电脑和服务器的环境不一样：Python 版本、依赖库版本、系统库、配置都可能不同。<b>Docker</b> 把应用<b>连同它需要的运行环境</b>一起打包成一个标准的「集装箱」，在任何装了 Docker 的机器上运行结果都一样。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>Dockerfile：打包一个 FastAPI 应用的说明书（看懂即可）</div>
+      <pre><code># 从一个装好 Python 3.12 的基础环境开始
+FROM python:3.12-slim
+WORKDIR /app
+# 先装好固定版本的依赖
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+# 再拷入代码，并指定容器启动时运行的命令
+COPY . .
+CMD ["fastapi", "run", "main.py", "--port", "8000"]</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>概念</th><th>白话</th></tr>
+      <tr><td>镜像 image</td><td>打包好的模板：代码 + 运行环境 + 依赖。像菜谱加上备好的食材</td></tr>
+      <tr><td>容器 container</td><td>镜像运行起来的实例。同一个镜像可以同时跑很多个容器</td></tr>
+      <tr><td>Dockerfile</td><td>告诉 Docker 怎么构建镜像的说明书</td></tr>
+      <tr><td>镜像仓库</td><td>存放和分发镜像的地方，如 Docker Hub、云厂商的镜像仓库</td></tr>
+      <tr><td>Docker Compose</td><td>一个文件描述多个容器（应用 + 数据库 + 缓存），一条命令全部启动</td></tr>
+    </table>
+    <table class="tbl">
+      <tr><th></th><th>容器</th><th>虚拟机</th></tr>
+      <tr><td>包含什么</td><td>应用和依赖，共享宿主机的操作系统内核</td><td>完整的操作系统</td></tr>
+      <tr><td>启动</td><td>秒级甚至更快</td><td>分钟级</td></tr>
+      <tr><td>体积与开销</td><td>小，一台机器能跑很多</td><td>大</td></tr>
+      <tr><td>隔离程度</td><td>进程级隔离，够用但弱于虚拟机</td><td>更强</td></tr>
+    </table>
+    <div id="demo-docker"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>Docker 解决的是<b>环境一致性</b>和<b>交付标准化</b>：开发、测试、生产跑的是同一个镜像。它是后面 CI/CD 和 Kubernetes 的基础。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 自动上线与规模化运行</div>
+    <h2><span class="num">02</span>流水线、编排与部署</h2>
+  </section>
+
+  <section class="topic" id="cicd">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>CI/CD：自动化流水线<span class="pt">CI/CD · 解决「人工上线易错」</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="devops::cicd"><span>已学会</span></label>
+    </div>
+    <p>人工上线的典型事故：忘了跑测试、漏传了一个文件、在错误的服务器上执行了命令、只有某个同事知道怎么部署。<b>CI（持续集成）</b>让每次提交代码都自动跑检查和测试，尽早发现问题；<b>CD（持续交付 / 持续部署）</b>让测试通过的代码自动打包，并发布到测试或生产环境。整个过程叫<b>流水线</b>，常用工具有 GitHub Actions、GitLab CI、Jenkins。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>.github/workflows/ci.yml：一条最小的 CI 流水线（看懂即可）</div>
+      <pre><code>on: [push, pull_request]          # 每次推代码或提 PR 时触发
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -r requirements.txt
+      - run: pytest                 # 测试不通过，流水线变红，后面的部署不会执行</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>阶段</th><th>做什么</th><th>失败时</th></tr>
+      <tr><td>代码检查</td><td>格式、静态分析、依赖漏洞扫描</td><td>标红，提醒提交者修</td></tr>
+      <tr><td>自动测试</td><td>单元测试、接口测试</td><td><b>阻止后续步骤</b>，不会带着 bug 上线</td></tr>
+      <tr><td>构建</td><td>打包 Docker 镜像，推到镜像仓库</td><td>停止</td></tr>
+      <tr><td>部署到测试环境</td><td>自动发布，跑冒烟测试</td><td>停止，生产不受影响</td></tr>
+      <tr><td>部署到生产</td><td>滚动发布或灰度发布，必要时人工确认</td><td>自动或一键回滚到上一个版本</td></tr>
+    </table>
+    <div id="demo-pipeline"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>CI/CD 把上线从「靠人记住步骤」变成「靠机器执行规则」。它让小步快跑、频繁发布变得安全，出问题也能快速回滚。</p></div>
+  </section>
+
+  <section class="topic" id="k8s">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>Kubernetes：成百上千个容器的调度员<span class="pt">K8s · 容器编排</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="devops::k8s"><span>已学会</span></label>
+    </div>
+    <p>只有几个容器时，手动启动就行。当你有<b>成百上千个</b>容器分布在几十台机器上时，谁来决定每个容器放在哪台机器？挂了谁来重启？流量大了谁来加实例？<b>Kubernetes（K8s）</b>就是干这个的「容器操作系统」。你只需<b>声明</b>「我要 3 个订单服务的副本」，它会持续把实际状态维持成你声明的样子。</p>
+    <table class="tbl">
+      <tr><th>能力</th><th>白话</th></tr>
+      <tr><td>调度</td><td>自动把容器放到资源够用的机器上</td></tr>
+      <tr><td>自愈</td><td>容器挂了自动重启，机器挂了把容器挪到别的机器</td></tr>
+      <tr><td>自动扩缩容</td><td>CPU 或请求量高了自动加副本，闲了自动减</td></tr>
+      <tr><td>滚动更新与回滚</td><td>新版本一个个替换旧版本，不停机；有问题一键回到旧版本</td></tr>
+      <tr><td>服务发现与负载均衡</td><td>服务之间按名字互相找到，流量自动分摊到各副本</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>别急着上：</b>K8s 很强大，但学习和运维成本也很高。一个小团队、几个服务的项目，用 PaaS 平台或「云服务器 + Docker Compose」往往就够了；确实需要时，优先用云厂商的<b>托管 K8s</b>，别自己从零搭集群。</p></div>
+  </section>
+
+  <section class="topic" id="deploy-where">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>部署去哪：云服务器、PaaS、Serverless<span class="pt">deployment · 你要管多少东西</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="devops::deploy-where"><span>已学会</span></label>
+    </div>
+    <p>部署方式的本质区别是：<b>你自己要管多少东西</b>。管得越多越灵活，但运维成本越高。</p>
+    <table class="tbl">
+      <tr><th>方式</th><th>你要管什么</th><th>例子</th><th>适合</th><th>代价</th></tr>
+      <tr><td>云服务器（虚拟机）</td><td>操作系统、安全补丁、运行环境、部署、监控</td><td>阿里云 ECS、AWS EC2</td><td>需要完全控制、长期稳定负载</td><td>运维工作量最大</td></tr>
+      <tr><td>PaaS / 应用托管平台</td><td>只管代码或镜像</td><td>Vercel、Render、Fly.io、各云的应用托管服务</td><td>小团队、初创、前端站点</td><td>灵活度有限，规模大后可能更贵</td></tr>
+      <tr><td>托管 K8s / 容器服务</td><td>容器和编排配置</td><td>阿里云 ACK、AWS EKS、Google GKE</td><td>服务多、需要弹性的中大型系统</td><td>需要懂 K8s</td></tr>
+      <tr><td>Serverless 函数</td><td>只管函数代码</td><td>AWS Lambda、阿里云函数计算</td><td>流量波动大的接口、定时任务</td><td>冷启动、时长限制、厂商锁定</td></tr>
+      <tr><td>托管数据库</td><td>只管表结构和数据</td><td>阿里云 RDS、AWS RDS</td><td>几乎所有生产环境</td><td>比自建贵一些，但省去备份、主从、升级</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>运维时间也是成本。小团队应该把精力花在产品上，尽量用托管服务；前端静态资源放 CDN，数据库优先用托管版。</p></div>
+  </section>
+
+  <section class="topic" id="observability">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>日志、指标、链路：系统的仪表盘<span class="pt">observability · 比用户先发现问题</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="devops::observability"><span>已学会</span></label>
+    </div>
+    <p>系统上线后，你需要知道它「现在好不好」「哪里不好」。这叫<b>可观测性</b>，有三根支柱，外加告警：</p>
+    <table class="tbl">
+      <tr><th>支柱</th><th>回答什么问题</th><th>例子</th><th>常见工具</th></tr>
+      <tr><td><b>指标</b> metrics</td><td>整体好不好？什么时候开始变坏？</td><td>每秒请求数、错误率、P99 延迟、CPU</td><td>Prometheus + Grafana</td></tr>
+      <tr><td><b>日志</b> logs</td><td>具体发生了什么？报了什么错？</td><td>「订单 1001 支付回调失败：签名错误」</td><td>ELK、Loki、云日志服务</td></tr>
+      <tr><td><b>链路追踪</b> traces</td><td>一个请求经过了哪些服务？慢在哪一段？</td><td>下单请求 800ms，其中库存服务占 650ms</td><td>OpenTelemetry、Jaeger</td></tr>
+      <tr><td><b>告警</b></td><td>出问题时谁来处理？</td><td>错误率 &gt; 5% 持续 3 分钟 → 通知值班</td><td>Alertmanager、云监控</td></tr>
+    </table>
+    <div id="demo-obs"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>先看<b>指标</b>确定「什么时候、哪里」变坏，再看<b>日志</b>确认「发生了什么」，跨服务时用<b>链路</b>找「慢在哪段」。最值得监控的四个黄金信号：<b>延迟、流量、错误、饱和度</b>。没有监控，就只能等用户来告诉你系统挂了。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>用自己的话向非技术朋友解释：镜像和容器是什么关系？（提示：菜谱和做出来的菜，或者模具和零件。）</li>
+      <li>在 GitHub 上找一个热门开源项目，打开 <code class="inl">.github/workflows</code> 目录，看看它的流水线有哪些步骤。</li>
+      <li>为一个「FastAPI + PostgreSQL」的小项目选部署方式，并估算每月要花多少时间在运维上。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "devops",
+  title: "基础设施与 DevOps",
+  eyebrow: "MODULE 08 · 技术全景",
+  lead: "Git 管版本，Docker 解决环境不一致，CI/CD 解决人工上线易错，Kubernetes 管理大量容器，监控让你比用户先发现问题。这一层决定代码能不能安全、自动地跑起来。",
+  points: ["git","docker","cicd","k8s","deploy-where","observability"],
+  prev: "07-arch.html", prevTitle: "架构模式：产品的组织形式",
+  next: "09-safety.html", nextTitle: "安全与失败模式",
+};
+
+const QUZ = [
+  { type:"quiz", q:"Git 主要解决什么问题？",
+    opts:["让程序运行更快","记录代码的每一次改动，支持多人并行开发、合并和回滚","自动扩容服务器","存储用户数据"],
+    ans:1, exp:"Git 是版本控制工具。性能、扩容、用户数据分别属于代码优化、K8s / 云平台、数据库的范畴。" },
+  { type:"quiz", q:"Docker 最核心解决的是哪类问题？",
+    opts:["数据库查询太慢","前端页面不好看","开发、测试、生产环境不一致导致「在我电脑上能跑，服务器上不行」","代码没有注释"],
+    ans:2, exp:"Docker 把应用和运行环境一起打包，保证在任何地方运行都一样。其余选项不是它解决的问题。" },
+  { type:"quiz", q:"镜像（image）和容器（container）的关系是？",
+    opts:["镜像是模板，容器是镜像运行起来的实例；一个镜像可以跑很多个容器","两者是同一个东西","容器是模板，镜像是实例","镜像只能在 Windows 上用"],
+    ans:0, exp:"类比：镜像是菜谱和备好的食材，容器是按它做出来的一盘盘菜。B、C 混淆了概念；D 错误。" },
+  { type:"quiz", q:"容器和虚拟机相比，哪种说法正确？",
+    opts:["容器包含完整的操作系统，所以更重","容器隔离性一定比虚拟机强","两者启动速度一样","容器共享宿主机内核，更轻、启动更快；虚拟机有完整操作系统，隔离更强"],
+    ans:3, exp:"这是两者最本质的区别。A、B 正好说反了；C 错，容器通常快得多。" },
+  { type:"quiz", q:"CI（持续集成）最主要的作用是？",
+    opts:["每次提交代码都自动跑检查和测试，尽早发现问题","替代程序员写代码","让服务器永不宕机","自动设计数据库"],
+    ans:0, exp:"CI 的价值是「早发现、早修复」。它不写代码（B），不保证不宕机（C），也不设计数据库（D）。" },
+  { type:"quiz", q:"流水线中自动测试失败了，正确的结果应该是？",
+    opts:["跳过测试继续部署到生产","阻止后续的构建和部署，通知提交者修复","删除测试用例让它通过","自动重启服务器"],
+    ans:1, exp:"测试是上线前的闸门，失败就应停止并反馈。A 让 bug 直达用户；C 是「把报警器拆了」；D 与测试失败无关。" },
+  { type:"quiz", q:"Kubernetes 主要负责什么？",
+    opts:["写前端页面","代码版本管理","管理大量容器：调度、自愈、自动扩缩容、滚动更新","设计数据库表结构"],
+    ans:2, exp:"K8s 是容器编排平台。前端、版本管理、表设计分别是 Vue / React、Git、数据库的事。" },
+  { type:"quiz", q:"3 人团队，1 个 FastAPI 服务 + 1 个数据库，最务实的部署方式是？",
+    opts:["自建一个多节点 Kubernetes 集群","PaaS 应用托管平台，或一台云服务器 + Docker Compose，数据库用托管版","每个函数拆成一个 Serverless 函数","在自己的笔记本上跑，24 小时不关机"],
+    ans:1, exp:"小团队应把精力花在产品上，选运维负担最小的方式。A 过度；C 拆得太碎、调试困难；D 没有可靠性可言。" },
+  { type:"quiz", q:"「接口 P99 延迟 = 820ms」属于可观测性的哪一类？",
+    opts:["日志","链路追踪","代码注释","指标"],
+    ans:3, exp:"它是随时间变化的数字，属于指标。日志是事件记录；链路追踪是单个请求经过各服务的耗时明细。" },
+  { type:"interview", q:"用户反馈「下午 3 点以后下单经常失败」。你会怎么排查？",
+    opts:["先重启所有服务器再说","让用户换个时间下单","看监控指标确认错误率从什么时候开始上升 → 对照那个时间点的发布记录和配置变更 → 查对应服务的错误日志 → 必要时用链路追踪找出失败或变慢的那一段","把日志全部删除，节省磁盘"],
+    ans:2, exp:"「指标定时间和范围 → 变更记录找嫌疑 → 日志看细节 → 链路定位环节」是标准的排障顺序。A 可能暂时缓解但丢失现场；B 回避问题；D 毁掉证据。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：有没有 Docker */
+(function(){
+  const ENV = {
+    dev:  { py:"3.12", lib:"pydantic 2.9", os:"macOS", cfg:"本地 .env" },
+    noDk: { py:"3.9",  lib:"pydantic 1.10", os:"CentOS 7", cfg:"手动改的配置" },
+    dk:   { py:"3.12", lib:"pydantic 2.9", os:"镜像内 Debian", cfg:"镜像 + 环境变量" }
+  };
+  const host = document.getElementById("demo-docker");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：同一份代码，部署到服务器</span><span class="hint">切换有无 Docker</span></div>
+    <div class="db">
+      <div class="ctl" id="dkMode"><label>部署方式</label><button class="b" data-v="no">直接拷代码到服务器</button><button class="b" data-v="yes">用 Docker 镜像</button></div>
+      <div id="dkOut"></div>
+      <div class="log" id="dkLog"></div>
+    </div></div>`;
+  ArchKit.choice("dkMode", v=>{
+    const srv = v === "yes" ? ENV.dk : ENV.noDk;
+    const row = (k, n) => `<tr class="${ENV.dev[k] === srv[k] || k === "os" || k === "cfg" ? "" : "hl"}"><td>${n}</td><td>${ENV.dev[k]}</td><td>${srv[k]}</td></tr>`;
+    document.getElementById("dkOut").innerHTML = `<table class="dt"><thead><tr><th>环境</th><th>开发电脑</th><th>生产服务器</th></tr></thead><tbody>${row("py","Python 版本")}${row("lib","依赖版本")}${row("os","操作系统")}${row("cfg","配置来源")}</tbody></table>`;
+    document.getElementById("dkLog").innerHTML = v === "yes"
+      ? "<b>✓ 启动成功</b>：服务器运行的是和开发、测试完全相同的镜像，Python 和依赖版本都被锁定在镜像里。操作系统差异被容器屏蔽了。"
+      : "<span class=\"bad\">✗ 启动失败</span>：服务器上是 Python 3.9 和旧版依赖，代码里用到的新语法和新版本 API 不存在。经典台词——「在我电脑上明明能跑！」";
+  }, "no");
+})();
+
+/* 演示 2：CI/CD 流水线 */
+(function(){
+  const STAGES = ["代码检查","自动测试","构建镜像","部署测试环境","冒烟测试","部署生产"];
+  const host = document.getElementById("demo-pipeline");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：一次提交触发的流水线</span><span class="hint">选这次提交的质量，再运行</span></div>
+    <div class="db">
+      <div class="ctl" id="plCase"><label>这次提交</label><button class="b" data-v="ok">一切正常</button><button class="b" data-v="test">引入了一个 bug</button><button class="b" data-v="smoke">配置写错（测试环境才暴露）</button></div>
+      <div class="ctl"><button class="b" id="plRun">▶ 运行流水线</button><button class="b" id="plStep">⏭ 单步</button></div>
+      <div class="flow" id="plFlow"></div>
+      <div class="log" id="plLog"></div>
+    </div></div>`;
+  let kase = "ok", pos = -1, failAt = -1;
+  const flow = document.getElementById("plFlow"), log = document.getElementById("plLog");
+  function draw(){
+    flow.innerHTML = STAGES.map((s,i)=>{
+      let cls = "dim", tag = "等待";
+      if(i < pos || (i === pos && failAt !== i)){ cls = "on"; tag = "✓ 通过"; }
+      if(i === failAt){ cls = "bad"; tag = "✗ 失败"; }
+      if(failAt >= 0 && i > failAt){ cls = "dim"; tag = "已跳过"; }
+      return `<div class="node ${cls}"><span class="ly">${tag}</span><b>${s}</b></div>${i < STAGES.length - 1 ? '<span class="arr">→</span>' : ""}`;
+    }).join("");
+  }
+  function step(){
+    if(failAt >= 0 || pos >= STAGES.length - 1) return;
+    pos++;
+    const failIdx = kase === "test" ? 1 : (kase === "smoke" ? 4 : -1);
+    if(pos === failIdx){
+      failAt = pos;
+      log.innerHTML = kase === "test"
+        ? "<span class=\"bad\">✗ 自动测试失败</span>：有 2 个用例没通过。流水线停止，后面的构建和部署都不会执行，提交者收到通知。<b>bug 没有到达用户。</b>"
+        : "<span class=\"bad\">✗ 冒烟测试失败</span>：测试环境启动后连不上数据库（配置写错）。生产部署被拦下，<b>线上用户不受影响。</b>";
+    } else if(pos === STAGES.length - 1){
+      log.innerHTML = "<b>✓ 已部署到生产</b>：全程无人手动操作。若线上发现问题，可以一键回滚到上一个镜像版本。";
+    } else {
+      log.innerHTML = `<b>${STAGES[pos]}</b> 通过，继续下一步…`;
+    }
+    draw();
+  }
+  function reset(){ pos = -1; failAt = -1; log.textContent = "点「运行流水线」或「单步」开始。"; draw(); }
+  document.getElementById("plStep").addEventListener("click", step);
+  document.getElementById("plRun").addEventListener("click", ()=>{ reset(); for(let i = 0; i < STAGES.length; i++) step(); });
+  ArchKit.choice("plCase", v=>{ kase = v; reset(); }, "ok");
+})();
+
+/* 演示 3：监控仪表盘 + 故障注入 */
+(function(){
+  const BASE = { qps:120, err:0.3, p99:180, cpu:35 };
+  const F = {
+    none:{ n:"一切正常", d:{}, alert:"无告警", look:"指标平稳，无需处理。" },
+    db:{ n:"数据库慢查询", d:{ p99:2400, err:2.1, cpu:40 }, alert:"⚠ P99 延迟 > 1s 持续 3 分钟", look:"链路追踪显示时间耗在数据库调用 → 查慢查询日志，发现一条缺索引的查询。" },
+    release:{ n:"新版本有 bug", d:{ err:18, p99:210 }, alert:"🚨 错误率 > 5% 持续 3 分钟", look:"错误率在 15:02 突增，正好是新版本发布时间 → 看错误日志定位异常 → 立即回滚。" },
+    traffic:{ n:"流量突增 ×5", d:{ qps:600, cpu:96, p99:950, err:1.5 }, alert:"⚠ CPU 饱和度 > 90%", look:"流量和 CPU 同时飙升 → 扩容实例或开启限流，同时确认是正常活动还是恶意刷接口。" }
+  };
+  const host = document.getElementById("demo-obs");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：监控仪表盘</span><span class="hint">注入一种故障，看指标和告警</span></div>
+    <div class="db">
+      <div class="ctl" id="obF"><label>故障</label><button class="b" data-v="none">正常</button><button class="b" data-v="db">数据库变慢</button><button class="b" data-v="release">新版本有 bug</button><button class="b" data-v="traffic">流量突增</button></div>
+      <div class="cards" id="obCards"></div>
+      <div class="log" id="obLog"></div>
+    </div></div>`;
+  const META = [ ["qps","流量（每秒请求）",""], ["err","错误率","%"], ["p99","P99 延迟","ms"], ["cpu","CPU 饱和度","%"] ];
+  ArchKit.choice("obF", v=>{
+    const f = F[v], m = Object.assign({}, BASE, f.d);
+    document.getElementById("obCards").innerHTML = META.map(([k, n, u])=>{
+      const bad = m[k] !== BASE[k] && (k !== "qps" || m[k] > BASE[k] * 2);
+      return `<div class="c ${bad ? "" : "on"}" style="${bad ? "border-color:var(--red);background:var(--red-soft)" : ""}"><h4>${n}</h4><span style="font-family:var(--font-mono);font-size:22px;font-weight:700">${m[k]}${u}</span></div>`;
+    }).join("");
+    document.getElementById("obLog").innerHTML = `<b>告警：</b>${f.alert}<br><b>排查思路：</b>${f.look}`;
+  }, "none");
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安全与失败模式 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 安全与失败模式：认证与授权、最小权限、输入验证、密钥管理、超时与重试、幂等、限流熔断降级、备份与恢复。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">安全与失败模式</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 09 · 技术全景</span></span>
+    <h1 id="pageTitle">安全与失败模式</h1>
+    <p class="lead" id="pageLead">权限边界在哪？挂了会怎样？</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>分清<b>认证</b>（你是谁）和<b>授权</b>（你能做什么），并识别最常见的越权漏洞。</li>
+      <li>说出最小权限、输入验证、密钥管理三条安全底线，各举一个反例。</li>
+      <li>解释为什么每个网络调用都要设<b>超时</b>，以及什么错误该重试、什么错误不该。</li>
+      <li>用「重复扣款」的例子解释<b>幂等</b>，并说出幂等键的做法。</li>
+      <li>区分限流、熔断、降级，知道它们如何保住核心链路。</li>
+      <li>说清「主从复制 ≠ 备份」，以及「没恢复过的备份不算备份」。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="05-backend.html">05 后端</a>（状态码、401 / 403）、<a href="06-data.html">06 数据层</a>（事务、一致性）和 <a href="07-arch.html">07 架构模式</a>（服务间网络调用）。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 安全：权限边界在哪</div>
+    <h2><span class="num">01</span>谁能做什么</h2>
+  </section>
+
+  <section class="topic" id="authn-authz">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>认证 vs 授权<span class="pt">authentication vs authorization · 你是谁 / 你能做什么</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="safety::authn-authz"><span>已学会</span></label>
+    </div>
+    <p><b>认证</b>（Authentication）回答「<b>你是谁</b>」：密码、短信验证码、扫码、第三方登录。认证通过后，服务端会发给你一个登录凭证（Session 或 Token，如 JWT），之后每次请求都带上它。<b>授权</b>（Authorization）回答「<b>你能做什么</b>」：普通用户只能看自己的订单，管理员才能下架商品。就像进公司：门禁卡证明你是员工（认证），但不代表你能进机房（授权）。</p>
+    <table class="tbl">
+      <tr><th></th><th>认证</th><th>授权</th></tr>
+      <tr><td>回答的问题</td><td>你是谁？</td><td>你能做什么？</td></tr>
+      <tr><td>常见手段</td><td>密码、验证码、OAuth 第三方登录、单点登录 SSO</td><td>角色权限（RBAC）、资源归属检查（只能操作自己的数据）</td></tr>
+      <tr><td>失败时</td><td><span class="st4">401</span> 未认证</td><td><span class="st4">403</span> 无权限</td></tr>
+    </table>
+    <div id="demo-auth"></div>
+    <div class="callout danger"><span class="i">!</span><p><b>最常见的漏洞——越权：</b>接口只检查了「有没有登录」，没检查「这条数据是不是你的」。结果把网址里的 <code class="inl">/orders/1001</code> 改成 <code class="inl">/orders/1002</code> 就能看到别人的订单。「访问控制失效」长期位居 OWASP Web 安全风险榜首。看 AI 生成的接口时，第一件事就是问：<b>它检查数据归属了吗？</b></p></div>
+  </section>
+
+  <section class="topic" id="secure-basics">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>最小权限、输入验证、密钥管理<span class="pt">security basics · 三条底线</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="safety::secure-basics"><span>已学会</span></label>
+    </div>
+    <p>安全细节很多，但有三条底线足以挡住大部分事故：</p>
+    <table class="tbl">
+      <tr><th>原则</th><th>反例</th><th>好的做法</th></tr>
+      <tr><td><b>最小权限</b></td><td>应用用数据库 root 账号连接；所有员工都有生产服务器权限</td><td>只给完成工作所需的最小权限；应用账号不能删表；权限定期回收</td></tr>
+      <tr><td><b>输入验证</b>（永远不信任输入）</td><td>把用户输入直接拼进 SQL；把用户评论原样插进网页</td><td>参数化查询防 SQL 注入；输出时转义防 XSS；限制上传文件的类型和大小</td></tr>
+      <tr><td><b>密钥管理</b></td><td>把数据库密码、API 密钥写在代码里并提交到 Git</td><td>放在环境变量或密钥管理服务中；按环境区分；定期轮换；一旦泄露立即吊销</td></tr>
+      <tr><td>传输加密</td><td>登录页用 HTTP 明文传密码</td><td>全站 HTTPS</td></tr>
+      <tr><td>依赖安全</td><td>几年不更新依赖；装来路不明的包</td><td>定期升级、开启依赖漏洞扫描；确认包名是官方的</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>SQL 注入：拼接 vs 参数化（看懂即可）</div>
+      <pre><code># ✗ 危险：用户输入 name = "' OR '1'='1" 时，会查出所有用户
+cursor.execute(f"SELECT * FROM users WHERE name = '{name}'")
+
+# ✓ 安全：参数单独传给数据库，永远被当作「值」而不是「SQL 代码」
+cursor.execute("SELECT * FROM users WHERE name = %s", (name,))</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>审查任何方案（包括 AI 写的）都可以问三句：<b>权限给大了吗？输入验证了吗？密钥放哪了？</b>本仓库 SQL 学习包第 14 模块有可交互的 SQL 注入演示。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 失败模式：挂了会怎样</div>
+    <h2><span class="num">02</span>网络调用一定会失败</h2>
+  </section>
+
+  <section class="topic" id="timeout-retry">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>超时与重试<span class="pt">timeout · retry · 失败的第三种结果</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="safety::timeout-retry"><span>已学会</span></label>
+    </div>
+    <p>函数调用只有成功和失败两种结果，但<b>网络调用有三种</b>：成功、失败、以及「<b>不知道</b>」——请求发出去了，迟迟没有回音，对方可能根本没收到，也可能已经处理完、只是响应丢了。</p>
+    <ul>
+      <li><b>必须设超时。</b>不设超时，一个变慢的下游会让所有请求都卡住等待，耗尽线程和连接，最后整个系统一起倒下（<b>级联故障</b>）。</li>
+      <li><b>只对临时性失败重试</b>：超时、503、429。参数错（400 / 422）、没权限（403）重试一万次也不会成功。</li>
+      <li><b>重试要克制</b>：限制次数，用<b>指数退避 + 随机抖动</b>（1 秒、2 秒、4 秒……再加点随机），否则所有客户端同时重试，会形成「重试风暴」把刚恢复的服务再次打垮。</li>
+    </ul>
+    <table class="tbl">
+      <tr><th>错误</th><th>该不该重试</th><th>原因</th></tr>
+      <tr><td>超时、连接被重置</td><td><span class="tg g">可以</span>（前提是操作幂等）</td><td>可能是网络抖动</td></tr>
+      <tr><td><span class="st5">503</span> 服务暂不可用、<span class="st4">429</span> 被限流</td><td><span class="tg g">可以</span>，退避后再试</td><td>对方暂时忙</td></tr>
+      <tr><td><span class="st4">400</span> / <span class="st4">422</span> 参数错误</td><td><span class="tg r">不要</span></td><td>请求本身有问题，重试结果不变</td></tr>
+      <tr><td><span class="st4">401</span> / <span class="st4">403</span></td><td><span class="tg r">不要</span></td><td>先解决登录或权限</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>危险组合：</b>「超时」+「自动重试」+「操作不幂等」= 重复扣款、重复下单、重复发短信。所以讨论重试之前，必须先讨论下一个知识点：幂等。</p></div>
+  </section>
+
+  <section class="topic" id="idempotency">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>幂等：重试也不重复扣款<span class="pt">idempotency · 做一次和做多次结果一样</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="safety::idempotency"><span>已学会</span></label>
+    </div>
+    <p><b>幂等</b>指同一个操作执行一次和执行多次，最终结果一样。「查询余额」天然幂等；「把订单状态设为已取消」也幂等；但「扣 100 元」不幂等——执行两次就扣了 200。因为网络会超时、用户会连点、客户端会自动重试，<b>所有涉及钱和状态变化的写操作都应该设计成幂等的</b>。</p>
+    <table class="tbl">
+      <tr><th>做法</th><th>怎么做</th><th>例子</th></tr>
+      <tr><td><b>幂等键</b></td><td>客户端为每一次「意图」生成唯一 id（如 <code class="inl">Idempotency-Key</code> 请求头），服务端记录处理过的 id，重复请求直接返回第一次的结果</td><td>支付平台的扣款接口普遍采用</td></tr>
+      <tr><td>唯一约束</td><td>数据库对业务单号加唯一索引，重复插入会被拒绝</td><td>同一个订单号只能有一条支付记录</td></tr>
+      <tr><td>状态机</td><td>只允许合法的状态转换</td><td>只有「待支付」能变成「已支付」，已支付的再来一次直接忽略</td></tr>
+      <tr><td>前端兜底</td><td>点击后禁用按钮</td><td>减少重复点击，但<b>不能替代</b>后端幂等</td></tr>
+    </table>
+    <div id="demo-idem"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>看到任何「失败自动重试」的设计，立刻追问：<b>这个操作幂等吗？靠什么保证？</b>这是 01 模块里「会问」的典型例子。</p></div>
+  </section>
+
+  <section class="topic" id="degrade">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>限流、熔断、降级<span class="pt">rate limit · circuit breaker · degradation · 保住核心链路</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="safety::degrade"><span>已学会</span></label>
+    </div>
+    <p>系统总有扛不住的时候。目标不是「永远不出问题」，而是出问题时<b>保住最重要的功能</b>（通常是下单和支付），让次要功能先「让路」。</p>
+    <table class="tbl">
+      <tr><th>手段</th><th>类比</th><th>做什么</th><th>例子</th></tr>
+      <tr><td><b>限流</b></td><td>景区限流</td><td>超过承受能力的请求直接拒绝（<span class="st4">429</span>），保护系统不被打垮</td><td>每个用户每秒最多 10 次请求；验证码每分钟 1 次</td></tr>
+      <tr><td><b>熔断</b></td><td>家里的保险丝</td><td>下游连续失败时，暂时不再调用它，直接走兜底；过一会儿放少量请求试探是否恢复</td><td>推荐服务连续超时 → 30 秒内不再调用</td></tr>
+      <tr><td><b>降级</b></td><td>停电时只保冰箱</td><td>非核心功能关闭或返回简化结果，把资源留给核心链路</td><td>个性化推荐 → 改为固定热门榜；评论区暂时只读</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>这些手段都要<b>提前设计</b>：哪些是核心链路？每个依赖挂了用什么兜底？出事时再想就来不及了。</p></div>
+  </section>
+
+  <section class="topic" id="backup">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>备份与恢复：数据能不能找回<span class="pt">backup · restore · 最后一道防线</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="safety::backup"><span>已学会</span></label>
+    </div>
+    <p>机器坏了、有人误删、被勒索病毒加密……数据层的最后一道防线是<b>备份</b>。注意：<b>主从复制不等于备份</b>。主从复制防的是「机器挂了」，可一条误删的 <code class="inl">DELETE</code> 会被<b>同步</b>到所有从库。</p>
+    <table class="tbl">
+      <tr><th>概念</th><th>白话</th></tr>
+      <tr><td>3-2-1 原则</td><td>至少 3 份数据副本，存在 2 种不同介质上，其中 1 份在异地</td></tr>
+      <tr><td>RPO（恢复点目标）</td><td>最多能接受丢失多长时间的数据？每天备份一次，最坏丢 24 小时</td></tr>
+      <tr><td>RTO（恢复时间目标）</td><td>出事后多久必须恢复服务？</td></tr>
+      <tr><td>恢复演练</td><td>定期真的拿备份恢复一次，确认它能用、知道要多久</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>真实教训：</b>2017 年 GitLab.com 发生过生产数据库被误删的事故，事后发现好几种备份方式都没有按预期工作，最终丢失了数小时的数据。<b>没恢复过的备份，不算备份。</b></p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>挑一个你熟悉的 App，列出 3 个失败场景（例如支付回调超时、短信服务挂了、数据库被误删），分别写出应对方向。</li>
+      <li>在幂等演示里，用「无保护」模式制造一次重复扣款，然后切换到「幂等键」模式重复同样的操作，对比结果。</li>
+      <li>检查你自己写过的代码或项目：有没有把密钥写在代码里？有没有调用外部接口却没设超时？</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "safety",
+  title: "安全与失败模式",
+  eyebrow: "MODULE 09 · 技术全景",
+  lead: "判断力最依赖的概念细节：权限边界在哪、密钥放在哪、网络调用超时了怎么办、重试会不会重复扣款、依赖挂了保住什么、数据丢了能不能找回。",
+  points: ["authn-authz","secure-basics","timeout-retry","idempotency","degrade","backup"],
+  prev: "08-devops.html", prevTitle: "基础设施与 DevOps",
+  next: "10-decide.html", nextTitle: "选型判断：五问框架与成本演进",
+};
+
+const QUZ = [
+  { type:"quiz", q:"认证和授权的区别是？",
+    opts:["认证回答「你是谁」，授权回答「你能做什么」","两者是同一件事","认证是给管理员的，授权是给普通用户的","认证在前端做，授权在数据库做"],
+    ans:0, exp:"认证确认身份，授权判断权限，失败时分别对应 401 和 403。C、D 都是错误的划分方式，两者都必须在后端执行。" },
+  { type:"quiz", q:"登录后把网址里的 /orders/1001 改成 /orders/1002，就能看到别人的订单。这是什么问题？",
+    opts:["数据库性能问题","授权缺失（越权）：接口只检查了登录，没检查订单是否属于当前用户","前端样式问题","网络延迟问题"],
+    ans:1, exp:"这是访问控制失效，最常见、危害最大的漏洞之一。修复方法是在后端校验资源归属。" },
+  { type:"quiz", q:"数据库密码和第三方 API 密钥应该放在哪里？",
+    opts:["直接写在代码里，方便","写在前端 JavaScript 里","环境变量或密钥管理服务中，不提交到代码仓库，并按环境区分、定期轮换","发到团队群里备份"],
+    ans:2, exp:"代码仓库和前端代码都会扩散到很多人手里，聊天群更不受控。密钥要集中、受控地管理，泄露后能立即吊销。" },
+  { type:"quiz", q:"防止 SQL 注入最根本的做法是？",
+    opts:["把用户输入里的单引号都删掉","用更快的数据库","前端限制输入长度","使用参数化查询，让用户输入永远被当作值而不是 SQL 代码"],
+    ans:3, exp:"参数化查询从机制上隔离了代码和数据。手动删字符容易遗漏；前端限制可以被绕过；数据库快慢与注入无关。" },
+  { type:"quiz", q:"调用第三方接口为什么一定要设置超时？",
+    opts:["为了让日志更好看","否则一个变慢的下游会让请求一直等待，耗尽线程和连接，引发级联故障","因为第三方要求","超时会让接口变快"],
+    ans:1, exp:"超时是把「慢」限制在可控范围内，防止故障扩散。它本身不会让接口变快（D），也不只是为了满足要求（C）。" },
+  { type:"quiz", q:"下列哪种错误<b>不应该</b>自动重试？",
+    opts:["连接超时","503 服务暂不可用","422 参数校验失败","429 请求过于频繁（退避后）"],
+    ans:2, exp:"422 说明请求本身不合法，重试结果不会变。超时、503、429 都是临时性问题，可以在幂等前提下退避重试。" },
+  { type:"quiz", q:"「幂等」的含义是？",
+    opts:["同一个操作执行一次和执行多次，最终结果一样","操作一定会成功","操作只能执行一次，第二次会报错","操作执行得很快"],
+    ans:0, exp:"幂等关注结果是否一致，不保证成功（B），也不是「第二次报错」（C，好的幂等设计会返回第一次的结果）。" },
+  { type:"quiz", q:"支付接口要防止「超时重试导致重复扣款」，最可靠的做法是？",
+    opts:["前端禁用按钮就够了","告诉用户不要点两次","不设超时","使用幂等键，服务端记录已处理的请求，重复请求直接返回第一次的结果；再配合业务单号唯一约束"],
+    ans:3, exp:"前端禁用按钮挡不住网络层的重试（A）；B 不可靠；C 会引发级联故障。幂等必须由后端保证。" },
+  { type:"quiz", q:"数据库已经配置了主从复制，还需要备份吗？",
+    opts:["需要。主从复制防的是机器故障，误删、程序 bug 写坏数据会被同步到从库，只有备份能找回","不需要，主从就是备份","不需要，云厂商会负责一切","只需要备份代码，不需要备份数据"],
+    ans:0, exp:"高可用和备份解决的是不同问题。B、C 是危险的误解；D 本末倒置，代码有 Git，数据丢了才是真的丢了。" },
+  { type:"interview", q:"大促期间「个性化推荐」服务挂了，首页一直转圈，下单也变慢了。你怎么处理？",
+    opts:["立刻关闭整个网站","对推荐服务启用熔断，首页降级为固定的热门榜，保证首页和下单支付链路不被拖慢；事后复盘为什么没有提前配置超时和兜底","让用户等推荐服务恢复","把推荐服务的超时调到 5 分钟"],
+    ans:1, exp:"熔断阻止故障扩散，降级保住核心链路，复盘补上缺失的防护。A 损失最大；C 用户不会等；D 让更多请求堆积，情况更糟。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：认证 / 授权判定器 */
+(function(){
+  const USERS = { anon:"未登录访客", alice:"用户 Alice", bob:"用户 Bob", admin:"管理员" };
+  const ACTS = {
+    list:{ n:"查看商品列表", rule:u=>[200,"公开接口，不需要登录。"] },
+    aliceOrder:{ n:"查看 Alice 的订单", rule:u=>({anon:[401,"认证失败：不知道你是谁，请先登录。"], alice:[200,"认证通过，且订单属于你本人。"], bob:[403,"认证通过，但这不是你的订单 → 授权失败。如果后端漏了这一步检查，就是越权漏洞。"], admin:[200,"管理员因客服工作需要可以查看，同时应记录审计日志。"]})[u] },
+    aliceAddr:{ n:"修改 Alice 的收货地址", rule:u=>({anon:[401,"认证失败：请先登录。"], alice:[200,"本人修改自己的数据。"], bob:[403,"不能修改别人的数据。"], admin:[403,"即使是管理员，也只给完成工作所需的权限：客服可以看，但不能替用户改地址（最小权限）。"]})[u] },
+    delItem:{ n:"下架商品", rule:u=>({anon:[401,"认证失败：请先登录。"], alice:[403,"普通用户没有商品管理权限。"], bob:[403,"普通用户没有商品管理权限。"], admin:[200,"管理员角色拥有商品管理权限（基于角色的权限控制 RBAC）。"]})[u] }
+  };
+  const host = document.getElementById("demo-auth");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：这个请求会被放行吗？</span><span class="hint">选身份和操作</span></div>
+    <div class="db">
+      <div class="ctl" id="auU"><label>身份</label>${Object.keys(USERS).map(k=>`<button class="b" data-v="${k}">${USERS[k]}</button>`).join("")}</div>
+      <div class="ctl" id="auA"><label>操作</label>${Object.keys(ACTS).map(k=>`<button class="b" data-v="${k}">${ACTS[k].n}</button>`).join("")}</div>
+      <div class="flow" id="auFlow"></div>
+      <div class="log" id="auLog"></div>
+    </div></div>`;
+  let u = "bob", a = "aliceOrder";
+  function render(){
+    const [st, why] = ACTS[a].rule(u);
+    const authnOk = !(st === 401), authzOk = st === 200;
+    const pub = a === "list";
+    document.getElementById("auFlow").innerHTML =
+      `<div class="node ${pub ? "dim" : (authnOk ? "on" : "bad")}"><span class="ly">第 1 关</span><b>认证：你是谁？</b>${pub ? "公开接口跳过" : (authnOk ? "✓ 已登录" : "✗ 未登录")}</div><span class="arr">→</span>` +
+      `<div class="node ${pub ? "dim" : (!authnOk ? "dim" : (authzOk ? "on" : "bad"))}"><span class="ly">第 2 关</span><b>授权：你能做吗？</b>${pub ? "公开接口跳过" : (!authnOk ? "未到达" : (authzOk ? "✓ 有权限" : "✗ 无权限"))}</div><span class="arr">→</span>` +
+      `<div class="node ${st === 200 ? "on" : "bad"}"><span class="ly">结果</span><b><span class="${st === 200 ? "st2" : "st4"}">${st}</span></b></div>`;
+    document.getElementById("auLog").innerHTML = `<b>${USERS[u]} → ${ACTS[a].n}</b>：${why}`;
+  }
+  ArchKit.choice("auU", v=>{ u = v; render(); }, "bob");
+  ArchKit.choice("auA", v=>{ a = v; render(); }, "aliceOrder");
+})();
+
+/* 演示 2：重复扣款 vs 幂等键 */
+(function(){
+  const host = document.getElementById("demo-idem");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：支付 ¥100，网络超时后会扣几次钱？</span><span class="hint">先选保护方式</span></div>
+    <div class="db">
+      <div class="ctl" id="idMode"><label>后端</label><button class="b" data-v="none">无幂等保护</button><button class="b" data-v="key">幂等键（Idempotency-Key）</button></div>
+      <div class="ctl"><button class="b" id="idPay">① 点击「支付」</button><button class="b" id="idRetry">② 响应超时，客户端自动重试</button><button class="b" id="idAgain">③ 用户着急又点一次</button><button class="b" id="idReset">↺ 重置</button></div>
+      <div class="cards">
+        <div class="c"><h4>账户余额</h4><div id="idBal" style="font-family:var(--font-mono);font-size:22px;font-weight:700"></div></div>
+        <div class="c"><h4>扣款记录（订单 #1001）</h4><div id="idRec" style="font-size:13.5px"></div></div>
+      </div>
+      <div class="log" id="idLog"></div>
+      <div class="foot">同一个订单的这次支付，客户端始终带同一个幂等键 pay-1001-a7f3；服务端处理过就记下来。</div>
+    </div></div>`;
+  let mode = "none", bal, recs, seen, logs, sent;
+  function reset(){ bal = 1000; recs = []; seen = {}; logs = []; sent = false; }
+  function add(s){ logs.unshift(s); logs = logs.slice(0, 5); }
+  function charge(label){
+    const key = "pay-1001-a7f3";
+    if(mode === "key" && seen[key]){ add(`${label}：服务端发现幂等键 ${key} 已处理 → <b>直接返回第一次的结果，不再扣款</b>`); }
+    else { bal -= 100; recs.push(label); seen[key] = true; add(`${label}：扣款 ¥100${recs.length > 1 ? ' <span class="bad">← 重复扣款！</span>' : ""}`); }
+    render();
+  }
+  function render(){
+    document.getElementById("idBal").innerHTML = `¥${bal}` + (bal < 900 ? ' <span class="tg r">多扣了 ¥' + (900 - bal) + "</span>" : "");
+    document.getElementById("idRec").innerHTML = recs.length ? recs.map((r,i)=>`${i+1}. -¥100（${r}）`).join("<br>") : "（暂无）";
+    document.getElementById("idLog").innerHTML = logs.length ? logs.join("<br>") : "按 ① → ② → ③ 的顺序点，看两种模式的区别。";
+  }
+  document.getElementById("idPay").addEventListener("click", ()=>{ sent = true; charge("第一次请求"); add("…服务端已扣款，但响应在回来的路上丢了，客户端只看到「超时」"); render(); });
+  document.getElementById("idRetry").addEventListener("click", ()=>{ if(!sent){ add("先点 ① 发出第一次支付请求。"); render(); return; } charge("自动重试"); });
+  document.getElementById("idAgain").addEventListener("click", ()=>{ if(!sent){ add("先点 ① 发出第一次支付请求。"); render(); return; } charge("用户再次点击"); });
+  document.getElementById("idReset").addEventListener("click", ()=>{ reset(); render(); });
+  reset();
+  ArchKit.choice("idMode", v=>{ mode = v; reset(); render(); }, "none");
+})();
+</script>
+</body>
+</html>

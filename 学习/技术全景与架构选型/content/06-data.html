@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据层：数据放在哪 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 数据层：关系型数据库与 ACID、NoSQL 四大类、Redis 缓存与脏数据、强一致与最终一致、向量数据库与 RAG、数据层怎么选。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">数据层</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 06 · 技术全景</span></span>
+    <h1 id="pageTitle">数据层：数据放在哪</h1>
+    <p class="lead" id="pageLead">数据的「仓库」。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>说出关系型数据库的特点，并用「转账」的例子解释事务（ACID）。</li>
+      <li>区分键值、文档、宽列、图等 NoSQL 类型，各举一个代表产品。</li>
+      <li>解释缓存为什么快、为什么会「脏」，以及「先更新数据库，再删除缓存」的做法。</li>
+      <li>判断一个业务需要<b>强一致</b>还是能接受<b>最终一致</b>。</li>
+      <li>说出向量数据库在 AI 检索（RAG）里的作用。</li>
+      <li>能判断：订单 / 金融偏关系型，缓存 / 会话偏 Redis，结构多变的文档偏 MongoDB。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="05-backend.html">05 后端与 API 框架</a>，知道「后端负责读写数据库」。想深入数据库本身，可以学本仓库的 <a href="../../SQL/index.html">SQL / 数据库学习包</a>。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 两大阵营</div>
+    <h2><span class="num">01</span>档案柜与收纳箱</h2>
+  </section>
+
+  <section class="topic" id="sql-db">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>关系型数据库：结构严格的档案柜<span class="pt">RDBMS / SQL · 强一致的主力</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="data::sql-db"><span>已学会</span></label>
+    </div>
+    <p>关系型数据库把数据存在一张张<b>二维表</b>里，必须提前定义好<b>表结构</b>（schema）：有哪些列、每列什么类型。表和表之间用主键、外键关联，用 <b>SQL</b> 查询。它最大的强项是<b>事务</b>：一组操作要么全部成功，要么全部失败。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>转账：事务的经典例子（看懂即可）</div>
+      <pre><code>BEGIN;                                                -- 开始事务
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;  -- A 扣 100
+UPDATE accounts SET balance = balance + 100 WHERE id = 2;  -- B 加 100
+COMMIT;                                               -- 两步都成功才提交
+-- 如果第二步失败（比如断电），整个事务回滚：A 的钱不会凭空消失</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>ACID</th><th>白话</th><th>转账里的意思</th></tr>
+      <tr><td>原子性 Atomicity</td><td>要么全做，要么全不做</td><td>不会出现「A 扣了钱、B 没收到」</td></tr>
+      <tr><td>一致性 Consistency</td><td>数据始终满足规则</td><td>总金额不变，余额不能为负</td></tr>
+      <tr><td>隔离性 Isolation</td><td>并发的事务互不干扰</td><td>两笔转账同时发生也不会算错</td></tr>
+      <tr><td>持久性 Durability</td><td>提交了就不会丢</td><td>提交后立刻断电，重启后数据还在</td></tr>
+    </table>
+    <table class="tbl">
+      <tr><th>代表</th><th>一句话</th></tr>
+      <tr><td>PostgreSQL</td><td>功能最全面的开源关系型数据库，扩展丰富（JSONB、全文检索、pgvector）</td></tr>
+      <tr><td>MySQL</td><td>国内互联网使用最广之一，生态和运维经验极丰富</td></tr>
+      <tr><td>SQLite</td><td>嵌入在程序里的单文件数据库，手机 App、小工具常用</td></tr>
+      <tr><td>TiDB、OceanBase 等</td><td>分布式关系型数据库：兼容 SQL，又能水平扩展到很多台机器</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>强项是<b>强一致</b>和<b>复杂关联查询</b>，适合订单、支付、库存、账户这类<b>不容出错</b>的核心业务。代价是表结构改动要走迁移流程，单机写入能力有上限。</p></div>
+  </section>
+
+  <section class="topic" id="nosql">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>NoSQL：键值、文档、宽列、图<span class="pt">NoSQL · 灵活的收纳箱</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="data::nosql"><span>已学会</span></label>
+    </div>
+    <p>NoSQL（Not only SQL）是一大类「不用二维表」的数据库，像<b>灵活的收纳箱</b>：不要求固定表结构，强项是<b>灵活性</b>和<b>水平扩展</b>（加机器就能扛更多数据）。它们各自为特定的数据形状优化：</p>
+    <table class="tbl">
+      <tr><th>类型</th><th>怎么存</th><th>代表</th><th>适合</th></tr>
+      <tr><td>键值</td><td>一个 key 对应一个值，像超大的字典</td><td>Redis</td><td>缓存、登录会话、验证码、计数器、排行榜</td></tr>
+      <tr><td>文档</td><td>一条记录是一个 JSON 风格的文档，字段可以各不相同</td><td>MongoDB</td><td>结构多变的内容、商品属性、快速迭代的产品</td></tr>
+      <tr><td>宽列</td><td>按列族存储，为海量写入设计</td><td>Cassandra、HBase</td><td>海量日志、消息记录、物联网数据</td></tr>
+      <tr><td>图</td><td>节点 + 关系</td><td>Neo4j</td><td>社交关系、推荐、风控关系网络</td></tr>
+      <tr><td>搜索引擎</td><td>倒排索引</td><td>Elasticsearch / OpenSearch</td><td>全文搜索、日志检索</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>易混：</b>「NoSQL 不需要 schema」不准确——schema 只是从数据库挪到了<b>应用代码</b>里，数据质量要靠你自己保证。另外，PostgreSQL 的 JSONB 也能存灵活字段，很多「需要灵活」的场景用一个 PostgreSQL 就够了。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 快与对的权衡</div>
+    <h2><span class="num">02</span>缓存与一致性</h2>
+  </section>
+
+  <section class="topic" id="cache">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>缓存与 Redis：快，但可能「脏」<span class="pt">cache · 用一致性换速度</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="data::cache"><span>已学会</span></label>
+    </div>
+    <p>数据库在磁盘上，查一次几毫秒到几十毫秒；Redis 在<b>内存</b>里，通常不到一毫秒。所以常把<b>读得多、改得少</b>的数据（商品详情、首页配置）复制一份放进缓存。代价是：现在数据有了两份，<b>两份可能不一致</b>，用户就会读到旧数据，这叫缓存「脏」了。</p>
+    <table class="tbl">
+      <tr><th>操作</th><th>最常见的做法（Cache-Aside 旁路缓存）</th></tr>
+      <tr><td>读</td><td>先查缓存；命中就直接返回；没命中再查数据库，并把结果写进缓存（设置过期时间 TTL）</td></tr>
+      <tr><td>写</td><td><b>先更新数据库，再删除缓存</b>；下次读的时候自然会从数据库加载新值</td></tr>
+      <tr><td>兜底</td><td>给每个缓存设置 TTL：就算忘了删，最多脏 TTL 那么久</td></tr>
+    </table>
+    <div id="demo-cache"></div>
+    <table class="tbl">
+      <tr><th>常见缓存问题</th><th>是什么</th><th>应对方向</th></tr>
+      <tr><td>缓存穿透</td><td>一直查一个不存在的数据，缓存永远不命中，压力全打到数据库</td><td>缓存空结果、参数校验、布隆过滤器</td></tr>
+      <tr><td>缓存击穿</td><td>一个超热的 key 刚好过期，瞬间大量请求涌向数据库</td><td>热点 key 不过期或加互斥锁重建</td></tr>
+      <tr><td>缓存雪崩</td><td>大量 key 同时过期或 Redis 整个挂了</td><td>过期时间加随机值、Redis 高可用、降级</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>加缓存前先问：<b>这份数据读到几秒的旧值，会造成什么损失？</b>商品描述旧几秒无所谓；库存和余额就不能只看缓存做决定。</p></div>
+  </section>
+
+  <section class="topic" id="consistency">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>强一致 vs 最终一致<span class="pt">consistency · 读到旧数据能不能接受</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="data::consistency"><span>已学会</span></label>
+    </div>
+    <p><b>强一致</b>：写入成功后，任何人<b>立刻</b>读到的都是新值。<b>最终一致</b>：写入后短时间内，有人可能还读到旧值，但过一会儿所有人都会看到新值。数据一旦分布在多台机器（主从复制、缓存、多个微服务），强一致就要付出性能和可用性的代价，所以要按业务区分对待。</p>
+    <table class="tbl">
+      <tr><th>业务</th><th>需要</th><th>为什么</th></tr>
+      <tr><td>账户余额、支付、扣库存</td><td><span class="tg r">强一致</span></td><td>读到旧值会导致超卖、多扣钱，损失真金白银</td></tr>
+      <tr><td>订单状态</td><td><span class="tg r">强一致</span>（核心链路）</td><td>用户付完款必须看到「已支付」，否则会重复支付</td></tr>
+      <tr><td>点赞数、浏览量、粉丝数</td><td><span class="tg g">最终一致</span></td><td>差几个、晚几秒，没人在意</td></tr>
+      <tr><td>搜索结果、推荐列表</td><td><span class="tg g">最终一致</span></td><td>新商品晚一分钟能被搜到，可以接受</td></tr>
+      <tr><td>主从复制的从库读</td><td><span class="tg a">看情况</span></td><td>刚写完立刻读从库可能读不到，「写后立即读」的场景应读主库</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>判断一致性需求只问一句：<b>读到旧数据几秒钟，会造成什么损失？</b>损失是钱和信任 → 强一致；损失几乎为零 → 最终一致，换来更快、更便宜、更好扩展。分布式理论里的 CAP 说的也是这个取舍：网络出问题时，一致性和可用性只能优先保一个。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 3 · AI 与选择</div>
+    <h2><span class="num">03</span>向量数据库与选型</h2>
+  </section>
+
+  <section class="topic" id="vector-db">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>向量数据库与 AI 检索<span class="pt">vector DB · 按「意思」找</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="data::vector-db"><span>已学会</span></label>
+    </div>
+    <p>传统搜索按<b>关键词</b>匹配：搜「退款」找不到写着「钱怎么退回来」的文档。AI 模型可以把一段文字变成一串数字（<b>向量 / embedding</b>），意思相近的文字，向量也相近。向量数据库专门存这些向量，并快速找出「意思最接近」的内容。</p>
+    <p>它是 <b>RAG（检索增强生成）</b>的核心：用户提问 → 把问题变成向量 → 在知识库里找最相关的几段 → 连同问题一起交给大模型 → 大模型基于这些资料回答，减少胡编。</p>
+    <table class="tbl">
+      <tr><th></th><th>关键词搜索</th><th>语义（向量）搜索</th></tr>
+      <tr><td>匹配方式</td><td>字面相同</td><td>意思相近</td></tr>
+      <tr><td>「退款」能否找到「钱怎么退回来」</td><td>不能</td><td>能</td></tr>
+      <tr><td>精确查型号、订单号</td><td>擅长</td><td>不擅长</td></tr>
+      <tr><td>代表</td><td>Elasticsearch、数据库全文检索</td><td>Milvus、Qdrant、Weaviate、Pinecone；PostgreSQL 的 pgvector 扩展</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>实际系统常把两者结合（混合检索）。数据量在百万条以内时，<b>PostgreSQL + pgvector</b> 往往就够了：少一个组件，就少一份运维和数据同步的麻烦。</p></div>
+  </section>
+
+  <section class="topic" id="data-choose">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>数据层怎么选<span class="pt">choosing · 从一个库起步</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="data::data-choose"><span>已学会</span></label>
+    </div>
+    <p>选数据层时，按顺序问五个问题：</p>
+    <ol>
+      <li><b>数据错了或丢了，损失多大？</b>涉及钱 → 关系型 + 事务 + 备份。</li>
+      <li><b>结构经常变吗？</b>每条记录字段都不一样 → 文档型或 JSONB。</li>
+      <li><b>读写量和延迟要求多高？</b>热点数据反复读 → 加缓存。</li>
+      <li><b>怎么查？</b>复杂关联 → SQL；按 key 取 → 键值；全文搜索 → 搜索引擎；按意思找 → 向量库。</li>
+      <li><b>团队能运维几个组件？</b>每多一个数据库，就多一份备份、监控、同步和故障点。</li>
+    </ol>
+    <table class="tbl">
+      <tr><th>场景</th><th>常见选择</th></tr>
+      <tr><td>订单、支付、账户、库存</td><td>PostgreSQL / MySQL + 事务</td></tr>
+      <tr><td>商品详情、首页这类热点读</td><td>数据库 + Redis 缓存</td></tr>
+      <tr><td>登录会话、验证码、限流计数</td><td>Redis</td></tr>
+      <tr><td>字段多变的内容、配置</td><td>MongoDB，或 PostgreSQL JSONB</td></tr>
+      <tr><td>站内搜索</td><td>起步用数据库全文检索，规模大了上 Elasticsearch</td></tr>
+      <tr><td>AI 知识库问答</td><td>起步用 pgvector，规模大了上专门的向量数据库</td></tr>
+    </table>
+    <div id="demo-pick"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>大多数项目的合理起点是<b>一个 PostgreSQL（或 MySQL）</b>，遇到明确的瓶颈再加 Redis、搜索引擎、向量库。不要一开始就上五种数据库。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>选一个你常用的 App（例如外卖），列出它的 5 类数据，逐个判断需要强一致还是最终一致，各适合放在哪种数据库。</li>
+      <li>在缓存演示里，用「忘了删缓存」模式复现一次「用户读到旧价格」，再说出两种修复办法。</li>
+      <li>查一查：你所在学校或公司的系统用的是什么数据库？它为什么这样选？</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "data",
+  title: "数据层：数据放在哪",
+  eyebrow: "MODULE 06 · 技术全景",
+  lead: "关系型数据库像结构严格的档案柜，强在事务和一致性；NoSQL 像灵活的收纳箱，强在灵活和扩展；缓存用一致性换速度；向量库让 AI 能按「意思」检索。",
+  points: ["sql-db","nosql","cache","consistency","vector-db","data-choose"],
+  prev: "05-backend.html", prevTitle: "后端与 API 框架",
+  next: "07-arch.html", nextTitle: "架构模式：产品的组织形式",
+};
+
+const QUZ = [
+  { type:"quiz", q:"订单和支付数据，优先放在哪类数据库？",
+    opts:["Redis，因为最快","关系型数据库（PostgreSQL / MySQL），用事务保证不出错","图数据库","只放在浏览器本地"],
+    ans:1, exp:"钱相关的数据要强一致和事务。Redis 主要在内存里，适合做缓存而不是唯一的账本；图数据库为关系网络设计；浏览器本地可被用户篡改。" },
+  { type:"quiz", q:"转账时「A 扣钱和 B 加钱要么都成功，要么都失败」，对应 ACID 里的哪一项？",
+    opts:["持久性","隔离性","原子性","可用性"],
+    ans:2, exp:"原子性 = 不可分割，全做或全不做。持久性指提交后不丢；隔离性指并发互不干扰；可用性不属于 ACID。" },
+  { type:"quiz", q:"Redis 快的根本原因是？",
+    opts:["数据主要放在内存里","它用了最新的编程语言","它不需要网络","它会自动压缩所有数据"],
+    ans:0, exp:"内存的访问速度比磁盘快几个数量级。B、D 不是关键原因；C 错，客户端通常也要通过网络访问 Redis。" },
+  { type:"quiz", q:"运营改了商品价格，用户却还看到旧价格，最可能的原因是？",
+    opts:["数据库坏了","用户网速慢","前端框架有 bug","更新数据库后没有删除（或更新）缓存，用户读到了缓存里的旧值"],
+    ans:3, exp:"数据有两份（数据库和缓存），只改了一份就会不一致。等 TTL 过期后通常会自己恢复，这也是判断「缓存脏了」的线索。" },
+  { type:"quiz", q:"旁路缓存（Cache-Aside）中，更新数据时推荐的做法是？",
+    opts:["只更新缓存，不更新数据库","先更新数据库，再删除缓存","先删除数据库，再更新缓存","缓存永不过期"],
+    ans:1, exp:"数据库是「真相」，先保证它正确；删掉缓存后，下次读取会重新加载新值。A、C 会丢数据或让真相出错；D 一旦漏删就永远是旧值。" },
+  { type:"quiz", q:"下列哪个数据最适合用「最终一致」？",
+    opts:["银行账户余额","商品剩余库存","文章的点赞数","支付状态"],
+    ans:2, exp:"点赞数差几个、晚几秒显示，几乎没有损失。余额、库存、支付状态读到旧值会造成真实损失，需要强一致。" },
+  { type:"quiz", q:"MongoDB 属于哪一类？",
+    opts:["文档数据库","关系型数据库","向量数据库","消息队列"],
+    ans:0, exp:"MongoDB 以 JSON 风格的文档存数据，字段可以灵活变化。" },
+  { type:"quiz", q:"向量数据库在 AI 应用里主要用来做什么？",
+    opts:["存储用户密码","按意思相似度检索内容，为大模型提供相关资料（RAG）","替代所有关系型数据库","加速 CPU 计算"],
+    ans:1, exp:"向量库擅长「找意思最接近的内容」。存密码要用哈希并存在常规数据库里；它不能替代事务型数据库；也不负责加速计算。" },
+  { type:"quiz", q:"3 人团队要做一个公司内部知识库问答，文档几万篇，已经在用 PostgreSQL。最务实的起点是？",
+    opts:["同时引入三种向量数据库对比","自己从零写一个向量检索引擎","放弃，必须招专门的数据库团队","用 PostgreSQL + pgvector 扩展，规模真的上来再考虑专门的向量库"],
+    ans:3, exp:"数据量不大、团队小，少一个组件就少一份运维和数据同步成本。A、B 过度投入；C 没必要。" },
+  { type:"interview", q:"线上反馈：「改价后，部分用户看到新价、部分看到旧价，过 10 分钟又都正常了。」你怎么分析？",
+    opts:["是前端随机 bug，让前端排查","大概率是缓存没有在改价时失效，旧值一直留到 TTL（约 10 分钟）过期；检查改价流程是否「更新数据库后删除缓存」，以及是否有多级缓存（如 CDN、本地缓存）没清","数据库主键冲突","用户浏览器坏了"],
+    ans:1, exp:"「部分用户」+「过一段时间自愈」是缓存不一致的典型特征，自愈时间往往就是 TTL。进一步要查所有缓存层。A、D 把问题推给别人；C 会导致写入失败而不是读到旧值。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：缓存变脏模拟器 */
+(function(){
+  const host = document.getElementById("demo-cache");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：缓存什么时候会「脏」</span><span class="hint">选写法，然后读 / 改 / 过期</span></div>
+    <div class="db">
+      <div class="ctl" id="cWay"><label>改价时</label><button class="b" data-v="del">更新数据库 + 删缓存</button><button class="b" data-v="forget">只更新数据库（忘了删缓存）</button></div>
+      <div class="ctl"><button class="b" id="cRead">👤 用户读价格</button><button class="b" id="cUpd">🛠 运营改价 +20</button><button class="b" id="cExp">⏰ 缓存 TTL 到期</button><button class="b" id="cReset">↺ 重置</button></div>
+      <div class="cards">
+        <div class="c"><h4>🗄 数据库（真相）</h4><div id="cDb" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--green)"></div></div>
+        <div class="c"><h4>⚡ Redis 缓存</h4><div id="cCache" style="font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--amber)"></div></div>
+        <div class="c"><h4>📊 统计</h4><div id="cStat" style="font-size:13.5px"></div></div>
+      </div>
+      <div class="log" id="cLog"></div>
+      <div class="foot">试试：选「忘了删缓存」→ 读一次 → 改价 → 再读，看用户读到了什么；再点「TTL 到期」后读一次。</div>
+    </div></div>`;
+  let db, cache, way = "del", logs, reads, stale;
+  function reset(){ db = 100; cache = null; logs = []; reads = 0; stale = 0; }
+  function add(s){ logs.unshift(s); logs = logs.slice(0, 6); }
+  function render(){
+    document.getElementById("cDb").textContent = "¥" + db;
+    document.getElementById("cCache").textContent = cache === null ? "（空）" : "¥" + cache;
+    document.getElementById("cStat").innerHTML = `读取 <b>${reads}</b> 次<br>读到旧价格 <b style="color:var(--red)">${stale}</b> 次`;
+    document.getElementById("cLog").innerHTML = logs.length ? logs.join("<br>") : "点「用户读价格」开始。";
+  }
+  document.getElementById("cRead").addEventListener("click", ()=>{
+    reads++;
+    if(cache === null){ cache = db; add(`读：缓存未命中 → 查数据库得到 ¥${db} → 写入缓存`); }
+    else if(cache === db){ add(`读：缓存命中 → ¥${cache}（和数据库一致 ✓）`); }
+    else { stale++; add(`<span class="bad">读：缓存命中 → ¥${cache}，但数据库已经是 ¥${db}，用户读到了旧价格 ✗</span>`); }
+    render();
+  });
+  document.getElementById("cUpd").addEventListener("click", ()=>{
+    db += 20;
+    if(way === "del"){ cache = null; add(`改价：数据库更新为 ¥${db} → 删除缓存 ✓`); }
+    else add(`改价：数据库更新为 ¥${db}（缓存里还是 ${cache === null ? "空" : "¥" + cache}）`);
+    render();
+  });
+  document.getElementById("cExp").addEventListener("click", ()=>{ cache = null; add("缓存过期：被自动删除，下次读会重新查数据库"); render(); });
+  document.getElementById("cReset").addEventListener("click", ()=>{ reset(); render(); });
+  reset();
+  ArchKit.choice("cWay", v=>{ way = v; reset(); render(); }, "del");
+})();
+
+/* 演示 2：数据选型器 */
+(function(){
+  const NEEDS = [
+    {k:"money", t:"涉及钱、库存、账户，绝不能错", c:"PostgreSQL / MySQL（开启事务）", why:"强一致 + 事务 + 成熟的备份恢复"},
+    {k:"rel", t:"表之间关联多，要做复杂查询和报表", c:"PostgreSQL / MySQL", why:"JOIN 和 SQL 是关系型的强项"},
+    {k:"flex", t:"每条记录字段都不一样，结构经常变", c:"MongoDB 或 PostgreSQL 的 JSONB", why:"不用频繁改表结构；已有 PostgreSQL 时优先用 JSONB"},
+    {k:"hot", t:"同一批数据被高频读取（首页、商品详情）", c:"Redis 缓存", why:"内存读取，挡住大部分数据库压力；记得设置 TTL 和改数据时删缓存"},
+    {k:"session", t:"登录会话、验证码、限流计数、排行榜", c:"Redis", why:"天然支持过期时间、计数、有序集合"},
+    {k:"search", t:"站内全文搜索、关键词模糊查找", c:"起步：数据库全文检索；规模大：Elasticsearch / OpenSearch", why:"倒排索引专为搜索设计"},
+    {k:"semantic", t:"按意思检索、AI 知识库问答（RAG）", c:"起步：pgvector；规模大：Milvus / Qdrant 等", why:"向量相似度检索"},
+    {k:"logs", t:"海量日志、埋点、监控指标", c:"ClickHouse 等列式库 / 时序库（如 Prometheus）", why:"为海量写入和聚合分析优化"}
+  ];
+  const host = document.getElementById("demo-pick");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：数据选型器</span><span class="hint">勾选你的需求</span></div>
+    <div class="db">
+      <div id="pkList">${NEEDS.map(n=>`<label class="chk"><input type="checkbox" data-k="${n.k}" ${n.k==="money"||n.k==="hot"?"checked":""}><span>${n.t}</span></label>`).join("")}</div>
+      <div class="verdict" id="pkOut"></div>
+    </div></div>`;
+  const out = document.getElementById("pkOut");
+  function render(){
+    const on = NEEDS.filter(n=>host.querySelector(`input[data-k="${n.k}"]`).checked);
+    if(!on.length){ out.innerHTML = "<h4>还没勾选需求</h4>先勾一两条，看看需要哪些组件。"; return; }
+    const comps = [...new Set(on.map(n=>n.c.split("（")[0]))];
+    out.innerHTML = `<h4>建议组合（约 ${comps.length} 类组件）</h4><ul>${on.map(n=>`<li><b>${n.c}</b> —— ${n.t}。${n.why}。</li>`).join("")}</ul>` +
+      `<p style="margin:8px 0 0;color:var(--muted);font-size:13px">${comps.length >= 4 ? "⚠ 组件已经不少了：每多一种数据库，就多一份备份、监控、数据同步和故障点。先确认每一项是不是「现在」就需要。" : "组件数量可控。记住：能用一个数据库解决的，先别引入第二个。"}</p>`;
+  }
+  host.querySelectorAll("#pkList input").forEach(i=>i.addEventListener("change", render));
+  render();
+})();
+</script>
+</body>
+</html>

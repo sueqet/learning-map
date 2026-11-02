@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>选型判断：五问框架与成本演进 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 选型判断：五问框架（约束、团队、成本、失败代价、演进）、总成本、可逆与不可逆决策，以及个人博客、电商订单系统、AI 问答服务三个选型案例。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">选型判断</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 10 · 技术全景</span></span>
+    <h1 id="pageTitle">选型判断：五问框架与成本演进</h1>
+    <p class="lead" id="pageLead">不要只问「它有什么优缺点」。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>按顺序说出<b>五问框架</b>：场景约束、团队能力、总成本、失败代价、演进路径。</li>
+      <li>把「总成本」拆成开发、运维、学习、迁移四部分，不只看「开发快不快」。</li>
+      <li>区分可逆与不可逆的技术决策，知道哪些要快定、哪些要慎重。</li>
+      <li>用五问框架给<b>个人博客、电商订单系统、AI 问答服务</b>各写出选型和理由。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 02–09 模块。本节把前面每一层的「性格」和「代价」组合起来，练习真正做决定。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 判断的工具</div>
+    <h2><span class="num">01</span>五问、成本与演进</h2>
+  </section>
+
+  <section class="topic" id="five-questions">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>五问框架：约束、团队、成本、失败代价、演进<span class="pt">five questions · 选择不是查表</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="decide::five-questions"><span>已学会</span></label>
+    </div>
+    <p>面对一个技术选择，不要只问「它有什么优缺点」，而是<b>按顺序</b>问五个问题。前面的问题会大幅缩小后面的选择范围。</p>
+    <table class="tbl">
+      <tr><th>顺序</th><th>要问的问题</th><th>目的</th></tr>
+      <tr><td>1</td><td><b>场景约束</b>：团队几个人？多快要上线？流量多大？一致性要求多高？有没有合规要求？</td><td>防止「技术很酷但不适合」</td></tr>
+      <tr><td>2</td><td><b>团队能力</b>：成员现在熟悉什么？招人容易吗？文档和社区成熟吗？</td><td>降低学习和维护成本</td></tr>
+      <tr><td>3</td><td><b>总成本</b>：开发 + 运维 + 学习 + 迁移，以及云资源费用</td><td>不只看开发快，还要看长期养不养得起</td></tr>
+      <tr><td>4</td><td><b>失败代价</b>：挂了影响多大？数据错了能不能恢复？</td><td>决定要不要强一致、备份、降级、多活</td></tr>
+      <tr><td>5</td><td><b>演进路径</b>：现在的简单方案，将来能不能平滑升级？</td><td>既避免早期过度设计，也避免把自己锁死</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>优缺点表告诉你「选项是什么」，五问告诉你「哪个适合我」。同一个技术，在不同答案下可能从最佳选择变成最差选择。</p></div>
+  </section>
+
+  <section class="topic" id="total-cost">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>总成本：开发 + 运维 + 学习 + 迁移<span class="pt">total cost · 养不养得起</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="decide::total-cost"><span>已学会</span></label>
+    </div>
+    <p>很多选型失败，是因为只算了「开发多快」，没算「之后每个月要花多少人和钱维持它」。一个技术的真实成本由四部分组成：</p>
+    <table class="tbl">
+      <tr><th>成本</th><th>包含什么</th><th>常被忽略的点</th></tr>
+      <tr><td>开发成本</td><td>写功能、联调、测试</td><td>分布式系统里，接口联调和一致性处理会让同样的功能多花不少时间</td></tr>
+      <tr><td>运维成本</td><td>部署、监控、升级、值班、排障、云资源费用</td><td>每月都在发生，持续整个产品生命周期</td></tr>
+      <tr><td>学习成本</td><td>团队掌握新技术的时间、踩坑的时间</td><td>新技术早期产出慢、事故多</td></tr>
+      <tr><td>迁移成本</td><td>以后要换掉它时的代价</td><td>数据迁移和契约变更最贵；越晚换越贵</td></tr>
+    </table>
+    <div id="demo-cost"></div>
+    <div class="callout warn"><span class="i">!</span><p><b>注意：</b>上面的计算器是<b>示意模型</b>，系数是为了展示「成本结构」而设定的假设，不是行业数据。真实项目里，你可以用同样的思路，把每一项换成自己团队的估算。</p></div>
+  </section>
+
+  <section class="topic" id="evolution">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>演进路径：不过度设计，也不锁死<span class="pt">evolution · 单向门与双向门</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="decide::evolution"><span>已学会</span></label>
+    </div>
+    <p>有两种相反的错误：<b>过度设计</b>（为了想象中的百万用户，第一天就上微服务）和<b>锁死</b>（选了一条以后很难回头的路）。一个实用的区分方法来自亚马逊：把决策分成<b>「双向门」</b>（走错了可以退回来，快速决定）和<b>「单向门」</b>（走过去就很难回头，慎重决定）。</p>
+    <table class="tbl">
+      <tr><th>决策</th><th>可逆吗</th><th>怎么对待</th></tr>
+      <tr><td>UI 组件库、某个工具库、CI 工具</td><td>双向门：换掉代价小</td><td>快速决定，不合适就换</td></tr>
+      <tr><td>前端框架</td><td>中等：可以逐页迁移</td><td>看团队熟悉度，别频繁换</td></tr>
+      <tr><td>核心数据模型、主数据库</td><td>单向门：数据迁移最贵</td><td>慎重，做原型验证</td></tr>
+      <tr><td>对外公开的 API 契约</td><td>单向门：别人已经在用</td><td>加版本号，设计时多想一步</td></tr>
+      <tr><td>深度绑定某云厂商的专有服务</td><td>偏单向门</td><td>评估收益是否值得被锁定</td></tr>
+    </table>
+    <p>保持可演进的几个习惯：内部<b>分层</b>并定义清晰的接口；尽量使用<b>标准协议</b>（SQL、HTTP、OpenAPI、Docker 镜像）；把重要决定写成简短的<b>架构决策记录（ADR）</b>：背景、选项、选择、理由，以后回头看时知道当初为什么这么选。</p>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>早期选<b>简单但可演进</b>的方案。双向门快速推进，单向门放慢脚步、做最小验证。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 三个虚拟产品</div>
+    <h2><span class="num">02</span>用五问做一次完整选型</h2>
+  </section>
+
+  <section class="topic" id="case-blog">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>案例一：个人博客 / 文档站<span class="pt">case · 最好的后端可能是没有后端</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="decide::case-blog"><span>已学会</span></label>
+    </div>
+    <p><b>五问：</b>① 1 个人，周末开发，流量小，内容一周更新几次，需要被搜索引擎收录；② 会一点前端；③ 预算接近零，不想运维服务器；④ 挂了几小时损失很小，文章都在 Git 里；⑤ 以后可能加评论、搜索。</p>
+    <table class="tbl">
+      <tr><th>层</th><th>选择</th><th>理由</th></tr>
+      <tr><td>前端 / 渲染</td><td>SSG：Astro、VitePress、Hugo 或 Next.js 静态导出</td><td>内容不常变 + 要 SEO + 要快 → 静态生成</td></tr>
+      <tr><td>后端</td><td>不需要</td><td>没有需要保密的业务规则</td></tr>
+      <tr><td>数据</td><td>Markdown 文件 + Git</td><td>Git 就是版本记录和备份</td></tr>
+      <tr><td>部署</td><td>GitHub Pages、Vercel、Cloudflare Pages 等静态托管 + CDN</td><td>推送即发布，免费额度通常够用</td></tr>
+      <tr><td>演进</td><td>评论用第三方服务；搜索用静态索引或托管搜索</td><td>需要时再加，不提前建后端</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>结论：</b>这个场景的最优解是「<b>没有后端、没有数据库</b>」。会判断「不需要什么」，和会选技术一样重要。</p></div>
+  </section>
+
+  <section class="topic" id="case-order">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>案例二：电商订单系统<span class="pt">case · 一致性与失败模式是重点</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="decide::case-order"><span>已学会</span></label>
+    </div>
+    <p><b>五问：</b>① 10–20 人团队，有大促峰值，订单和支付<b>绝不能错</b>；② 团队熟 Java 或 Go；③ 能负担托管云服务，有 1–2 人懂运维；④ 超卖、重复扣款会造成真实损失和投诉；⑤ 预计两年内业务和团队翻倍。</p>
+    <table class="tbl">
+      <tr><th>层</th><th>选择</th><th>理由</th></tr>
+      <tr><td>前端</td><td>商品页 SSR（Nuxt / Next.js），后台管理 SPA + 组件库</td><td>商品页要 SEO 和实时价格；后台要开发快</td></tr>
+      <tr><td>后端</td><td>Spring Boot 或 Go；<b>模块化单体</b>起步，订单、库存、支付边界清晰</td><td>团队熟悉；边界清晰便于大促前把最热的模块拆出去</td></tr>
+      <tr><td>数据</td><td>MySQL / PostgreSQL（事务）+ Redis（商品详情缓存、限流）+ 消息队列（支付成功后的发货、积分、通知）</td><td>钱和库存强一致；热点读走缓存；后续动作异步解耦</td></tr>
+      <tr><td>关键设计</td><td>库存扣减防超卖、支付幂等键、对账、限流与降级、定期备份和恢复演练</td><td>这些是失败代价最高的地方（09 模块）</td></tr>
+      <tr><td>基础设施</td><td>Docker + CI/CD + 托管容器服务；监控告警覆盖下单和支付链路</td><td>频繁发布要安全；大促要能扩容</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>为了扛大促，一开始就拆成几十个微服务。真正的风险点在<b>一致性和失败模式</b>，而不是服务数量。先把幂等、事务、限流、降级、备份做扎实。</p></div>
+  </section>
+
+  <section class="topic" id="case-ai">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>案例三：AI 问答服务<span class="pt">case · 公司知识库客服</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="decide::case-ai"><span>已学会</span></label>
+    </div>
+    <p><b>五问：</b>① 3–5 人，两个月上线，内部几百人使用；回答要有出处；② 团队熟 Python；③ 大模型按 token 计费，要控制成本；④ 答错可能误导员工，部分文档涉及敏感信息；⑤ 以后可能对外开放给客户。</p>
+    <table class="tbl">
+      <tr><th>层</th><th>选择</th><th>理由</th></tr>
+      <tr><td>前端</td><td>Vue / React 聊天界面，流式显示回答（SSE）</td><td>内部工具不需要 SEO；流式输出体验更好</td></tr>
+      <tr><td>后端</td><td><b>Python + FastAPI</b>（异步）</td><td>团队熟悉；AI 生态在 Python；大部分时间在等模型返回，异步划算</td></tr>
+      <tr><td>模型</td><td>先调用大模型 API；敏感数据多或合规要求高时，评估私有化部署开源模型</td><td>API 起步最快；私有化换来数据不出域，代价是 GPU 和运维</td></tr>
+      <tr><td>数据</td><td>PostgreSQL + pgvector 存文档片段和向量；Redis 做会话和限流</td><td>数据量不大，一个库搞定，少一份运维</td></tr>
+      <tr><td>关键设计</td><td>回答附上引用来源；准备一套测试问题集做评估；按用户限流、缓存常见问题；接口超时与重试</td><td>防幻觉、控成本、可验证</td></tr>
+    </table>
+    <div id="demo-bench"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>AI 应用的特殊风险在于<b>幻觉、成本、隐私和评估</b>。选型时除了技术栈，还要问：答案怎么验证？一次问答花多少钱？哪些数据不能发给外部模型？</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>自己设计第四个案例（例如「校园二手交易小程序」），完整写出五问的答案和每一层的选择。</li>
+      <li>给你做过的一个项目补写一份 ADR：当时有哪些选项？为什么选了现在这个？现在回头看对吗？</li>
+      <li>在选型工作台里，把「订单系统」的团队改成 1 人、上线时间改成 2 周，看建议发生了什么变化，并解释原因。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "decide",
+  title: "选型判断：五问框架与成本演进",
+  eyebrow: "MODULE 10 · 技术全景",
+  lead: "选择不是查优缺点表，而是权衡：按「场景约束、团队能力、总成本、失败代价、演进路径」五个问题依次判断，再用三个虚拟产品完整练一遍。",
+  points: ["five-questions","total-cost","evolution","case-blog","case-order","case-ai"],
+  prev: "09-safety.html", prevTitle: "安全与失败模式",
+  next: "11-capstone.html", nextTitle: "最小闭环：一条线跑通",
+};
+
+const QUZ = [
+  { type:"quiz", q:"五问框架中，应该最先问的是？",
+    opts:["哪个技术最新","场景约束：团队规模、上线时间、流量、一致性要求","哪个技术的 logo 最好看","竞争对手用什么"],
+    ans:1, exp:"约束会直接排除大量选项，是后续判断的前提。新不新、别人用什么都只能作为参考。" },
+  { type:"quiz", q:"「团队能力」这一问的主要目的是？",
+    opts:["考核员工","证明团队很强","降低学习和维护成本，避免选了没人会、招不到人的技术","决定工资"],
+    ans:2, exp:"技术最终要由人来开发和维护。团队不熟悉的技术，早期产出慢、事故多，人一走还可能没人能接手。" },
+  { type:"quiz", q:"技术的「总成本」不包括下面哪一项？",
+    opts:["运维成本","学习成本","迁移成本","这个技术的 GitHub 星标数"],
+    ans:3, exp:"星标数反映流行度，不是成本。总成本 = 开发 + 运维 + 学习 + 迁移（以及云资源费用）。" },
+  { type:"quiz", q:"下列哪个决策最接近「单向门」（很难回头，需要慎重）？",
+    opts:["核心数据模型和主数据库的选择","按钮用哪个 UI 组件库","代码格式化工具","CI 用哪个平台"],
+    ans:0, exp:"数据迁移是最贵的迁移之一，一旦积累了大量数据和依赖就很难更换。其余三项都相对容易替换，属于双向门。" },
+  { type:"quiz", q:"下面哪个做法有助于「不把自己锁死」？",
+    opts:["所有逻辑都写进某个云厂商的专有服务","内部分层、定义清晰接口、尽量使用标准协议，并记录架构决策","不写任何文档","第一天就上 30 个微服务"],
+    ans:1, exp:"分层 + 标准协议让替换某一环成为可能，ADR 让后人知道当初的取舍。A 加深锁定；C 丢失上下文；D 是过度设计。" },
+  { type:"quiz", q:"个人技术博客，1 人维护、零预算、需要 SEO，最合适的方案是？",
+    opts:["Spring Boot + MySQL + Kubernetes","SPA + 自建后端","SSG 静态生成 + 静态托管 / CDN，不需要后端和数据库","买一台高配服务器"],
+    ans:2, exp:"内容不常变、要 SEO、零运维，静态生成正好。A、D 成本和运维都过高；B 不利于 SEO 且需要维护后端。" },
+  { type:"quiz", q:"电商订单系统选型中，最需要重点设计的是？",
+    opts:["库存扣减防超卖、支付幂等、事务与对账、限流降级、备份恢复","首页动画效果","用最多数量的微服务","选最新的前端框架"],
+    ans:0, exp:"订单系统失败代价最高的环节在一致性和失败模式。服务数量和前端新旧都不是核心风险。" },
+  { type:"quiz", q:"3 人熟悉 Python 的团队做 AI 知识库问答服务，后端首选？",
+    opts:["Rust","Java + Spring Cloud 微服务","PHP","Python + FastAPI"],
+    ans:3, exp:"团队熟悉 + AI 生态 + 异步适合等待模型返回，三个因素都指向 Python + FastAPI。" },
+  { type:"quiz", q:"AI 问答服务调用外部大模型 API 时，下列哪个问题<b>最需要</b>追问？",
+    opts:["模型的名字好不好听","哪些数据可以发给外部模型？每次问答成本多少？答案如何验证？","模型发布了几年","界面是什么颜色"],
+    ans:1, exp:"隐私、成本、准确性（幻觉）是 AI 应用最核心的三类风险。其余选项与选型关系不大。" },
+  { type:"interview", q:"面试官：「给你一个新项目，你怎么做技术选型？」最好的回答结构是？",
+    opts:["选我最熟悉的，其他不考虑","选最流行的技术栈","按五问框架：先明确约束，再看团队、总成本、失败代价和演进路径；对单向门决策做最小原型验证，并把决定和理由写成 ADR","让 AI 直接给答案"],
+    ans:2, exp:"好回答展示了结构化思考、对风险的分级处理和可追溯的决策记录。A、B 只考虑单一因素；D 把判断外包，没有验证。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：总成本计算器（示意模型） */
+(function(){
+  const host = document.getElementById("demo-cost");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：两种方案一年的总成本（单位：人·月）</span><span class="hint">拖动滑块</span></div>
+    <div class="db">
+      <div class="ctl"><label>团队人数</label><input type="range" id="tcTeam" min="2" max="40" value="4"><span class="tg" id="tcTeamV"></span></div>
+      <div class="ctl"><label>团队对微服务 / K8s 的熟悉度（1–5）</label><input type="range" id="tcFam" min="1" max="5" value="1"><span class="tg" id="tcFamV"></span></div>
+      <div id="tcOut"></div>
+      <div class="log" id="tcLog"></div>
+      <div class="foot">假设：功能工作量固定为「团队人数 × 8 人·月」。A＝模块化单体 + 托管平台；B＝微服务 + 自建 K8s。B 的开发系数 1.3（联调与一致性），运维 = (0.5 + 0.04×人数) 人 × 12 个月，学习 = (5 − 熟悉度) × 0.4 × 人数；A 的运维 = 0.15 人 × 12 个月，学习忽略不计；人数超过 20 时 A 计入 6 人·月的未来拆分成本。</div>
+    </div></div>`;
+  function render(){
+    const t = +document.getElementById("tcTeam").value, f = +document.getElementById("tcFam").value;
+    document.getElementById("tcTeamV").textContent = t + " 人";
+    document.getElementById("tcFamV").textContent = f;
+    const work = t * 8;
+    const A = { 开发: work, 运维: 0.15 * 12, 学习: 0, 迁移: t > 20 ? 6 : 0 };
+    const B = { 开发: work * 1.3, 运维: (0.5 + 0.04 * t) * 12, 学习: (5 - f) * 0.4 * t, 迁移: 0 };
+    const sum = o => Object.values(o).reduce((a,b)=>a+b, 0);
+    const sa = sum(A), sb = sum(B), max = Math.max(sa, sb);
+    const row = (n, o, s) => `<div class="bar"><span class="nm" style="width:120px">${n}</span><span class="track"><span style="width:${s/max*100}%"></span></span><span class="val">${s.toFixed(1)}</span></div>` +
+      `<div style="font-size:12px;color:var(--muted);margin:-2px 0 6px 128px">${Object.keys(o).map(k=>`${k} ${o[k].toFixed(1)}`).join(" · ")}</div>`;
+    document.getElementById("tcOut").innerHTML = `<div class="bars">${row("A 模块化单体", A, sa)}${row("B 微服务 + K8s", B, sb)}</div>`;
+    const extra = sb - sa;
+    document.getElementById("tcLog").innerHTML = `B 比 A 多花约 <b>${extra.toFixed(1)}</b> 人·月（${(extra / sa * 100).toFixed(0)}%）。` +
+      (t <= 10 ? " 团队越小，固定的运维和学习成本占比越高——这就是「小团队别盲目上微服务」的账面原因。" : " 团队变大后，B 的相对代价在下降；如果再加上「多团队独立发布」带来的效率收益（本模型未计入），B 才可能划算。");
+  }
+  ["tcTeam","tcFam"].forEach(id=>document.getElementById(id).addEventListener("input", render));
+  render();
+})();
+
+/* 演示 2：选型工作台 */
+(function(){
+  const host = document.getElementById("demo-bench");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：选型工作台</span><span class="hint">选案例和约束，看建议如何变化</span></div>
+    <div class="db">
+      <div class="ctl" id="wbCase"><label>案例</label><button class="b" data-v="blog">个人博客</button><button class="b" data-v="order">订单系统</button><button class="b" data-v="ai">AI 问答</button></div>
+      <div class="ctl"><label>团队</label><select id="wbTeam"><option value="1">1 人</option><option value="5" selected>3–5 人</option><option value="20">10–20 人</option></select>
+        <label>上线</label><select id="wbTime"><option value="2w">2 周</option><option value="3m" selected>3 个月</option><option value="6m">半年以上</option></select>
+        <label>流量</label><select id="wbTraffic"><option value="low" selected>小</option><option value="mid">中</option><option value="peak">有大促峰值</option></select>
+        <label>敏感数据</label><select id="wbPriv"><option value="no" selected>没有</option><option value="yes">有，不能出公司</option></select></div>
+      <div class="verdict" id="wbOut"></div>
+    </div></div>`;
+  let kase = "blog";
+  const g = id => document.getElementById(id).value;
+  function render(){
+    const team = +g("wbTeam"), time = g("wbTime"), traffic = g("wbTraffic"), priv = g("wbPriv");
+    let stack = [], warn = [];
+    if(kase === "blog"){
+      stack = [["前端 / 渲染","SSG 静态生成（Astro / VitePress / Hugo）"],["后端","不需要"],["数据","Markdown + Git"],["部署","静态托管 + CDN"]];
+      if(traffic === "peak") warn.push("流量很大也不怕：静态文件走 CDN，几乎无限扩展。");
+      if(team >= 20) warn.push("20 人维护一个博客？可能其实是「内容平台」，需要重新定义需求（CMS、权限、审核流程）。");
+      if(priv === "yes") warn.push("有敏感内容就不能放公开静态托管：改为内网部署或加访问控制。");
+    } else if(kase === "order"){
+      stack = [["前端","商品页 SSR + 后台 SPA"],["后端", team >= 20 ? "Spring Boot / Go，模块化单体 → 按需拆出订单、库存、支付" : "团队最熟的语言，模块化单体"],["数据","MySQL / PostgreSQL 事务" + (traffic !== "low" ? " + Redis 缓存 + 消息队列" : "")],["部署", team >= 20 ? "Docker + CI/CD + 托管容器服务" : "Docker + CI/CD + PaaS / 云服务器"]];
+      if(team === 1 || time === "2w") warn.push("1 人或 2 周做一个订单支付系统风险极高：优先考虑成熟的 SaaS 电商平台，把精力放在业务上。");
+      if(traffic === "peak") warn.push("有大促：必须做限流、降级、库存防超卖和压测，缓存与消息队列不能省。");
+      warn.push("无论规模大小：支付幂等、事务、备份恢复演练都是必选项。");
+    } else {
+      stack = [["前端","聊天界面 SPA + 流式输出"],["后端","Python + FastAPI（异步）"],["模型", priv === "yes" ? "私有化部署开源模型（或厂商的私有化 / 专属部署方案）" : "调用大模型 API"],["数据","PostgreSQL + pgvector；Redis 做会话与限流"],["部署", priv === "yes" ? "公司内网 + GPU 服务器" : "Docker + PaaS / 云服务器"]];
+      if(priv === "yes") warn.push("私有化部署意味着 GPU 成本和模型运维，要提前评估预算和人手。");
+      if(time === "2w") warn.push("2 周上线：先做最小可用版本，务必准备一套测试问题集验证回答质量。");
+      if(traffic !== "low") warn.push("流量上来后 token 成本会快速增长：按用户限流、缓存高频问题、监控单次问答成本。");
+      warn.push("回答必须附引用来源，降低幻觉带来的误导。");
+    }
+    document.getElementById("wbOut").innerHTML = `<h4>建议技术栈</h4><table class="dt"><tbody>${stack.map(r=>`<tr><td class="key">${r[0]}</td><td style="white-space:normal">${r[1]}</td></tr>`).join("")}</tbody></table>` +
+      (warn.length ? `<ul>${warn.map(w=>`<li style="color:var(--amber)">⚠ ${w}</li>`).join("")}</ul>` : `<p style="margin:8px 0 0">✓ 当前约束下没有明显风险：保持简单，需要时再加组件。</p>`);
+  }
+  ["wbTeam","wbTime","wbTraffic","wbPriv"].forEach(id=>document.getElementById(id).addEventListener("change", render));
+  ArchKit.choice("wbCase", v=>{ kase = v; render(); }, "blog");
+})();
+</script>
+</body>
+</html>

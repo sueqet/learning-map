@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全景地图：软件产品的分层 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 全景地图：前端、后端、数据、基础设施四层，一次请求的旅程，语言/框架/库/架构/工具/平台的区别，API 与接口契约。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">全景地图</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 02 · 技术全景</span></span>
+    <h1 id="pageTitle">全景地图：软件产品的分层</h1>
+    <p class="lead" id="pageLead">把所有名词放进一张分层地图。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>说出软件产品的<b>四层</b>（前端、后端、数据、基础设施），以及每层负责什么。</li>
+      <li>描述一次请求从「点按钮」到「看到结果」的完整旅程，并指出每一步可能出什么问题。</li>
+      <li>区分<b>语言、框架、库、架构模式、工具、平台</b>这几类名词。</li>
+      <li>解释 <b>API 与接口契约</b>的作用，以及前后端为什么能靠它分开开发。</li>
+      <li>听到一个新名词时，用「三问」快速给它定位。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="01-goal.html">01 学习目标</a>。知道「网页是在浏览器里打开的」「数据存在某个服务器上」就够了。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 一栋楼的结构</div>
+    <h2><span class="num">01</span>分层与数据流</h2>
+  </section>
+
+  <section class="topic" id="layers">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>四层：前端、后端、数据、基础设施<span class="pt">layers · 地图的骨架</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="map::layers"><span>已学会</span></label>
+    </div>
+    <p>一个软件产品可以看成一家餐厅：<b>前厅</b>（菜单、服务员）是用户直接接触的部分；<b>后厨</b>按菜谱做菜，顾客看不见但所有规则都在这里执行；<b>仓库和冰箱</b>存放食材；<b>水电、燃气、配送、消防</b>保证整家店能开门营业。对应到软件，就是下面四层。</p>
+    <div class="stack">
+      <div class="ly" style="--c:#3a6b8f"><span class="n">前端层<small>FRONTEND</small></span><span class="d">把界面画出来，响应点击和输入。HTML / CSS / JavaScript、Vue、React、小程序、App 界面。</span></div>
+      <div class="ly" style="--c:#1e5b4f"><span class="n">后端层<small>BACKEND</small></span><span class="d">业务规则、身份验证、调用数据库。Python + FastAPI、Java + Spring Boot、Go、Node.js。</span></div>
+      <div class="ly" style="--c:#b7791f"><span class="n">数据层<small>DATA</small></span><span class="d">持久化存储与查询。PostgreSQL / MySQL、Redis、MongoDB、向量数据库。</span></div>
+      <div class="ly" style="--c:#6b4f8a"><span class="n">基础设施层<small>INFRA / DEVOPS</small></span><span class="d">把代码安全、自动地送上线并保持运行。Git、Docker、CI/CD、Kubernetes、云服务、监控。</span></div>
+    </div>
+    <table class="tbl">
+      <tr><th>层</th><th>负责什么</th><th>用户看得见吗</th><th>本学习包</th></tr>
+      <tr><td>前端层</td><td>展示、交互、调用后端接口</td><td>看得见</td><td><a href="04-frontend.html">04 前端层</a></td></tr>
+      <tr><td>后端层</td><td>业务规则、鉴权、编排数据</td><td>看不见，但规则都在这里</td><td><a href="05-backend.html">05 后端与 API 框架</a></td></tr>
+      <tr><td>数据层</td><td>存、取、保证数据不丢不乱</td><td>看不见</td><td><a href="06-data.html">06 数据层</a></td></tr>
+      <tr><td>基础设施层</td><td>打包、部署、扩缩容、监控</td><td>看不见，挂了大家都看得见</td><td><a href="08-devops.html">08 基础设施与 DevOps</a></td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>绝大多数技术名词都能放进这四层。放不进的，通常是<b>贯穿各层的组织方式</b>（单体、微服务、分层架构，见 <a href="07-arch.html">07 架构模式</a>）或<b>横切关注点</b>（安全、监控、成本，见 09、10 模块）。</p></div>
+  </section>
+
+  <section class="topic" id="request-journey">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>一次请求的旅程（数据流）<span class="pt">request journey · 排障的路线图</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="map::request-journey"><span>已学会</span></label>
+    </div>
+    <p>以「在购物网站点下单」为例，一次请求会依次穿过所有层，再原路返回。这条路线就是<b>数据流</b>。它是理解系统最重要的一张图：设计时用它检查每一步的职责，出问题时沿着它逐段排查。</p>
+    <table class="tbl">
+      <tr><th>#</th><th>发生了什么</th><th>所在层</th><th>典型技术</th><th>可能出的问题</th></tr>
+      <tr><td>1</td><td>用户点「下单」，前端组件收集商品和数量</td><td>前端</td><td>Vue / React</td><td>按钮重复点击、表单没校验</td></tr>
+      <tr><td>2</td><td>浏览器发出 HTTPS 请求</td><td>网络</td><td>DNS、TLS 证书</td><td>断网、证书过期、跨域被拦</td></tr>
+      <tr><td>3</td><td>网关 / 反向代理接住请求，转给后端</td><td>基础设施</td><td>Nginx、云负载均衡</td><td>限流、后端全挂时报 502 / 504</td></tr>
+      <tr><td>4</td><td>后端框架匹配接口、校验参数、检查登录</td><td>后端</td><td>FastAPI、Spring Boot</td><td>参数不合法（422）、没登录（401）</td></tr>
+      <tr><td>5</td><td>业务逻辑：查库存、算价格、生成订单</td><td>后端</td><td>你写的业务代码</td><td>逻辑 bug、超卖、调用第三方超时</td></tr>
+      <tr><td>6</td><td>读写数据库和缓存</td><td>数据</td><td>PostgreSQL、Redis</td><td>慢查询、锁等待、缓存是旧数据</td></tr>
+      <tr><td>7</td><td>后端返回 JSON 响应</td><td>后端 → 前端</td><td>HTTP 状态码 + JSON</td><td>500 服务器错误、字段名和前端约定的不一样</td></tr>
+      <tr><td>8</td><td>前端更新状态，界面自动刷新</td><td>前端</td><td>Vue / React 的状态驱动</td><td>没处理错误，页面卡在「加载中」</td></tr>
+    </table>
+    <div id="demo-journey"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>出问题时，先确定请求<b>走到了第几步</b>。浏览器开发者工具的 Network 面板能告诉你：请求发出去了吗？状态码是多少？响应内容是什么？这一步就能把问题缩小到某一层。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 名词与连接</div>
+    <h2><span class="num">02</span>给名词分类，看清层与层怎么连</h2>
+  </section>
+
+  <section class="topic" id="noun-types">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>名词分类：语言 / 框架 / 库 / 架构 / 工具 / 平台<span class="pt">noun types · 先分类再理解</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="map::noun-types"><span>已学会</span></label>
+    </div>
+    <p>之前容易混乱，是因为把不同<b>种类</b>的名词放在一起比较。「Python 和 FastAPI 哪个好」就像问「水泥和户型图哪个好」，它们根本不是同一类东西。先分类，很多问题自然就清楚了。</p>
+    <table class="tbl">
+      <tr><th>类别</th><th>是什么</th><th>比喻</th><th>例子</th></tr>
+      <tr><td><b>编程语言</b></td><td>写程序用的语言，决定语法和基本能力</td><td>砖头和水泥</td><td>Python、Java、Go、JavaScript、TypeScript、Rust</td></tr>
+      <tr><td><b>运行时</b></td><td>让某种语言的程序跑起来的环境</td><td>施工现场</td><td>Node.js（让 JS 跑在服务器上）、JVM、CPython</td></tr>
+      <tr><td><b>框架</b></td><td>预先搭好的骨架，你往里填业务代码，<b>框架调用你的代码</b></td><td>精装房的框架结构</td><td>Vue、FastAPI、Django、Spring Boot、NestJS</td></tr>
+      <tr><td><b>库</b></td><td>一组现成的函数或组件，<b>你主动调用它</b></td><td>工具箱</td><td>React（官方自称库）、requests、NumPy、Axios</td></tr>
+      <tr><td><b>架构模式</b></td><td>系统各部分怎么组织、怎么协作</td><td>户型和公司组织架构</td><td>单体、微服务、分层架构、事件驱动</td></tr>
+      <tr><td><b>工具</b></td><td>帮助开发、构建、部署的软件</td><td>施工工具</td><td>Git、Docker、VS Code、npm、pip</td></tr>
+      <tr><td><b>平台 / 服务</b></td><td>别人运营好、你直接使用的场地或能力</td><td>场地和物业</td><td>GitHub、阿里云 / AWS、Vercel、托管数据库</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>不必较真：</b>React 自称「库」，Vue 自称「渐进式框架」，社区常常把它们都叫框架。边界有些模糊没关系，重要的是知道它们<b>都在前端层、都解决「界面怎么搭」</b>的问题。</p></div>
+  </section>
+
+  <section class="topic" id="api-contract">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>层与层之间靠什么连：API 与接口契约<span class="pt">API contract · 两边的约定</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="map::api-contract"><span>已学会</span></label>
+    </div>
+    <p><b>API</b>（Application Programming Interface，应用程序接口）是一层对另一层提供服务的「窗口」。前后端之间最常见的是 Web API：前端按约定发请求，后端按约定回数据。这份约定就叫<b>接口契约</b>，像餐厅的点菜单：顾客只看菜单点菜，不需要知道后厨怎么做。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>一份接口契约长什么样（看懂即可）</div>
+      <pre><code>POST /api/v1/orders            ← 方法 + 地址（带版本号 v1）
+Authorization: Bearer xxxxx    ← 要求先登录
+{ "product_id": 42, "quantity": 2 }        ← 请求体：字段名和类型
+
+201 Created                    ← 成功：状态码
+{ "order_id": 1001, "status": "pending", "total": 199.0 }
+
+422 Unprocessable Content      ← 失败：参数不合法（例如 quantity 是负数）
+401 Unauthorized               ← 失败：没登录</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>契约要素</th><th>例子</th><th>两边不一致会怎样</th></tr>
+      <tr><td>地址和方法</td><td><code class="inl">POST /api/v1/orders</code></td><td>404 找不到接口，或 405 方法不允许</td></tr>
+      <tr><td>请求字段与类型</td><td><code class="inl">quantity</code> 是正整数</td><td>后端校验失败返回 422，或者更糟：错误数据入库</td></tr>
+      <tr><td>响应字段</td><td><code class="inl">order_id</code>、<code class="inl">status</code></td><td>前端读不到字段，页面显示空白或 undefined</td></tr>
+      <tr><td>状态码与错误格式</td><td>201 成功、422 参数错、401 未登录</td><td>前端不知道该提示什么，只能显示「出错了」</td></tr>
+      <tr><td>鉴权要求</td><td>需要登录令牌</td><td>接口被未授权的人调用</td></tr>
+      <tr><td>版本</td><td><code class="inl">/v1</code>、<code class="inl">/v2</code></td><td>后端一改字段，所有老版本 App 全部出错</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>契约稳定，前后端就能<b>各自独立开发、独立替换</b>：后端从 Django 换成 FastAPI，只要契约不变，前端无感。契约要改，就加版本号，给调用方迁移时间。契约里<b>不包含</b>后端用什么语言、什么数据库，那些是实现细节。</p></div>
+  </section>
+
+  <section class="topic" id="where-is-it">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>听到新名词，先问「它在哪一层」<span class="pt">locate any term · 三问法</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="map::where-is-it"><span>已学会</span></label>
+    </div>
+    <p>以后遇到没听过的技术名词，不要急着搜教程，先用三个问题给它定位：</p>
+    <ol>
+      <li><b>它是哪一类？</b>语言、框架、库、架构模式、工具，还是平台？</li>
+      <li><b>它在哪一层？</b>前端、后端、数据、基础设施，还是贯穿各层？</li>
+      <li><b>它解决什么问题？替换它会影响谁？</b>它的代价是什么？</li>
+    </ol>
+    <table class="tbl">
+      <tr><th>名词</th><th>哪一类</th><th>哪一层</th><th>解决什么问题</th></tr>
+      <tr><td>Nginx</td><td>工具 / 服务软件</td><td>基础设施（接入）</td><td>反向代理、负载均衡、托管静态文件</td></tr>
+      <tr><td>Kafka</td><td>中间件（消息队列）</td><td>后端与数据之间</td><td>服务之间异步传消息，削峰、解耦</td></tr>
+      <tr><td>Next.js</td><td>框架（基于 React）</td><td>前端（也能写简单后端）</td><td>服务端渲染、首屏速度、SEO</td></tr>
+      <tr><td>Tailwind CSS</td><td>CSS 框架</td><td>前端</td><td>用现成的样式类快速美化页面</td></tr>
+    </table>
+    <div id="demo-locate"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>三问答完，你就已经知道它和你已有知识的关系。剩下「具体怎么用」的部分，正是可以交给 AI 和文档的操作细节。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>不看本页，在纸上画出「用户 → 前端 → API → 业务 → 数据库 → 部署」的简图，并在每个箭头旁写一个可能出错的地方。</li>
+      <li>打开任意一个网站，按 F12 打开开发者工具的 Network 面板，刷新页面，找出一个返回 JSON 的请求，写下它的地址、方法和状态码。</li>
+      <li>用三问法给这几个词定位：Electron、Supabase、RabbitMQ、Vite。查不到也没关系，先猜，再查证。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "map",
+  title: "全景地图：软件产品的分层",
+  eyebrow: "MODULE 02 · 技术全景",
+  lead: "把所有名词放进一张分层地图：前端、后端、数据、基础设施四层，一次请求怎么穿过它们，以及层与层之间靠什么约定连接。",
+  points: ["layers","request-journey","noun-types","api-contract","where-is-it"],
+  prev: "01-goal.html", prevTitle: "学习目标：会问、会判、会验",
+  next: "03-lang.html", nextTitle: "编程语言的性格",
+};
+
+const QUZ = [
+  { type:"quiz", q:"Docker、CI/CD、Kubernetes 主要属于哪一层？",
+    opts:["前端层","数据层","基础设施层","业务逻辑层"],
+    ans:2, exp:"它们负责打包、自动化上线和运行容器，属于基础设施层（DevOps）。它们不画界面（A），不存业务数据（B），也不写业务规则（D）。" },
+  { type:"quiz", q:"「检查用户有没有登录、库存够不够、价格怎么算」这些规则应该放在哪一层执行？",
+    opts:["前端层，因为离用户近","数据层的表结构里","Nginx 配置里","后端层"],
+    ans:3, exp:"业务规则和鉴权必须在后端执行。前端可以做提示性校验，但前端代码运行在用户的浏览器里，可以被绕过（A）。数据库约束是最后一道防线，但不是写业务规则的主要位置（B）。Nginx 负责转发和限流（C）。" },
+  { type:"quiz", q:"一次「点下单」请求的典型顺序是？",
+    opts:["前端 → 网关 / 反向代理 → 后端框架 → 业务逻辑 → 数据库 → 原路返回","数据库 → 后端 → 前端 → 网关","前端 → 数据库 → 后端","后端 → 前端 → 数据库"],
+    ans:0, exp:"请求从用户这一侧出发，经网络和网关进入后端，后端再读写数据库，最后把响应返回给前端。前端通常不直接连数据库（C），否则数据库地址和密码会暴露给所有用户。" },
+  { type:"quiz", q:"关于「框架」和「库」，哪种说法最准确？",
+    opts:["框架一定比库大","你主动调用库；框架提供骨架并调用你写的代码","库只能用在前端","二者完全没有区别"],
+    ans:1, exp:"这就是常说的「控制反转」：用库时你决定什么时候调用；用框架时你按它的规则填代码，由框架决定何时调用。大小不是判断标准（A）；库前后端都有（C）。" },
+  { type:"quiz", q:"Vue 和 Python 分别属于哪一类名词？",
+    opts:["都是编程语言","Vue 是后端架构，Python 是框架","都是数据库","Vue 是前端框架，Python 是编程语言"],
+    ans:3, exp:"Vue 是基于 JavaScript 的前端 UI 框架；Python 是编程语言，常用于后端、数据和 AI。把它们放在一起比较「哪个好」，就是把不同类别混在一起了。" },
+  { type:"quiz", q:"下列哪一项<b>不属于</b>前后端之间的接口契约？",
+    opts:["接口地址和请求方法","请求和响应的字段及类型","成功和失败时的状态码","后端用的是 MySQL 还是 PostgreSQL"],
+    ans:3, exp:"用哪种数据库是后端的实现细节，前端不需要知道，换数据库也不应该影响契约。地址、字段、状态码都是双方必须一致的约定。" },
+  { type:"quiz", q:"页面提示「下单失败」，按分层排查，最先做哪一步最有效？",
+    opts:["直接重装数据库","把前端框架从 Vue 换成 React","在浏览器 Network 面板看请求有没有发出、状态码和响应是什么","让后端把所有日志删掉重新跑"],
+    ans:2, exp:"先确定请求走到了第几步：没发出是前端问题；4xx 多半是参数或权限；5xx 是后端或下游出错。这一步成本最低，信息最多。A、B、D 都是没定位就大动干戈。" },
+  { type:"quiz", q:"「单体」和「微服务」属于哪一类名词？",
+    opts:["架构模式","编程语言","数据库","前端框架"],
+    ans:0, exp:"它们描述系统各部分怎么组织和协作，属于架构模式，贯穿各层（详见 07 模块）。" },
+  { type:"quiz", q:"后端要把订单接口的 total 字段改名为 amount，最稳妥的做法是？",
+    opts:["直接改，前端自己会适配","新开 /v2 接口或同时返回两个字段，给调用方迁移时间，再下线旧字段","改完不通知任何人","让前端去读数据库"],
+    ans:1, exp:"契约变更要有版本或兼容期，否则已经发布的 App、合作方会直接出错。A、C 会造成线上故障；D 破坏分层，还会暴露数据库。" },
+  { type:"interview", q:"面试题简化版：「从浏览器输入网址到看到页面，大致发生了什么？」哪个回答结构最好？",
+    opts:["浏览器很快，所以就显示了","域名解析找到服务器 → 建立 HTTPS 连接 → 网关转发请求 → 后端处理并读写数据 → 返回 HTML / JSON → 浏览器渲染页面；每一步都可能出错，排查时逐段定位","服务器把数据库直接发给浏览器","前端框架会自动生成数据"],
+    ans:1, exp:"好回答按数据流分段，并点出每段的职责和可能的故障，体现分层思维。A 没内容；C 错，数据库不对外暴露；D 错，数据来自后端和数据库。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：请求旅程分步器 */
+(function(){
+  const NODES = [
+    {l:"前端", t:"点击下单"}, {l:"网络", t:"HTTPS"}, {l:"基础设施", t:"网关 / Nginx"}, {l:"后端", t:"路由 + 校验"},
+    {l:"后端", t:"业务逻辑"}, {l:"数据", t:"数据库 / 缓存"}, {l:"后端→前端", t:"JSON 响应"}, {l:"前端", t:"界面刷新"}
+  ];
+  const STEPS = [
+    {t:"用户点「下单」", note:"Vue / React 组件拿到点击事件，把商品 id 和数量组装成请求。<br>⚠ 常见问题：按钮可以连点两次 → 要禁用按钮或靠后端幂等兜底。"},
+    {t:"浏览器发出 HTTPS 请求", note:"先通过 DNS 把域名解析成 IP，再建立加密连接。<br>⚠ 常见问题：证书过期、断网、跨域（CORS）被浏览器拦下。"},
+    {t:"网关 / 反向代理", note:"Nginx 或云负载均衡接住请求，做 HTTPS 终止、限流，然后转给某台后端。<br>⚠ 常见问题：后端全挂了会返回 502 / 504。"},
+    {t:"后端框架：路由、校验、鉴权", note:"FastAPI 按地址找到对应函数，检查参数类型、检查登录令牌。<br>⚠ 常见问题：参数不合法返回 422，没登录返回 401。"},
+    {t:"业务逻辑", note:"查库存、算价格、扣减库存、生成订单号。真正的业务规则都在这里。<br>⚠ 常见问题：并发下超卖、调用支付等第三方接口超时。"},
+    {t:"数据层", note:"在 PostgreSQL 里开事务写订单，在 Redis 里读热门商品缓存。<br>⚠ 常见问题：慢查询、锁等待、缓存里还是旧价格。"},
+    {t:"返回 JSON 响应", note:"后端返回 201 和订单信息；出错就返回 4xx / 5xx 和错误说明。<br>⚠ 常见问题：字段名和契约不一致，前端读到 undefined。"},
+    {t:"界面刷新", note:"前端把响应写进状态，框架自动更新界面：显示「下单成功」。<br>⚠ 常见问题：没处理失败分支，页面一直转圈。"}
+  ];
+  const host = document.getElementById("demo-journey");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：一次「下单」请求的旅程</span><span class="hint">点「下一步」逐段前进</span></div>
+    <div class="db">
+      <div class="ctl"><button class="b" id="jPrev">◀ 上一步</button><button class="b" id="jNext">▶ 下一步</button><button class="b" id="jReset">↺ 重来</button></div>
+      <div class="flow" id="jFlow"></div>
+      <div id="jOut"></div>
+      <div class="log" id="jLog"></div>
+      <div class="foot">每一步都标出了「常见问题」：排障时就是沿着这条路，找到请求停在哪一步。</div>
+    </div></div>`;
+  const flow = document.getElementById("jFlow");
+  ArchKit.stepper({
+    out:"jOut", log:"jLog", next:"jNext", prev:"jPrev", reset:"jReset",
+    steps: STEPS.map(s=>({t:s.t, html:"", note:s.note})),
+    idle:'<p style="color:var(--muted);font-size:13.5px;margin:0">准备就绪：用户正在看商品详情页。点「下一步」开始。</p>',
+    onRender: i => {
+      flow.innerHTML = NODES.map((n,k)=>`<div class="node ${k===i?"on":(k<i?"":"dim")}"><span class="ly">${n.l}</span><b>${n.t}</b></div>${k<NODES.length-1?'<span class="arr">→</span>':""}`).join("");
+    }
+  });
+})();
+
+/* 演示 2：名词归位器 */
+(function(){
+  const LAYERS = [
+    {k:"fe", n:"前端层", c:"#3a6b8f"}, {k:"be", n:"后端层", c:"#1e5b4f"}, {k:"data", n:"数据层", c:"#b7791f"},
+    {k:"infra", n:"基础设施层", c:"#6b4f8a"}, {k:"arch", n:"贯穿各层的架构", c:"#a0522d"}
+  ];
+  const TERMS = {
+    "Vue":{cat:"前端框架", ly:["fe"], d:"用组件和模板搭界面，数据变了界面自动更新。上手快，中文资料多。"},
+    "React":{cat:"前端 UI 库", ly:["fe"], d:"用 JSX 写组件，生态最大，也能延伸到移动端（React Native）。"},
+    "Next.js":{cat:"全栈框架（基于 React）", ly:["fe","be"], d:"在 React 基础上加服务端渲染和路由，解决首屏速度和 SEO。"},
+    "Tailwind CSS":{cat:"CSS 框架", ly:["fe"], d:"用现成的样式类快速写样式，不用自己起很多 class 名。"},
+    "TypeScript":{cat:"编程语言（JS 的超集）", ly:["fe","be"], d:"给 JavaScript 加上类型检查，前后端都能用，大项目更不容易出错。"},
+    "Python":{cat:"编程语言", ly:["be","data"], d:"语法直观、开发快，后端、数据分析和 AI 的主力语言。"},
+    "Go":{cat:"编程语言", ly:["be","infra"], d:"为高并发网络服务设计，Docker、Kubernetes 本身就是用 Go 写的。"},
+    "Java":{cat:"编程语言", ly:["be"], d:"企业级和金融系统的主力，生态极成熟，相对笨重。"},
+    "FastAPI":{cat:"后端 API 框架（Python）", ly:["be"], d:"现代、异步、自动生成接口文档，适合做 API 和 AI 服务。"},
+    "Django":{cat:"后端全栈框架（Python）", ly:["be"], d:"自带后台、权限、ORM，适合快速做带管理后台的系统。"},
+    "Spring Boot":{cat:"后端框架（Java）", ly:["be"], d:"Java 企业级开发的事实标准。"},
+    "Node.js":{cat:"运行时", ly:["be"], d:"让 JavaScript 能在服务器上跑，前后端可以用同一种语言。"},
+    "PostgreSQL":{cat:"关系型数据库", ly:["data"], d:"功能强、标准好、扩展多（例如 pgvector），强一致的业务首选之一。"},
+    "MySQL":{cat:"关系型数据库", ly:["data"], d:"国内互联网使用最广的关系型数据库之一。"},
+    "Redis":{cat:"内存键值数据库", ly:["data"], d:"放在内存里，极快，常做缓存、会话、排行榜、计数器。"},
+    "MongoDB":{cat:"文档数据库（NoSQL）", ly:["data"], d:"直接存 JSON 风格的文档，结构灵活，改字段方便。"},
+    "Kafka":{cat:"消息队列 / 事件流平台", ly:["be","data"], d:"服务之间异步传消息，用来削峰、解耦、做事件驱动。"},
+    "Nginx":{cat:"Web 服务器 / 反向代理", ly:["infra"], d:"站在后端前面接请求：HTTPS、负载均衡、静态文件。"},
+    "Docker":{cat:"容器工具", ly:["infra"], d:"把应用和运行环境一起打包，在哪台机器上跑都一样。"},
+    "Kubernetes":{cat:"容器编排平台", ly:["infra"], d:"管理成百上千个容器：自动调度、扩缩容、故障恢复。"},
+    "GitHub Actions":{cat:"CI/CD 平台", ly:["infra"], d:"代码一提交，自动跑测试、打包、部署。"},
+    "Prometheus":{cat:"监控工具", ly:["infra"], d:"定时采集指标（请求量、错误率、延迟），配合告警使用。"},
+    "微服务":{cat:"架构模式", ly:["arch"], d:"把系统拆成多个独立部署的服务，换来隔离和独立扩展，代价是运维复杂。"},
+    "单体":{cat:"架构模式", ly:["arch"], d:"所有功能打包在一个应用里，起步最快，后期容易牵一发动全身。"}
+  };
+  const host = document.getElementById("demo-locate");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：名词归位器</span><span class="hint">选一个名词，看它在哪一层</span></div>
+    <div class="db">
+      <div class="ctl"><label>名词</label><select id="locSel">${Object.keys(TERMS).map(k=>`<option value="${k}">${k}</option>`).join("")}</select></div>
+      <div class="stack" id="locStack"></div>
+      <div class="log" id="locLog"></div>
+      <div class="foot">先自己猜「哪一类、哪一层」，再看答案。猜错的那几个，就是值得多读两遍的。</div>
+    </div></div>`;
+  const sel = document.getElementById("locSel"), stack = document.getElementById("locStack"), log = document.getElementById("locLog");
+  function render(){
+    const t = TERMS[sel.value];
+    stack.innerHTML = LAYERS.map(l=>`<div class="ly ${t.ly.includes(l.k)?"on":"dim"}" style="--c:${l.c}"><span class="n">${l.n}</span><span class="d">${t.ly.includes(l.k)?"◀ "+ArchKit.esc(sel.value)+" 在这里":""}</span></div>`).join("");
+    log.innerHTML = `<b>${ArchKit.esc(sel.value)}</b> · 类别：${t.cat}<br>${t.d}`;
+  }
+  sel.addEventListener("change", render);
+  render();
+})();
+</script>
+</body>
+</html>

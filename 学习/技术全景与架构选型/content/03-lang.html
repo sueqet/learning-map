@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>编程语言的性格 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 编程语言的性格：Java、Python、Go、JavaScript/TypeScript、Rust 各自适合什么、代价是什么，以及怎么选语言。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">编程语言的性格</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 03 · 技术全景</span></span>
+    <h1 id="pageTitle">编程语言的性格</h1>
+    <p class="lead" id="pageLead">每种语言都有自己的「性格」。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>解释「语言不决定架构，但影响倾向」：哪些语言特性会影响系统设计。</li>
+      <li>用一个比喻 + 一句话说出 Java、Python、Go、JavaScript / TypeScript、Rust 各自的性格。</li>
+      <li>说出每种语言<b>适合</b>和<b>不太适合</b>的场景，以及它的主要代价。</li>
+      <li>按「场景硬约束 → 团队 → 生态 → 性能 → 招聘」的顺序做语言选择，避免「为了性能盲目换语言」。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="02-map.html">02 全景地图</a>，知道「语言、框架、运行时」是不同类别的名词。不需要会写任何一种语言。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 语言和架构的关系</div>
+    <h2><span class="num">01</span>先看语言影响什么</h2>
+  </section>
+
+  <section class="topic" id="lang-vs-arch">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>语言不决定架构，但影响倾向<span class="pt">language vs architecture · 设计哲学</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="lang::lang-vs-arch"><span>已学会</span></label>
+    </div>
+    <p>用 Python 可以写微服务，用 Go 也可以写单体，语言本身<b>不决定</b>架构。但每种语言的设计哲学不同：有的追求开发速度，有的追求运行性能，有的追求安全。这些取舍会让某些系统写起来更顺手，所以语言会<b>影响倾向</b>。可以把语言想成不同性格的公司：同样能做生意，擅长的生意不一样。</p>
+    <table class="tbl">
+      <tr><th>语言特性</th><th>有哪些做法</th><th>会影响什么</th></tr>
+      <tr><td>执行方式</td><td>编译成机器码（Go、Rust）/ 虚拟机（Java）/ 解释执行（Python）/ JIT 引擎（JavaScript）</td><td>运行速度、启动速度、部署形态（一个文件还是要装环境）</td></tr>
+      <tr><td>并发模型</td><td>线程（Java）、轻量协程（Go 的 goroutine）、事件循环 + async（JavaScript、Python）</td><td>同时能扛多少连接、写并发代码难不难</td></tr>
+      <tr><td>类型系统</td><td>静态类型（Java、Go、Rust、TypeScript）/ 动态类型（Python、JavaScript）</td><td>写起来快不快 vs 大团队重构时安不安心</td></tr>
+      <tr><td>内存管理</td><td>垃圾回收 GC（Java、Go、Python、JS）/ 编译期所有权检查（Rust）/ 手动（C）</td><td>内存占用、偶发停顿、内存安全</td></tr>
+      <tr><td>生态</td><td>库、框架、工具、社区、招聘市场</td><td>能不能快速找到现成方案和合适的人</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>选语言，很大程度上是在选<b>生态和团队</b>。语法差异反而是最不重要的。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 五种主流语言</div>
+    <h2><span class="num">02</span>五种性格</h2>
+  </section>
+
+  <section class="topic" id="java">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>Java：稳重的「大企业」<span class="pt">Java · 一次编写，到处运行</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="lang::java"><span>已学会</span></label>
+    </div>
+    <p>Java 程序运行在 <b>JVM</b>（Java 虚拟机）上，追求「一次编写，到处运行」。它有近三十年的积累，生态极度成熟，强类型和严格的工程规范适合几十上百人长期维护同一个系统。银行、保险、电商、政企的核心系统大量使用 Java，主流框架是 <b>Spring Boot</b>。</p>
+    <table class="tbl">
+      <tr><th>适合</th><th>不太适合</th><th>代表框架 / 场景</th><th>主要代价</th></tr>
+      <tr><td>复杂业务、需要事务管理、长期维护的大型企业系统</td><td>小脚本、快速原型、对启动速度和内存极敏感的场景</td><td>Spring Boot、Spring Cloud；金融核心系统、大型电商后台；Android 历史上的主力语言</td><td>启动较慢、内存占用较高、代码相对啰嗦</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>别用老印象判断：</b>新版本 Java 一直在改进，例如 Java 21 的虚拟线程让高并发写法简单了很多；同在 JVM 上的 <b>Kotlin</b> 写法更简洁，可以复用整个 Java 生态。</p></div>
+  </section>
+
+  <section class="topic" id="python">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>Python：灵巧的「多面手」<span class="pt">Python · 开发速度优先</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="lang::python"><span>已学会</span></label>
+    </div>
+    <p>Python 语法接近自然语言，开发速度极快。它在<b>数据分析、AI、快速原型</b>上几乎无可替代：NumPy、Pandas、PyTorch 等库让它成了 AI 的主力语言。后端方向有 FastAPI、Django，运维和测试也常用它写自动化脚本。</p>
+    <table class="tbl">
+      <tr><th>适合</th><th>不太适合</th><th>代表框架 / 场景</th><th>主要代价</th></tr>
+      <tr><td>AI / 数据、API 服务、自动化脚本、快速验证想法</td><td>纯 Python 写的计算密集代码、对延迟极敏感的核心链路、浏览器端</td><td>FastAPI、Django、Flask；PyTorch、Pandas；各类运维脚本</td><td>原生执行慢；GIL 限制多线程并行；动态类型在大项目里容易藏 bug</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>为什么「慢」的 Python 能统治 AI？</b>因为真正耗时的矩阵计算由底层的 C / C++ / CUDA 完成，Python 只负责「指挥」。所以性能问题常靠<b>调用底层库、多进程、异步 I/O</b>解决。另外，Python 3.13 起提供了实验性的无 GIL 版本，并在后续版本中逐步成熟，但大多数生产环境仍以默认版本为主。</p></div>
+  </section>
+
+  <section class="topic" id="go">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>Go：高效的「现代工厂」<span class="pt">Go · 为高并发网络服务而生</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="lang::go"><span>已学会</span></label>
+    </div>
+    <p>Go 由 Google 设计，目标是让写高并发网络服务变简单。它的 <b>goroutine</b> 是极轻量的协程，一台机器可以同时跑成千上万个；程序编译成<b>单个可执行文件</b>，启动快、内存小、部署简单。所以 Go 成了云原生基础设施的热门语言：Docker、Kubernetes、Prometheus 都是用 Go 写的。</p>
+    <table class="tbl">
+      <tr><th>适合</th><th>不太适合</th><th>代表框架 / 场景</th><th>主要代价</th></tr>
+      <tr><td>微服务、API 网关、云平台组件、命令行工具、高并发后端</td><td>业务规则特别复杂的领域建模、AI 训练与数据分析</td><td>Gin、Echo、标准库 net/http；Docker、Kubernetes、etcd</td><td>语言刻意朴素，表达复杂业务不如 Java 丰富；错误处理写法啰嗦；AI / 数据生态弱</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>Go 的「简单」是一种取舍：语言特性少，团队代码风格统一、好读好维护；代价是有些抽象写起来更长。</p></div>
+  </section>
+
+  <section class="topic" id="js-ts">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>JavaScript / TypeScript：无处不在的「连接器」<span class="pt">JS / TS · 浏览器的母语</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="lang::js-ts"><span>已学会</span></label>
+    </div>
+    <p>JavaScript 是浏览器原生支持的编程语言，任何有丰富交互的网页都离不开它，是 Web 前端事实上的标准。有了 <b>Node.js</b> 运行时，它也能写后端，于是一个团队可以<b>前后端用同一种语言</b>。<b>TypeScript</b> 是 JavaScript 的超集，给它加上静态类型，大中型项目基本都用 TypeScript。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>JavaScript 的历史包袱（看个热闹）</div>
+      <pre><code>"1" + 1      // "11"  ← 数字被悄悄转成了字符串
+"5" - 2      // 3     ← 这次字符串又被转成了数字
+0.1 + 0.2    // 0.30000000000000004（多数语言的浮点数都这样）
+
+// TypeScript 在写代码时就能拦住类型不匹配：
+function total(price: number, qty: number) { return price * qty; }
+total("9.9", 2);   // ✗ 编译报错：string 不能传给 number</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>适合</th><th>不太适合</th><th>代表框架 / 场景</th><th>主要代价</th></tr>
+      <tr><td>所有网页前端、全栈小团队、实时应用（聊天、协作）、跨端（桌面 Electron、移动 React Native）</td><td>CPU 密集计算（单线程事件循环会被卡住）、对类型安全要求极高却不用 TS 的大项目</td><td>Vue、React、Next.js；后端 Express、NestJS</td><td>历史遗留的「古怪」设计容易埋 bug；npm 依赖多，供应链风险需要管理</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>Java 和 JavaScript 除了名字像，几乎没有关系。JavaScript 的名字是当年的营销决定。</p></div>
+  </section>
+
+  <section class="topic" id="rust">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>Rust：极致的「安全狂人」<span class="pt">Rust · 不牺牲性能的内存安全</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="lang::rust"><span>已学会</span></label>
+    </div>
+    <p>Rust 通过独特的<b>所有权和借用检查</b>，在<b>编译期</b>就排除空指针、数据竞争等一大类内存错误，而且不需要垃圾回收，性能接近 C / C++。代价是规则多、学习曲线陡，新手经常和编译器「搏斗」。很多新一代开发工具用 Rust 重写后速度大幅提升，例如 Python 生态里的 Ruff、uv、Polars。</p>
+    <table class="tbl">
+      <tr><th>适合</th><th>不太适合</th><th>代表场景</th><th>主要代价</th></tr>
+      <tr><td>对安全和速度都有极致要求的系统编程：浏览器引擎、数据库、网络代理、操作系统组件、WebAssembly</td><td>需求天天变的业务后台、团队里没人会 Rust 的项目、快速原型</td><td>开发者工具链、高性能基础组件；Linux 内核也已接纳 Rust 编写的部分驱动</td><td>学习曲线陡、编译慢、招聘难、业务开发速度慢</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>Rust 适合「写一次、跑很久、不能出错、要很快」的底层组件，而不是「需求每周都改」的业务代码。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 3 · 怎么选</div>
+    <h2><span class="num">03</span>选语言的顺序</h2>
+  </section>
+
+  <section class="topic" id="lang-choose">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 7</span>怎么选语言：团队、生态、场景<span class="pt">choosing · 先硬约束后偏好</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="lang::lang-choose"><span>已学会</span></label>
+    </div>
+    <p>选语言时按下面的顺序问，前面的问题优先级更高：</p>
+    <ol>
+      <li><b>场景有没有硬约束？</b>浏览器里只能用 JavaScript / TypeScript；iOS 首选 Swift；Android 首选 Kotlin；训练 AI 模型几乎只能用 Python。</li>
+      <li><b>团队已经会什么？</b>3 个人都熟 Python，就别为了「更快」改用 Rust。</li>
+      <li><b>生态里有没有现成方案？</b>要接支付、做报表、调大模型，看哪个语言的库最成熟。</li>
+      <li><b>性能真的是瓶颈吗？</b>大多数业务系统慢在数据库和网络，不在语言本身。</li>
+      <li><b>以后好不好招人？</b>小众语言写的系统，人员一走就没人能维护。</li>
+    </ol>
+    <table class="tbl">
+      <tr><th>其他常见语言</th><th>一句话性格</th><th>典型场景</th></tr>
+      <tr><td>C / C++</td><td>贴近硬件的「老匠人」，最快但最容易踩内存坑</td><td>操作系统、游戏引擎、嵌入式、高性能计算</td></tr>
+      <tr><td>C#</td><td>微软生态的「全能选手」</td><td>.NET 企业应用、Windows 桌面、Unity 游戏</td></tr>
+      <tr><td>Kotlin</td><td>更现代的 Java 兄弟</td><td>Android App、JVM 后端</td></tr>
+      <tr><td>Swift</td><td>苹果生态的官方语言</td><td>iOS / macOS App</td></tr>
+      <tr><td>PHP</td><td>老牌建站语言，部署简单</td><td>WordPress、传统网站、Laravel 后端</td></tr>
+      <tr><td>SQL</td><td>和数据库说话的语言</td><td>几乎所有方向都要会，本仓库有专门的 <a href="../../SQL/index.html">SQL 学习包</a></td></tr>
+    </table>
+    <div id="demo-compare"></div>
+    <div id="demo-scene"></div>
+    <div class="callout danger"><span class="i">!</span><p><b>常见误区：</b>「服务慢，用 Go / Rust 重写吧」。重写前先测量：如果 90% 的时间花在等数据库，换语言几乎没用，加索引、加缓存、改查询才有用。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>从五种语言里挑三种，各写一句「适合 …，不适合 …，因为 …」。写不出「因为」的那个，回去重读。</li>
+      <li>去任意招聘网站搜「后端开发」，统计前 20 个岗位要求的语言，看看和本页的「性格」描述是否吻合。</li>
+      <li>假设你要做一个「浏览器插件 + 后端 + 数据分析」的小产品，团队只有你一个人，你会选几种语言？为什么？</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "lang",
+  title: "编程语言的性格",
+  eyebrow: "MODULE 03 · 技术全景",
+  lead: "Java 稳重、Python 灵巧、Go 高效、JavaScript 无处不在、Rust 追求极致安全。了解每种语言的性格和代价，选语言时先看硬约束和团队，再看偏好。",
+  points: ["lang-vs-arch","java","python","go","js-ts","rust","lang-choose"],
+  prev: "02-map.html", prevTitle: "全景地图：软件产品的分层",
+  next: "04-frontend.html", nextTitle: "前端层：界面怎么搭",
+};
+
+const QUZ = [
+  { type:"quiz", q:"「用 Python 写微服务、用 Go 写单体」可行吗？",
+    opts:["可行。语言不决定架构，只是让某些架构写起来更顺手","不可行，微服务只能用 Go","不可行，Python 只能写脚本","不可行，单体只能用 Java"],
+    ans:0, exp:"架构是系统的组织方式，任何主流语言都能实现单体或微服务。语言影响的是倾向和成本，例如 Go 的单文件部署让微服务运维更轻松，但不是硬性限制。" },
+  { type:"quiz", q:"Java 最常被提到的代价是？",
+    opts:["没有生态","不能写后端","启动较慢、内存占用较高、代码相对啰嗦","只能在 Windows 上运行"],
+    ans:2, exp:"Java 生态是最成熟的之一（A 错），后端是它的主战场（B 错），JVM 正是为了跨平台（D 错）。它的代价主要在启动速度、内存和代码量。" },
+  { type:"quiz", q:"Python 原生执行不快，为什么还能统治 AI 领域？",
+    opts:["因为 AI 不需要计算","因为生态（NumPy、PyTorch 等）成熟且易用，重计算由底层 C / C++ / CUDA 完成","因为 Python 比 C 更快","因为只有 Python 能连 GPU"],
+    ans:1, exp:"Python 负责「指挥」，真正的矩阵计算在底层高性能库里执行。A、C 明显不对；D 错，其他语言也能调用 GPU，只是生态远不如 Python。" },
+  { type:"quiz", q:"Go 在云原生基础设施里很流行，最主要的原因是？",
+    opts:["语法最花哨","goroutine 让高并发简单，编译成单个文件，启动快、部署简单","它是浏览器唯一支持的语言","它没有任何缺点"],
+    ans:1, exp:"轻量并发 + 单文件部署 + 低资源占用，正好契合容器和微服务。A 恰好相反，Go 以朴素著称；C 说的是 JavaScript；D 错，Go 的表达力和 AI 生态都有短板。" },
+  { type:"quiz", q:"TypeScript 和 JavaScript 是什么关系？",
+    opts:["TypeScript 是 JavaScript 的超集，加上了静态类型，最终编译成 JavaScript 运行","两者毫无关系","TypeScript 是数据库","TypeScript 只能写后端"],
+    ans:0, exp:"TypeScript 在写代码阶段做类型检查，运行时仍是 JavaScript，前后端都能用。B、C、D 都不对。" },
+  { type:"quiz", q:"关于 Rust，哪种说法最准确？",
+    opts:["它靠垃圾回收保证内存安全","它适合需求每周都变的业务后台","它学习简单，适合入门第一门语言","它在编译期通过所有权检查消除很多内存错误，性能接近 C / C++，但学习曲线陡"],
+    ans:3, exp:"Rust 没有 GC（A 错），它的优势在底层组件而不是多变的业务（B 错），学习曲线公认很陡（C 错）。" },
+  { type:"quiz", q:"要开发一个 iOS App 的原生界面，首选哪种语言？",
+    opts:["Go","Swift","PHP","SQL"],
+    ans:1, exp:"这是「场景硬约束」：苹果平台的官方语言是 Swift。Go、PHP 主要写后端，SQL 用来查数据。跨端方案（React Native、Flutter）也是选项，但原生开发首选 Swift。" },
+  { type:"quiz", q:"选语言时，哪个问题应该最先问？",
+    opts:["哪个语言最新潮","哪个语言语法最短","场景有没有硬约束（例如浏览器、iOS、AI 训练）","哪个语言名字最好听"],
+    ans:2, exp:"硬约束会直接排除大部分选项，其后才是团队、生态、性能、招聘。A、B、D 都不是可靠的选择依据。" },
+  { type:"quiz", q:"3 人团队都熟悉 Python，要做一个「调用大模型的问答后端」，最合理的选择是？",
+    opts:["Python + FastAPI","Rust，因为最快","Java，因为最稳","C++，因为最底层"],
+    ans:0, exp:"团队熟悉 + AI 生态最好 + FastAPI 适合做 API，三个因素指向同一个答案。这类服务的耗时主要在等大模型返回，语言本身的速度不是瓶颈，换成 Rust、C++ 只会拖慢开发。" },
+  { type:"interview", q:"线上服务响应慢，有人提议「用 Go 把 Python 服务全部重写」。你最应该先做什么？",
+    opts:["立刻开始重写，越快越好","先测量（看日志、性能分析、慢查询），确认时间花在哪里，再决定优化数据库、加缓存还是重写热点部分","把服务器配置调到最高","改用最新版本的 Python 就够了"],
+    ans:1, exp:"没有测量就重写，常常白忙一场：如果瓶颈在数据库或外部接口，换语言几乎没用。先定位，再选择成本最低、收益最大的手段。C、D 也是没定位就行动。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：语言对比器 */
+(function(){
+  const DIMS = ["开发速度","运行性能","高并发","生态成熟度","上手容易","AI / 数据","招聘面"];
+  const L = {
+    "Java":[3,4,4,5,3,2,5], "Python":[5,2,3,5,5,5,5], "Go":[4,4,5,4,4,1,4],
+    "JavaScript / TS":[4,3,3,5,4,2,5], "Rust":[2,5,5,3,1,2,2]
+  };
+  const NOTE = {
+    "Java":"稳重的大企业：生态和工程规范最完善，代价是笨重。",
+    "Python":"灵巧的多面手：写得最快、AI 最强，代价是原生性能。",
+    "Go":"高效的现代工厂：并发和部署都轻松，代价是表达力朴素。",
+    "JavaScript / TS":"无处不在的连接器：浏览器的母语、前后端通吃，代价是历史包袱。",
+    "Rust":"极致的安全狂人：又快又安全，代价是难学、开发慢。"
+  };
+  const host = document.getElementById("demo-compare");
+  const opts = Object.keys(L).map(k=>`<option value="${k}">${k}</option>`).join("");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：语言对比器</span><span class="hint">选两种语言对比</span></div>
+    <div class="db">
+      <div class="ctl"><label>A</label><select id="cmpA">${opts}</select><label>B</label><select id="cmpB">${opts}</select></div>
+      <div id="cmpOut"></div>
+      <div class="log" id="cmpLog"></div>
+      <div class="foot">分数是 1–5 的相对印象，用来建立直觉，不是精确测量；具体项目还要看框架、团队和实现质量。</div>
+    </div></div>`;
+  const a = document.getElementById("cmpA"), b = document.getElementById("cmpB"), out = document.getElementById("cmpOut"), log = document.getElementById("cmpLog");
+  b.value = "Python";
+  function render(){
+    const A = L[a.value], B = L[b.value];
+    out.innerHTML = `<table class="dt"><thead><tr><th>维度</th><th>${a.value}</th><th>${b.value}</th></tr></thead><tbody>` +
+      DIMS.map((d,i)=>`<tr class="${A[i]!==B[i]?"":"dim"}"><td>${d}</td><td>${ArchKit.meter(A[i])} ${A[i]}</td><td>${ArchKit.meter(B[i])} ${B[i]}</td></tr>`).join("") + `</tbody></table>`;
+    const winA = DIMS.filter((d,i)=>A[i]>B[i]), winB = DIMS.filter((d,i)=>B[i]>A[i]);
+    log.innerHTML = a.value===b.value ? "两边选的是同一种语言，换一个试试。" :
+      `<b>${a.value}</b> 更强：${winA.join("、")||"无"}<br><b>${b.value}</b> 更强：${winB.join("、")||"无"}<br>${NOTE[a.value]}<br>${NOTE[b.value]}`;
+  }
+  a.addEventListener("change", render); b.addEventListener("change", render);
+  render();
+})();
+
+/* 演示 2：场景 → 语言 */
+(function(){
+  const S = {
+    web:{n:"网页里的交互（按钮、表单、动画）", first:"JavaScript / TypeScript", alt:"（没有真正的替代，WebAssembly 只用于少数高性能场景）", why:"浏览器原生只认 JavaScript，这是硬约束。", no:"用 Python、Java 直接写网页交互"},
+    bank:{n:"银行核心系统：交易复杂、要长期维护", first:"Java（Spring Boot）", alt:"Kotlin、C#", why:"事务管理、生态和人才储备最成熟，适合大团队长期维护。", no:"用小众语言或动态类型语言硬扛"},
+    ai:{n:"AI 模型服务 / 数据分析", first:"Python（FastAPI、PyTorch、Pandas）", alt:"推理加速部分可交给 C++ / Rust 写的底层库", why:"AI 和数据生态几乎都在 Python。", no:"为了速度改用 Go 重写模型调用逻辑"},
+    infra:{n:"高并发网关 / 云原生基础设施组件", first:"Go", alt:"Rust（追求极致性能和安全时）、Java", why:"goroutine 天然适合海量连接，单文件部署契合容器。", no:"用纯 Python 扛十万级长连接"},
+    mvp:{n:"小团队快速做 MVP 后端，两周上线", first:"团队最熟的语言（常见是 Python 或 TypeScript）", alt:"Go、Java（如果团队熟）", why:"这个阶段最贵的是时间，熟悉度压倒一切。", no:"边学 Rust 边做产品"},
+    lowlevel:{n:"数据库引擎 / 浏览器内核这类底层组件", first:"Rust 或 C++", alt:"Go（对延迟要求没那么极致时）", why:"需要极致性能和内存控制，Rust 还能在编译期避免大量内存错误。", no:"用 Python 写核心存储引擎"},
+    ios:{n:"iOS App", first:"Swift", alt:"React Native（JS / TS）、Flutter（Dart）等跨端方案", why:"苹果平台官方语言，体验和新特性支持最好。", no:"指望一个后端框架做出手机界面"},
+    android:{n:"Android App", first:"Kotlin", alt:"Java、跨端方案", why:"Google 官方推荐的 Android 开发语言。", no:"用 PHP 写手机界面"}
+  };
+  const host = document.getElementById("demo-scene");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：场景 → 语言</span><span class="hint">选一个场景，先自己猜</span></div>
+    <div class="db">
+      <div class="ctl"><label>场景</label><select id="sceneSel">${Object.keys(S).map(k=>`<option value="${k}">${S[k].n}</option>`).join("")}</select></div>
+      <div class="verdict" id="sceneOut"></div>
+    </div></div>`;
+  const sel = document.getElementById("sceneSel"), out = document.getElementById("sceneOut");
+  function render(){
+    const s = S[sel.value];
+    out.innerHTML = `<h4>${s.n}</h4><ul><li><b>首选：</b>${s.first}</li><li><b>备选：</b>${s.alt}</li><li><b>理由：</b>${s.why}</li><li><b>别这样：</b>${s.no}</li></ul>`;
+  }
+  sel.addEventListener("change", render);
+  render();
+})();
+</script>
+</body>
+</html>

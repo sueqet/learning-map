@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>最小闭环：一条线跑通 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 最小闭环：用 Vue + FastAPI + PostgreSQL + Docker 跑通一个待办应用，看清每层怎么连、接口契约、分层排障法与替换任意一环的影响。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">最小闭环</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 11 · 技术全景</span></span>
+    <h1 id="pageTitle">最小闭环：一条线跑通</h1>
+    <p class="lead" id="pageLead">不贪多，先跑通一条线。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>说出为什么推荐 <b>Vue + FastAPI + PostgreSQL + Docker</b> 作为初学者的第一条完整技术线。</li>
+      <li>讲清一个待办应用从「点添加」到「数据入库」再到「列表刷新」的每一步，各在哪一层。</li>
+      <li>理解「接口文档就是契约」，知道契约如何让前后端并行开发。</li>
+      <li>遇到白屏、422、500、数据丢失、本地能跑容器里不行等症状，知道<b>先查哪一层、看哪里</b>。</li>
+      <li>说出替换任意一环（换 React、换 Django、换 MySQL）要改什么、不用改什么。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 02–10 模块。本节的代码都只要求「读得懂它在干什么」；想真正动手，可以把本页代码交给 AI 生成完整项目，再用本页的排障表去验证和调试——这本身就是 12 模块要练的「AI 协作」。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 一条线</div>
+    <h2><span class="num">01</span>界面 → 接口 → 数据 → 部署</h2>
+  </section>
+
+  <section class="topic" id="stack-line">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>推荐起点：为什么是这四件<span class="pt">starter stack · 每层一件，覆盖闭环</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="capstone::stack-line"><span>已学会</span></label>
+    </div>
+    <p>面对这么多选择，「<b>不贪多，先跑通一条线</b>」最有效。下面这条线每一环都对初学者友好，四件东西各占一层，组合起来正好是一个完整闭环。用它做出一个能实际运行的小项目后，再回头看其他语言或框架，你会清楚地知道它们在解决什么问题、替换的是这条线上的哪一环。</p>
+    <table class="tbl">
+      <tr><th>层</th><th>选择</th><th>为什么适合起步</th><th>学会后能迁移到</th></tr>
+      <tr><td>前端</td><td><b>Vue</b></td><td>模板接近 HTML，学习曲线最平缓，中文文档好</td><td>React、Svelte：组件 / 状态 / 路由概念相通</td></tr>
+      <tr><td>后端</td><td><b>FastAPI</b></td><td>代码简洁，自动生成接口文档，契约「看得见」</td><td>Django、Spring Boot、Gin：都是「接请求 → 校验 → 业务 → 数据 → 响应」</td></tr>
+      <tr><td>数据</td><td><b>PostgreSQL</b></td><td>最主流的关系型数据库之一，SQL 学一次到处能用</td><td>MySQL 等关系型数据库；本仓库 SQL 学习包</td></tr>
+      <tr><td>部署</td><td><b>Docker（Compose）</b></td><td>一条命令把三样东西一起跑起来，环境一致</td><td>CI/CD、Kubernetes、各类云平台</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>这个阶段的目标不是功能多，而是<b>知道每层怎么连、出了问题怎么查</b>。一个只有「增删改查」的待办清单就足够了。</p></div>
+  </section>
+
+  <section class="topic" id="wire-up">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>每层怎么连：「待办清单」的数据流<span class="pt">wire-up · 从点击到入库</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="capstone::wire-up"><span>已学会</span></label>
+    </div>
+    <p>以「添加一条待办：买牛奶」为例，看数据如何穿过四层。下面三段代码分别属于前端、后端、部署（看懂即可）：</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>frontend · Vue：点「添加」时调用后端接口</div>
+      <pre><code>async function addTodo() {
+  const res = await fetch("/api/todos", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: newTitle.value }),
+  });
+  if (!res.ok) { error.value = "添加失败：" + res.status; return; }  // 处理失败分支
+  todos.value.push(await res.json());   // 状态一变，列表自动刷新
+}</code></pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>backend · FastAPI：校验、写库、返回</div>
+      <pre><code>class TodoIn(BaseModel):
+    title: str = Field(min_length=1, max_length=100)   # 契约：标题 1–100 个字符
+
+@app.post("/api/todos", status_code=201)
+def create_todo(todo: TodoIn, db: Session = Depends(get_db)):
+    row = Todo(title=todo.title, done=False)
+    db.add(row)
+    db.commit()          # 提交事务，数据才真正写进 PostgreSQL
+    db.refresh(row)      # 拿到数据库生成的 id
+    return {"id": row.id, "title": row.title, "done": row.done}</code></pre>
+    </div>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>docker-compose.yml：一条命令启动三件套</div>
+      <pre><code>services:
+  web:                       # 前端：Vue 打包后的静态文件，由 Nginx 提供，并把 /api 转发给后端
+    build: ./frontend
+    ports: ["8080:80"]
+  api:                       # 后端：FastAPI
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql://app:${DB_PASSWORD}@db:5432/todo   # 主机名是服务名 db，不是 localhost
+    depends_on: [db]
+  db:                        # 数据库：PostgreSQL
+    image: postgres:16
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}   # 密码从 .env 读取，不写死在文件里
+      POSTGRES_DB: todo
+    volumes: ["pgdata:/var/lib/postgresql/data"]   # 数据卷：容器重建，数据也不丢
+volumes:
+  pgdata:</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>环节</th><th>连接方式</th><th>约定</th></tr>
+      <tr><td>浏览器 → 前端服务</td><td>HTTP，访问 localhost:8080</td><td>Nginx 提供静态文件</td></tr>
+      <tr><td>前端 → 后端</td><td>HTTP + JSON，同域的 <code class="inl">/api</code> 路径由 Nginx 转发</td><td>接口契约（下一个知识点）</td></tr>
+      <tr><td>后端 → 数据库</td><td>数据库连接串 <code class="inl">DATABASE_URL</code></td><td>表结构：todos(id, title, done)</td></tr>
+      <tr><td>三者之间</td><td>Docker Compose 创建的内部网络，用服务名互相访问</td><td>web、api、db 三个服务名</td></tr>
+    </table>
+    <div id="demo-flow"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>每两层之间都有一个「接口」：前端和后端之间是 HTTP 契约，后端和数据库之间是连接串和表结构，服务和服务之间是 Compose 网络。<b>问题几乎总是出在这些接缝上。</b></p></div>
+  </section>
+
+  <section class="topic" id="contract-first">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>接口文档就是契约<span class="pt">contract first · 先约定，再各写各的</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="capstone::contract-first"><span>已学会</span></label>
+    </div>
+    <p>FastAPI 会根据代码自动生成 <b>OpenAPI</b> 格式的接口文档（访问 <code class="inl">/docs</code>）。这份文档就是前后端之间的合同：前端照着它调用，后端照着它实现。更进一步的做法是<b>契约优先</b>：先把接口定下来，前端用假数据（mock）先开发界面，后端同时实现接口，最后对接。</p>
+    <table class="tbl">
+      <tr><th>接口</th><th>请求</th><th>成功响应</th><th>常见失败</th></tr>
+      <tr><td><code class="inl">GET /api/todos</code></td><td>—</td><td><span class="st2">200</span> 待办列表</td><td>—</td></tr>
+      <tr><td><code class="inl">POST /api/todos</code></td><td><code class="inl">{"title": "买牛奶"}</code></td><td><span class="st2">201</span> 新建的待办（含 id）</td><td><span class="st4">422</span> 标题为空或超过 100 字</td></tr>
+      <tr><td><code class="inl">PATCH /api/todos/{id}</code></td><td><code class="inl">{"done": true}</code></td><td><span class="st2">200</span> 更新后的待办</td><td><span class="st4">404</span> id 不存在</td></tr>
+      <tr><td><code class="inl">DELETE /api/todos/{id}</code></td><td>—</td><td><span class="st2">204</span> 无内容</td><td><span class="st4">404</span> id 不存在</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>契约要被尊重：</b>后端想把 <code class="inl">title</code> 改名为 <code class="inl">name</code>，就必须同步通知前端，或者先兼容两个字段。很多「前端突然显示空白」的事故，根源都是契约被悄悄改了。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 出问题与换零件</div>
+    <h2><span class="num">02</span>排障与替换</h2>
+  </section>
+
+  <section class="topic" id="debug-layer">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>出问题先查哪一层：分层排障法<span class="pt">debug by layer · 先定位，再修复</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="capstone::debug-layer"><span>已学会</span></label>
+    </div>
+    <p>出问题时，AI 可以帮你猜原因，但你要先判断<b>问题在哪一层</b>：前端状态、接口契约、后端逻辑、数据库，还是部署环境。按症状找到第一步该看的地方，问题通常就缩小了一大半。</p>
+    <table class="tbl">
+      <tr><th>症状</th><th>先查哪层</th><th>第一步看哪里</th></tr>
+      <tr><td>页面白屏</td><td>前端</td><td>浏览器 Console 的报错</td></tr>
+      <tr><td>点了没反应，Network 里没有请求</td><td>前端</td><td>事件绑定、按钮是否被禁用、前端校验</td></tr>
+      <tr><td>请求报 CORS 跨域错误</td><td>后端 / 网关配置</td><td>后端是否允许前端的域名，或改为同域反向代理</td></tr>
+      <tr><td>接口返回 422</td><td>接口契约</td><td>响应里的 detail 字段，对照 /docs</td></tr>
+      <tr><td>接口返回 500</td><td>后端</td><td>后端日志里的错误堆栈（traceback）</td></tr>
+      <tr><td>数据刷新后不见了</td><td>后端 / 数据库 / 部署</td><td>事务有没有提交；数据库容器有没有挂数据卷</td></tr>
+      <tr><td>本地能跑，容器里连不上数据库</td><td>部署环境</td><td>连接串里写的是不是 localhost；环境变量有没有传进容器</td></tr>
+    </table>
+    <div id="demo-debug"></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>容器里的 <code class="inl">localhost</code> 指的是<b>容器自己</b>，不是你的电脑，也不是数据库容器。在 Docker Compose 里要用服务名（如 <code class="inl">db</code>）访问其他容器。这是初学者最常踩的部署坑之一。</p></div>
+  </section>
+
+  <section class="topic" id="swap-part">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>替换一环：换 React / Django / MySQL 会怎样<span class="pt">swap a part · 分层与契约的回报</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="capstone::swap-part"><span>已学会</span></label>
+    </div>
+    <p>分层和契约的最大回报是：<b>替换一环时，影响被限制在这一环</b>。这也是为什么学会一条线后，再学其他技术会很快——你只是在换掉一个零件。</p>
+    <table class="tbl">
+      <tr><th>替换</th><th>要改哪里</th><th>不用改哪里</th><th>注意</th></tr>
+      <tr><td>Vue → React</td><td>前端代码</td><td>后端、数据库、接口契约</td><td>组件、状态、路由的概念都通用</td></tr>
+      <tr><td>FastAPI → Django / Spring Boot</td><td>后端代码</td><td>前端（只要契约不变）、数据库表</td><td>新框架要实现完全相同的接口</td></tr>
+      <tr><td>PostgreSQL → MySQL</td><td>数据访问层、连接配置</td><td>前端、接口契约</td><td>SQL 方言有差异，需要迁移数据</td></tr>
+      <tr><td>Docker Compose → Kubernetes</td><td>部署配置</td><td>应用代码</td><td>镜像可以直接复用</td></tr>
+      <tr><td>新增 Redis 缓存</td><td>后端加缓存逻辑</td><td>前端、数据库表</td><td>要处理缓存失效（06 模块）</td></tr>
+    </table>
+    <div id="demo-swap"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>如果换一个前端框架还要改数据库，说明分层被打破了。「替换某一环要改多少地方」是检验架构是否健康的好指标。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>把本页的契约表和三段代码交给 AI，让它生成一个完整的待办项目；用 <code class="inl">docker compose up</code> 跑起来，打开 <code class="inl">/docs</code> 对照契约检查。</li>
+      <li>故意制造三个故障：把连接串改成 localhost、去掉数据卷、把字段名 title 改成 name，分别观察症状，并用排障表定位。</li>
+      <li>给待办加一个「截止日期」字段：列出需要改动的每一层，以及契约要怎么变。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "capstone",
+  title: "最小闭环：一条线跑通",
+  eyebrow: "MODULE 11 · 技术全景",
+  lead: "用 Vue + FastAPI + PostgreSQL + Docker 跑通一个待办应用：亲眼看到「界面 → 接口 → 数据 → 部署」的完整闭环，知道每层怎么连、出了问题先查哪一层。",
+  points: ["stack-line","wire-up","contract-first","debug-layer","swap-part"],
+  prev: "10-decide.html", prevTitle: "选型判断：五问框架与成本演进",
+  next: "12-ai.html", nextTitle: "AI 协作：生成、判断、验证",
+};
+
+const QUZ = [
+  { type:"quiz", q:"在 Vue + FastAPI + PostgreSQL + Docker 这条线里，Docker 的作用是？",
+    opts:["画界面","把前端、后端、数据库打包，一条命令一起启动，保证环境一致","存储数据","校验接口参数"],
+    ans:1, exp:"Docker（Compose）负责部署层。画界面是 Vue，存数据是 PostgreSQL，校验参数是 FastAPI。" },
+  { type:"quiz", q:"为什么推荐初学者用 FastAPI 作为第一个后端框架？",
+    opts:["因为它是唯一的 Python 框架","因为它不需要写代码","因为它最适合做手机 App","代码简洁，并自动生成接口文档，让前后端契约「看得见」"],
+    ans:3, exp:"自动文档能让初学者直观看到契约，还能在网页上直接试调用。Python 还有 Django、Flask 等框架；它仍需写代码；它是后端框架而非 App 框架。" },
+  { type:"quiz", q:"「添加一条待办」的正确数据流是？",
+    opts:["Vue 发 POST 请求 → FastAPI 校验 → 写入 PostgreSQL 并提交 → 返回 201 和新数据 → Vue 更新状态、列表刷新","Vue 直接写入 PostgreSQL","PostgreSQL 主动通知 Vue","FastAPI 修改浏览器页面"],
+    ans:0, exp:"请求从前端出发，经后端写库，再把结果返回前端。前端不直连数据库（B）；数据库不主动推送（C）；后端不直接改浏览器页面（D）。" },
+  { type:"quiz", q:"「契约优先」开发方式最大的好处是？",
+    opts:["不需要写测试","不需要数据库","前后端先约定好接口，前端可以用假数据先开发，两边并行推进，最后对接","可以随时改字段名不用通知"],
+    ans:2, exp:"契约让两边可以独立工作。它不能替代测试和数据库，更不允许随意改契约（D 恰恰是契约优先要避免的）。" },
+  { type:"quiz", q:"页面白屏，第一步最应该看哪里？",
+    opts:["数据库的表结构","浏览器开发者工具的 Console 报错","服务器的硬盘空间","Docker 镜像大小"],
+    ans:1, exp:"白屏首先是前端问题，Console 通常会直接告诉你哪行 JavaScript 出错了。其余选项离症状太远。" },
+  { type:"quiz", q:"添加待办时接口返回 422，最可能的原因是？",
+    opts:["数据库宕机","服务器断电","请求体不符合契约，比如 title 为空或字段名写错","前端 CSS 写错"],
+    ans:2, exp:"422 是参数校验失败，属于契约不一致。数据库宕机一般是 500；断电根本收不到响应；CSS 不影响请求。" },
+  { type:"quiz", q:"本地运行一切正常，放进 Docker Compose 后后端连不上数据库，最常见的原因是？",
+    opts:["连接串里写的是 localhost，而容器里的 localhost 指容器自己，应该用服务名 db","PostgreSQL 不支持 Docker","前端用了 Vue","接口文档没打开"],
+    ans:0, exp:"容器之间要用 Compose 的服务名互相访问。B 错误；C、D 与数据库连接无关。" },
+  { type:"quiz", q:"用 docker compose 重建容器后，之前添加的待办全不见了。最可能是？",
+    opts:["Vue 有缓存","FastAPI 版本太新","网络太慢","数据库容器没有挂载数据卷，数据随容器一起被删除"],
+    ans:3, exp:"容器本身是「可丢弃」的，持久数据必须放在数据卷里。其余选项不会导致数据库数据消失。" },
+  { type:"quiz", q:"把前端从 Vue 换成 React，后端需要改吗？",
+    opts:["必须全部重写","只要接口契约不变，后端和数据库都不用改","必须换数据库","必须换成 Node.js 后端"],
+    ans:1, exp:"这就是分层和契约的回报：前端只是契约的一个调用方。A、C、D 都把不相关的层牵扯进来了。" },
+  { type:"interview", q:"面试官：「讲讲你的项目从用户点按钮到数据入库的过程，出了问题你怎么查？」最好的回答是？",
+    opts:["我用了很多技术，都很厉害","按层讲：Vue 组件发 POST 请求 → Nginx 转发 /api → FastAPI 按契约校验 → 写 PostgreSQL 并提交事务 → 返回 201 → 前端更新状态。排障时按症状定位层：前端看 Console 和 Network，契约问题看 422 的 detail，后端看日志堆栈，部署看连接串和环境变量","出问题就重装系统","让 AI 帮我查，我不太清楚"],
+    ans:1, exp:"好回答同时展示了数据流和分层排障能力，正是「会问、会判、会验」的体现。A 空泛；C 不解决问题；D 说明没有理解自己的系统。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：数据流追踪 */
+(function(){
+  const NODES = ["Vue 组件","fetch 请求","Nginx","FastAPI 校验","写入 PostgreSQL","201 响应","列表刷新"];
+  const STEPS = [
+    {t:"用户输入「买牛奶」点添加", data:'newTitle = "买牛奶"', note:"前端层：Vue 组件的 addTodo 函数被调用。"},
+    {t:"浏览器发出 HTTP 请求", data:'POST /api/todos\nContent-Type: application/json\n{"title": "买牛奶"}', note:"前端 → 后端：请求体就是契约里约定的 JSON。"},
+    {t:"Nginx 转发", data:"/api/todos → http://api:8000/api/todos", note:"基础设施：同域的 /api 请求被转发给 Compose 网络里的 api 服务，避免跨域问题。"},
+    {t:"FastAPI 按契约校验", data:'TodoIn(title="买牛奶")  ✓ 长度 1–100', note:"后端：类型和长度都符合，进入业务逻辑；不符合会直接返回 422。"},
+    {t:"写入数据库并提交", data:"INSERT INTO todos (title, done)\nVALUES ('买牛奶', false)\nRETURNING id;   → id = 7\nCOMMIT;", note:"数据层：事务提交后，数据才真正持久化。忘了提交，重启后数据就没了。"},
+    {t:"返回 201 响应", data:'201 Created\n{"id": 7, "title": "买牛奶", "done": false}', note:"后端 → 前端：返回新建的完整数据，包含数据库生成的 id。"},
+    {t:"前端更新状态", data:'todos = [..., {id: 7, title: "买牛奶", done: false}]', note:"前端层：把新数据放进状态，Vue 自动刷新列表。闭环完成。"}
+  ];
+  const host = document.getElementById("demo-flow");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：跟着数据走一遍</span><span class="hint">点「下一步」，看每一层手里的数据</span></div>
+    <div class="db">
+      <div class="ctl"><button class="b" id="cfPrev">◀ 上一步</button><button class="b" id="cfNext">▶ 下一步</button><button class="b" id="cfReset">↺ 重来</button></div>
+      <div class="flow" id="cfFlow"></div>
+      <div id="cfOut"></div>
+      <div class="log" id="cfLog"></div>
+    </div></div>`;
+  const flow = document.getElementById("cfFlow");
+  ArchKit.stepper({
+    out:"cfOut", log:"cfLog", next:"cfNext", prev:"cfPrev", reset:"cfReset",
+    steps: STEPS.map(s=>({t:s.t, html:`<pre style="margin:0;padding:10px 12px;background:var(--code-bg);color:var(--code-ink);border-radius:8px;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap">${ArchKit.esc(s.data)}</pre>`, note:s.note})),
+    onRender: i => { flow.innerHTML = NODES.map((n,k)=>`<div class="node ${k===i?"on":(k<i?"":"dim")}"><b>${n}</b></div>${k<NODES.length-1?'<span class="arr">→</span>':""}`).join(""); }
+  });
+})();
+
+/* 演示 2：分层排障助手 */
+(function(){
+  const S = {
+    white:{ n:"页面白屏", layer:"前端", look:"浏览器 Console", causes:["某行 JavaScript 报错导致整个应用没渲染","接口返回的数据格式和前端预期不同（例如期望数组却拿到对象），渲染时出错","打包产物路径配置错误，JS 文件 404"], verify:"Console 里的报错会指出文件和行号；Network 里看 JS 文件和接口是否 200。" },
+    nothing:{ n:"点添加没反应，Network 里没有请求", layer:"前端", look:"按钮事件与前端校验", causes:["点击事件没绑定上","按钮处于禁用状态","前端校验没通过但没给提示"], verify:"在 addTodo 第一行打印日志，看函数是否被调用。" },
+    cors:{ n:"请求报 CORS 跨域错误", layer:"后端 / 网关配置", look:"Console 中的 CORS 报错信息", causes:["前端和后端不同域名或端口，后端没允许该来源","没有通过 Nginx 同域转发 /api"], verify:"在后端配置允许的来源，或改为同域反向代理后重试。" },
+    e422:{ n:"接口返回 422", layer:"接口契约", look:"响应体里的 detail 字段", causes:["字段名写错（title 写成 name）","类型不对或为空、超长"], verify:"对照 /docs 的定义，在 /docs 页面用同样的数据试调用。" },
+    e500:{ n:"接口返回 500", layer:"后端", look:"后端日志里的错误堆栈", causes:["代码 bug（空值没处理等）","数据库连接失败或 SQL 出错"], verify:"按堆栈定位到具体行；在本地用同样的请求复现。" },
+    lost:{ n:"刷新后新数据不见了", layer:"后端 / 数据库 / 部署环境", look:"事务提交与数据卷", causes:["写库后没有 commit","数据库容器没挂数据卷，容器重建后数据丢失","前端只改了本地状态，请求其实失败了"], verify:"直接连数据库查表；检查 compose 文件中的 volumes；看 Network 中请求的状态码。" },
+    docker:{ n:"本地能跑，容器里连不上数据库", layer:"部署环境", look:"连接串和环境变量", causes:["连接串写的是 localhost，应为服务名 db","环境变量没有传进容器","数据库容器还没启动完成，后端就开始连接"], verify:"进入 api 容器查看环境变量；看 db 容器日志确认已就绪；为后端加连接重试。" },
+    slow:{ n:"添加很慢，要等好几秒", layer:"逐段测量", look:"Network 面板的耗时分解", causes:["后端在请求里做了慢操作（调用外部接口没设超时）","数据库慢查询、缺索引","网络或跨地域部署"], verify:"先看 Network 总耗时，再看后端日志里每段耗时，最后看数据库慢查询日志。" }
+  };
+  const host = document.getElementById("demo-debug");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：分层排障助手</span><span class="hint">选一个症状</span></div>
+    <div class="db">
+      <div class="ctl"><label>症状</label><select id="dbgSel">${Object.keys(S).map(k=>`<option value="${k}">${S[k].n}</option>`).join("")}</select></div>
+      <div class="stack" id="dbgStack"></div>
+      <div class="verdict" id="dbgOut"></div>
+    </div></div>`;
+  const LAYERS = [["前端","#3a6b8f"],["接口契约","#1e5b4f"],["后端","#1e5b4f"],["数据库","#b7791f"],["部署环境","#6b4f8a"]];
+  const sel = document.getElementById("dbgSel");
+  function render(){
+    const s = S[sel.value];
+    document.getElementById("dbgStack").innerHTML = LAYERS.map(([n,c])=>`<div class="ly ${s.layer.includes(n) || s.layer === "逐段测量" ? "on" : "dim"}" style="--c:${c}"><span class="n">${n}</span><span class="d">${s.layer.includes(n) ? "◀ 先查这里" : (s.layer === "逐段测量" ? "逐段测量耗时" : "")}</span></div>`).join("");
+    document.getElementById("dbgOut").innerHTML = `<h4>第一步：看「${s.look}」</h4><ul>${s.causes.map(c=>`<li>${c}</li>`).join("")}</ul><p style="margin:6px 0 0"><b>怎么验证：</b>${s.verify}</p>`;
+  }
+  sel.addEventListener("change", render);
+  render();
+})();
+
+/* 演示 3：替换一环 */
+(function(){
+  const LY = ["前端","接口契约","后端","数据库","部署"];
+  const SW = {
+    react:{ n:"Vue → React", chg:["前端"], note:"只重写前端；契约不变，后端和数据库零改动。" },
+    django:{ n:"FastAPI → Django", chg:["后端"], note:"用 Django 实现完全相同的接口，前端无感；数据库表可沿用。" },
+    mysql:{ n:"PostgreSQL → MySQL", chg:["数据库","后端"], note:"改连接配置和数据访问层（SQL 方言差异），并迁移数据；前端和契约不变。" },
+    k8s:{ n:"Compose → Kubernetes", chg:["部署"], note:"应用代码和镜像都不变，只改部署配置。" },
+    rename:{ n:"把字段 title 改名为 name", chg:["接口契约","前端","后端"], note:"改契约会同时波及调用方和实现方：要么同步修改并协调发布，要么先兼容两个字段。" }
+  };
+  const host = document.getElementById("demo-swap");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：替换一环，影响多大？</span><span class="hint">选一种替换</span></div>
+    <div class="db">
+      <div class="ctl" id="swPick">${Object.keys(SW).map(k=>`<button class="b" data-v="${k}">${SW[k].n}</button>`).join("")}</div>
+      <div class="flow" id="swFlow"></div>
+      <div class="log" id="swLog"></div>
+    </div></div>`;
+  ArchKit.choice("swPick", v=>{
+    const s = SW[v];
+    document.getElementById("swFlow").innerHTML = LY.map((l,i)=>`<div class="node ${s.chg.includes(l) ? "bad" : "on"}"><span class="ly">${s.chg.includes(l) ? "需要修改" : "不用动"}</span><b>${l}</b></div>${i < LY.length - 1 ? '<span class="arr">·</span>' : ""}`).join("");
+    document.getElementById("swLog").innerHTML = `<b>${s.n}</b>：影响 ${s.chg.length} / ${LY.length} 层。${s.note}`;
+  }, "react");
+})();
+</script>
+</body>
+</html>
