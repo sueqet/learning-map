@@ -13,12 +13,11 @@ const ROOT = path.dirname(CONTENT);
 const problems = [], warns = [];
 const P = m => problems.push(m), W = m => warns.push(m);
 
-/* ---------- 1. 读取 index.html 的 STAGES / MODULES ---------- */
+/* ---------- 1. 读取 content/assets/modules.js 的 STAGES / MODULES（唯一数据源） ---------- */
 const idx = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
-const block = idx.match(/const STAGES = \{[\s\S]*?\n\];/);
-if (!block) { console.error("✗ 无法从 index.html 提取 STAGES / MODULES"); process.exit(1); }
-const ctx = {}; vm.createContext(ctx);
-vm.runInContext(block[0] + "\n;__out = {STAGES, MODULES};", ctx);
+if (!idx.includes('src="content/assets/modules.js"')) P("index.html: 没有引入 content/assets/modules.js");
+const ctx = { window: {} }; vm.createContext(ctx);
+vm.runInContext(fs.readFileSync(path.join(CONTENT, "assets", "modules.js"), "utf8") + "\n;__out = {STAGES, MODULES};", ctx);
 const { STAGES, MODULES } = ctx.__out;
 
 const seen = new Set(); let totalPts = 0;
@@ -149,6 +148,41 @@ MODULES.forEach((m, mi) => {
       const name = tg[1].replace(/^\//, "");
       if (!/^(b|i|em|strong|span|code|br)\b/i.test(name)) P(`${tag}: 第 ${bi + 1} 个代码块有未转义标签 <${name.slice(0, 20)}>`);
     });
+  });
+});
+
+/* ---------- 2b. 图鉴数据 atlas-data.js ---------- */
+{
+  const actx = { window: {} }; vm.createContext(actx);
+  vm.runInContext(fs.readFileSync(path.join(CONTENT, "assets", "atlas-data.js"), "utf8") + "\n;__a = {ATLAS, ATLAS_LAYERS};", actx);
+  const { ATLAS, ATLAS_LAYERS } = actx.__a;
+  const ids = new Set(), lys = new Set(ATLAS_LAYERS.map(l => l.k));
+  ATLAS.forEach(a => {
+    if (ids.has(a.id)) P(`atlas: id 重复 ${a.id}`); ids.add(a.id);
+    ["n", "ly", "cat", "one", "s", "c", "mod"].forEach(k => { if (!a[k]) P(`atlas: ${a.id} 缺少字段 ${k}`); });
+    if (!lys.has(a.ly)) P(`atlas: ${a.id} 的层 ${a.ly} 不存在`);
+    if (![1, 2, 3].includes(a.lv)) P(`atlas: ${a.id} 的 lv 非法`);
+    if (a.pk && !["sql", "python", "linux", "git", "dsa"].includes(a.pk)) P(`atlas: ${a.id} 的 pk 非法`);
+  });
+  ATLAS.forEach(a => {
+    [...(a.pair || []), ...(a.alt || [])].forEach(r => { if (!ids.has(r)) P(`atlas: ${a.id} 引用了不存在的 ${r}`); });
+    const [f, h] = a.mod.split("#"), fp = path.join(CONTENT, f);
+    if (!fs.existsSync(fp)) P(`atlas: ${a.id} 的 mod 文件不存在 ${f}`);
+    else if (h && !fs.readFileSync(fp, "utf8").includes(`id="${h}"`)) P(`atlas: ${a.id} 的锚点 #${h} 在 ${f} 中不存在`);
+  });
+  ATLAS_LAYERS.forEach(l => { if (!fs.existsSync(path.join(CONTENT, l.mod))) P(`atlas: 层 ${l.k} 的 mod 文件不存在`); });
+  console.log(`atlas-data.js: ${ATLAS.length} 个名词`);
+}
+
+/* ---------- 2c. 工具页（图鉴 / 沙盘 / 闪卡）：必需脚本、内联脚本语法、相对链接 ---------- */
+["atlas.html", "sandbox.html", "review.html"].forEach(f => {
+  const fp = path.join(ROOT, f);
+  if (!fs.existsSync(fp)) { P(`缺少工具页 ${f}`); return; }
+  const html = fs.readFileSync(fp, "utf8");
+  ["content/assets/learn.css", "content/assets/theme.js", "content/assets/ui.js"].forEach(sig => { if (!html.includes(sig)) P(`${f}: 缺少 ${sig}`); });
+  [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/g)].forEach((x, i) => { try { new Function(x[1]); } catch (e) { P(`${f}: 第 ${i + 1} 个内联脚本语法错误 → ${e.message}`); } });
+  [...html.matchAll(/(?:href|src)="((?!https?:|#|mailto:)[^"$]+)"/g)].forEach(x => {
+    const t = x[1].split("#")[0]; if (t && !fs.existsSync(path.resolve(ROOT, t))) P(`${f}: 相对路径 "${x[1]}" 不存在`);
   });
 });
 

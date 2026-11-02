@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>架构沙盘 · 技术全景与架构选型</title>
+<meta name="description" content="架构沙盘：你来当技术负责人。选一个场景，在有限的人力预算内做技术选型，然后让系统「上线运行一年」，看它在流量洪峰、重复扣款、误删数据库、密钥泄露、法务审查等事件中的表现，最后逐项复盘每个决定。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="content/assets/learn.css">
+<script src="content/assets/theme.js"></script>
+<style>
+  .wrap{max-width:1040px}
+  .topnav .crumb{flex:1}
+  .hero{padding:36px 0 4px}
+  h2.sec{font-family:var(--font-display);font-weight:900;font-size:clamp(20px,2.8vw,26px);margin:30px 0 4px}
+  h2.sec .n{font-family:var(--font-mono);font-size:.6em;color:var(--green);margin-right:6px}
+  .sub{color:var(--ink-soft);margin:0 0 12px;font-size:14.5px}
+  .scs{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+  .sc{cursor:pointer;text-align:left;background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:16px 18px;box-shadow:var(--shadow);font-family:inherit;color:var(--ink);transition:.15s}
+  .sc:hover{transform:translateY(-2px);border-color:var(--green)}
+  .sc.on{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft),var(--shadow)}
+  .sc .ic{font-size:26px}
+  .sc h3{margin:6px 0 4px;font-size:17px}
+  .sc p{margin:0;font-size:13.5px;color:var(--ink-soft);line-height:1.6}
+  .sc .best{margin-top:8px;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+  .sc .best b{color:var(--green)}
+  .cfg{display:grid;grid-template-columns:1fr 290px;gap:16px;align-items:start}
+  @media (max-width:860px){ .cfg{grid-template-columns:1fr} }
+  .slot{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:0 0 10px;box-shadow:var(--shadow)}
+  .slot .h{display:flex;align-items:baseline;gap:8px;margin-bottom:8px}
+  .slot .h b{font-size:15px}
+  .slot .h a{margin-left:auto;font-size:12px}
+  .opts{display:flex;flex-wrap:wrap;gap:6px}
+  .op{cursor:pointer;border:1px solid var(--line-2);background:var(--card);color:var(--ink-soft);padding:7px 12px;border-radius:10px;font-family:inherit;font-size:13.5px;display:inline-flex;gap:6px;align-items:center}
+  .op:hover{border-color:var(--green);color:var(--green)}
+  .op.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  .op .cost{font-family:var(--font-mono);font-size:11px;opacity:.75}
+  .gd{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:6px}
+  .gd label{display:flex;gap:8px;align-items:center;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 10px;cursor:pointer;font-size:13.5px;color:var(--ink-soft)}
+  .gd label.on{border-color:var(--green);background:var(--green-soft);color:var(--ink)}
+  .gd input{accent-color:var(--green)}
+  .gd .cost{margin-left:auto;font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+  .side{position:sticky;top:76px}
+  .budget{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+  .budget .big{font-family:var(--font-mono);font-size:28px;font-weight:700;color:var(--green)}
+  .budget .big.over{color:var(--red)}
+  .budget .bar{height:10px;background:var(--line);border-radius:999px;overflow:hidden;margin:6px 0 8px}
+  .budget .bar span{display:block;height:100%;background:var(--green);transition:width .2s}
+  .budget .bar span.over{background:var(--red)}
+  .budget p{margin:6px 0 0;font-size:13px;color:var(--ink-soft)}
+  .budget .brief{border-top:1px dashed var(--line-2);margin-top:10px;padding-top:10px;font-size:13px;color:var(--ink-soft)}
+  .run{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .run .btn{flex:1;justify-content:center}
+  .gauges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:10px 0 14px}
+  @media (max-width:640px){ .gauges{grid-template-columns:repeat(2,1fr)} }
+  .g{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:var(--shadow)}
+  .g .l{font-size:12px;color:var(--muted)}
+  .g .v{font-family:var(--font-mono);font-size:22px;font-weight:700}
+  .g .t{height:6px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:4px}
+  .g .t span{display:block;height:100%;transition:width .5s ease, background .5s}
+  .tl{position:relative;padding-left:22px}
+  .tl::before{content:"";position:absolute;left:7px;top:6px;bottom:6px;width:2px;background:var(--line-2)}
+  .ev{position:relative;background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;box-shadow:var(--shadow);animation:pop .35s ease}
+  .ev::before{content:"";position:absolute;left:-21px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--muted);border:2px solid var(--paper)}
+  .ev.ok::before{background:var(--green)} .ev.mid::before{background:var(--amber)} .ev.bad::before{background:var(--red)}
+  .ev.bad{border-color:var(--line-r)} .ev.mid{border-color:var(--line-a)}
+  .ev .m{font-family:var(--font-mono);font-size:11.5px;color:var(--muted)}
+  .ev h4{margin:2px 0 4px;font-size:15.5px}
+  .ev p{margin:0;font-size:14px;color:var(--ink-soft)}
+  .ev .ds{margin-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .grade{display:flex;gap:18px;align-items:center;background:var(--paper-2);border:1px solid var(--line);border-radius:16px;padding:18px 20px;box-shadow:var(--shadow);margin:16px 0}
+  .grade .L{font-family:var(--font-display);font-weight:900;font-size:72px;line-height:1;color:var(--green);flex:none;width:80px;text-align:center}
+  .grade p{margin:0;font-size:14.5px;color:var(--ink-soft)}
+  .grade h3{margin:0 0 4px;font-size:19px}
+  table.rv{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  table.rv th,table.rv td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top;color:var(--ink-soft)}
+  table.rv th{background:var(--green-soft);color:var(--green);white-space:nowrap}
+  table.rv td:first-child{white-space:nowrap;color:var(--ink);font-weight:700}
+  @media (max-width:640px){ table.rv{display:block;overflow-x:auto} }
+  .hide{display:none}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="index.html">← 学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b>架构沙盘</b></span>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>ARCHITECTURE SANDBOX · 架构沙盘</span>
+    <h1>架构<span class="accent">沙盘</span></h1>
+    <p class="lead">这一次，<b>你是技术负责人</b>。选一个场景，在有限的人力预算里做选型——每个组件、每项保障措施都要花人力。然后让系统<b>上线运行一年</b>：账单、越权、密钥泄露、重复扣款、误删数据库、流量洪峰、依赖故障……看你的方案扛不扛得住，最后逐项复盘。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <h2 class="sec"><span class="n">01</span>选一个场景</h2>
+  <p class="sub">三个场景的约束完全不同，同一套方案在这里得 S，在那里可能得 D。</p>
+  <div class="scs" id="scs"></div>
+
+  <div id="cfgWrap">
+    <h2 class="sec"><span class="n">02</span>做选型</h2>
+    <p class="sub">每个选项后面的数字是它要花的<b>人力点</b>。保障措施不是越多越好——人力有限，要挑这个场景最要命的那几项。</p>
+    <div class="cfg">
+      <div id="slots"></div>
+      <div class="side"><div class="budget" id="budget"></div>
+        <div class="run"><button class="btn pri" id="go">🚀 上线运行一年</button></div>
+        <div class="run"><button class="btn" id="ref">看参考方案</button><button class="btn" id="reset">清空</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="out" class="hide">
+    <h2 class="sec"><span class="n">03</span>这一年发生了什么</h2>
+    <div class="gauges" id="gauges"></div>
+    <div class="tl" id="tl"></div>
+    <div class="run" id="skipWrap"><button class="btn" id="skip">⏩ 跳过动画</button></div>
+    <div id="result" class="hide">
+      <h2 class="sec"><span class="n">04</span>复盘</h2>
+      <div class="grade" id="grade"></div>
+      <table class="rv" id="review"></table>
+      <div class="run" style="max-width:640px"><button class="btn pri" id="again">调整方案再来一次</button><button class="btn" id="other">换个场景</button></div>
+    </div>
+  </div>
+  <div style="height:70px"></div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const BEST = "arch_sandbox_v1";
+
+  /* ---------------- 选项 ---------------- */
+  const SLOTS = [
+    { k:"arch", n:"架构", mod:"content/07-arch.html", opts:[ {v:"mono", n:"单体（内部分层）", cost:2}, {v:"modular", n:"模块化单体", cost:3}, {v:"micro", n:"微服务", cost:8} ] },
+    { k:"stack", n:"后端技术栈", mod:"content/05-backend.html", opts:[ {v:"py", n:"Python · FastAPI", lang:"python"}, {v:"java", n:"Java · Spring Boot", lang:"java"}, {v:"go", n:"Go · Gin", lang:"go"}, {v:"node", n:"TypeScript · NestJS", lang:"ts"} ] },
+    { k:"db", n:"主数据库", mod:"content/06-data.html", opts:[ {v:"pg", n:"PostgreSQL", cost:1}, {v:"mysql", n:"MySQL", cost:1}, {v:"mongo", n:"MongoDB", cost:1}, {v:"redis", n:"只用 Redis", cost:1} ] },
+    { k:"cache", n:"缓存", mod:"content/06-data.html#cache", opts:[ {v:"none", n:"不加缓存", cost:0}, {v:"redis", n:"Redis 旁路缓存", cost:1} ] },
+    { k:"deploy", n:"部署方式", mod:"content/08-devops.html#deploy-where", opts:[ {v:"paas", n:"PaaS 托管", cost:1}, {v:"vm", n:"云服务器 + Compose", cost:2}, {v:"k8sm", n:"托管 Kubernetes", cost:4}, {v:"k8s", n:"自建 Kubernetes", cost:7}, {v:"faas", n:"Serverless 函数", cost:2} ] },
+    { k:"model", n:"大模型", only:"kb", mod:"content/10-decide.html#case-ai", opts:[ {v:"api", n:"调用外部大模型 API", cost:1}, {v:"private", n:"内网私有化部署开源模型", cost:5} ] }
+  ];
+  const GUARDS = [
+    { k:"idem", n:"写操作幂等（支付 / 下单）", cost:1, mod:"content/09-safety.html#idempotency" },
+    { k:"timeout", n:"超时 + 有限重试", cost:1, mod:"content/09-safety.html#timeout-retry" },
+    { k:"ratelimit", n:"限流 + 降级开关", cost:1, mod:"content/09-safety.html#degrade" },
+    { k:"authz", n:"授权：检查数据归属", cost:1, mod:"content/09-safety.html#authn-authz" },
+    { k:"secrets", n:"密钥管理（不进代码仓库）", cost:1, mod:"content/09-safety.html#secure-basics" },
+    { k:"backup", n:"自动备份 + 恢复演练", cost:1, mod:"content/09-safety.html#backup" },
+    { k:"monitor", n:"监控告警 + 集中日志", cost:1, mod:"content/08-devops.html#observability" },
+    { k:"cicd", n:"CI/CD + 自动化测试", cost:2, mod:"content/08-devops.html#cicd" },
+    { k:"mq", n:"消息队列异步削峰", cost:2, mod:"content/07-arch.html#other-styles" },
+    { k:"loadtest", n:"上线前全链路压测", cost:2, mod:"content/13-products.html#p-flash" },
+    { k:"rageval", n:"回答引用来源 + 评估问题集", cost:1, only:"kb", mod:"content/12-ai.html#verify-claim" }
+  ];
+  const optOf = (k, v) => SLOTS.find(s=>s.k===k).opts.find(o=>o.v===v);
+  const gName = k => GUARDS.find(g=>g.k===k).n;
+
+  /* ---------------- 场景与事件 ---------------- */
+  const launch = (c, g, x, sc) => {
+    const over = x.cost - sc.cap, miss = optOf("stack", c.stack).lang !== sc.lang;
+    if(over <= 0) return { t:"按计划上线", r:1, msg:`人力预算用了 ${x.cost} / ${sc.cap}，团队按时交付。` + (miss ? " 不过团队是边学新语言边开发，前期踩了不少坑。" : ""), d: miss ? { prog:-5 } : {} };
+    const weeks = Math.ceil(over / sc.cap * sc.weeks);
+    const why = c.arch === "micro" || c.deploy === "k8s" ? "大部分时间花在了搭服务拆分和基础设施上。" : (miss ? "团队在学一门新语言。" : "要做的事情太多了。");
+    return { t:"上线延期", r: over / sc.cap > 0.35 ? -1 : 0, msg:`人力预算超了 ${over} 点（${x.cost} / ${sc.cap}），上线延期约 ${weeks} 周：${why}`, d:{ prog: -Math.min(70, Math.round(over / sc.cap * 110)) } };
+  };
+  const SC = {
+    campus:{ ic:"🎓", n:"校园二手交易平台", cap:13, weeks:8, lang:"python",
+      brief:"3 人团队，都熟悉 Python 和 Vue；2 个月上线；预算很低；预计日活 2000；有担保交易（在线支付）。",
+      ref:{ arch:"modular", stack:"py", db:"pg", cache:"none", deploy:"paas", guards:["idem","authz","secrets","backup","monitor"] },
+      ok:{ arch:["mono","modular"], stack:["py"], db:["pg","mysql"], cache:["none","redis"], deploy:["paas","vm","faas"] },
+      must:["idem","authz","secrets","backup"], waste:["loadtest","mq"],
+      why:{ arch:"3 人团队，单体最快；按交易、用户、商品划好模块，以后好拆。", stack:"团队熟悉 Python，两个月工期里熟练度压倒一切。", db:"交易和支付需要事务，关系型最稳。", cache:"2000 日活，数据库完全扛得住，缓存可以先不加。", deploy:"几乎免运维，3 个人把精力放在产品上。" },
+      events:[
+        { m:"第 2 月", f:launch },
+        { m:"第 2 月", f:(c)=>{
+          let d = 0, msg = [];
+          if(c.deploy === "k8s"){ d -= 35; msg.push("为 2000 日活维护一套自建 K8s 集群：好几台机器常驻，还得有人值守。"); }
+          if(c.deploy === "k8sm"){ d -= 20; msg.push("托管 K8s 的集群费用对一个校园项目来说偏贵。"); }
+          if(c.arch === "micro"){ d -= 12; msg.push("多个服务各自占用资源，账单按服务数量翻倍。"); }
+          return { t:"第一张云账单", r: d === 0 ? 1 : (d > -25 ? 0 : -1), msg: d === 0 ? "账单很低：现在的流量用最简单的部署方式就够了。" : msg.join(""), d:{ cost:d } }; } },
+        { m:"第 3 月", f:(c,g)=> g.has("authz") ? { t:"有人把网址里的订单号改了一下", r:1, msg:"接口校验了订单归属，返回 403，什么也没看到。", d:{} }
+          : { t:"有人把网址里的订单号改了一下", r:-1, msg:"然后就看到了别人的收货地址和电话，截图被发进了校园群。越权漏洞，紧急修复并公开致歉。", d:{ safe:-35 } } },
+        { m:"第 4 月", f:(c,g)=> g.has("secrets") ? { t:"一位同学把代码推到了公开仓库", r:1, msg:"数据库密码放在平台的环境变量里，仓库里只有占位符，虚惊一场。", d:{} }
+          : { t:"一位同学把代码推到了公开仓库", r:-1, msg:"配置文件里的数据库密码随代码一起公开，几小时后数据库被扫描器入侵，只能紧急改密码、排查泄露。", d:{ safe:-25 } } },
+        { m:"第 6 月", f:(c,g)=>{
+          let r = g.has("idem") ? { t:"支付平台的回调超时，重试了 3 次", r:1, msg:"幂等键挡住了重复回调，每笔交易只记一次账。", d:{} }
+            : { t:"支付平台的回调超时，重试了 3 次", r:-1, msg:"同一笔交易被记账 3 次，卖家收到了 3 倍货款，只能人工逐笔核对、追回。", d:{ safe:-30 } };
+          if(c.db === "redis"){ r.r = -1; r.msg += " 更糟的是交易记录只存在 Redis 里，一次重启丢了部分记录。"; r.d.safe = (r.d.safe || 0) - 20; }
+          return r; } },
+        { m:"第 8 月", f:(c,g)=> g.has("backup") ? { t:"一条写错的 DELETE 清空了订单表", r:1, msg:"从 1 小时前的自动备份恢复；因为演练过，20 分钟就搞定了。", d:{ stab:-3 } }
+          : { t:"一条写错的 DELETE 清空了订单表", r:-1, msg:"没有可用的备份，几个月的订单记录永久丢失。", d:{ safe:-40, stab:-15 } } },
+        { m:"第 9 月", f:(c,g)=>{
+          const elastic = ["paas","k8sm","k8s","faas"].includes(c.deploy) || c.cache === "redis";
+          if(elastic) return { t:"开学季，流量 ×5", r:1, msg: c.cache === "redis" ? "缓存挡住了热门商品的读取，平稳度过。" : "平台自动扩容，平稳度过。", d:{} };
+          return { t:"开学季，流量 ×5", r:0, msg:"一台服务器 CPU 打满，高峰期页面卡了半小时，临时升级配置解决。" + (g.has("monitor") ? "好在告警先响了。" : "而且是同学在群里吐槽后才发现的。"), d:{ stab: g.has("monitor") ? -10 : -18 } }; } },
+        { m:"第 11 月", f:(c,g)=>{
+          if(c.arch === "micro") return { t:"新需求：加一个「求购」功能", r:-1, msg:"要同时改商品、用户、通知三个服务，协调发布花了两周。3 个人维护一堆服务，越来越吃力。", d:{ prog:-15 } };
+          if(g.has("cicd")) return { t:"新需求：加一个「求购」功能", r:1, msg:"在商品模块里加一个子模块，测试通过后流水线自动上线，当天交付。", d:{} };
+          return { t:"新需求：加一个「求购」功能", r:0, msg:"功能本身很快写完，但手动部署时漏传了一个文件，线上出错 20 分钟。", d:{ prog:-3, stab:-5 } }; } }
+      ] },
+    promo:{ ic:"🛒", n:"电商大促备战", cap:30, weeks:12, lang:"java",
+      brief:"15 人团队，以 Java 为主；已有 50 万用户；3 个月后双十一，流量预计 ×20；订单和支付绝不能错。",
+      ref:{ arch:"modular", stack:"java", db:"mysql", cache:"redis", deploy:"k8sm", guards:["idem","timeout","ratelimit","backup","monitor","cicd","mq","loadtest"] },
+      ok:{ arch:["modular","micro"], stack:["java"], db:["mysql","pg"], cache:["redis"], deploy:["k8sm"] },
+      must:["idem","timeout","ratelimit","backup","monitor","cicd","loadtest"], waste:[],
+      why:{ arch:"15 人可以按订单、库存、支付划清边界；模块化单体起步，把最热的模块拆出去也合理。", stack:"团队以 Java 为主，大促前不是换语言的时候。", db:"订单和库存需要事务与条件更新防超卖。", cache:"商品详情是典型的热点读，必须有缓存。", deploy:"大促要能快速扩容；托管 K8s 省去自建集群的运维。" },
+      events:[
+        { m:"第 3 月", f:launch },
+        { m:"大促前一周", f:(c,g)=> g.has("loadtest") ? { t:"全链路压测", r:1, msg:"压测发现商品详情接口和一条慢查询是瓶颈，提前加了索引和缓存。", d:{} }
+          : { t:"没有做压测", r:0, msg:"没人知道系统到底能扛多少，只能祈祷。", d:{ stab:-5 } } },
+        { m:"双十一 00:00", f:(c,g)=>{
+          let d = 0, m = [];
+          if(c.cache !== "redis"){ d -= 25; m.push("商品详情请求全部打到数据库，连接数瞬间耗尽"); }
+          if(!g.has("ratelimit")){ d -= 20; m.push("没有限流，洪峰直接冲垮了下单接口"); }
+          if(c.deploy === "vm"){ d -= 20; m.push("云服务器 + Compose 没法在几分钟内扩到几十台"); }
+          if(c.deploy === "faas"){ d -= 12; m.push("大量函数冷启动，数据库连接数被打满"); }
+          if(c.deploy === "paas"){ d -= 6; m.push("平台扩容有上限，峰值时排队"); }
+          if(!g.has("mq")){ d -= 8; m.push("订单同步写库，写入排队变慢"); }
+          return { t:"零点开抢，流量 ×20", r: d === 0 ? 1 : (d > -20 ? 0 : -1), msg: d === 0 ? "缓存挡住热点读、网关限流、消息队列削峰、集群自动扩容，零点平稳度过。" : m.join("；") + "。", d:{ stab:d } }; } },
+        { m:"双十一 00:01", f:(c)=>{
+          if(c.db === "redis") return { t:"爆款只有 100 件库存", r:-1, msg:"库存只存在 Redis 里，主从切换时丢了一批扣减记录，超卖 300 件，只能一一致歉赔付。", d:{ safe:-40 } };
+          if(c.db === "mongo") return { t:"爆款只有 100 件库存", r:0, msg:"需要额外设计事务，开发时漏了一处，超卖了 7 件。", d:{ safe:-15 } };
+          return { t:"爆款只有 100 件库存", r:1, msg:"数据库条件更新（stock > 0 才扣减）兜底，一件都没有超卖。", d:{} }; } },
+        { m:"双十一 01:00", f:(c,g)=> g.has("idem") ? { t:"支付回调大面积超时重试", r:1, msg:"幂等键让每笔订单只扣一次款。", d:{} }
+          : { t:"支付回调大面积超时重试", r:-1, msg:"几千笔订单被重复扣款，客服电话被打爆，连夜人工退款。", d:{ safe:-35 } } },
+        { m:"双十一 02:00", f:(c,g)=>{
+          if(g.has("timeout") && g.has("ratelimit")) return { t:"推荐服务挂了", r:1, msg:"调用超时后熔断，首页降级为热门榜，下单链路完全不受影响。", d:{} };
+          if(g.has("timeout")) return { t:"推荐服务挂了", r:0, msg:"超时保护了下单链路，但没有降级开关，首页推荐区空白了一小时。", d:{ stab:-10 } };
+          return { t:"推荐服务挂了", r:-1, msg: (c.arch === "micro" ? "下单服务的线程全卡在等推荐服务返回" : "整个应用的线程都在等推荐结果，被耗尽") + "，整站卡死 25 分钟。", d:{ stab:-25 } }; } },
+        { m:"大促第二天", f:(c,g)=>{
+          if(g.has("cicd") && g.has("monitor")) return { t:"热修复版本带出了新 bug", r:1, msg:"错误率告警 3 分钟内响起，流水线一键回滚。", d:{} };
+          if(g.has("monitor")) return { t:"热修复版本带出了新 bug", r:0, msg:"告警很快响了，但手动回滚花了 40 分钟。", d:{ stab:-10 } };
+          return { t:"热修复版本带出了新 bug", r:-1, msg:"用户投诉后才发现，排查加回滚花了 2 小时。", d:{ stab:-25 } }; } },
+        { m:"年底", f:(c,g)=>{
+          let d = 0, m = [];
+          if(c.deploy === "k8s"){ d -= 20; m.push("自建集群占用了 2 名工程师全职运维"); }
+          if(c.arch === "micro"){ d -= 8; m.push("服务数量多，资源和联调成本高"); }
+          if(c.deploy === "paas"){ d -= 15; m.push("按量计费在大促流量下非常贵"); }
+          if(!g.has("backup")){ d -= 5; m.push("审计发现没有可用的数据库备份，紧急补做"); }
+          return { t:"年度成本与审计复盘", r: d === 0 ? 1 : (d > -15 ? 0 : -1), msg: d === 0 ? "资源随流量伸缩，人力投入合理，备份审计通过。" : m.join("；") + "。", d:{ cost:d } }; } }
+      ] },
+    kb:{ ic:"🤖", n:"企业 AI 知识库", cap:16, weeks:8, lang:"python",
+      brief:"4 人团队，熟悉 Python；内部 800 名员工使用；文档含合同与客户信息，不能出公司；2 个月上线。",
+      ref:{ arch:"mono", stack:"py", db:"pg", cache:"none", deploy:"vm", model:"private", guards:["authz","secrets","rageval","timeout","backup"] },
+      ok:{ arch:["mono","modular"], stack:["py"], db:["pg"], cache:["none","redis"], deploy:["vm","k8sm"], model:["private"] },
+      must:["authz","rageval","timeout","secrets"], waste:["loadtest","mq","idem"],
+      why:{ arch:"内部工具、4 个人，单体就够。", stack:"团队熟悉 Python，AI 生态也在 Python。", db:"PostgreSQL + pgvector：文档、权限和向量在同一个库里。", cache:"800 人内部使用，缓存可有可无；加 Redis 做限流也行。", deploy:"敏感数据不出内网，部署在公司自己的服务器或私有云。", model:"合同与客户信息不能发给外部服务，只能内网私有化部署。" },
+      events:[
+        { m:"第 2 月", f:launch },
+        { m:"第 2 月", f:(c)=> c.model === "private" ? { t:"法务和安全部门审查", r:1, msg:"模型部署在内网，数据不出公司，审查通过。", d:{} }
+          : { t:"法务和安全部门审查", r:-1, msg:"合同和客户信息会发送给外部模型服务，违反数据合规要求。项目被叫停整改 3 周。", d:{ safe:-40, prog:-15 } } },
+        { m:"第 3 月", f:(c,g)=> g.has("rageval") ? { t:"「这个条款是 AI 编的吧？」", r:1, msg:"每条回答都附有原文出处，员工点开就能核对；评估问题集也提前发现了一个检索切片问题。", d:{} }
+          : { t:"「这个条款是 AI 编的吧？」", r:-1, msg:"回答引用了一个根本不存在的条款，业务部门不敢再用，停用了一周。", d:{ safe:-15, stab:-15 } } },
+        { m:"第 4 月", f:(c,g)=> g.has("authz") ? { t:"实习生问了一个关于高管薪酬的问题", r:1, msg:"检索前先按员工权限过滤文档，只返回他有权看到的内容。", d:{} }
+          : { t:"实习生问了一个关于高管薪酬的问题", r:-1, msg:"知识库把只有管理层能看的文件片段当作答案返回了。严重的数据泄露事件。", d:{ safe:-35 } } },
+        { m:"第 5 月", f:(c,g)=> g.has("timeout") ? { t:"模型偶尔 30 秒都不返回", r:1, msg:"超时后快速失败并提示重试，页面不会卡死，其他人不受影响。", d:{} }
+          : { t:"模型偶尔 30 秒都不返回", r:-1, msg:"请求在后端堆积，最后所有人的问答都卡住了。", d:{ stab:-20 } } },
+        { m:"第 6 月", f:(c,g)=>{
+          if(c.model === "private") return { t:"成本复盘", r:0, msg:"GPU 服务器常驻，成本固定且不低——这是数据不出域的代价，管理层认可。" + (c.deploy === "k8s" ? "自建 K8s 又额外占用了一个人。" : ""), d:{ cost: c.deploy === "k8s" ? -25 : -12 } };
+          return g.has("ratelimit") ? { t:"成本复盘", r:1, msg:"按人限额 + 缓存高频问题，token 账单可控。", d:{} }
+            : { t:"成本复盘", r:-1, msg:"有人写脚本批量调用接口，token 账单翻了 5 倍。", d:{ cost:-22 } }; } },
+        { m:"第 8 月", f:(c)=>{
+          if(c.db === "pg") return { t:"文档量涨到 10 万篇", r:1, msg:"pgvector 让文档、权限和向量在同一个库里，检索和权限过滤一条 SQL 搞定。", d:{} };
+          if(c.db === "redis") return { t:"文档量涨到 10 万篇", r:-1, msg:"文档元数据和权限只存在 Redis 里，一次重启后索引丢失，重建了两天。", d:{ safe:-20, stab:-10 } };
+          return { t:"文档量涨到 10 万篇", r:0, msg:"主库不支持向量检索，另加了一个向量数据库，多了一份数据同步和运维。", d:{ prog:-6, cost:-6 } }; } },
+        { m:"第 10 月", f:(c,g)=> g.has("backup") ? { t:"机房意外断电，磁盘损坏", r:1, msg:"从备份恢复了文档库和向量索引，半天恢复服务。", d:{ stab:-5 } }
+          : { t:"机房意外断电，磁盘损坏", r:-1, msg:"没有备份，文档库和向量索引都要从头重建，停服一周。", d:{ safe:-25, stab:-20 } } }
+      ] }
+  };
+
+  /* ---------------- 状态 ---------------- */
+  let scKey = "campus", choice = {}, guards = new Set(), timers = [];
+  const best = () => { try{ return JSON.parse(localStorage.getItem(BEST) || "{}"); }catch(e){ return {}; } };
+
+  function stackCost(v){ return optOf("stack", v).lang === SC[scKey].lang ? 1 : 4; }
+  function cost(){
+    let x = 0;
+    SLOTS.forEach(s=>{ if(s.only && s.only !== scKey) return; const v = choice[s.k]; if(!v) return; x += s.k === "stack" ? stackCost(v) : optOf(s.k, v).cost; });
+    guards.forEach(k=>x += GUARDS.find(g=>g.k===k).cost);
+    return x;
+  }
+  function slotsFor(){ return SLOTS.filter(s=>!s.only || s.only === scKey); }
+
+  function renderScs(){
+    const b = best();
+    document.getElementById("scs").innerHTML = Object.keys(SC).map(k=>`<button class="sc ${k===scKey?"on":""}" data-k="${k}"><div class="ic">${SC[k].ic}</div><h3>${SC[k].n}</h3><p>${SC[k].brief}</p><div class="best">人力预算 ${SC[k].cap} 点${b[k] ? ` · 最佳成绩 <b>${b[k]}</b>` : ""}</div></button>`).join("");
+  }
+  function renderCfg(){
+    const sc = SC[scKey];
+    document.getElementById("slots").innerHTML = slotsFor().map(s=>`<div class="slot"><div class="h"><b>${s.n}</b><a href="${s.mod}">不确定？看对应模块 →</a></div><div class="opts">${s.opts.map(o=>{
+        const c = s.k === "stack" ? stackCost(o.v) : o.cost;
+        return `<button class="op ${choice[s.k]===o.v?"on":""}" data-s="${s.k}" data-v="${o.v}">${o.n}<span class="cost">${c}${s.k === "stack" && c > 1 ? " · 要学" : ""}</span></button>`; }).join("")}</div></div>`).join("") +
+      `<div class="slot"><div class="h"><b>保障措施（可多选）</b><a href="content/09-safety.html">不确定？看 09 模块 →</a></div><div class="gd">${GUARDS.filter(g=>!g.only || g.only === scKey).map(g=>`<label class="${guards.has(g.k)?"on":""}"><input type="checkbox" data-g="${g.k}" ${guards.has(g.k)?"checked":""}>${g.n}<span class="cost">${g.cost}</span></label>`).join("")}</div></div>`;
+    const x = cost(), over = x > sc.cap, missing = slotsFor().filter(s=>!choice[s.k]).map(s=>s.n);
+    document.getElementById("budget").innerHTML = `<div style="font-size:12.5px;color:var(--muted)">人力预算</div><div class="big ${over?"over":""}">${x} / ${sc.cap}</div>
+      <div class="bar"><span class="${over?"over":""}" style="width:${Math.min(100, x / sc.cap * 100)}%"></span></div>
+      <p>${over ? `⚠ 超出 ${x - sc.cap} 点：可以硬上，但会延期。` : `还剩 ${sc.cap - x} 点。`}</p>
+      ${missing.length ? `<p style="color:var(--amber)">还没选：${missing.join("、")}</p>` : ""}
+      <div class="brief"><b>${sc.ic} ${sc.n}</b><br>${sc.brief}</div>`;
+    document.getElementById("go").disabled = missing.length > 0;
+  }
+
+  /* ---------------- 运行 ---------------- */
+  const METRICS = [["prog","进度"],["stab","稳定"],["safe","数据与安全"],["cost","成本"]];
+  function gauges(m){
+    document.getElementById("gauges").innerHTML = METRICS.map(([k,n])=>{
+      const v = Math.max(0, m[k]), col = v >= 80 ? "var(--green)" : (v >= 55 ? "var(--amber)" : "var(--red)");
+      return `<div class="g"><div class="l">${n}</div><div class="v" style="color:${col}">${v}</div><div class="t"><span style="width:${v}%;background:${col}"></span></div></div>`;
+    }).join("");
+  }
+  function run(){
+    timers.forEach(clearTimeout); timers = [];
+    const sc = SC[scKey], x = { cost: cost() }, m = { prog:100, stab:100, safe:100, cost:100 };
+    const evs = sc.events.map(e=>Object.assign({ m:e.m }, e.f(choice, guards, x, sc)));
+    document.getElementById("out").classList.remove("hide");
+    document.getElementById("result").classList.add("hide");
+    document.getElementById("skipWrap").classList.remove("hide");
+    document.getElementById("tl").innerHTML = "";
+    gauges(m);
+    document.getElementById("out").scrollIntoView({ behavior:"smooth", block:"start" });
+    let i = 0;
+    const step = () => {
+      if(i >= evs.length) return finish(m, evs);
+      const e = evs[i++];
+      Object.keys(e.d || {}).forEach(k=>{ m[k] = Math.max(0, Math.min(100, m[k] + e.d[k])); });
+      const chips = Object.keys(e.d || {}).filter(k=>e.d[k]).map(k=>`<span class="tg ${e.d[k] < 0 ? "r" : "g"}">${METRICS.find(x=>x[0]===k)[1]} ${e.d[k] > 0 ? "+" : ""}${e.d[k]}</span>`).join("");
+      const el = document.createElement("div");
+      el.className = "ev " + (e.r === 1 ? "ok" : (e.r === 0 ? "mid" : "bad"));
+      el.innerHTML = `<div class="m">${e.m}</div><h4>${e.r === 1 ? "✓" : (e.r === 0 ? "⚠" : "✗")} ${esc(e.t)}</h4><p>${esc(e.msg)}</p>${chips ? `<div class="ds">${chips}</div>` : ""}`;
+      document.getElementById("tl").appendChild(el);
+      gauges(m);
+      timers.push(setTimeout(step, 750));
+    };
+    document.getElementById("skip").onclick = () => { timers.forEach(clearTimeout); timers = []; while(i < evs.length){ const e = evs[i++]; Object.keys(e.d || {}).forEach(k=>{ m[k] = Math.max(0, Math.min(100, m[k] + e.d[k])); });
+      const chips = Object.keys(e.d || {}).filter(k=>e.d[k]).map(k=>`<span class="tg ${e.d[k] < 0 ? "r" : "g"}">${METRICS.find(x=>x[0]===k)[1]} ${e.d[k]}</span>`).join("");
+      const el = document.createElement("div"); el.className = "ev " + (e.r === 1 ? "ok" : (e.r === 0 ? "mid" : "bad"));
+      el.innerHTML = `<div class="m">${e.m}</div><h4>${e.r === 1 ? "✓" : (e.r === 0 ? "⚠" : "✗")} ${esc(e.t)}</h4><p>${esc(e.msg)}</p>${chips ? `<div class="ds">${chips}</div>` : ""}`;
+      document.getElementById("tl").appendChild(el); }
+      gauges(m); finish(m, evs); };
+    timers.push(setTimeout(step, 300));
+  }
+  function finish(m, evs){
+    document.getElementById("skipWrap").classList.add("hide");
+    const sc = SC[scKey], avg = Math.round((m.prog + m.stab + m.safe + m.cost) / 4), lowest = Math.min(m.prog, m.stab, m.safe, m.cost);
+    let L = avg >= 92 ? "S" : avg >= 82 ? "A" : avg >= 68 ? "B" : avg >= 52 ? "C" : "D";
+    if(lowest < 40 && (L === "S" || L === "A")) L = "B";
+    const bad = evs.filter(e=>e.r === -1).length, mid = evs.filter(e=>e.r === 0).length;
+    const words = { S:"教科书级的选型：简单、够用、把钱和人力花在了最要命的地方。", A:"很扎实的方案，只有小磕碰。", B:"能跑起来，但有几次本可以避免的事故。", C:"这一年过得很狼狈，好几个关键风险没有防住。", D:"项目差点没撑过这一年。复盘一下，下次一定更好。" }[L];
+    const b = best(), rank = "SABCD";
+    if(!b[scKey] || rank.indexOf(L) < rank.indexOf(b[scKey])){ b[scKey] = L; try{ localStorage.setItem(BEST, JSON.stringify(b)); }catch(e){} }
+    document.getElementById("grade").innerHTML = `<div class="L">${L}</div><div><h3>综合 ${avg} 分 · ${sc.n}</h3><p>${words}</p><p style="margin-top:6px">这一年：${evs.length - bad - mid} 件事稳稳接住，${mid} 件有惊无险，${bad} 件出了事故。最弱的一项是「${METRICS.find(x=>m[x[0]] === lowest)[1]}」（${lowest} 分）。</p></div>`;
+    const rows = [];
+    slotsFor().forEach(s=>{
+      const v = choice[s.k], good = (sc.ok[s.k] || []).includes(v), refName = optOf(s.k, sc.ref[s.k]).n;
+      rows.push(`<tr><td>${s.n}</td><td>${good ? "✓" : "✗"} ${optOf(s.k, v).n}</td><td>${good ? "合适。" : `参考：<b>${refName}</b>。`}${esc(sc.why[s.k] || "")} <a href="${s.mod}">→</a></td></tr>`);
+    });
+    const miss = sc.must.filter(k=>!guards.has(k)), waste = sc.waste.filter(k=>guards.has(k));
+    rows.push(`<tr><td>保障措施</td><td>${guards.size} 项</td><td>${miss.length ? `✗ 缺少：${miss.map(k=>`<a href="${GUARDS.find(g=>g.k===k).mod}">${gName(k)}</a>`).join("、")}。` : "✓ 关键保障都到位了。"}${waste.length ? ` ⚠ 在这个场景里不太需要：${waste.map(gName).join("、")}，人力可以省下来。` : ""}</td></tr>`);
+    document.getElementById("review").innerHTML = `<thead><tr><th>决定</th><th>你的选择</th><th>点评</th></tr></thead><tbody>${rows.join("")}</tbody>`;
+    document.getElementById("result").classList.remove("hide");
+    renderScs();
+  }
+
+  /* ---------------- 事件绑定 ---------------- */
+  document.getElementById("scs").addEventListener("click", e=>{
+    const b = e.target.closest(".sc"); if(!b) return;
+    scKey = b.dataset.k; choice = {}; guards = new Set();
+    renderScs(); renderCfg(); document.getElementById("out").classList.add("hide");
+    document.getElementById("cfgWrap").scrollIntoView({ behavior:"smooth", block:"start" });
+  });
+  document.getElementById("slots").addEventListener("click", e=>{
+    const b = e.target.closest(".op"); if(!b) return;
+    choice[b.dataset.s] = b.dataset.v; renderCfg();
+  });
+  document.getElementById("slots").addEventListener("change", e=>{
+    const i = e.target.closest("input[data-g]"); if(!i) return;
+    i.checked ? guards.add(i.dataset.g) : guards.delete(i.dataset.g); renderCfg();
+  });
+  document.getElementById("go").addEventListener("click", run);
+  document.getElementById("ref").addEventListener("click", ()=>{ const r = SC[scKey].ref; choice = Object.assign({}, r); delete choice.guards; guards = new Set(r.guards); renderCfg(); });
+  document.getElementById("reset").addEventListener("click", ()=>{ choice = {}; guards = new Set(); renderCfg(); });
+  document.getElementById("again").addEventListener("click", ()=>document.getElementById("cfgWrap").scrollIntoView({ behavior:"smooth" }));
+  document.getElementById("other").addEventListener("click", ()=>document.getElementById("scs").scrollIntoView({ behavior:"smooth" }));
+
+  renderScs(); renderCfg();
+})();
+</script>
+<script src="content/assets/modules.js"></script>
+<script src="content/assets/atlas-data.js"></script>
+<script src="content/assets/ui.js"></script>
+</body>
+</html>

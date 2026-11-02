@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>闪卡复习 · 技术全景与架构选型</title>
+<meta name="description" content="闪卡复习：用间隔重复记住 100 多个技术名词——它在哪一层、解决什么、代价是什么。支持正向和反向两种练习，与技术图鉴共用掌握状态。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="content/assets/learn.css">
+<script src="content/assets/theme.js"></script>
+<style>
+  .topnav .crumb{flex:1}
+  .hero{padding:34px 0 4px}
+  .L-fe{--lc:#3a6b8f}.L-be{--lc:#1e5b4f}.L-data{--lc:#b7791f}.L-infra{--lc:#6b4f8a}.L-ai{--lc:#a0522d}.L-arch{--lc:#5a6b2f}
+  :root[data-theme="dark"] .L-fe{--lc:#8ebbdb}:root[data-theme="dark"] .L-be{--lc:#6cc2a8}:root[data-theme="dark"] .L-data{--lc:#e3aa4f}
+  :root[data-theme="dark"] .L-infra{--lc:#b9a3e3}:root[data-theme="dark"] .L-ai{--lc:#e8a07a}:root[data-theme="dark"] .L-arch{--lc:#b3c776}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+  .kpi{background:var(--paper-2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow)}
+  .kpi .v{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--green);line-height:1.2}
+  .kpi .l{font-size:12px;color:var(--muted)}
+  .setup{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 4px}
+  .setup label{font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+  .setup select{padding:7px 10px;border:1px solid var(--line-2);border-radius:999px;background:var(--card);color:var(--ink);font-size:13px}
+  .seg{display:inline-flex;border:1px solid var(--line-2);border-radius:999px;overflow:hidden}
+  .seg button{border:none;background:var(--card);color:var(--ink-soft);padding:7px 13px;cursor:pointer;font-family:inherit;font-size:13px}
+  .seg button.on{background:var(--ink);color:var(--paper)}
+  .stage{margin:16px 0 10px}
+  .prog{display:flex;align-items:center;gap:10px;font-family:var(--font-mono);font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .prog .t{flex:1;height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+  .prog .t span{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--amber));transition:width .3s}
+  .flash{perspective:1400px;cursor:pointer;user-select:none}
+  .flash .inner{position:relative;min-height:330px;transition:transform .45s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+  .flash.flip .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;background:var(--paper-2);border:1px solid var(--line-2);border-top:6px solid var(--lc);border-radius:18px;box-shadow:var(--shadow);padding:26px 28px;display:flex;flex-direction:column}
+  .face.back{transform:rotateY(180deg);overflow:auto}
+  .face .meta{font-family:var(--font-mono);font-size:12px;color:var(--muted);letter-spacing:.06em}
+  .face .big{font-family:var(--font-display);font-weight:900;font-size:clamp(30px,6vw,46px);margin:auto 0 8px;line-height:1.15;color:var(--ink)}
+  .face .ask{color:var(--ink-soft);font-size:15px;margin-bottom:auto}
+  .face .clue{font-size:clamp(17px,2.6vw,21px);font-weight:700;color:var(--ink);margin:auto 0 10px;line-height:1.5}
+  .face .hint{font-size:12.5px;color:var(--muted);margin-top:14px;font-family:var(--font-mono)}
+  .face h3{margin:4px 0 8px;font-size:26px;font-family:var(--font-display);font-weight:900}
+  .face .r{margin:6px 0;font-size:14.5px;color:var(--ink-soft)}
+  .face .r b{display:inline-block;min-width:64px;font-family:var(--font-mono);font-size:11.5px;color:var(--muted);font-weight:500}
+  .face .r.s b{color:var(--green)} .face .r.c b{color:var(--amber)} .face .r.x b{color:var(--red)}
+  .rate{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+  .rate button{border:1px solid var(--line-2);background:var(--card);border-radius:14px;padding:12px 8px;cursor:pointer;font-family:inherit;font-size:15px;font-weight:700;color:var(--ink);transition:.15s}
+  .rate button small{display:block;font-weight:500;font-size:11.5px;color:var(--muted);font-family:var(--font-mono);margin-top:2px}
+  .rate button:hover{transform:translateY(-2px)}
+  .rate .r1:hover{border-color:var(--red);background:var(--red-soft)}
+  .rate .r2:hover{border-color:var(--amber);background:var(--amber-soft)}
+  .rate .r3:hover{border-color:var(--green);background:var(--green-soft)}
+  .rate button:disabled{opacity:.35;pointer-events:none}
+  .done{background:var(--paper-2);border:1px solid var(--line);border-radius:18px;padding:30px;text-align:center;box-shadow:var(--shadow)}
+  .done h2{font-family:var(--font-display);font-size:30px;margin:0 0 8px}
+  .done .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:24px 0 60px}
+  @media (max-width:720px){ .two{grid-template-columns:1fr} }
+  .panel{background:var(--paper-2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;box-shadow:var(--shadow)}
+  .panel h3{margin:0 0 10px;font-size:15px}
+  .boxes{display:flex;align-items:flex-end;gap:10px;height:120px}
+  .boxes .col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;font-family:var(--font-mono);font-size:11.5px;color:var(--muted)}
+  .boxes .col i{display:block;width:100%;border-radius:6px 6px 0 0;background:var(--green);min-height:2px;transition:height .3s}
+  .days{display:flex;gap:4px;align-items:flex-end;height:90px}
+  .days .d{flex:1;background:var(--line);border-radius:4px;min-height:4px;position:relative}
+  .days .d.on{background:var(--amber)}
+  .days .d.today{outline:2px solid var(--green);outline-offset:1px}
+  .muted{color:var(--muted);font-size:12.5px}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="index.html">← 学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b>闪卡复习</b></span>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span>SPACED REVIEW · 闪卡复习</span>
+    <h1>闪卡<span class="accent">复习</span></h1>
+    <p class="lead">看到名词，先在心里回答三个问题：<b>它在哪一层？解决什么？代价是什么？</b>再翻面核对。认识的卡片间隔越来越长才再出现，不认识的很快会回来——这就是间隔重复。和 <a href="atlas.html">技术图鉴</a> 共用掌握状态。</p>
+    <div class="kpis">
+      <div class="kpi"><div class="v" id="kDue">—</div><div class="l">今天到期</div></div>
+      <div class="kpi"><div class="v" id="kNew">—</div><div class="l">还没学过</div></div>
+      <div class="kpi"><div class="v" id="kKnown">—</div><div class="l">已认识（≥3 档）</div></div>
+      <div class="kpi"><div class="v" id="kStreak">—</div><div class="l">连续学习天数</div></div>
+    </div>
+    <div class="setup">
+      <label>练什么</label>
+      <select id="scope"><option value="today">今日复习（到期 + 新卡）</option><option value="must">只练「必知」</option><option value="all">全部名词</option></select>
+      <select id="layer"><option value="all">全部层</option></select>
+      <label>每次新卡</label>
+      <select id="quota"><option>5</option><option selected>10</option><option>20</option></select>
+      <span class="seg" id="dir"><button data-v="fwd" class="on">名词 → 用途</button><button data-v="rev">用途 → 名词</button></span>
+      <button class="btn" id="start">▶ 开始一组</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="stage" id="stage"></div>
+  <div class="two">
+    <div class="panel"><h3>熟练度分布</h3><div class="boxes" id="boxes"></div><p class="muted" style="margin:8px 0 0">第 1 档：不认识，当场再来；第 2 档：1 天后；第 3 档：3 天后；第 4 档：7 天后；第 5 档：16 天后。</p></div>
+    <div class="panel"><h3>最近 14 天</h3><div class="days" id="days"></div><p class="muted" style="margin:8px 0 0" id="dayTip"></p></div>
+  </div>
+</div>
+
+<script src="content/assets/modules.js"></script>
+<script src="content/assets/atlas-data.js"></script>
+<script>
+(function(){
+  const KEY = "arch_cards_v1", LOG = "arch_review_log", DAY = 864e5;
+  const IV = {1:0, 2:1, 3:3, 4:7, 5:16};
+  const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const LY = Object.fromEntries(ATLAS_LAYERS.map(l=>[l.k, l])), byId = Object.fromEntries(ATLAS.map(a=>[a.id, a]));
+  const LVN = {1:"必知", 2:"常见", 3:"了解即可"};
+  const get = (k, d) => { try{ return JSON.parse(localStorage.getItem(k) || d); }catch(e){ return JSON.parse(d); } };
+  const put = (k, v) => { try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+  const today = () => { const d = new Date(); return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); };
+  let dir = "fwd", queue = [], pos = 0, flipped = false, session = { n:0, ok:0, again:0 }, shownAgain = {};
+
+  document.getElementById("layer").innerHTML += ATLAS_LAYERS.map(l=>`<option value="${l.k}">${l.n}</option>`).join("");
+
+  function streak(log){
+    let n = 0, d = new Date();
+    if(!log[today()]) d = new Date(Date.now() - DAY);
+    for(;;){ const k = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); if(log[k]) { n++; d = new Date(d.getTime() - DAY); } else break; }
+    return n;
+  }
+  function dash(){
+    const cards = get(KEY, "{}"), log = get(LOG, "{}"), now = Date.now();
+    document.getElementById("kDue").textContent = Object.keys(cards).filter(id=>byId[id] && cards[id].due <= now).length;
+    document.getElementById("kNew").textContent = ATLAS.filter(a=>!cards[a.id]).length;
+    document.getElementById("kKnown").textContent = ATLAS.filter(a=>cards[a.id] && cards[a.id].box >= 3).length + "/" + ATLAS.length;
+    document.getElementById("kStreak").textContent = streak(log);
+    const cnt = [1,2,3,4,5].map(b=>ATLAS.filter(a=>cards[a.id] && cards[a.id].box === b).length), mx = Math.max(1, ...cnt);
+    document.getElementById("boxes").innerHTML = cnt.map((c,i)=>`<div class="col"><span>${c}</span><i style="height:${c/mx*80}%;opacity:${0.35 + i*0.16}"></i><span>第${i+1}档</span></div>`).join("");
+    const days = [], t = today();
+    for(let i = 13; i >= 0; i--){ const d = new Date(Date.now() - i*DAY); const k = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); days.push([k, log[k] || 0]); }
+    const dm = Math.max(1, ...days.map(d=>d[1]));
+    document.getElementById("days").innerHTML = days.map(([k,v])=>`<div class="d ${v ? "on" : ""} ${k === t ? "today" : ""}" title="${k}：${v} 张" style="height:${v ? 12 + v/dm*88 : 4}%"></div>`).join("");
+    const total = days.reduce((a,d)=>a+d[1], 0);
+    document.getElementById("dayTip").textContent = total ? `最近 14 天共复习 ${total} 张，今天 ${log[t] || 0} 张。` : "还没有复习记录。每天 10 分钟，比一次刷 2 小时记得更牢。";
+  }
+
+  function build(){
+    const cards = get(KEY, "{}"), now = Date.now(), scope = document.getElementById("scope").value, ly = document.getElementById("layer").value, quota = +document.getElementById("quota").value;
+    let pool = ATLAS.filter(a=>ly === "all" || a.ly === ly);
+    if(scope === "must") pool = pool.filter(a=>a.lv === 1);
+    if(scope === "today"){
+      const due = pool.filter(a=>cards[a.id] && cards[a.id].due <= now).sort((x,y)=>cards[x.id].due - cards[y.id].due);
+      const fresh = pool.filter(a=>!cards[a.id]).sort((x,y)=>x.lv - y.lv).slice(0, quota);
+      return due.concat(fresh).map(a=>a.id);
+    }
+    const arr = pool.map(a=>a.id);
+    for(let i = arr.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    return arr.slice(0, Math.max(quota * 2, 10));
+  }
+
+  function start(){
+    queue = build(); pos = 0; session = { n:0, ok:0, again:0 }; shownAgain = {};
+    if(!queue.length){
+      document.getElementById("stage").innerHTML = `<div class="done"><h2>🎉 今天没有要复习的卡片</h2><p>到期的都复习完了。可以换成「全部名词」随便练练，或者去 <a href="atlas.html">技术图鉴</a> 认识新名词。</p></div>`;
+      return;
+    }
+    show();
+  }
+
+  function show(){
+    if(pos >= queue.length) return finish();
+    const a = byId[queue[pos]], cards = get(KEY, "{}"), c = cards[a.id], ly = LY[a.ly];
+    flipped = false;
+    const front = dir === "fwd"
+      ? `<div class="meta">${ly.n} · ${LVN[a.lv]} · ${c ? "第 " + c.box + " 档" : "新卡"}</div><div class="big">${esc(a.n)}</div><div class="ask">它在哪一层？解决什么问题？代价是什么？<br>先在心里回答，再翻面。</div><div class="hint">点卡片或按空格翻面</div>`
+      : `<div class="meta">${ly.n} · ${esc(a.cat)} · ${c ? "第 " + c.box + " 档" : "新卡"}</div><div class="clue">${esc(a.one)}<br><span style="font-weight:400;font-size:.8em;color:var(--ink-soft)">解决：${esc(a.s)}</span></div><div class="ask">这是哪个技术或概念？</div><div class="hint">点卡片或按空格翻面</div>`;
+    const back = `<div class="meta">${ly.n} · ${esc(a.cat)} · ${LVN[a.lv]}</div><h3>${esc(a.n)}</h3>
+      <div class="r"><b>一句话</b>${esc(a.one)}</div><div class="r s"><b>解决</b>${esc(a.s)}</div><div class="r c"><b>代价</b>${esc(a.c)}</div>${a.x ? `<div class="r x"><b>别用</b>${esc(a.x)}</div>` : ""}
+      <div class="r"><b>常搭配</b>${(a.pair||[]).map(i=>byId[i] ? esc(byId[i].n) : "").filter(Boolean).join("、") || "—"}</div>
+      <div class="hint"><a href="atlas.html#${a.id}" onclick="event.stopPropagation()">在图鉴中查看</a> · <a href="content/${a.mod}" onclick="event.stopPropagation()">去详解页</a></div>`;
+    document.getElementById("stage").innerHTML = `<div class="prog"><span>${pos + 1} / ${queue.length}</span><span class="t"><span style="width:${pos / queue.length * 100}%"></span></span><span>✓ ${session.ok}</span></div>
+      <div class="flash L-${a.ly}" id="card"><div class="inner"><div class="face front">${front}</div><div class="face back">${back}</div></div></div>
+      <div class="rate"><button class="r1" data-r="1" disabled>不认识<small>1 · 马上再来</small></button><button class="r2" data-r="2" disabled>有点模糊<small>2 · 明天再见</small></button><button class="r3" data-r="3" disabled>认识<small>3 · 间隔加长</small></button></div>`;
+    document.getElementById("card").addEventListener("click", flip);
+    document.querySelectorAll(".rate button").forEach(b=>b.addEventListener("click", ()=>rate(+b.dataset.r)));
+  }
+  function flip(){
+    const el = document.getElementById("card"); if(!el) return;
+    flipped = !flipped; el.classList.toggle("flip", flipped);
+    document.querySelectorAll(".rate button").forEach(b=>b.disabled = !flipped);
+  }
+  function rate(r){
+    if(!flipped) return;
+    const id = queue[pos], cards = get(KEY, "{}"), c = cards[id] || { box: 0 };
+    let box = c.box || 0;
+    if(r === 1){ box = 1; session.again++; if((shownAgain[id] || 0) < 2){ shownAgain[id] = (shownAgain[id] || 0) + 1; queue.push(id); } }
+    else if(r === 2){ box = 2; }   // 模糊：回到第 2 档，明天再见
+    else { box = c.box ? Math.min(5, box + 1) : 3; session.ok++; }   // 新卡第一次就认识 → 直接第 3 档
+    cards[id] = { box, due: Date.now() + IV[box] * DAY };
+    put(KEY, cards);
+    const log = get(LOG, "{}"); log[today()] = (log[today()] || 0) + 1; put(LOG, log);
+    session.n++; pos++; dash(); show();
+  }
+  function finish(){
+    document.getElementById("stage").innerHTML = `<div class="done"><h2>这一组完成了 🎉</h2><p>共 ${session.n} 次作答，认识 <b>${session.ok}</b> 次，「不认识」<b>${session.again}</b> 次（已安排很快再见）。</p>
+      <div class="btns"><button class="btn pri" id="again">再来一组</button><a class="btn" href="atlas.html">去图鉴看看</a><a class="btn" href="sandbox.html">去架构沙盘练判断</a></div></div>`;
+    document.getElementById("again").onclick = start;
+  }
+
+  document.getElementById("start").addEventListener("click", start);
+  document.getElementById("dir").addEventListener("click", e=>{
+    const b = e.target.closest("button"); if(!b) return;
+    dir = b.dataset.v; document.querySelectorAll("#dir button").forEach(x=>x.classList.toggle("on", x === b));
+    if(queue.length && pos < queue.length) show();
+  });
+  document.addEventListener("keydown", e=>{
+    if(/INPUT|SELECT|TEXTAREA/.test(e.target.tagName) || document.querySelector(".pal-mask.on")) return;
+    if(!document.getElementById("card")) return;
+    if(e.key === " "){ e.preventDefault(); flip(); }
+    if(["1","2","3"].includes(e.key)) rate(+e.key);
+  });
+  window.addEventListener("storage", dash);
+  dash();
+  document.getElementById("stage").innerHTML = `<div class="done"><h2>准备好了吗？</h2><p>选择要练的范围，点「开始一组」。快捷键：<b>空格</b> 翻面，<b>1 / 2 / 3</b> 评分。</p><div class="btns"><button class="btn pri" id="go0">▶ 开始今日复习</button></div></div>`;
+  document.getElementById("go0").onclick = start;
+})();
+</script>
+<script src="content/assets/ui.js"></script>
+</body>
+</html>

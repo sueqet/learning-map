@@ -49,7 +49,7 @@
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
 
   /* 顶部导航 */
-  .topnav{position:sticky;top:0;z-index:70;background:rgba(245,241,232,.9);backdrop-filter:blur(11px);border-bottom:1px solid var(--line)}
+  .topnav{position:sticky;top:0;z-index:70;background:var(--nav-bg);backdrop-filter:blur(11px);border-bottom:1px solid var(--line)}
   .topnav .wrap{display:flex;align-items:center;gap:14px;height:58px;flex-wrap:nowrap}
   .brand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:15.5px;color:var(--ink);white-space:nowrap;letter-spacing:-.01em}
   .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
@@ -117,7 +117,7 @@
   .mod .mh .tt{flex:1;min-width:0}
   .mod .mh .tt h3{margin:0;font-size:17.5px;font-weight:800;letter-spacing:-.01em}
   .mod .mh .tt .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
-  .mod .mh .tt .demotag{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-family:var(--font-mono);font-size:10.5px;color:var(--blue);background:var(--blue-soft);border:1px solid #cfe0dc;border-radius:999px;padding:2px 8px}
+  .mod .mh .tt .demotag{display:inline-flex;align-items:center;gap:4px;margin-top:6px;font-family:var(--font-mono);font-size:10.5px;color:var(--blue);background:var(--blue-soft);border:1px solid var(--line-g);border-radius:999px;padding:2px 8px}
   .mod .mp{margin-left:auto;flex:none;text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap}
   .mod .mp b{color:var(--st,var(--green));font-size:14px}
   .mod .mp .bar{width:64px;height:6px;background:var(--line);border-radius:999px;margin-top:5px;overflow:hidden;margin-left:auto}
@@ -130,7 +130,7 @@
   .mod .pts .nm{font-size:14.5px;color:var(--ink-soft);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mod .pts input:checked ~ .nm{color:var(--muted);text-decoration:line-through}
   .mod .pts .dif{font-size:11px;padding:2px 7px;border-radius:999px;flex:none;font-family:var(--font-mono)}
-  .mod .pts .go{flex:none;font-family:var(--font-mono);font-size:12px;color:var(--green);padding:4px 9px;border:1px solid var(--line-2);border-radius:999px;background:#fff;transition:.12s;white-space:nowrap}
+  .mod .pts .go{flex:none;font-family:var(--font-mono);font-size:12px;color:var(--green);padding:4px 9px;border:1px solid var(--line-2);border-radius:999px;background:var(--card);transition:.12s;white-space:nowrap}
   .mod .pts .go:hover{border-color:var(--green);background:var(--green-soft);text-decoration:none}
   .dif.e1{background:var(--green-soft);color:var(--green)}
   .dif.e2{background:var(--amber-soft);color:var(--amber)}
@@ -164,16 +164,38 @@
   .aim .k{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;color:var(--c);text-transform:uppercase}
   .aim h3{margin:4px 0 6px;font-size:19px;font-weight:900;font-family:var(--font-display)}
   .aim p{margin:0;font-size:13.5px;color:var(--ink-soft)}
-  .need{margin:18px 0 0;padding:14px 18px;background:var(--blue-soft);border:1px solid #cfe0dc;border-radius:var(--radius);font-size:14px;color:var(--ink-soft)}
+  .need{margin:18px 0 0;padding:14px 18px;background:var(--blue-soft);border:1px solid var(--line-g);border-radius:var(--radius);font-size:14px;color:var(--ink-soft)}
   .need b{color:var(--ink)}
   .need code{background:var(--paper-2);border:1px solid var(--line);padding:1px 6px;border-radius:5px;font-family:var(--font-mono);font-size:12.5px;color:var(--green)}
   .layermap{display:flex;flex-direction:column;gap:8px;margin:14px 0 0}
-  .layermap a{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-left:6px solid var(--c);border-radius:10px;padding:10px 14px;color:var(--ink-soft);font-size:13.5px;transition:.15s}
+  .layermap a{display:grid;grid-template-columns:150px 1fr auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-left:6px solid var(--c);border-radius:10px;padding:10px 14px;color:var(--ink-soft);font-size:13.5px;transition:.15s}
   .layermap a:hover{text-decoration:none;transform:translateX(3px);border-color:var(--c)}
   .layermap a b{color:var(--c);font-size:14.5px}
   .layermap a .go{font-family:var(--font-mono);font-size:12px;color:var(--green)}
   @media (max-width:640px){.layermap a{grid-template-columns:1fr}}
+  /* ===== 主题 token 与深色模式（与 content/assets/learn.css 一致） ===== */
+  :root{--card:#fff;--line-g:#cfe0dc;--nav-bg:rgba(245,241,232,.9);--on-accent:#fff;color-scheme:light}
+  :root[data-theme="dark"]{
+    --paper:#191814;--paper-2:#211f1b;--card:#272520;--ink:#ebe5d6;--ink-soft:#c8c0af;--muted:#9a917f;
+    --line:#38352e;--line-2:#4b473d;--green:#6cc2a8;--green-soft:#1d3530;--amber:#e3aa4f;--amber-soft:#382d1a;
+    --red:#f08b7b;--red-soft:#3b221e;--blue:#8ebbdb;--blue-soft:#1c2a35;--line-g:#2b4a43;--nav-bg:rgba(25,24,20,.88);--on-accent:#13120e;
+    --shadow:0 1px 2px rgba(0,0,0,.35),0 14px 34px -20px rgba(0,0,0,.85);color-scheme:dark}
+  :root[data-theme="dark"] body{background-image:radial-gradient(1200px 620px at 90% -8%, rgba(108,194,168,.07), transparent 60%),radial-gradient(900px 520px at -6% 6%, rgba(227,170,79,.05), transparent 55%)}
+  :root[data-theme="dark"] .chip.active{background:var(--ink);color:var(--paper)}
+  :root[data-theme="dark"] .totop{background:var(--paper-2);color:var(--ink)}
+  :root[data-theme="dark"] .aim:nth-child(1){--c:#6cc2a8!important}:root[data-theme="dark"] .aim:nth-child(2){--c:#8ebbdb!important}:root[data-theme="dark"] .aim:nth-child(3){--c:#e3aa4f!important}
+  .topnav .search{margin-left:auto}
+  /* ===== 工具箱 ===== */
+  .tools{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:22px 0 4px}
+  .tool{display:flex;flex-direction:column;gap:4px;background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);color:var(--ink);transition:transform .15s,border-color .15s;position:relative;overflow:hidden}
+  .tool:hover{transform:translateY(-3px);border-color:var(--green);text-decoration:none}
+  .tool .ic{font-size:22px;line-height:1}
+  .tool b{font-size:16px}
+  .tool span{font-size:13px;color:var(--ink-soft)}
+  .tool .st{font-family:var(--font-mono);font-size:12px;color:var(--green);margin-top:2px}
+  .tool.cont{background:linear-gradient(135deg,var(--green-soft),var(--paper-2));border-color:var(--green)}
 </style>
+<script src="content/assets/theme.js"></script>
 </head>
 <body>
 <nav class="topnav">
@@ -189,7 +211,7 @@
   <div class="wrap">
     <span class="eyebrow"><span class="dot"></span>TECH LANDSCAPE MAP · 学习大纲</span>
     <h1>技术全景与<br><span class="accent">架构选型</span></h1>
-    <p class="lead">不背 API、不抠配置项，而是建立一张<b>技术全景地图</b>：听到任何技术名词，能快速说出它<b>在哪一层、解决什么问题、代价是什么、什么场景不该用</b>；AI 给你方案时，能<b>问出关键问题</b>并<b>用最小成本验证</b>。12 个模块，每个知识点都有详解网页、<b>可动手的交互演示</b>和考核题。</p>
+    <p class="lead">不背 API、不抠配置项，而是建立一张<b>技术全景地图</b>：听到任何技术名词，能快速说出它<b>在哪一层、解决什么问题、代价是什么、什么场景不该用</b>；AI 给你方案时，能<b>问出关键问题</b>并<b>用最小成本验证</b>。13 个模块，每个知识点都有详解网页、<b>可动手的交互演示</b>和考核题；另有 <b>技术图鉴、架构沙盘、闪卡复习</b> 三件工具。</p>
     <div class="stats">
       <div class="stat"><div class="num" id="nMod">—</div><div class="lab">知识模块</div></div>
       <div class="stat"><div class="num" id="nPt">—</div><div class="lab">知识点</div></div>
@@ -202,6 +224,12 @@
       <div class="aim" style="--c:#1e5b4f"><div class="k">Ask · 会问</div><h3>会问</h3><p>这个方案的<b>边界、代价、失败模式</b>是什么？权限在哪？重试会不会重复扣款？</p></div>
       <div class="aim" style="--c:#3a6b8f"><div class="k">Judge · 会判</div><h3>会判</h3><p>AI 或别人给的方案，是否符合<b>当前阶段的约束</b>：团队、流量、预算、一致性要求？</p></div>
       <div class="aim" style="--c:#b7791f"><div class="k">Verify · 会验</div><h3>会验</h3><p>用<b>最小原型、接口文档、测试、日志、压测</b>去验证，而不是凭感觉相信。</p></div>
+    </div>
+    <div class="tools" id="tools">
+      <a class="tool cont" id="tCont" href="content/01-goal.html"><span class="ic">▶</span><b>从这里开始</b><span id="tContD">01 学习目标：会问、会判、会验</span><span class="st" id="tContS"></span></a>
+      <a class="tool" href="atlas.html"><span class="ic">◎</span><b>技术图鉴</b><span>100+ 个技术名词铺成一张分层地图，点开就知道它在哪层、解决什么、代价是什么。</span><span class="st" id="tAtlas"></span></a>
+      <a class="tool" href="sandbox.html"><span class="ic">▣</span><b>架构沙盘</b><span>当一回技术负责人：选型、上线、迎接一年里的各种事故，看能拿几分。</span><span class="st" id="tSand"></span></a>
+      <a class="tool" href="review.html"><span class="ic">⟳</span><b>闪卡复习</b><span>间隔重复，每天几分钟，把名词真正记住。</span><span class="st" id="tRev"></span></a>
     </div>
     <div class="need">📌 <b>学习边界</b>：操作性细节（函数怎么写、配置项叫什么、报错逐行怎么改）交给 AI 和文档；<b>概念性细节</b>（数据流、接口契约、一致性、权限、失败模式、成本）必须自己懂。完整的需求说明与掌握清单见 <a href="content/01-goal.html">01 学习目标</a> 与本目录的 <code>学习需求与掌握清单.md</code>。</div>
 
@@ -227,6 +255,7 @@
       <button class="chip" data-stage="judge">练判断<span class="cnt" id="c-judge"></span></button>
       <button class="chip" data-stage="verify">练验证<span class="cnt" id="c-verify"></span></button>
       <button class="chip" data-stage="ai">练 AI 协作<span class="cnt" id="c-ai"></span></button>
+      <button class="chip" data-stage="apply">学以致用<span class="cnt" id="c-apply"></span></button>
     </div>
     <input class="msearch" id="searchMob" type="text" placeholder="🔍 搜索知识点 / 模块…">
   </div>
@@ -258,141 +287,8 @@
   </div>
 </div>
 
-<script>
-/* ============================================================
-   MODULES —— 学习大纲数据（可维护区）
-   新增知识点：往对应模块的 pts 数组加一项 {id, title, diff}，
-   并在详解页里加同 id 的 <section class="topic" id="...">。
-   mark：该模块的「掌握标志」（来自学习需求与掌握清单）。
-   ============================================================ */
-const STAGES = {
-  map:{ name:"建地图", color:"#1e5b4f", desc:"先说清「要学什么、不学什么」，再把所有名词放进一张分层地图：前端、后端、数据、基础设施，以及语言、框架、架构分别是什么。" },
-  compare:{ name:"学比较", color:"#3a6b8f", desc:"逐层看主流选项的性格、优点和代价：Vue / React、FastAPI / Django / Spring Boot、SQL / NoSQL / 缓存、单体 / 微服务、Docker / CI/CD / K8s。" },
-  judge:{ name:"练判断", color:"#b7791f", desc:"补上判断力最依赖的概念细节：权限边界、失败模式、总成本与演进路径，并用「五问框架」给三个虚拟产品做选型。" },
-  verify:{ name:"练验证", color:"#6b4f8a", desc:"用最小闭环（Vue + FastAPI + PostgreSQL + Docker）看清每层怎么连、出问题先查哪一层，替换任何一环都心里有数。" },
-  ai:{ name:"练 AI 协作", color:"#a0522d", desc:"形成「AI 生成 → 你判断 → 测试验证」的工作闭环：会追问、会审方案、会用最小成本验证 AI 的说法。" },
-};
-
-const MODULES = [
-  { id:"goal", no:"01", stage:"map", title:"学习目标：会问、会判、会验", sub:"需求说明 · 两类细节 · 学习边界", file:"01-goal.html", href:"content/01-goal.html", demo:true,
-    mark:"能说清自己要学什么、不学什么，以及「问、判、验」分别指什么。",
-    pts:[
-      {id:"need", title:"我的需求：建一张技术全景地图", diff:1},
-      {id:"two-kinds", title:"操作性细节 vs 概念性细节", diff:1},
-      {id:"why-not-enough", title:"为什么「只背优缺点表」不够", diff:2},
-      {id:"ask-judge-verify", title:"目标能力：会问、会判、会验", diff:1},
-      {id:"must-vs-skip", title:"必须懂 / 交给 AI / 不必深入", diff:1},
-    ]},
-  { id:"map", no:"02", stage:"map", title:"全景地图：软件产品的分层", sub:"四层 · 请求旅程 · 名词归位 · 接口契约", file:"02-map.html", href:"content/02-map.html", demo:true,
-    mark:"能画出「用户 → 前端 → API → 业务 → 数据库 → 部署」的简图。",
-    pts:[
-      {id:"layers", title:"四层：前端、后端、数据、基础设施", diff:1},
-      {id:"request-journey", title:"一次请求的旅程（数据流）", diff:1},
-      {id:"noun-types", title:"名词分类：语言 / 框架 / 库 / 架构 / 工具 / 平台", diff:1},
-      {id:"api-contract", title:"层与层之间靠什么连：API 与接口契约", diff:2},
-      {id:"where-is-it", title:"听到新名词，先问「它在哪一层」", diff:1},
-    ]},
-  { id:"lang", no:"03", stage:"map", title:"编程语言的性格", sub:"Java · Python · Go · JS/TS · Rust", file:"03-lang.html", href:"content/03-lang.html", demo:true,
-    mark:"能说出 3 种语言各自适合和不适合的场景。",
-    pts:[
-      {id:"lang-vs-arch", title:"语言不决定架构，但影响倾向", diff:1},
-      {id:"java", title:"Java：稳重的「大企业」", diff:1},
-      {id:"python", title:"Python：灵巧的「多面手」", diff:1},
-      {id:"go", title:"Go：高效的「现代工厂」", diff:1},
-      {id:"js-ts", title:"JavaScript / TypeScript：无处不在的「连接器」", diff:1},
-      {id:"rust", title:"Rust：极致的「安全狂人」", diff:2},
-      {id:"lang-choose", title:"怎么选语言：团队、生态、场景", diff:2},
-    ]},
-  { id:"frontend", no:"04", stage:"compare", title:"前端层：界面怎么搭", sub:"三件套 · Vue/React · SPA/SSR/SSG", file:"04-frontend.html", href:"content/04-frontend.html", demo:true,
-    mark:"知道 Vue / React 是前端 UI 框架而不是后端架构；能在 SPA / SSR / SSG 之间做选择。",
-    pts:[
-      {id:"fe-basics", title:"HTML / CSS / JavaScript 三件套", diff:1},
-      {id:"why-framework", title:"为什么需要框架：组件化、声明式、状态驱动", diff:1},
-      {id:"vue-react", title:"Vue、React、Svelte、Angular 怎么比", diff:1},
-      {id:"render-modes", title:"渲染方式：SPA / SSR / SSG", diff:2},
-      {id:"fe-ecosystem", title:"Next.js / Nuxt、UI 库与跨端方案", diff:2},
-    ]},
-  { id:"backend", no:"05", stage:"compare", title:"后端与 API 框架", sub:"HTTP/REST · FastAPI · Django/Flask · Spring Boot · 异步", file:"05-backend.html", href:"content/05-backend.html", demo:true,
-    mark:"听到 FastAPI 知道它是 Python 后端 API 框架，能说出它适合 API 与 AI 服务化。",
-    pts:[
-      {id:"be-role", title:"后端做什么：规则、鉴权、调数据", diff:1},
-      {id:"http-api", title:"HTTP 与 REST API：请求、响应、状态码", diff:1},
-      {id:"fastapi", title:"FastAPI：Python 的现代 API 框架", diff:1},
-      {id:"py-family", title:"Django 与 Flask：全家桶 vs 自助餐", diff:1},
-      {id:"other-stacks", title:"Spring Boot、NestJS / Express、Go", diff:2},
-      {id:"sync-async", title:"同步 vs 异步：I/O 多时异步更划算", diff:2},
-    ]},
-  { id:"data", no:"06", stage:"compare", title:"数据层：数据放在哪", sub:"SQL · NoSQL · 缓存 · 一致性 · 向量库", file:"06-data.html", href:"content/06-data.html", demo:true,
-    mark:"能判断订单 / 金融偏关系型、缓存 / 会话偏 Redis、文档型偏 MongoDB。",
-    pts:[
-      {id:"sql-db", title:"关系型数据库：结构严格的档案柜", diff:1},
-      {id:"nosql", title:"NoSQL：键值、文档、宽列、图", diff:1},
-      {id:"cache", title:"缓存与 Redis：快，但可能「脏」", diff:2},
-      {id:"consistency", title:"强一致 vs 最终一致", diff:2},
-      {id:"vector-db", title:"向量数据库与 AI 检索", diff:2},
-      {id:"data-choose", title:"数据层怎么选", diff:2},
-    ]},
-  { id:"arch", no:"07", stage:"compare", title:"架构模式：产品的组织形式", sub:"单体 · 微服务 · 分层 · 模块化单体 · 演进", file:"07-arch.html", href:"content/07-arch.html", demo:true,
-    mark:"能说出微服务的好处和代价；知道小团队别盲目上微服务。",
-    pts:[
-      {id:"monolith", title:"单体：一个「全能小作坊」", diff:1},
-      {id:"microservices", title:"微服务：一个「专业化集团」", diff:2},
-      {id:"layered", title:"分层架构：接入层 / 业务层 / 数据层", diff:1},
-      {id:"modular", title:"模块化单体：两者之间的中间路线", diff:2},
-      {id:"other-styles", title:"事件驱动与 Serverless", diff:2},
-      {id:"evolve", title:"架构演进：先单体，按需再拆", diff:2},
-    ]},
-  { id:"devops", no:"08", stage:"compare", title:"基础设施与 DevOps", sub:"Git · Docker · CI/CD · K8s · 部署 · 监控", file:"08-devops.html", href:"content/08-devops.html", demo:true,
-    mark:"知道 Docker 解决「环境不一致」、CI/CD 解决「人工上线易错」。",
-    pts:[
-      {id:"git", title:"Git / GitHub：版本控制与协作", diff:1},
-      {id:"docker", title:"Docker：把应用装进标准集装箱", diff:1},
-      {id:"cicd", title:"CI/CD：自动化流水线", diff:1},
-      {id:"k8s", title:"Kubernetes：成百上千个容器的调度员", diff:2},
-      {id:"deploy-where", title:"部署去哪：云服务器、PaaS、Serverless", diff:2},
-      {id:"observability", title:"日志、指标、链路：系统的仪表盘", diff:2},
-    ]},
-  { id:"safety", no:"09", stage:"judge", title:"安全与失败模式", sub:"认证授权 · 密钥 · 超时重试 · 幂等 · 降级 · 备份", file:"09-safety.html", href:"content/09-safety.html", demo:true,
-    mark:"能问出「权限边界在哪、密钥怎么管」；能列出 3 个失败场景和应对方向。",
-    pts:[
-      {id:"authn-authz", title:"认证 vs 授权", diff:1},
-      {id:"secure-basics", title:"最小权限、输入验证、密钥管理", diff:2},
-      {id:"timeout-retry", title:"超时与重试", diff:2},
-      {id:"idempotency", title:"幂等：重试也不重复扣款", diff:2},
-      {id:"degrade", title:"限流、熔断、降级", diff:2},
-      {id:"backup", title:"备份与恢复：数据能不能找回", diff:2},
-    ]},
-  { id:"decide", no:"10", stage:"judge", title:"选型判断：五问框架与成本演进", sub:"五问 · 总成本 · 演进 · 三个案例", file:"10-decide.html", href:"content/10-decide.html", demo:true,
-    mark:"能用五问框架给博客、订单系统、AI 问答服务各写出选型和理由。",
-    pts:[
-      {id:"five-questions", title:"五问框架：约束、团队、成本、失败代价、演进", diff:1},
-      {id:"total-cost", title:"总成本：开发 + 运维 + 学习 + 迁移", diff:2},
-      {id:"evolution", title:"演进路径：不过度设计，也不锁死", diff:2},
-      {id:"case-blog", title:"案例一：个人博客 / 文档站", diff:1},
-      {id:"case-order", title:"案例二：电商订单系统", diff:2},
-      {id:"case-ai", title:"案例三：AI 问答服务", diff:2},
-    ]},
-  { id:"capstone", no:"11", stage:"verify", title:"最小闭环：一条线跑通", sub:"Vue + FastAPI + PostgreSQL + Docker", file:"11-capstone.html", href:"content/11-capstone.html", demo:true,
-    mark:"能讲清一个待办应用从点击到入库的每一步，出问题知道先查哪一层。",
-    pts:[
-      {id:"stack-line", title:"推荐起点：为什么是这四件", diff:1},
-      {id:"wire-up", title:"每层怎么连：「待办清单」的数据流", diff:2},
-      {id:"contract-first", title:"接口文档就是契约", diff:2},
-      {id:"debug-layer", title:"出问题先查哪一层：分层排障法", diff:2},
-      {id:"swap-part", title:"替换一环：换 React / Django / MySQL 会怎样", diff:2},
-    ]},
-  { id:"ai", no:"12", stage:"ai", title:"AI 协作：生成、判断、验证", sub:"AI 的边界 · 追问清单 · 方案审查 · 验证闭环", file:"12-ai.html", href:"content/12-ai.html", demo:true,
-    mark:"AI 给方案时，能问出关键问题，并用最小成本验证。",
-    pts:[
-      {id:"ai-limits", title:"AI 能替你做什么、不能替你做什么", diff:1},
-      {id:"ask-list", title:"会问：拿到 AI 方案后的追问清单", diff:1},
-      {id:"judge-plan", title:"会判：方案是否符合当前约束", diff:2},
-      {id:"verify-claim", title:"会验：每种说法对应一种验证方式", diff:2},
-      {id:"ai-loop", title:"闭环：AI 生成 → 你判断 → 测试验证", diff:1},
-      {id:"finish-line", title:"终点状态与下一步", diff:1},
-    ]},
-];
-</script>
+<script src="content/assets/modules.js"></script>
+<script src="content/assets/atlas-data.js"></script>
 
 <script>
 /* ============================================================
@@ -518,5 +414,31 @@ const MODULES = [
   renderAll(); renderProgress(); applyFilter();
 })();
 </script>
+<script>
+/* 工具箱状态：继续学习 / 图鉴掌握 / 沙盘成绩 / 今日待复习 */
+(function(){
+  const get = (k, d) => { try{ return JSON.parse(localStorage.getItem(k) || d); }catch(e){ return JSON.parse(d); } };
+  const last = get("arch_last", "null"), done = new Set(get("arch_outline_progress_v1", "[]"));
+  const cards = get("arch_cards_v1", "{}"), best = get("arch_sandbox_v1", "{}"), now = Date.now();
+  const t = id => document.getElementById(id);
+  let next = null;
+  for(const m of MODULES){ for(const p of m.pts){ if(!done.has(m.id + "::" + p.id)){ next = { m, p }; break; } } if(next) break; }
+  if(last && last.href){
+    t("tCont").href = last.href; t("tCont").querySelector("b").textContent = "继续上次学习";
+    t("tContD").textContent = last.title;
+    t("tContS").textContent = next ? "下一个未学会：" + next.m.no + " · " + next.p.title : "全部知识点都学会了 🎉";
+  } else if(next && done.size){
+    t("tCont").href = next.m.href + "#" + next.p.id; t("tCont").querySelector("b").textContent = "继续学习";
+    t("tContD").textContent = next.m.no + " · " + next.m.title + " — " + next.p.title;
+  }
+  const known = ATLAS.filter(a=>cards[a.id] && cards[a.id].box >= 3).length;
+  t("tAtlas").textContent = "已认识 " + known + " / " + ATLAS.length;
+  const g = Object.keys(best).map(k=>best[k]);
+  t("tSand").textContent = g.length ? "最佳成绩：" + g.join(" · ") : "还没玩过，三个场景等你挑战";
+  const due = Object.keys(cards).filter(id=>cards[id].due <= now).length, fresh = ATLAS.filter(a=>!cards[a.id]).length;
+  t("tRev").textContent = due ? "今天有 " + due + " 张到期" : (fresh ? "还有 " + fresh + " 张新卡" : "今天没有到期的卡片");
+})();
+</script>
+<script src="content/assets/ui.js"></script>
 </body>
 </html>

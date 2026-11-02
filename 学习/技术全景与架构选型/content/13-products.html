@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>产品架构拆解：六类产品怎么搭 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 产品架构拆解：即时通讯、秒杀大促、短视频信息流、外卖打车、协同文档、AI 对话产品的核心难点、典型架构与 3 人团队简化版。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">产品架构拆解</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 13 · 技术全景</span></span>
+    <h1 id="pageTitle">产品架构拆解：六类产品怎么搭</h1>
+    <p class="lead" id="pageLead">架构是从难点里长出来的。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>掌握「<b>先找核心难点，再倒推架构</b>」的四步拆解法。</li>
+      <li>说出聊天、秒杀、短视频、外卖、协同文档、AI 对话这六类产品<b>各自最难的地方</b>。</li>
+      <li>对每类产品，能讲出 3–5 个关键组件，以及它们分别是为了解决哪个难点。</li>
+      <li>对每类产品，能给出「<b>只有 3 个人时</b>」的简化版，而不是照搬大厂架构。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完前 12 个模块，尤其是 <a href="06-data.html">06 数据层</a>、<a href="07-arch.html">07 架构模式</a>、<a href="09-safety.html">09 安全与失败模式</a>。本节描述的是业界公开分享中常见做法的<b>抽象</b>，帮助你理解思路，并不代表任何一家公司的真实内部架构。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 方法</div>
+    <h2><span class="num">01</span>从难点倒推架构</h2>
+  </section>
+
+  <section class="topic" id="p-method">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>拆解方法：从核心难点倒推架构<span class="pt">method · 四步拆解法</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="products::p-method"><span>已学会</span></label>
+    </div>
+    <p>你最初的问题是：「<b>不同的产品都使用什么样的架构？</b>」答案是：没有哪个产品是「先选好一堆技术再拼起来」的。架构总是从产品<b>最难的那件事</b>里长出来的。拆解任何产品，都可以用四步：</p>
+    <ol>
+      <li><b>找核心难点</b>：这个产品最不能出错、最难扛的是什么？（消息丢了？库存超卖？视频卡顿？）</li>
+      <li><b>估算规模</b>：多少用户、每秒多少请求、多少数据、读多还是写多？</li>
+      <li><b>从难点倒推组件</b>：每一个关键组件都应该能回答「我是为了解决哪个难点」。</li>
+      <li><b>给出 MVP 版</b>：如果只有 3 个人、两个月，哪些组件可以先不要？</li>
+    </ol>
+    <table class="tbl">
+      <tr><th>产品</th><th>核心难点</th><th>关键技术</th></tr>
+      <tr><td>即时通讯</td><td>海量长连接；消息不丢、不乱、实时</td><td>WebSocket、会话序号、ACK 重发、消息存储分片</td></tr>
+      <tr><td>秒杀大促</td><td>瞬间流量是平时百倍；库存不能超卖</td><td>CDN、网关限流、Redis 预扣、消息队列削峰</td></tr>
+      <tr><td>短视频信息流</td><td>海量视频的存储分发；千人千面推荐</td><td>对象存储、转码、CDN、推荐系统、计数服务</td></tr>
+      <tr><td>外卖打车</td><td>实时位置；就近匹配；多方订单状态</td><td>地理索引、调度算法、状态机、对账</td></tr>
+      <tr><td>协同文档</td><td>多人同时编辑不打架、不丢字</td><td>OT / CRDT、WebSocket、操作日志</td></tr>
+      <tr><td>AI 对话</td><td>推理慢且贵；流式输出；内容安全</td><td>SSE、推理集群、RAG、限流计费、内容审核</td></tr>
+    </table>
+    <div id="demo-teardown"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>看到一张复杂的架构图时，逐个问：<b>这个组件是为了解决哪个难点？</b>答不上来的组件，在你的场景里很可能不需要。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 六类产品</div>
+    <h2><span class="num">02</span>逐个拆解</h2>
+  </section>
+
+  <section class="topic" id="p-im">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>即时通讯：消息不丢、不乱、实时到达<span class="pt">IM · 类微信聊天</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="products::p-im"><span>已学会</span></label>
+    </div>
+    <p>聊天看起来简单：A 发一句，B 收到。难点在于<b>规模</b>和<b>可靠</b>：上亿人同时在线，每个人都要和服务器保持一条长连接；网络随时抖动，但消息既不能丢，也不能乱序，还不能重复显示；手机离线时，消息要存起来等上线再补。</p>
+    <table class="tbl">
+      <tr><th>难点</th><th>常见对策</th><th>用到的技术</th></tr>
+      <tr><td>实时推送</td><td>客户端和服务器保持长连接，有消息立刻推下去</td><td>WebSocket 或自研 TCP 协议；长连接网关集群（Go / C++ / Java 等高并发语言）</td></tr>
+      <tr><td>不丢</td><td>消息带唯一 id；服务端<b>先落库再回执 ACK</b>；客户端没收到 ACK 就重发</td><td>超时重试 + 消息 id</td></tr>
+      <tr><td>不重复</td><td>接收端按消息 id 去重</td><td>幂等</td></tr>
+      <tr><td>不乱序</td><td>每个会话分配递增序号 seq，客户端按 seq 排序，发现缺口就主动拉取</td><td>会话内序号</td></tr>
+      <tr><td>离线与多端同步</td><td>在线时推，离线后上线按 seq 拉（推拉结合）；手机后台走系统推送通道</td><td>消息存储 + 推送服务</td></tr>
+      <tr><td>海量消息存储</td><td>按会话分片，写多读少</td><td>宽列数据库（HBase / Cassandra）或分库分表；Kafka 削峰</td></tr>
+      <tr><td>群聊</td><td>小群「写扩散」（每人一份收件箱），大群「读扩散」（存一份，大家来读）</td><td>按群规模选策略</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>3 人团队版：</b>一个后端服务同时处理 WebSocket 和业务；消息存 PostgreSQL，按（会话 id, seq）建索引；Redis 记录谁在线；先不做多端同步和千人大群。这套足以支撑早期几千人同时在线。</p></div>
+  </section>
+
+  <section class="topic" id="p-flash">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>秒杀大促：瞬间流量与库存不超卖<span class="pt">flash sale · 削峰与防超卖</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="products::p-flash"><span>已学会</span></label>
+    </div>
+    <p>秒杀的特点是：<b>100 件库存，几十万人在同一秒点「购买」</b>。如果所有请求都直接打到数据库，数据库瞬间被压垮，整个网站跟着瘫痪。核心思路是<b>层层过滤</b>：让绝大多数请求在越靠前的地方被挡住或消化，只有真正能买到的那一小部分走到数据库。</p>
+    <table class="tbl">
+      <tr><th>层</th><th>做法</th><th>挡住了什么</th></tr>
+      <tr><td>前端</td><td>商品页静态化放 CDN；开始前按钮置灰；点击后防连点；排队页或验证码</td><td>页面流量、机器刷单、重复点击</td></tr>
+      <tr><td>接入层</td><td>网关按用户 / IP / 设备限流，黑名单防刷</td><td>超出系统承受能力的请求</td></tr>
+      <tr><td>库存</td><td>库存预先放进 Redis，用原子操作扣减，扣成功才放行</td><td>绝大部分「其实买不到」的请求</td></tr>
+      <tr><td>下单</td><td>扣库存成功后发消息，订单服务<b>异步</b>慢慢建单</td><td>瞬时写入洪峰（削峰）</td></tr>
+      <tr><td>数据库</td><td>条件更新 <code class="inl">UPDATE … SET stock = stock - 1 WHERE id = ? AND stock &gt; 0</code>；一人一单靠唯一约束</td><td>最后一道防超卖、防重复下单的防线</td></tr>
+      <tr><td>隔离</td><td>秒杀服务独立部署；准备降级开关；提前全链路压测</td><td>秒杀出事拖垮正常购物</td></tr>
+    </table>
+    <div id="demo-funnel"></div>
+    <div class="callout warn"><span class="i">!</span><p><b>3 人团队版：</b>如果「秒杀」只是几百人抢 50 张优惠券，不需要上面整套。数据库<b>条件更新</b> + <b>唯一约束</b>（一人一单）+ 简单限流就足够，再做一次压测确认。</p></div>
+  </section>
+
+  <section class="topic" id="p-feed">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>短视频信息流：存储分发与推荐<span class="pt">feed · 类抖音</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="products::p-feed"><span>已学会</span></label>
+    </div>
+    <p>短视频有两个大难题：一是<b>海量大文件</b>——每天上传的视频要转成多种清晰度，再快速送到全国各地的手机上；二是<b>千人千面</b>——每个人刷到的内容都不一样，推荐决定了产品的生死。</p>
+    <table class="tbl">
+      <tr><th>难点</th><th>常见对策</th><th>用到的技术</th></tr>
+      <tr><td>上传</td><td>客户端<b>直传对象存储</b>（服务端只发临时签名），分片上传、断点续传</td><td>对象存储</td></tr>
+      <tr><td>转码</td><td>上传完成后发消息，转码集群异步生成多种清晰度和封面</td><td>消息队列 + 转码服务</td></tr>
+      <tr><td>播放分发</td><td>视频走 CDN；播放器按网速自动切换清晰度、预加载下一条</td><td>CDN、自适应码率</td></tr>
+      <tr><td>推荐</td><td>离线训练模型；在线「召回 → 粗排 → 精排」层层筛选；用户行为实时更新特征</td><td>推荐系统、特征存储、大数据平台</td></tr>
+      <tr><td>点赞播放计数</td><td>Redis 计数，异步批量落库</td><td>最终一致</td></tr>
+      <tr><td>内容安全</td><td>机器审核 + 人工复审</td><td>审核服务</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>3 人团队版：</b>对象存储 + CDN + 云厂商的转码服务，几乎不用自己写视频处理；feed 先按「时间 + 热度」排序，不做个性化推荐。等有了足够的用户行为数据，推荐才有意义。</p></div>
+  </section>
+
+  <section class="topic" id="p-delivery">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>外卖打车：位置、调度与订单状态机<span class="pt">delivery · LBS 与实时调度</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="products::p-delivery"><span>已学会</span></label>
+    </div>
+    <p>外卖和打车涉及<b>三方</b>（用户、商家或乘客、骑手或司机），难点是：位置每几秒就变一次；要在几秒内找到「附近最合适」的骑手；一个订单在多方之间流转，状态绝不能错乱；最后还要三方对账。</p>
+    <table class="tbl">
+      <tr><th>难点</th><th>常见对策</th><th>用到的技术</th></tr>
+      <tr><td>高频位置上报</td><td>骑手端每隔几秒上报，写入内存型存储，只保留最新位置</td><td>Redis 等内存存储</td></tr>
+      <tr><td>就近查询</td><td>地理索引：把地图切成格子，快速找附近的人</td><td>GeoHash、Redis GEO、PostgreSQL 的 PostGIS 扩展</td></tr>
+      <tr><td>派单</td><td>调度算法综合距离、顺路程度、预计送达时间，批量匹配</td><td>调度服务</td></tr>
+      <tr><td>订单状态</td><td><b>状态机</b>：已下单 → 已接单 → 配送中 → 已送达，只允许合法转换；所有状态变更幂等</td><td>状态机 + 幂等 + 事件</td></tr>
+      <tr><td>实时通知</td><td>状态变化推送给相关各方</td><td>推送、长连接</td></tr>
+      <tr><td>结算对账</td><td>事务记账 + 定期三方对账</td><td>关系型数据库</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>3 人团队版：</b>做一个校园跑腿小程序：PostgreSQL + PostGIS 查附近的人；派单先用「附近骑手抢单」规则；订单状态机写在一个服务里，每次状态变更都检查「当前状态是否允许」。</p></div>
+  </section>
+
+  <section class="topic" id="p-collab">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>协同文档：多人同时编辑不打架<span class="pt">collaboration · OT / CRDT</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="products::p-collab"><span>已学会</span></label>
+    </div>
+    <p>两个人同时编辑同一段文字，如果简单地「谁最后保存就用谁的」，另一个人的修改就丢了。协同文档的核心是：<b>同步「操作」而不是整篇文档</b>，再用专门的算法把并发的操作合并，让所有人最终看到一模一样的结果。</p>
+    <table class="tbl">
+      <tr><th>难点</th><th>常见对策</th><th>用到的技术</th></tr>
+      <tr><td>并发冲突</td><td>把每次编辑表示为「在第几个位置插入 / 删除什么」，用算法变换后合并</td><td>OT（操作转换）或 CRDT（无冲突复制数据类型）</td></tr>
+      <tr><td>低延迟同步</td><td>操作通过长连接实时广播；同一文档的连接路由到同一节点</td><td>WebSocket、长连接网关</td></tr>
+      <tr><td>版本历史</td><td>存操作日志，定期打快照，随时回到任意版本</td><td>操作日志 + 快照</td></tr>
+      <tr><td>离线编辑</td><td>本地先保存，重新联网后合并</td><td>CRDT 尤其擅长</td></tr>
+      <tr><td>权限分享</td><td>文档级权限、分享链接、只读 / 评论 / 编辑</td><td>认证授权</td></tr>
+    </table>
+    <div id="demo-collab"></div>
+    <div class="callout warn"><span class="i">!</span><p><b>3 人团队版：</b>千万别自己从零实现 OT / CRDT 算法。用成熟的开源 CRDT 库（例如 Yjs）+ 一个 WebSocket 服务；或者先做「编辑锁」——同一时间只允许一个人编辑，简单可靠。</p></div>
+  </section>
+
+  <section class="topic" id="p-aichat">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 7</span>AI 对话产品：流式、推理成本与安全<span class="pt">AI chat · 类聊天机器人</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="products::p-aichat"><span>已学会</span></label>
+    </div>
+    <p>AI 对话产品和传统 Web 应用最大的不同：<b>一次请求可能要几秒到几十秒、成本按 token 计</b>，而且输出内容不可完全预测。架构围绕四件事展开：体验（流式）、成本、质量、安全。</p>
+    <table class="tbl">
+      <tr><th>难点</th><th>常见对策</th><th>用到的技术</th></tr>
+      <tr><td>等待太久</td><td>边生成边推送，前端逐字显示；支持中途停止</td><td>SSE、流式渲染</td></tr>
+      <tr><td>推理贵、GPU 紧张</td><td>调用模型 API；或自建推理集群并批处理请求提高吞吐</td><td>大模型 API、vLLM 等推理引擎</td></tr>
+      <tr><td>多轮上下文</td><td>保存会话历史，超长时截断或摘要，控制 token</td><td>会话存储</td></tr>
+      <tr><td>私有知识、实时信息</td><td>检索增强（RAG）；调用搜索、计算等工具</td><td>向量检索、Agent / 工具调用</td></tr>
+      <tr><td>成本失控</td><td>按用户配额与限流；缓存高频问题；简单问题路由到小模型</td><td>网关、计费、模型路由</td></tr>
+      <tr><td>内容安全</td><td>输入输出审核；防提示注入；敏感数据脱敏</td><td>审核服务</td></tr>
+      <tr><td>质量</td><td>评估问题集 + 线上点赞 / 点踩反馈</td><td>评估流水线</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>3 人团队版：</b>FastAPI + 大模型 API + SSE 流式 + PostgreSQL 存会话（需要知识库时加 pgvector）+ 按用户限流。这正是 <a href="10-decide.html#case-ai">10 模块的 AI 问答案例</a>。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>用四步拆解法拆一个本页没讲的产品：网盘、在线考试、直播、12306 抢票，任选其一。先写核心难点，再写组件。</li>
+      <li>在架构拆解器里，对比同一产品的 MVP 版和大规模版：每多出来的一个组件，分别是为了解决哪个难点？</li>
+      <li>去架构沙盘里选一个场景，用本节的思路做选型，看看能不能拿到 A 以上。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "products",
+  title: "产品架构拆解：六类产品怎么搭",
+  eyebrow: "MODULE 13 · 技术全景",
+  lead: "不同的产品用什么架构？答案藏在它们最难的那件事里：消息不能丢、库存不能超卖、视频不能卡、骑手要就近、编辑不能打架、AI 要又快又省。从难点倒推架构，再给出 3 人团队版。",
+  points: ["p-method","p-im","p-flash","p-feed","p-delivery","p-collab","p-aichat"],
+  prev: "12-ai.html", prevTitle: "AI 协作：生成、判断、验证",
+  next: "", nextTitle: "",
+};
+
+const QUZ = [
+  { type:"quiz", q:"用四步法拆解一个产品的架构，第一步应该做什么？",
+    opts:["列出所有流行技术","找出这个产品最不能出错、最难扛的核心难点","先画一张漂亮的架构图","选一个编程语言"],
+    ans:1, exp:"架构是从难点里长出来的，先有难点才知道需要什么组件。A、C、D 都是把手段放在了目的前面。" },
+  { type:"quiz", q:"即时通讯中，保证同一会话里消息「不乱序」的常见做法是？",
+    opts:["按客户端本地时间排序","让用户自己排序","为每个会话分配递增序号 seq，客户端按 seq 排序并补拉缺口","只允许一个人发消息"],
+    ans:2, exp:"客户端时间不可靠（可能被改、会有偏差）。服务端分配的会话内序号既能排序，又能发现丢失的消息。" },
+  { type:"quiz", q:"即时通讯中，「消息不丢」最关键的一步是？",
+    opts:["服务端先把消息落库，再给发送方回执 ACK；没收到 ACK 的客户端会重发","用更快的网络","把消息只放在内存里","发送后立刻显示成功"],
+    ans:0, exp:"先持久化再确认，确认之前失败就重发，这样消息至少会被保存一次；配合接收端按消息 id 去重，就不会重复。" },
+  { type:"quiz", q:"秒杀系统中，防止库存超卖的「最后一道防线」通常是？",
+    opts:["前端按钮置灰","CDN 缓存","在 Redis 里记一个数字就够了","数据库条件更新：stock = stock - 1 WHERE stock > 0"],
+    ans:3, exp:"前面各层是为了挡流量，最终正确性要靠数据库的原子条件更新兜底。前端可以被绕过；CDN 不管库存；Redis 预扣也需要与数据库最终对齐。" },
+  { type:"quiz", q:"秒杀中引入消息队列的主要目的是？",
+    opts:["让页面更好看","削峰：扣库存成功后异步创建订单，避免瞬时写入压垮数据库","代替数据库存订单","让用户可以重复下单"],
+    ans:1, exp:"消息队列把瞬间洪峰变成平稳的处理速度。它不是订单的最终存储（C），更不能让人重复下单（D）。" },
+  { type:"quiz", q:"短视频上传，最合理的做法是？",
+    opts:["客户端直传对象存储（服务端只发临时签名），上传完成后通过消息触发异步转码","视频先全部传到后端服务器内存，再由后端转发","把视频存进关系型数据库的字段里","上传时让用户等待转码完成"],
+    ans:0, exp:"直传对象存储不占后端带宽和内存；转码是耗时任务，应当异步。数据库不适合存大文件；让用户等转码体验很差。" },
+  { type:"quiz", q:"短视频的点赞数、播放数，通常采用哪种一致性？",
+    opts:["必须强一致，每次点赞都开分布式事务","不需要存储","最终一致：Redis 计数，异步批量落库","只存在客户端本地"],
+    ans:2, exp:"计数差几个、晚几秒显示没有实际损失，最终一致能换来极高的写入性能（06 模块的一致性判断）。" },
+  { type:"quiz", q:"外卖平台查询「附近 3 公里内的骑手」，常用什么技术？",
+    opts:["逐个计算所有骑手的距离","地理索引：GeoHash、Redis GEO 或 PostGIS","全文搜索引擎","区块链"],
+    ans:1, exp:"地理索引把地图切成格子，只在附近的格子里找，复杂度大幅降低。逐个计算在规模大时太慢；全文搜索和区块链与地理位置查询无关。" },
+  { type:"quiz", q:"两个人同时编辑同一段文字，要做到「都不丢、最终一致」，核心技术是？",
+    opts:["谁最后保存就用谁的","OT（操作转换）或 CRDT（无冲突复制数据类型）","每次编辑都整篇覆盖","禁止网络通信"],
+    ans:1, exp:"「最后保存者获胜」会丢掉别人的修改（见本页协同演示）。OT / CRDT 合并的是操作，所有人最终收敛到同一结果。" },
+  { type:"quiz", q:"AI 对话产品控制推理成本，下列哪组措施最合理？",
+    opts:["不限制使用量","把所有请求都发给最大的模型","按用户配额与限流、缓存高频问题、简单问题路由到小模型","关闭流式输出"],
+    ans:2, exp:"成本 = 请求数 × 每次的 token × 单价，三个措施分别从这三个维度下手。D 只影响体验，不省钱。" },
+  { type:"interview", q:"面试题：「设计一个类似微信的聊天系统。」你只有 3 个人、两个月。最好的回答是？",
+    opts:["照搬大厂架构：长连接网关集群 + 几十个微服务 + 多机房","先讲核心难点（实时、不丢、不乱、离线），再给 MVP：单个后端处理 WebSocket，消息按会话 + seq 落 PostgreSQL 后回 ACK，客户端重发 + 按 id 去重，Redis 记在线状态；说明规模变大后再拆出长连接网关、消息队列和分片存储","聊天系统很简单，用 HTTP 每秒轮询一次就行","说做不了"],
+    ans:1, exp:"好回答同时展示了「从难点倒推架构」和「按约束给出合适的规模」，并说清演进路径。A 忽视约束；C 低估难点（轮询浪费资源且不够实时）；D 回避问题。" },
+];
+</script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
+<script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
+<script>
+/* 演示 1：架构拆解器 */
+(function(){
+  const P = {
+    im:{ n:"即时通讯", hard:"海量长连接；消息不丢、不乱序、实时到达；离线补发",
+      mvp:[["前端",[["App / 网页客户端","维护 WebSocket 连接，断线自动重连，按 seq 排序显示"]]],["接入",[["WebSocket 服务","在同一个后端进程里处理长连接，早期几千人在线足够"]]],["服务",[["消息服务","收到消息 → 分配会话内 seq → 落库 → 回 ACK"]]],["数据",[["PostgreSQL","消息表按（会话 id, seq）建索引"],["Redis","记录谁在线、连在哪台机器"]]],["基础设施",[["云服务器 + Docker Compose","一台机器起步，记得开备份"]]]],
+      scale:[["前端",[["多端客户端","本地数据库缓存消息，发现 seq 缺口就补拉"]]],["接入",[["长连接网关集群","只负责维持海量连接，用 Go / C++ 等高并发语言"],["系统推送通道","手机在后台时走 APNs / 厂商推送"]]],["服务",[["消息路由","根据在线状态把消息投递到对应网关节点"],["群组服务","小群写扩散、大群读扩散"],["离线消息服务","上线后按 seq 拉取"]]],["数据",[["Kafka","消息解耦、削峰"],["宽列库 / 分库分表","按会话分片存海量消息"],["Redis 集群","在线状态、未读数"]]],["基础设施",[["Kubernetes + 多机房","容灾、就近接入、全面监控"]]]] },
+    flash:{ n:"秒杀大促", hard:"瞬间流量是平时百倍；100 件库存不能超卖；不能拖垮整站",
+      mvp:[["前端",[["商品页 + 防连点","点击后按钮禁用"]]],["接入",[["Nginx + 简单限流","按 IP 限频"]]],["服务",[["下单接口","校验一人一单"]]],["数据",[["MySQL / PostgreSQL","条件更新防超卖 + 唯一约束防重复下单"]]],["基础设施",[["云服务器 + 一次压测","确认扛得住预计流量"]]]],
+      scale:[["前端",[["静态页 + CDN","绝大多数页面请求不到源站"],["排队页 / 验证码","过滤机器刷单、打散峰值"]]],["接入",[["API 网关","按用户 / 设备限流、黑名单防刷"]]],["服务",[["秒杀服务（独立部署）","与主站隔离，挂了不影响正常购物"],["订单服务","消费消息，异步创建订单"]]],["数据",[["Redis 预扣库存","原子扣减，挡住绝大部分请求"],["消息队列","削峰填谷"],["数据库","最终落单，条件更新兜底"]]],["基础设施",[["弹性扩容 + 全链路压测 + 降级开关","提前演练"]]]] },
+    feed:{ n:"短视频", hard:"海量视频的上传、转码、分发；千人千面的推荐；高并发计数",
+      mvp:[["前端",[["App / H5 播放器","按热度刷视频"]]],["接入",[["API 服务","单体后端"]]],["服务",[["上传服务","只生成直传签名"],["Feed 接口","按时间 + 热度排序"]]],["数据",[["对象存储","存视频文件"],["PostgreSQL","视频元数据、点赞"]]],["基础设施",[["CDN + 云厂商转码服务","不自己写视频处理"]]]],
+      scale:[["前端",[["自适应码率播放器","按网速切清晰度、预加载下一条"]]],["接入",[["网关","鉴权、限流"]]],["服务",[["上传与转码流水线","消息触发多清晰度转码"],["推荐系统","召回 → 粗排 → 精排"],["审核服务","机审 + 人审"],["计数服务","播放、点赞、评论数"]]],["数据",[["对象存储 + 多级 CDN","海量文件就近分发"],["Redis 计数","异步批量落库，最终一致"],["埋点 → Kafka → 数仓","训练推荐模型的数据"]]],["基础设施",[["K8s + GPU 集群","模型训练与推理"]]]] },
+    delivery:{ n:"外卖打车", hard:"实时位置；就近匹配；多方订单状态不能乱；三方对账",
+      mvp:[["前端",[["用户 / 商家 / 骑手三端","可先用小程序"]]],["接入",[["API 服务","单体后端"]]],["服务",[["订单服务","状态机：已下单 → 已接单 → 配送中 → 已送达"],["抢单规则","附近骑手抢单，先不做智能派单"]]],["数据",[["PostgreSQL + PostGIS","附近骑手查询"]]],["基础设施",[["PaaS / 云服务器","托管数据库"]]]],
+      scale:[["前端",[["三端 App","骑手端每几秒上报位置"]]],["接入",[["网关 + 长连接推送","状态变化实时通知各方"]]],["服务",[["位置服务","高频写入，只保留最新位置"],["调度服务","综合距离、顺路、时效批量派单"],["订单状态机服务","状态转换校验 + 幂等 + 补偿"],["结算对账服务","三方资金对账"]]],["数据",[["Redis GEO / 地理索引","就近查询"],["分库分表的订单库","海量订单"],["Kafka","订单状态变更事件"]]],["基础设施",[["多可用区 + 实时监控大盘","高峰期快速发现异常"]]]] },
+    collab:{ n:"协同文档", hard:"多人同时编辑不丢字、最终一致；低延迟；版本历史；离线编辑",
+      mvp:[["前端",[["编辑器 + 开源 CRDT 库（如 Yjs）","合并算法交给成熟的库"]]],["接入",[["WebSocket 服务","广播编辑操作"]]],["服务",[["文档服务","转发操作，定期保存快照"]]],["数据",[["PostgreSQL","文档快照、权限"]]],["基础设施",[["一台服务器 + 备份","简单可靠"]]]],
+      scale:[["前端",[["编辑器 + 离线缓存","光标同步、断网可编辑"]]],["接入",[["长连接网关","同一文档的连接路由到同一节点"]]],["服务",[["协同服务","OT / CRDT 合并并广播"],["版本服务","操作日志 + 快照"],["权限与分享服务","只读 / 评论 / 编辑"],["搜索服务","全文检索"]]],["数据",[["操作日志存储","可回放任意版本"],["对象存储","图片和附件"],["Elasticsearch","文档搜索"]]],["基础设施",[["K8s + 按文档分片","热门文档单独调度"]]]] },
+    ai:{ n:"AI 对话", hard:"推理慢且贵；流式输出；上下文与知识；内容安全；成本控制",
+      mvp:[["前端",[["聊天界面","SSE 流式逐字显示"]]],["接入",[["FastAPI","鉴权 + 按用户限流"]]],["服务",[["对话服务","拼接历史，调用大模型 API"]]],["数据",[["PostgreSQL（+ pgvector）","会话记录；需要知识库时做 RAG"]]],["基础设施",[["PaaS + 模型 API","不碰 GPU"]]]],
+      scale:[["前端",[["多端 + 流式 + 中断重试","长回答可随时停止"]]],["接入",[["API 网关","鉴权、配额计费、限流"]]],["服务",[["编排服务","上下文管理、RAG、工具调用"],["模型路由","简单问题走小模型，省钱"],["推理集群","vLLM 等引擎批处理 + KV 缓存"],["内容安全","输入输出审核、防提示注入"]]],["数据",[["会话存储","多轮历史"],["向量库","知识检索"],["评估与反馈数据","持续改进质量"]]],["基础设施",[["GPU 集群 + 成本 / 延迟监控","按 token 计成本"]]]] }
+  };
+  const LYC = { "前端":"#3a6b8f", "接入":"#6b4f8a", "服务":"#1e5b4f", "数据":"#b7791f", "基础设施":"#a0522d" };
+  const host = document.getElementById("demo-teardown");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：架构拆解器</span><span class="hint">选产品和规模，点任意组件看它解决什么</span></div>
+    <div class="db">
+      <div class="ctl" id="tdP"><label>产品</label>${Object.keys(P).map(k=>`<button class="b" data-v="${k}">${P[k].n}</button>`).join("")}</div>
+      <div class="ctl" id="tdS"><label>规模</label><button class="b" data-v="mvp">3 人团队 MVP</button><button class="b" data-v="scale">千万级用户</button></div>
+      <div class="log" id="tdHard" style="margin:0 0 10px"></div>
+      <div class="stack" id="tdStack"></div>
+      <div class="log" id="tdLog"></div>
+    </div></div>`;
+  let prod = "im", scale = "mvp";
+  function render(){
+    const d = P[prod], layers = d[scale];
+    const count = layers.reduce((a,l)=>a+l[1].length, 0), other = P[prod][scale === "mvp" ? "scale" : "mvp"].reduce((a,l)=>a+l[1].length, 0);
+    document.getElementById("tdHard").innerHTML = `<b>核心难点：</b>${d.hard}`;
+    document.getElementById("tdStack").innerHTML = layers.map((l,i)=>`<div class="ly" style="--c:${LYC[l[0]]}"><span class="n">${l[0]}</span><span class="d">${l[1].map((c,j)=>`<button class="b" data-c="${i}-${j}" style="margin:2px 4px 2px 0">${c[0]}</button>`).join("")}</span></div>`).join("");
+    document.getElementById("tdLog").innerHTML = `${scale === "mvp" ? "3 人团队版" : "大规模版"}共 <b>${count}</b> 个关键组件（另一版 ${other} 个）。点任意组件，看它是为了解决哪个难点。`;
+  }
+  document.getElementById("tdStack").addEventListener("click", e=>{
+    const b = e.target.closest("button[data-c]"); if(!b) return;
+    const [i,j] = b.dataset.c.split("-").map(Number), c = P[prod][scale][i][1][j];
+    document.querySelectorAll("#tdStack button").forEach(x=>x.classList.toggle("on", x === b));
+    document.getElementById("tdLog").innerHTML = `<b>${c[0]}</b>（${P[prod][scale][i][0]}）：${c[1]}`;
+  });
+  ArchKit.choice("tdP", v=>{ prod = v; render(); }, "im");
+  ArchKit.choice("tdS", v=>{ scale = v; render(); }, "mvp");
+})();
+
+/* 演示 2：秒杀流量漏斗 */
+(function(){
+  const host = document.getElementById("demo-funnel");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：秒杀流量漏斗（库存 100 件）</span><span class="hint">拖动流量，开关每一层防护</span></div>
+    <div class="db">
+      <div class="ctl"><label>开抢那一秒的请求数</label><input type="range" id="fnN" min="4" max="6" step="0.05" value="5.3"><span class="tg" id="fnNv"></span></div>
+      <div id="fnSw">
+        <label class="chk"><input type="checkbox" data-k="q" checked><span>前端排队 / 验证码（过滤约 40% 机器刷单）</span></label>
+        <label class="chk"><input type="checkbox" data-k="gw" checked><span>网关限流（每秒最多放行 20,000）</span></label>
+        <label class="chk"><input type="checkbox" data-k="redis" checked><span>Redis 预扣库存（只有扣成功的才继续）</span></label>
+        <label class="chk"><input type="checkbox" data-k="mq" checked><span>消息队列削峰（数据库按 2,000 / 秒平稳写入）</span></label>
+      </div>
+      <div class="bars" id="fnBars"></div>
+      <div class="log" id="fnLog"></div>
+      <div class="foot">简化模型：假设数据库每秒最多稳定处理约 3,000 次写入。条长按对数比例绘制，否则小数字会看不见。</div>
+    </div></div>`;
+  const fmt = n => Math.round(n).toLocaleString("zh-CN");
+  function render(){
+    const N = Math.round(Math.pow(10, +document.getElementById("fnN").value));
+    document.getElementById("fnNv").textContent = fmt(N) + " 次";
+    const on = k => host.querySelector(`input[data-k="${k}"]`).checked;
+    const rows = [["用户点击", N]];
+    let cur = N;
+    if(on("q")){ cur = cur * 0.6; rows.push(["排队 / 验证码后", cur]); }
+    if(on("gw")){ cur = Math.min(cur, 20000); rows.push(["网关放行", cur]); }
+    if(on("redis")){ cur = Math.min(cur, 100); rows.push(["Redis 扣减成功", cur]); }
+    const dbPeak = on("mq") ? Math.min(cur, 2000) : cur;
+    rows.push(["数据库每秒写入峰值", dbPeak]);
+    const max = Math.log10(N + 1);
+    document.getElementById("fnBars").innerHTML = rows.map((r,i)=>`<div class="bar"><span class="nm" style="width:150px">${r[0]}</span><span class="track"><span style="width:${Math.max(2, Math.log10(r[1] + 1) / max * 100)}%;${i === rows.length - 1 && dbPeak > 3000 ? "background:var(--red)" : ""}"></span></span><span class="val" style="width:90px">${fmt(r[1])}</span></div>`).join("");
+    const log = document.getElementById("fnLog");
+    if(dbPeak > 3000) log.innerHTML = `<span class="bad">✗ 数据库被打垮</span>：每秒 ${fmt(dbPeak)} 次写入，是承受能力的 ${(dbPeak / 3000).toFixed(1)} 倍。不只是秒杀失败，整个网站都会一起瘫痪。`;
+    else if(!on("redis") && cur > 100) log.innerHTML = `<b>⚠ 数据库扛住了</b>，但有 ${fmt(cur)} 个请求在争抢 100 件库存：全靠数据库条件更新防超卖，大量请求白白占用数据库连接，响应会很慢。`;
+    else log.innerHTML = `<b>✓ 平稳</b>：${fmt(N)} 个请求最终只有 ${fmt(Math.min(cur, 100))} 个走到数据库。层层过滤之后，数据库几乎感觉不到秒杀的存在。`;
+  }
+  document.getElementById("fnN").addEventListener("input", render);
+  host.querySelectorAll("#fnSw input").forEach(i=>i.addEventListener("change", render));
+  render();
+})();
+
+/* 演示 3：协同编辑冲突 */
+(function(){
+  const host = document.getElementById("demo-collab");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：两个人同时编辑「今天开会」</span><span class="hint">切换同步方式和保存顺序</span></div>
+    <div class="db">
+      <div class="ctl" id="cbMode"><label>同步方式</label><button class="b" data-v="lww">整篇覆盖（最后保存者获胜）</button><button class="b" data-v="op">同步操作并合并（OT / CRDT）</button></div>
+      <div class="ctl" id="cbOrder"><label>谁先到达服务器</label><button class="b" data-v="ab">Alice 先</button><button class="b" data-v="ba">Bob 先</button></div>
+      <div id="cbOut"></div>
+      <div class="log" id="cbLog"></div>
+    </div></div>`;
+  let mode = "lww", order = "ab";
+  const BASE = "今天开会", A = "今天下午开会", B = "今天开会，记得带电脑";
+  function render(){
+    const rows = [["初始文档", BASE, BASE, BASE],
+      ["Alice 在第 2 个字后插入「下午」", A, BASE, "—"],
+      ["Bob 在末尾追加「，记得带电脑」", A, B, "—"]];
+    let final, ok;
+    if(mode === "lww"){
+      const first = order === "ab" ? ["Alice", A] : ["Bob", B], second = order === "ab" ? ["Bob", B] : ["Alice", A];
+      rows.push([first[0] + " 保存整篇", "", "", first[1]]);
+      rows.push([second[0] + " 保存整篇（覆盖）", "", "", second[1]]);
+      final = second[1]; ok = false;
+    } else {
+      rows.push([(order === "ab" ? "Alice" : "Bob") + " 的操作先到：直接应用", "", "", order === "ab" ? A : B]);
+      rows.push([(order === "ab" ? "Bob" : "Alice") + " 的操作后到：按已发生的插入调整位置后应用", "", "", "今天下午开会，记得带电脑"]);
+      final = "今天下午开会，记得带电脑"; ok = true;
+    }
+    document.getElementById("cbOut").innerHTML = `<table class="dt"><thead><tr><th>步骤</th><th>Alice 屏幕</th><th>Bob 屏幕</th><th>服务器</th></tr></thead><tbody>` +
+      rows.map((r,i)=>`<tr class="${i === rows.length - 1 ? (ok ? "match" : "hl") : ""}"><td style="white-space:normal">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join("") + `</tbody></table>`;
+    document.getElementById("cbLog").innerHTML = ok
+      ? `<b>✓ 最终：「${final}」</b>。两个人的修改都保留了，而且无论谁先到达，结果都一样——这就是 OT / CRDT 要保证的「收敛」。`
+      : `<span class="bad">✗ 最终：「${final}」</span>。${order === "ab" ? "Alice 的「下午」" : "Bob 的「，记得带电脑」"}被覆盖丢失了，而且结果取决于谁后保存——这在多人协作中是不可接受的。`;
+  }
+  ArchKit.choice("cbMode", v=>{ mode = v; render(); }, "lww");
+  ArchKit.choice("cbOrder", v=>{ order = v; render(); }, "ab");
+})();
+</script>
+</body>
+</html>

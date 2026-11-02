@@ -78,6 +78,81 @@
     });
     window.addEventListener("storage", sync);
     sync();
+    window.ArchProgress = { get: get, onChange: function (fn) { window.addEventListener("arch-progress", fn); } };
+    var _sync = sync;
+    // 之后每次 sync（勾选、一键掌握）都广播 arch-progress，供目录和「下一步」刷新
+    sync = function () { _sync(); window.dispatchEvent(new CustomEvent("arch-progress")); };
+    window.addEventListener("storage", function () { window.dispatchEvent(new CustomEvent("arch-progress")); });
+  })();
+
+  /* ---------- 2b. 阅读进度条、侧边目录、键盘翻页、下一步推荐 ---------- */
+  (function () {
+    var bar = document.createElement("div"); bar.className = "readbar"; document.body.appendChild(bar);
+    function onScroll() {
+      var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+      bar.style.width = (max > 0 ? Math.min(100, h.scrollTop / max * 100) : 0) + "%";
+    }
+    window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+
+    var topics = [].slice.call(document.querySelectorAll(".topic"));
+    var done = function () { return window.ArchProgress ? window.ArchProgress.get() : new Set(); };
+    if (topics.length) {
+      var toc = document.createElement("nav"); toc.className = "toc"; toc.setAttribute("aria-label", "本节目录");
+      toc.innerHTML = '<div class="toc-h">本节目录</div>' + topics.map(function (t, i) {
+        var h = t.querySelector("h3"), title = t.id;
+        if (h) title = [].slice.call(h.childNodes).filter(function (n) { return n.nodeType === 3; }).map(function (n) { return n.nodeValue; }).join("").trim();
+        return '<a href="#' + t.id + '" data-id="' + t.id + '"><span class="n" data-n="' + (i + 1) + '">' + (i + 1) + '</span><span class="tt">' + esc(title) + "</span></a>";
+      }).join("") + '<a href="#quiz" data-id="quiz"><span class="n">✎</span><span class="tt">本节考核</span></a>';
+      document.body.appendChild(toc);
+      var links = [].slice.call(toc.querySelectorAll("a"));
+      var paint = function () {
+        var d = done();
+        links.forEach(function (a) {
+          var n = a.querySelector(".n"); if (!n.dataset.n) return;
+          var ok = d.has(CONFIG.moduleId + "::" + a.dataset.id);
+          a.classList.toggle("done", ok); n.textContent = ok ? "✓" : n.dataset.n;
+        });
+      };
+      window.addEventListener("arch-progress", paint); paint();
+      if ("IntersectionObserver" in window) {
+        var targets = topics.concat([document.getElementById("quiz")]);
+        var io = new IntersectionObserver(function (ents) {
+          ents.forEach(function (en) {
+            if (en.isIntersecting) links.forEach(function (a) { a.classList.toggle("on", a.dataset.id === en.target.id); });
+          });
+        }, { rootMargin: "-30% 0px -60% 0px" });
+        targets.forEach(function (t) { if (t) io.observe(t); });
+      }
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return;
+      if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName || "") || document.querySelector(".pal-mask.on")) return;
+      if (e.key === "ArrowLeft" && CONFIG.prev) location.href = CONFIG.prev;
+      if (e.key === "ArrowRight" && CONFIG.next) location.href = CONFIG.next;
+    });
+
+    var tip = document.querySelector(".master .tip");
+    var MODS = window.ARCH_MODULES || [];
+    if (tip && MODS.length) {
+      var nx = document.createElement("div"); nx.className = "nextup"; tip.parentNode.appendChild(nx);
+      var suggest = function () {
+        var d = done(), start = Math.max(0, MODS.map(function (m) { return m.id; }).indexOf(CONFIG.moduleId));
+        for (var k = 0; k < MODS.length; k++) {
+          var m = MODS[(start + k) % MODS.length];
+          for (var j = 0; j < m.pts.length; j++) {
+            var p = m.pts[j];
+            if (!d.has(m.id + "::" + p.id)) {
+              var same = m.id === CONFIG.moduleId;
+              nx.innerHTML = (same ? "本节还没学会：" : "下一步推荐：") + '<a href="' + m.file + "#" + p.id + '">' + (same ? "" : m.no + " · " + esc(m.title) + " — ") + esc(p.title) + " →</a>";
+              return;
+            }
+          }
+        }
+        nx.innerHTML = '🎉 全部 ' + MODS.reduce(function (a, m) { return a + m.pts.length; }, 0) + ' 个知识点都已学会！去 <a href="../sandbox.html">架构沙盘</a> 检验一下判断力吧。';
+      };
+      window.addEventListener("arch-progress", suggest); suggest();
+    }
   })();
 
   /* ---------- 3. 考核渲染与计分 ---------- */

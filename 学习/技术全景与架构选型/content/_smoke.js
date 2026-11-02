@@ -10,7 +10,8 @@ const { chromium } = require("playwright");
 
 const CONTENT = __dirname, ROOT = path.dirname(CONTENT);
 const filter = process.argv[2] || "";
-const pages = [path.join(ROOT, "index.html")].concat(
+const TOOLS = ["atlas.html", "sandbox.html", "review.html"].map(f => path.join(ROOT, f));
+const pages = [path.join(ROOT, "index.html")].concat(TOOLS).concat(
   fs.readdirSync(CONTENT).filter(f => /^\d\d-.*\.html$/.test(f)).sort().map(f => path.join(CONTENT, f))
 ).filter(p => p.includes(filter));
 
@@ -28,7 +29,16 @@ const pages = [path.join(ROOT, "index.html")].concat(
     await page.goto(pathToFileURL(file).href);
     const name = path.basename(file);
     const info = {};
-    if (name === "index.html") {
+    if (["atlas.html", "sandbox.html", "review.html"].includes(name)) {
+      // 工具页：能渲染、无报错、窄屏不溢出（深度交互见各自的手工测试）
+      info.text = (await page.evaluate(() => document.body.innerText.length)) > 500;
+      if (name === "atlas.html") { info.techs = await page.locator("#map .tech").count(); await page.locator("#map .tech").first().click(); info.drawer = await page.locator("#drawer.on").count(); }
+      if (name === "sandbox.html") { await page.click("#ref"); await page.click("#go"); await page.waitForTimeout(300); await page.click("#skip"); info.grade = await page.textContent("#grade .L"); }
+      if (name === "review.html") { await page.click("#go0"); await page.keyboard.press(" "); await page.keyboard.press("3"); info.next = await page.textContent(".prog span"); }
+      await page.setViewportSize({ width: 375, height: 800 });
+      const ov = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      if (ov > 2) errs.push(`375px 宽度下横向溢出 ${ov}px`);
+    } else if (name === "index.html") {
       info.modules = await page.locator(".mod").count();
       info.points = await page.locator(".mod .pts li").count();
       await page.locator(".mod .pts input").first().check();

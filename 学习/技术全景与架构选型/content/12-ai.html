@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="assets/learn.css">
+<script src="assets/theme.js"></script>
 </head>
 <body>
 <nav class="topnav">
@@ -174,7 +175,7 @@
     </div>
     <p>学完整个学习包，你要达到的状态是：</p>
     <div class="callout key"><span class="i">★</span><p><b>听到任何技术名词，能快速定位它在哪一层、解决什么问题、代价是什么、什么场景不该用；AI 给你方案时，能问出关键问题并用最小成本验证。</b>这样就不需要死抠技术细节，也不会被 AI 或名词带着走。</p></div>
-    <p>之后如果想在某一层深入，本仓库已经有对应的专项学习包。记住：一旦你选定了方向，那一层的「不必深入」就会变成「必须懂」。</p>
+    <p>想检验成果？去 <a href="13-products.html">13 产品架构拆解</a> 用整张地图拆一遍真实产品，或者到 <a href="../sandbox.html">架构沙盘</a> 当一回技术负责人。之后如果想在某一层深入，本仓库已经有对应的专项学习包。记住：一旦你选定了方向，那一层的「不必深入」就会变成「必须懂」。</p>
     <table class="tbl">
       <tr><th>想深入</th><th>去哪里</th><th>在全景地图中的位置</th></tr>
       <tr><td>数据库与 SQL</td><td><a href="../../SQL/index.html">SQL / 数据库学习包</a></td><td>数据层</td></tr>
@@ -230,7 +231,7 @@ const CONFIG = {
   lead: "AI 负责加速生成，你负责方向和质量：知道 AI 的边界，会追问、会对照约束审方案、会为每个说法找到验证方式，形成可持续的协作闭环。",
   points: ["ai-limits","ask-list","judge-plan","verify-claim","ai-loop","finish-line"],
   prev: "11-capstone.html", prevTitle: "最小闭环：一条线跑通",
-  next: "", nextTitle: "",
+  next: "13-products.html", nextTitle: "产品架构拆解：六类产品怎么搭",
 };
 
 const QUZ = [
@@ -266,7 +267,10 @@ const QUZ = [
     ans:2, exp:"C 展示了完整的「问、判、验」闭环和责任意识。A 回避问题；B 不是独立验证；D 回避了题目，也放弃了效率。" },
 ];
 </script>
+<script src="assets/modules.js"></script>
+<script src="assets/atlas-data.js"></script>
 <script src="assets/learn.js"></script>
+<script src="assets/ui.js"></script>
 <script>
 /* 演示 1：AI 方案审查器 */
 (function(){
