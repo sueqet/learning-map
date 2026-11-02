@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>后端与 API 框架 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 后端与 API 框架：后端的职责、HTTP 与 REST API、状态码、FastAPI 是什么、Django 与 Flask、Spring Boot / NestJS / Go，以及同步与异步。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">后端与 API 框架</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 05 · 技术全景</span></span>
+    <h1 id="pageTitle">后端与 API 框架</h1>
+    <p class="lead" id="pageLead">产品的「大脑」和「引擎」。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>说出后端的职责，以及为什么价格计算、权限检查<b>必须</b>放在后端。</li>
+      <li>读懂一个 HTTP 请求和响应：方法、路径、请求体、状态码；分清 2xx / 4xx / 5xx。</li>
+      <li>听到 <b>FastAPI</b> 就知道：它是 Python 的后端 API 框架，特点是自动校验、自动文档、异步，适合 API 和 AI 服务化。</li>
+      <li>比较 FastAPI、Django、Flask，以及 Spring Boot、NestJS / Express、Go 的性格。</li>
+      <li>解释同步和异步的区别：为什么「等待」多时异步更划算，而计算密集时它帮不上忙。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="02-map.html">02 全景地图</a>（请求旅程、接口契约）与 <a href="03-lang.html">03 编程语言的性格</a>。想动手写一个 FastAPI 接口，可以看 Python 学习包的 <a href="../../Python/content/21-script-http.html#fastapi">21 · FastAPI 入门</a>。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 后端与接口</div>
+    <h2><span class="num">01</span>后端做什么，怎么被调用</h2>
+  </section>
+
+  <section class="topic" id="be-role">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>后端做什么：规则、鉴权、调数据<span class="pt">backend role · 看不见的大脑</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="backend::be-role"><span>已学会</span></label>
+    </div>
+    <p>后端运行在你控制的服务器上，用户看不见它，但所有<b>关键规则</b>都在这里执行。原因很简单：前端代码运行在用户的浏览器里，用户可以随意修改；只有后端是可信的。</p>
+    <table class="tbl">
+      <tr><th>职责</th><th>例子</th><th>为什么必须在后端</th></tr>
+      <tr><td>业务规则</td><td>计算订单总价、判断优惠券能不能用、扣库存</td><td>放在前端，用户改一行代码就能把价格改成 0.01</td></tr>
+      <tr><td>身份验证与权限</td><td>检查登录令牌、判断能不能看别人的订单</td><td>前端的权限判断只是「隐藏按钮」，挡不住直接调接口</td></tr>
+      <tr><td>数据读写</td><td>查询、写入数据库，开启事务</td><td>数据库密码不能出现在浏览器里</td></tr>
+      <tr><td>调用第三方</td><td>支付、短信、地图、大模型 API</td><td>第三方的密钥必须保密</td></tr>
+      <tr><td>后台任务</td><td>发邮件、生成报表、定时清理数据</td><td>用户关掉网页后任务仍要继续</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>前端校验是为了<b>体验</b>（及时提示用户填错了），后端校验是为了<b>安全和正确</b>。两者都要有，但只有后端那一道是不能省的。</p></div>
+  </section>
+
+  <section class="topic" id="http-api">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>HTTP 与 REST API：请求、响应、状态码<span class="pt">HTTP · 前后端的通用语言</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="backend::http-api"><span>已学会</span></label>
+    </div>
+    <p>前端和后端用 <b>HTTP</b> 协议对话。一次对话就是「请求 + 响应」。最常见的接口风格是 <b>REST</b>：把数据看成「资源」（例如 <code class="inl">/items</code>），用不同的<b>方法</b>表示对它做什么。</p>
+    <table class="tbl">
+      <tr><th>方法</th><th>含义</th><th>例子</th></tr>
+      <tr><td>GET</td><td>查询（不改数据）</td><td><code class="inl">GET /items/42</code> 查 42 号商品</td></tr>
+      <tr><td>POST</td><td>新建</td><td><code class="inl">POST /orders</code> 创建订单</td></tr>
+      <tr><td>PUT / PATCH</td><td>整体替换 / 部分修改</td><td><code class="inl">PATCH /items/42</code> 改价格</td></tr>
+      <tr><td>DELETE</td><td>删除</td><td><code class="inl">DELETE /items/42</code></td></tr>
+    </table>
+    <table class="tbl">
+      <tr><th>状态码</th><th>意思</th><th>谁的问题</th></tr>
+      <tr><td><span class="st2">200</span> / <span class="st2">201</span></td><td>成功 / 创建成功</td><td>—</td></tr>
+      <tr><td><span class="st4">400</span> / <span class="st4">422</span></td><td>请求格式不对 / 字段校验失败</td><td>调用方：参数传错了</td></tr>
+      <tr><td><span class="st4">401</span></td><td>没登录（不知道你是谁）</td><td>调用方：缺少或过期的登录令牌</td></tr>
+      <tr><td><span class="st4">403</span></td><td>登录了，但没权限</td><td>调用方：越权访问</td></tr>
+      <tr><td><span class="st4">404</span></td><td>资源不存在</td><td>调用方：地址或 id 不对</td></tr>
+      <tr><td><span class="st4">429</span></td><td>请求太频繁，被限流</td><td>调用方：慢一点</td></tr>
+      <tr><td><span class="st5">500</span></td><td>服务器内部错误</td><td>服务端：代码出 bug 了</td></tr>
+      <tr><td><span class="st5">502</span> / <span class="st5">503</span> / <span class="st5">504</span></td><td>网关拿不到后端的正常响应 / 服务暂不可用 / 后端超时</td><td>服务端或基础设施</td></tr>
+    </table>
+    <div id="demo-api"></div>
+    <div class="callout warn"><span class="i">!</span><p><b>其他接口风格：</b>REST 最常见，但还有 <b>GraphQL</b>（前端按需指定要哪些字段）、<b>gRPC</b>（服务之间高性能调用，多用于微服务内部）、<b>WebSocket</b>（长连接，实时聊天、协作）。知道它们存在、各自解决什么问题即可。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 主流后端框架</div>
+    <h2><span class="num">02</span>FastAPI 与它的同行们</h2>
+  </section>
+
+  <section class="topic" id="fastapi">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>FastAPI：Python 的现代 API 框架<span class="pt">FastAPI · 主打快的速食店</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="backend::fastapi"><span>已学会</span></label>
+    </div>
+    <p><b>FastAPI 是一个用 Python 写后端 API 的框架。</b>它的核心优势是：你用 Python 的类型标注声明「参数长什么样」，它就<b>自动校验数据</b>、<b>自动生成可交互的接口文档</b>；同时对<b>异步</b>支持很好，在 Python 框架里性能靠前。可以把它想象成一家「主打快的速食店」：出餐快，菜单（接口文档）还自动帮你印好了。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>main.py —— 一个最小的 FastAPI 接口（看懂即可）</div>
+      <pre><code>from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+class Item(BaseModel):        # 声明请求体长什么样
+    name: str
+    price: float              # 传 "abc" 会被自动拒绝，返回 422
+
+@app.post("/items", status_code=201)
+async def create_item(item: Item):
+    return {"id": 1, "name": item.name, "price": item.price}
+
+# 运行：fastapi dev main.py
+# 打开 http://127.0.0.1:8000/docs 就能看到自动生成的接口文档，还能直接点按钮试调用</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>适合</th><th>不太适合</th><th>主要代价</th></tr>
+      <tr><td>前后端分离项目的 API、AI 模型服务化（把模型包装成接口）、高并发 I/O 型接口、微服务中的单个服务</td><td>需要现成管理后台和完整用户系统的内容型网站（Django 更省事）；纯 CPU 密集的计算</td><td>只管 API 这一块，数据库、权限、后台等要自己挑库组合；项目结构需要自己定规范</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>FastAPI 的「快」包含两层：<b>开发快</b>（类型即校验即文档）和<b>I/O 并发好</b>（异步）。它不会让 CPU 计算变快。</p></div>
+  </section>
+
+  <section class="topic" id="py-family">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>Django 与 Flask：全家桶 vs 自助餐<span class="pt">Django · Flask · Python 三兄弟</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="backend::py-family"><span>已学会</span></label>
+    </div>
+    <p>Python 后端最常见的是三个框架。它们的区别不在「谁更好」，而在<b>自带多少东西</b>：</p>
+    <table class="tbl">
+      <tr><th></th><th>Django</th><th>Flask</th><th>FastAPI</th></tr>
+      <tr><td>比喻</td><td>拎包入住的写字楼（全家桶）</td><td>自助餐（极简，自己挑）</td><td>速食店（专做 API）</td></tr>
+      <tr><td>自带</td><td>ORM、管理后台、用户认证、表单、模板</td><td>只有路由和请求处理，其余靠插件</td><td>路由、数据校验、接口文档、异步</td></tr>
+      <tr><td>适合</td><td>带管理后台的业务系统、内容网站、需要快速搭完整功能</td><td>小工具、简单服务、想完全掌控结构</td><td>前后端分离的 API、AI 服务、高并发接口</td></tr>
+      <tr><td>代价</td><td>较重，约定多，灵活度低一些</td><td>项目大了要自己定规范，容易各写各的</td><td>非 API 的功能要自己组合</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>不是非此即彼：</b>Django 也能做 API（配合 Django REST Framework 等），FastAPI 也能接 ORM（如 SQLAlchemy、SQLModel）。选择时问自己：<b>我需要它「自带」哪些东西？</b></p></div>
+  </section>
+
+  <section class="topic" id="other-stacks">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>Spring Boot、NestJS / Express、Go<span class="pt">other stacks · 其他语言的主流框架</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="backend::other-stacks"><span>已学会</span></label>
+    </div>
+    <p>每种语言都有自己的主流后端框架。选框架，基本等于选这门语言的生态：</p>
+    <table class="tbl">
+      <tr><th>框架</th><th>语言</th><th>性格</th><th>适合</th></tr>
+      <tr><td><b>Spring Boot</b></td><td>Java / Kotlin</td><td>企业级「压舱石」，事务、安全、监控一应俱全；Spring Cloud 提供微服务全家桶</td><td>金融、电商、政企等大型系统</td></tr>
+      <tr><td><b>NestJS</b></td><td>TypeScript</td><td>结构严谨、分层清晰的 Node.js 企业级框架</td><td>想用 TS 统一前后端的中大型团队</td></tr>
+      <tr><td><b>Express</b></td><td>JavaScript / TS</td><td>极简、灵活，Node.js 生态最老牌</td><td>小服务、原型、学习</td></tr>
+      <tr><td><b>Gin / Echo / 标准库</b></td><td>Go</td><td>轻量、高性能，Go 社区偏爱「少依赖」</td><td>高并发 API、微服务、网关</td></tr>
+      <tr><td>ASP.NET Core</td><td>C#</td><td>微软生态的高性能企业框架</td><td>.NET 技术栈的企业</td></tr>
+      <tr><td>Laravel / Rails</td><td>PHP / Ruby</td><td>约定优于配置，开发效率高</td><td>快速建站、中小型业务</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>这些框架都在做同样的事：<b>接请求 → 校验 → 跑业务逻辑 → 读写数据 → 回响应</b>。学会了一个的概念，换另一个只是语法和约定不同。</p></div>
+  </section>
+
+  <section class="topic" id="sync-async">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>同步 vs 异步：I/O 多时异步更划算<span class="pt">sync vs async · 等待时去干别的</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="backend::sync-async"><span>已学会</span></label>
+    </div>
+    <p>想象一个服务员：<b>同步</b>模式下，他把菜单交给后厨后就站在窗口傻等，菜出来了才去接下一桌；<b>异步</b>模式下，他下完单就去招呼别的桌，菜好了再回来端。后端大部分时间都在「等」——等数据库、等第三方接口、等大模型返回。这种 <b>I/O 密集</b>的场景，异步能让同样的机器服务多得多的请求。</p>
+    <table class="tbl">
+      <tr><th>场景</th><th>瓶颈</th><th>异步有没有用</th><th>常见做法</th></tr>
+      <tr><td>调大模型 API、查数据库、调第三方接口</td><td>等待（I/O）</td><td><span class="tg g">很有用</span></td><td>async 接口、连接池</td></tr>
+      <tr><td>图片压缩、视频转码、本地跑模型推理</td><td>CPU 计算</td><td><span class="tg r">帮不上</span>，还会卡住其他请求</td><td>放进后台任务队列（如 Celery）、多进程或单独的服务</td></tr>
+      <tr><td>发邮件、生成报表这类不需要立刻返回的事</td><td>耗时长</td><td>部分有用</td><td>先返回「已受理」，后台慢慢做</td></tr>
+    </table>
+    <div id="demo-async"></div>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>在 async 接口里直接做大量 CPU 计算（或调用不支持异步的阻塞库），会卡住整个事件循环，<b>所有</b>请求一起变慢。这是 FastAPI 新手最常见的性能坑之一。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>照着 Python 学习包第 21 节跑一个 FastAPI 接口，打开 <code class="inl">/docs</code> 页面，故意传错一个字段类型，观察 422 响应里的 detail 说了什么。</li>
+      <li>给一个「图片上传后自动生成缩略图」的功能设计接口：哪部分同步返回？哪部分放后台任务？</li>
+      <li>用自己的话解释：为什么「前端已经校验过手机号格式了，后端还要再校验一遍」？</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "backend",
+  title: "后端与 API 框架",
+  eyebrow: "MODULE 05 · 技术全景",
+  lead: "后端处理业务规则、身份验证和数据读写，通过 HTTP API 为前端服务。FastAPI 是 Python 的现代 API 框架；Django、Spring Boot、Go 各有性格；异步让「等待多」的服务更划算。",
+  points: ["be-role","http-api","fastapi","py-family","other-stacks","sync-async"],
+  prev: "04-frontend.html", prevTitle: "前端层：界面怎么搭",
+  next: "06-data.html", nextTitle: "数据层：数据放在哪",
+};
+
+const QUZ = [
+  { type:"quiz", q:"为什么订单总价必须由后端计算，而不能信任前端传来的价格？",
+    opts:["因为后端电脑更快","因为前端代码运行在用户浏览器里，可以被随意修改","因为前端不会算乘法","因为数据库要求这样"],
+    ans:1, exp:"前端完全在用户掌控之下，传来的任何数据都可能被篡改，只有后端是可信的。A、C 不是原因；D 是把结果当原因。" },
+  { type:"quiz", q:"「创建一个新订单」按 REST 风格最常用哪个方法？",
+    opts:["GET","DELETE","POST","HEAD"],
+    ans:2, exp:"POST 用于新建资源。GET 只查询不改数据；DELETE 删除；HEAD 只取响应头。" },
+  { type:"quiz", q:"401 和 403 的区别是？",
+    opts:["401 = 没登录（不知道你是谁）；403 = 登录了但没权限","两者完全一样","401 是服务器崩溃，403 是网络断了","401 表示成功，403 表示失败"],
+    ans:0, exp:"401 是认证问题，403 是授权问题（09 模块会细讲认证和授权）。服务器错误是 5xx；成功是 2xx。" },
+  { type:"quiz", q:"接口返回 5xx 状态码，通常说明？",
+    opts:["调用方参数传错了","用户没登录","请求被限流","服务端或下游出了问题（代码 bug、依赖挂了、超时）"],
+    ans:3, exp:"4xx 是调用方的问题（参数、登录、权限、频率），5xx 是服务端的问题。排障时这是第一道分界线。" },
+  { type:"quiz", q:"关于 FastAPI，哪种说法最准确？",
+    opts:["它是前端框架","它是 Python 的后端 API 框架，用类型标注实现自动校验和自动接口文档，异步支持好","它是一种数据库","它能让 CPU 密集计算变快"],
+    ans:1, exp:"FastAPI 在后端层，「快」指开发快和 I/O 并发好。它不会加速 CPU 计算（D 错），也不是前端框架或数据库。" },
+  { type:"quiz", q:"要快速做一个内容管理网站，需要现成的管理后台、用户登录和权限，Python 技术栈下最省事的是？",
+    opts:["Django","Flask","纯手写 socket","Rust"],
+    ans:0, exp:"Django 自带 admin 后台、认证、ORM，正是为这类需求准备的。Flask 和 FastAPI 都要自己组合这些功能；手写和换语言都不现实。" },
+  { type:"quiz", q:"Spring Boot 是？",
+    opts:["前端 UI 库","容器编排平台","Java（也支持 Kotlin）生态的企业级后端框架","一种 NoSQL 数据库"],
+    ans:2, exp:"Spring Boot 是 Java 后端的事实标准，金融、电商大量使用。前端 UI 库是 React 等；容器编排是 Kubernetes；NoSQL 是 MongoDB 等。" },
+  { type:"quiz", q:"下面哪个场景，异步能带来最大的收益？",
+    opts:["本地用 CPU 压缩一万张图片","计算一个很大的矩阵","大量请求都在等待大模型 API 和数据库返回","把一个文件从内存复制到内存"],
+    ans:2, exp:"异步的价值在于「等待时去处理别的请求」，I/O 等待越多收益越大。A、B、D 都是 CPU / 内存计算，异步帮不上。" },
+  { type:"quiz", q:"在 FastAPI 的 async 接口里直接做耗时的图片处理，会发生什么？",
+    opts:["没有任何影响","卡住事件循环，其他所有请求一起变慢；应该放进后台任务、进程池或单独的服务","图片处理会自动变快","FastAPI 会自动把它拆成多台机器"],
+    ans:1, exp:"事件循环是单线程轮流处理的，CPU 计算不会「让出」，会把别人都堵住。框架不会自动加速或拆分（C、D 错）。" },
+  { type:"interview", q:"前端同事说：「你的接口一直返回 422。」你最先怎么判断？",
+    opts:["服务器宕机了，重启一下","数据库满了","网络断了，检查网线","请求体不符合接口契约（字段缺失或类型不对），看响应里的 detail 字段，对照 /docs 里的定义"],
+    ans:3, exp:"422 表示请求格式能解析，但字段校验没通过，是契约不一致的问题。FastAPI 会在 detail 里指出哪个字段、为什么错。宕机通常是 5xx 或连不上；数据库满了是 5xx；断网根本收不到响应。" },
+];
+</script>
+<script src="assets/learn.js"></script>
+<script>
+/* 演示 1：API 请求模拟器 */
+(function(){
+  const R = {
+    list:{ req:"GET /items", st:200, body:'[ {"id": 42, "name": "键盘", "price": 199.0},\n  {"id": 43, "name": "鼠标", "price": 89.0} ]', why:"查询列表，成功。GET 不会改动任何数据。" },
+    one:{ req:"GET /items/42", st:200, body:'{"id": 42, "name": "键盘", "price": 199.0}', why:"按 id 查询单个资源，成功。" },
+    miss:{ req:"GET /items/999", st:404, body:'{"detail": "Item not found"}', why:"资源不存在。调用方的问题：id 不对。" },
+    create:{ req:'POST /items\nAuthorization: Bearer 有效令牌\n{"name": "显示器", "price": 999}', st:201, body:'{"id": 44, "name": "显示器", "price": 999.0}', why:"创建成功，返回 201 和新资源。" },
+    bad:{ req:'POST /items\nAuthorization: Bearer 有效令牌\n{"name": "显示器", "price": "很贵"}', st:422, body:'{"detail": [{"loc": ["body", "price"],\n  "msg": "Input should be a valid number"}]}', why:"字段类型不符合契约：price 应该是数字。FastAPI 自动校验并指出是哪个字段。" },
+    noauth:{ req:'POST /items\n（没带 Authorization）\n{"name": "显示器", "price": 999}', st:401, body:'{"detail": "Not authenticated"}', why:"没登录，服务器不知道你是谁。去登录拿令牌。" },
+    forbid:{ req:"DELETE /items/42\nAuthorization: Bearer 普通用户的令牌", st:403, body:'{"detail": "Admin only"}', why:"知道你是谁，但你没有删除商品的权限。" },
+    crash:{ req:"GET /report/today", st:500, body:'{"detail": "Internal Server Error"}', why:"服务端代码出错（例如除以零、空值没处理）。调用方没有做错什么，要去看后端日志。" },
+    timeout:{ req:"GET /recommend", st:504, body:"Gateway Timeout", why:"网关等后端太久没回应（例如后端在等一个很慢的第三方接口），超时了。" }
+  };
+  const host = document.getElementById("demo-api");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：API 请求模拟器</span><span class="hint">选一个请求，看服务器怎么回</span></div>
+    <div class="db">
+      <div class="ctl" id="apiPick">
+        <button class="b" data-v="list">查列表</button><button class="b" data-v="one">查单个</button><button class="b" data-v="miss">查不存在的</button>
+        <button class="b" data-v="create">新建</button><button class="b" data-v="bad">新建（类型错）</button><button class="b" data-v="noauth">新建（没登录）</button>
+        <button class="b" data-v="forbid">删除（普通用户）</button><button class="b" data-v="crash">后端出 bug</button><button class="b" data-v="timeout">后端太慢</button>
+      </div>
+      <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        <div class="c"><h4>请求</h4><pre id="apiReq" style="margin:0;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap"></pre></div>
+        <div class="c"><h4>响应 <span id="apiSt"></span></h4><pre id="apiBody" style="margin:0;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap"></pre></div>
+      </div>
+      <div class="log" id="apiLog"></div>
+    </div></div>`;
+  ArchKit.choice("apiPick", v=>{
+    const r = R[v], cls = r.st < 300 ? "st2" : (r.st < 500 ? "st4" : "st5");
+    document.getElementById("apiReq").textContent = r.req;
+    document.getElementById("apiBody").textContent = r.body;
+    document.getElementById("apiSt").innerHTML = `<span class="${cls}">${r.st}</span>`;
+    document.getElementById("apiLog").innerHTML = `<b>${r.st < 300 ? "成功" : (r.st < 500 ? "调用方的问题（4xx）" : "服务端的问题（5xx）")}</b>：${r.why}`;
+  }, "list");
+})();
+
+/* 演示 2：同步 vs 异步 耗时估算 */
+(function(){
+  const host = document.getElementById("demo-async");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：同步 vs 异步，同一时刻来了 N 个请求</span><span class="hint">拖动滑块</span></div>
+    <div class="db">
+      <div class="ctl"><label>同时到达的请求数 N</label><input type="range" id="asN" min="1" max="50" value="20"><span class="tg" id="asNv"></span></div>
+      <div class="ctl"><label>每个请求等待 I/O（毫秒）</label><input type="range" id="asIO" min="0" max="1000" step="10" value="500"><span class="tg" id="asIOv"></span></div>
+      <div class="ctl"><label>每个请求 CPU 计算（毫秒）</label><input type="range" id="asCPU" min="1" max="300" value="10"><span class="tg" id="asCPUv"></span></div>
+      <div class="bars" id="asBars"></div>
+      <div class="log" id="asLog"></div>
+      <div class="foot">简化模型：只有 1 个工作进程。同步时请求排队一个个完整处理；异步时等待可以重叠，但 CPU 计算仍然只能一个个来。</div>
+    </div></div>`;
+  const n = document.getElementById("asN"), io = document.getElementById("asIO"), cpu = document.getElementById("asCPU");
+  function render(){
+    const N = +n.value, I = +io.value, C = +cpu.value;
+    document.getElementById("asNv").textContent = N;
+    document.getElementById("asIOv").textContent = I + " ms";
+    document.getElementById("asCPUv").textContent = C + " ms";
+    const sync = N * (I + C), asyn = I + N * C, max = Math.max(sync, asyn, 1);
+    document.getElementById("asBars").innerHTML =
+      `<div class="bar"><span class="nm">同步</span><span class="track"><span style="width:${sync/max*100}%"></span></span><span class="val">${(sync/1000).toFixed(2)} s</span></div>` +
+      `<div class="bar"><span class="nm">异步</span><span class="track"><span style="width:${asyn/max*100}%"></span></span><span class="val">${(asyn/1000).toFixed(2)} s</span></div>`;
+    const ratio = (sync / asyn).toFixed(1);
+    document.getElementById("asLog").innerHTML = I >= C * 5
+      ? `<b>I/O 密集</b>：最后一个请求，同步要等 ${(sync/1000).toFixed(2)} 秒，异步约 ${(asyn/1000).toFixed(2)} 秒，快约 ${ratio} 倍。等待越多，异步越划算。`
+      : `<b>CPU 占比高</b>：异步只快 ${ratio} 倍。瓶颈是计算本身，应该考虑多进程、后台任务或单独的计算服务，而不是指望异步。`;
+  }
+  [n, io, cpu].forEach(el=>el.addEventListener("input", render));
+  render();
+})();
+</script>
+</body>
+</html>

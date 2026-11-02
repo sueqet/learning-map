@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>架构模式：产品的组织形式 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 架构模式：单体、微服务、分层架构、模块化单体、事件驱动与 Serverless 的优缺点，以及架构如何随团队和业务演进。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">架构模式</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 07 · 技术全景</span></span>
+    <h1 id="pageTitle">架构模式：产品的组织形式</h1>
+    <p class="lead" id="pageLead">在「简单」与「灵活」之间做权衡。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>用「小作坊」和「专业化集团」的比喻，说出单体和微服务的优点与代价。</li>
+      <li>解释分层架构（接入层 / 业务层 / 数据层）的职责划分，以及它和单体 / 微服务是不同维度。</li>
+      <li>说出模块化单体为什么是很多团队的务实选择。</li>
+      <li>知道事件驱动和 Serverless 各自解决什么问题、代价是什么。</li>
+      <li>能根据团队规模、业务复杂度、运维能力判断「现在该用哪种架构」，并说出<b>小团队别盲目上微服务</b>的理由。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="05-backend.html">05 后端</a> 和 <a href="06-data.html">06 数据层</a>，知道后端通过 API 被调用、数据有一致性问题。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 两种极端</div>
+    <h2><span class="num">01</span>从全能作坊到专业分工</h2>
+  </section>
+
+  <section class="topic" id="monolith">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>单体：一个「全能小作坊」<span class="pt">monolith · 一个应用装下所有功能</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="arch::monolith"><span>已学会</span></label>
+    </div>
+    <p><b>单体架构</b>把所有功能——用户、商品、订单、支付——打包在<b>一个应用</b>里：一个代码库、一次部署、通常连一个数据库。功能之间互相调用就是普通的函数调用，又快又简单。</p>
+    <table class="tbl">
+      <tr><th>优点</th><th>缺点</th></tr>
+      <tr><td>起步极快：开发、测试、部署链路都很短</td><td>功能膨胀后代码盘根错节，<b>牵一发而动全身</b></td></tr>
+      <tr><td>调用是函数调用，没有网络延迟和失败</td><td>一个严重 bug（如内存泄漏）可能拖垮<b>整个站点</b></td></tr>
+      <tr><td>事务简单：一个数据库里就能保证一致</td><td>只能整体扩容：订单忙，也得把整个应用一起复制</td></tr>
+      <tr><td>排查容易：日志和调用栈都在一个地方</td><td>团队变大后互相踩脚，发布要排队</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>单体不是贬义词。它<b>非常适合初创产品验证想法</b>。不少知名产品长期以单体为主体运行（例如 Stack Overflow 多年来用单体应用和少量服务器支撑巨大流量）。问题往往不在「单体」本身，而在「没有边界的单体」。</p></div>
+  </section>
+
+  <section class="topic" id="microservices">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>微服务：一个「专业化集团」<span class="pt">microservices · 拆成独立部署的服务</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="arch::microservices"><span>已学会</span></label>
+    </div>
+    <p><b>微服务架构</b>把作坊拆成一个个独立的「专业部门」：商品服务、订单服务、支付服务、用户服务……各自开发、各自部署、各自运行，通常还有各自的数据库，彼此通过网络（API 或消息）协作。大型互联网公司（如淘宝、微信）的后台由成千上万个服务组成，并按入口层、业务层、数据层组织，来支撑海量并发。</p>
+    <table class="tbl">
+      <tr><th>优点</th><th>代价</th><th>需要的配套</th></tr>
+      <tr><td><b>故障隔离</b>：支付挂了，浏览和聊天照常</td><td><b>运维极其复杂</b>：几十上百个服务要部署、监控、升级</td><td>容器 + Kubernetes、CI/CD</td></tr>
+      <tr><td><b>独立扩展</b>：大促只给商品和订单服务加机器</td><td><b>网络调用</b>：延迟、超时、重试、部分失败</td><td>API 网关、服务发现、熔断限流</td></tr>
+      <tr><td><b>独立发布</b>：各团队按自己的节奏上线</td><td><b>数据一致性</b>：跨服务没有一个数据库事务可用</td><td>最终一致、补偿流程（Saga）</td></tr>
+      <tr><td><b>技术自由</b>：不同服务可以用不同语言</td><td><b>排查困难</b>：一个请求穿过十几个服务</td><td>集中日志、链路追踪、监控告警</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>最坏的结果：「分布式单体」。</b>拆成了很多服务，但它们之间强耦合，改一个功能要几个服务一起发布——同时承担了单体的僵硬和微服务的复杂。拆分之前先问：边界清楚吗？能独立发布吗？</p></div>
+    <div id="demo-mono-ms"></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 内部分工与中间路线</div>
+    <h2><span class="num">02</span>分层、模块化与其他形态</h2>
+  </section>
+
+  <section class="topic" id="layered">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>分层架构：接入层 / 业务层 / 数据层<span class="pt">layered · 内部分工</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="arch::layered"><span>已学会</span></label>
+    </div>
+    <p>无论单体还是微服务，内部通常都按<b>分层</b>组织：<b>接入层</b>接待请求（路由、参数校验、鉴权），<b>业务逻辑层</b>执行规则，<b>数据访问层</b>负责存取。每层只和相邻的层打交道。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>一个分层的后端项目目录（看懂即可）</div>
+      <pre><code>app/
+├── api/            ← 接入层：定义接口、校验参数、检查登录（FastAPI 的路由）
+│   └── orders.py
+├── services/       ← 业务逻辑层：下单规则、库存扣减、价格计算
+│   └── order_service.py
+└── repositories/   ← 数据访问层：只负责读写数据库
+    └── order_repo.py</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>优点</th><th>缺点</th></tr>
+      <tr><td>职责清晰，便于团队分工和单独测试</td><td>请求要层层穿透，有一些性能开销</td></tr>
+      <tr><td>换数据库只需改数据访问层</td><td>简单功能也要写好几层，可能有样板代码</td></tr>
+      <tr><td>业务规则集中在一处，不会散落各地</td><td>分得过细会变成过度设计</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>「单体 / 微服务」说的是<b>拆成几个部署单元</b>；「分层」说的是<b>每个单元内部怎么分工</b>。两者是不同维度，可以自由组合：分层的单体、分层的微服务都很常见。</p></div>
+  </section>
+
+  <section class="topic" id="modular">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>模块化单体：两者之间的中间路线<span class="pt">modular monolith · 部署简单、边界清晰</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="arch::modular"><span>已学会</span></label>
+    </div>
+    <p><b>模块化单体</b>仍然只部署一个应用，但内部按业务领域划分出边界清晰的模块（订单模块、支付模块……），模块之间<b>只通过明确的接口调用</b>，不直接读对方的数据表。它保留了单体部署简单的优点，又拥有接近微服务的清晰边界；将来真要拆，就沿着模块边界拆。Shopify 就公开分享过把超大型单体改造为模块化单体的经验。</p>
+    <table class="tbl">
+      <tr><th></th><th>杂乱的单体</th><th>模块化单体</th><th>微服务</th></tr>
+      <tr><td>部署单元</td><td>1 个</td><td>1 个</td><td>很多个</td></tr>
+      <tr><td>模块边界</td><td>模糊，互相直接调用、直接读表</td><td>清晰，只走模块接口</td><td>清晰，靠网络强制隔离</td></tr>
+      <tr><td>模块间调用</td><td>函数调用</td><td>函数调用</td><td>网络调用</td></tr>
+      <tr><td>运维复杂度</td><td>低</td><td>低</td><td>高</td></tr>
+      <tr><td>适合团队规模</td><td>很小</td><td>几人到几十人</td><td>几十人以上、多个独立团队</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>对大多数中小团队，<b>模块化单体是性价比最高的默认选项</b>：今天简单，明天可拆。</p></div>
+  </section>
+
+  <section class="topic" id="other-styles">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>事件驱动与 Serverless<span class="pt">event-driven · serverless · 另外两种常见形态</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="arch::other-styles"><span>已学会</span></label>
+    </div>
+    <p><b>事件驱动</b>：服务之间不直接互相调用，而是发布一条事件（「订单已支付」），发货、积分、短信等服务各自订阅并处理，中间通过<b>消息队列</b>（Kafka、RabbitMQ、RocketMQ）传递。<b>Serverless</b>：你只写函数，云平台在有请求时自动运行它、按调用次数计费，不用管服务器（AWS Lambda、阿里云函数计算、Cloudflare Workers）。</p>
+    <table class="tbl">
+      <tr><th></th><th>事件驱动</th><th>Serverless</th></tr>
+      <tr><td>优点</td><td>发布方不用知道谁在订阅，新增功能只需加一个订阅者；能削峰填谷</td><td>免运维服务器、按量付费、自动扩缩容，低流量时几乎零成本</td></tr>
+      <tr><td>代价</td><td>流程不直观、只能最终一致、要处理消息重复 / 丢失 / 乱序、排查更难</td><td>冷启动延迟、单次执行时长有限制、厂商锁定、持续大流量时可能更贵、本地调试难</td></tr>
+      <tr><td>适合</td><td>一件事触发多个后续动作、上下游处理速度不一致</td><td>流量波动大或很低的接口、定时任务、事件处理、小工具</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>没有银弹：</b>Amazon Prime Video 团队在 2023 年公开过一个案例：把一个音视频质量监控系统从分布式的 Serverless 组件合并成单个进程后，基础设施成本降低了约 90%。架构好不好，取决于它是否匹配<b>这个具体的负载</b>。</p></div>
+  </section>
+
+  <section class="topic" id="evolve">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>架构演进：先单体，按需再拆<span class="pt">evolution · 架构服务于当前阶段</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="arch::evolve"><span>已学会</span></label>
+    </div>
+    <p>架构没有绝对的好坏，只有<b>是否适合当前阶段</b>。常见的健康路径是：<b>单体 → 模块化单体 → 把确实需要独立的模块拆成服务</b>。拆的时候常用「绞杀者模式」：新功能放进新服务，旧功能逐步迁移，旧系统慢慢「被绞杀」，而不是一次性推倒重来。</p>
+    <table class="tbl">
+      <tr><th>阶段</th><th>团队</th><th>建议架构</th><th>重点</th></tr>
+      <tr><td>验证想法</td><td>1–5 人</td><td>单体（内部分层）</td><td>快速上线、快速改</td></tr>
+      <tr><td>产品成型</td><td>5–30 人</td><td>模块化单体</td><td>划清模块边界，补测试、CI/CD、监控</td></tr>
+      <tr><td>规模扩张</td><td>30 人以上、多个团队</td><td>按业务边界逐步拆出服务</td><td>先补齐运维配套，再拆；一次只拆一个</td></tr>
+    </table>
+    <table class="tbl">
+      <tr><th>值得拆的信号</th><th>不该拆的信号</th></tr>
+      <tr><td>多个团队频繁互相阻塞、发布要排队</td><td>团队不到十个人</td></tr>
+      <tr><td>某个模块的扩容需求和其他模块差异巨大</td><td>业务还在摸索，边界天天变</td></tr>
+      <tr><td>某个模块需要更高的可用性或独立的发布节奏</td><td>还没有自动化部署、集中日志和监控</td></tr>
+    </table>
+    <div id="demo-advisor"></div>
+    <div class="callout key"><span class="i">★</span><p><b>一句话总结：</b>验证想法、小团队 → 从<b>单体</b>起步；业务复杂、大团队 → 用<b>微服务</b>解耦，用<b>分层</b>理清内部。拆分是为了解决真实存在的问题，而不是为了「看起来先进」。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>在「单体 vs 微服务」演示里，分别触发三个事件，用一张表记录两种架构下的结果，并写出各自的代价。</li>
+      <li>给一个外卖 App 画出模块划分（至少 5 个模块），标出哪两个模块最可能先被拆成独立服务，为什么。</li>
+      <li>找一篇「我们为什么从微服务回到单体」或「我们为什么拆分单体」的技术博客，提炼出他们的判断依据。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "arch",
+  title: "架构模式：产品的组织形式",
+  eyebrow: "MODULE 07 · 技术全景",
+  lead: "架构是产品的「组织形式」：单体像全能小作坊，微服务像专业化集团，分层是内部分工，模块化单体是中间路线。选择的本质，是在「简单」与「灵活」之间做权衡。",
+  points: ["monolith","microservices","layered","modular","other-styles","evolve"],
+  prev: "06-data.html", prevTitle: "数据层：数据放在哪",
+  next: "08-devops.html", nextTitle: "基础设施与 DevOps",
+};
+
+const QUZ = [
+  { type:"quiz", q:"单体架构最大的优点是？",
+    opts:["天然故障隔离","起步极快，开发、测试、部署链路都很短","可以只给订单模块单独扩容","每个模块可以用不同语言"],
+    ans:1, exp:"单体的优势是简单和快。故障隔离、独立扩容、技术自由都是微服务的优点（A、C、D）。" },
+  { type:"quiz", q:"单体功能不断膨胀后，最典型的问题是？",
+    opts:["网络调用太多","无法使用数据库","代码盘根错节，改一处影响一片，一个严重 bug 可能拖垮全站","无法部署"],
+    ans:2, exp:"「牵一发而动全身」是单体膨胀后的典型症状。网络调用多是微服务的问题；单体当然能用数据库和部署。" },
+  { type:"quiz", q:"微服务的「故障隔离」指的是？",
+    opts:["支付服务挂了，商品浏览、聊天等其他服务照常可用","任何服务都不会出故障","故障时自动回滚代码","所有服务共用一个进程"],
+    ans:0, exp:"服务独立运行，一个挂了不会直接带走其他服务（但依赖它的功能会受影响，需要降级处理）。B、C 不是隔离的含义；D 恰恰是单体。" },
+  { type:"quiz", q:"下列哪一项<b>不是</b>微服务的典型代价？",
+    opts:["运维复杂，要部署和监控很多服务","服务间网络调用带来延迟和部分失败","跨服务的数据一致性难保证","起步比单体更快、更简单"],
+    ans:3, exp:"微服务起步更慢、更复杂，D 说反了。A、B、C 都是它的真实代价。" },
+  { type:"quiz", q:"分层架构通常把系统分成哪三层？",
+    opts:["接入层、业务逻辑层、数据层","前端、手机、电脑","开发、测试、运维","Java、Python、Go"],
+    ans:0, exp:"接入层接待请求，业务层执行规则，数据层负责存取。其余选项是设备、岗位或语言，不是系统分层。" },
+  { type:"quiz", q:"「模块化单体」最准确的描述是？",
+    opts:["很多个独立部署的小服务","一个部署单元，但内部按业务划分出边界清晰、只通过接口互相调用的模块","不分任何模块的单体","只用 Serverless 函数的系统"],
+    ans:1, exp:"它保留单体「一个部署单元」的简单，同时拥有清晰的模块边界，方便以后沿边界拆分。A 是微服务；C 是杂乱的单体；D 是 Serverless。" },
+  { type:"quiz", q:"「订单已支付」之后，要触发发货、加积分、发短信三件事，且以后可能还会加新动作。哪种方式最解耦？",
+    opts:["订单服务里依次直接调用三个服务","让用户手动点三个按钮","发布「订单已支付」事件到消息队列，各服务自行订阅处理","把三个功能写进数据库触发器"],
+    ans:2, exp:"事件驱动让发布方不必知道有哪些订阅者，新增动作只需加订阅者。A 耦合紧，订单服务要知道并等待所有下游；B 不合理；D 把业务逻辑藏进数据库，难维护。" },
+  { type:"quiz", q:"关于 Serverless，哪项是它的典型代价？",
+    opts:["必须自己管理服务器","冷启动延迟、执行时长限制、厂商锁定","无法自动扩容","任何流量下都比自建服务器贵"],
+    ans:1, exp:"Serverless 免运维、自动扩容（A、C 说反了）；低流量时通常很便宜，持续大流量时才可能更贵（D 太绝对）。" },
+  { type:"quiz", q:"3 个人的初创团队要验证一个新产品想法，最合适的架构是？",
+    opts:["20 个微服务 + Kubernetes","事件驱动 + 五种消息队列","单体（内部分层，最好有清晰模块边界）","先写一年架构文档再开发"],
+    ans:2, exp:"这个阶段最贵的是时间和试错成本，单体最快。A、B 会把精力耗在运维上；D 在需求还不确定时过度设计。" },
+  { type:"interview", q:"面试官问：「微服务这么好，为什么不一开始就用？」哪个回答最好？",
+    opts:["因为微服务已经过时了","微服务的收益（独立扩展、团队独立发布、故障隔离）要在团队和业务足够大时才显现，而它的代价（运维、网络调用、一致性、排障）从第一天就要付。早期边界还不稳定，拆错了代价更高。所以先用单体或模块化单体，等出现明确的拆分信号再按边界逐步拆","因为微服务只能用 Go","因为单体永远比微服务好"],
+    ans:1, exp:"好回答讲清了「收益何时出现、代价何时支付」的不对称，并给出演进路径。A、D 都是绝对化的说法；C 是事实错误。" },
+];
+</script>
+<script src="assets/learn.js"></script>
+<script>
+/* 演示 1：单体 vs 微服务 */
+(function(){
+  const MODS = ["用户","商品","订单","支付","消息"];
+  const host = document.getElementById("demo-mono-ms");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：同一件事，单体和微服务各会怎样</span><span class="hint">先选架构，再触发事件</span></div>
+    <div class="db">
+      <div class="ctl" id="amArch"><label>架构</label><button class="b" data-v="mono">单体</button><button class="b" data-v="ms">微服务</button></div>
+      <div class="ctl" id="amEvt"><label>事件</label><button class="b" data-v="normal">正常运行</button><button class="b" data-v="bug">支付模块出严重 bug</button><button class="b" data-v="peak">大促：订单流量 ×10</button><button class="b" data-v="deploy">只改一行商品页文案</button></div>
+      <div id="amOut"></div>
+      <div class="log" id="amLog"></div>
+      <div class="foot">把两种架构在同一事件下的结果对比着看。注意微服务那一栏的「运维」代价一直存在。</div>
+    </div></div>`;
+  let arch = "mono", evt = "normal";
+  function box(name, cls, sub){ return `<div class="node ${cls}"><span class="ly">${sub}</span><b>${name}</b></div>`; }
+  function render(){
+    const out = document.getElementById("amOut"), log = document.getElementById("amLog");
+    let html = "", msg = "", ops = "";
+    if(arch === "mono"){
+      const down = evt === "bug";
+      const sub = evt === "peak" ? "×10 份整体" : (evt === "deploy" ? "整体重新发布" : "1 个进程");
+      html = `<div class="flow"><div class="node ${down?"bad":"on"}" style="flex:1 1 100%"><span class="ly">单体应用 · ${sub}</span><b>${MODS.join(" · ")}</b></div></div>`;
+      msg = {
+        normal:"一切正常：所有功能在同一个进程里，调用就是函数调用。",
+        bug:"<span class=\"bad\">支付模块的严重 bug 拖垮了整个进程：用户登录、浏览商品、聊天全部不可用。</span>",
+        peak:"订单忙，但只能把整个应用复制 10 份：用户、消息这些不忙的模块也跟着多占了 9 倍资源。",
+        deploy:"只改了一行文案，也要把整个应用重新构建、回归测试、重新发布；发布期间所有功能都受影响。"
+      }[evt];
+      ops = "运维：1 个部署单元，0 次服务间网络调用。";
+    } else {
+      html = `<div class="flow">` + MODS.map(m=>{
+        let cls = "on", sub = "×1";
+        if(evt === "bug" && m === "支付"){ cls = "bad"; sub = "已宕机"; }
+        if(evt === "bug" && m === "订单"){ cls = ""; sub = "降级：可下单，稍后支付"; }
+        if(evt === "peak" && m === "订单"){ sub = "×10"; }
+        if(evt === "peak" && m === "商品"){ sub = "×5"; }
+        if(evt === "deploy"){ cls = m === "商品" ? "on" : "dim"; sub = m === "商品" ? "单独发布" : "不受影响"; }
+        return box(m + "服务", cls, sub);
+      }).join("") + `</div>`;
+      msg = {
+        normal:"一切正常：5 个服务各自运行，通过网络 API 互相调用。",
+        bug:"支付服务宕机，但用户、商品、消息照常；订单服务做了降级（允许先下单、稍后支付）。<b>故障被隔离了。</b>",
+        peak:"只给订单（×10）和商品（×5）服务加实例，其他服务不动：<b>按需扩展，更省钱。</b>",
+        deploy:"只重新发布商品服务，其他服务完全不受影响：<b>独立发布。</b>"
+      }[evt];
+      ops = "运维：5 个部署单元、服务之间每秒大量网络调用，需要网关、服务发现、集中日志、链路追踪、监控告警。";
+    }
+    out.innerHTML = html;
+    log.innerHTML = msg + "<br>" + ops;
+  }
+  ArchKit.choice("amArch", v=>{ arch = v; render(); }, "mono");
+  ArchKit.choice("amEvt", v=>{ evt = v; render(); }, "normal");
+})();
+
+/* 演示 2：架构建议器 */
+(function(){
+  const host = document.getElementById("demo-advisor");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：现在该用哪种架构？</span><span class="hint">拖动滑块描述你的处境</span></div>
+    <div class="db">
+      <div class="ctl"><label>团队人数</label><input type="range" id="adTeam" min="1" max="200" value="4"><span class="tg" id="adTeamV"></span></div>
+      <div class="ctl"><label>业务复杂度（1–5）</label><input type="range" id="adCx" min="1" max="5" value="2"><span class="tg" id="adCxV"></span></div>
+      <div class="ctl"><label>运维 / DevOps 能力（1–5）</label><input type="range" id="adOps" min="1" max="5" value="2"><span class="tg" id="adOpsV"></span></div>
+      <div class="ctl"><label>各模块扩容需求差异（1–5）</label><input type="range" id="adDiff" min="1" max="5" value="1"><span class="tg" id="adDiffV"></span></div>
+      <div class="verdict" id="adOut"></div>
+      <div class="foot">这是帮助建立直觉的简化规则，真实决策还要看业务边界是否清晰、发布是否互相阻塞等具体信号。</div>
+    </div></div>`;
+  const ids = ["adTeam","adCx","adOps","adDiff"];
+  function render(){
+    const [t, cx, ops, diff] = ids.map(id=>+document.getElementById(id).value);
+    ids.forEach(id=>document.getElementById(id+"V").textContent = document.getElementById(id).value);
+    let title, why = [], risk = [];
+    if(t <= 8){
+      title = "单体（内部分层）";
+      why.push("团队小，沟通成本低，一个代码库最快");
+      if(cx >= 4) why.push("业务复杂，建议从第一天就按业务划分模块边界");
+      if(diff >= 4) risk.push("个别模块扩容需求特殊：可以先把它做成独立的后台任务或单独部署一个实例，而不是全面拆分");
+    } else if(t <= 40 || ops <= 2){
+      title = "模块化单体";
+      why.push("团队变大，需要清晰的模块边界来减少互相踩脚");
+      if(ops <= 2 && t > 40) risk.push("团队已经很大，但运维能力不足：先补 CI/CD、集中日志、监控，再考虑拆分");
+      if(diff >= 4) why.push("可以把扩容需求最特殊的 1–2 个模块先拆成独立服务");
+    } else {
+      title = cx >= 3 ? "微服务（按业务边界逐步拆分）" : "模块化单体 + 少量独立服务";
+      why.push("多个团队需要独立开发和发布");
+      if(ops >= 4) why.push("运维能力足够支撑多服务的部署、监控和排障");
+      if(diff >= 3) why.push("各模块扩容需求不同，独立扩展能省成本");
+      risk.push("一次只拆一个服务，警惕「分布式单体」");
+    }
+    if(ops <= 1) risk.push("几乎没有运维能力：优先考虑托管服务（PaaS、托管数据库）减少运维负担");
+    document.getElementById("adOut").innerHTML = `<h4>建议：${title}</h4><ul>${why.map(w=>`<li>${w}</li>`).join("")}${risk.map(r=>`<li style="color:var(--amber)">⚠ ${r}</li>`).join("")}</ul>`;
+  }
+  ids.forEach(id=>document.getElementById(id).addEventListener("input", render));
+  render();
+})();
+</script>
+</body>
+</html>

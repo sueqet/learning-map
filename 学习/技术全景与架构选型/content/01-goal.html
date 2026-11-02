@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习目标：会问、会判、会验 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 学习目标：需求说明、操作性细节与概念性细节、为什么只背优缺点不够、问判验三种能力、必须懂与可交给 AI 的边界。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">学习目标</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 01 · 技术全景</span></span>
+    <h1 id="pageTitle">学习目标：会问、会判、会验</h1>
+    <p class="lead" id="pageLead">先把「要学什么、不学什么」说清楚。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>用一句话说清自己的学习目标：<b>建一张技术全景地图</b>，并具备<b>选择、判断、验证</b>的能力。</li>
+      <li>区分<b>操作性细节</b>和<b>概念性细节</b>，知道哪些可以交给 AI，哪些必须自己懂。</li>
+      <li>说出「只背优缺点表」不够用的 4 个原因，各举一个例子。</li>
+      <li>解释「会问、会判、会验」分别指什么，并各举一个例子。</li>
+      <li>拿到任意一条知识，能把它归入「必须懂 / 交给 AI / 不必深入」三类之一。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>无。用过电脑、网页和手机 App 就够了。听说过 Vue、React、FastAPI、微服务这些名词但分不清，正是本学习包要解决的问题。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 从一段对话到学习目标</div>
+    <h2><span class="num">01</span>我到底要学什么</h2>
+  </section>
+
+  <section class="topic" id="need">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>我的需求：建一张技术全景地图<span class="pt">need · 需求说明</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="goal::need"><span>已学会</span></label>
+    </div>
+    <p>这个学习包来自一次对话。起点是一句「<b>不想学技术细节了</b>」，接着问了不同语言和产品用什么架构、Vue 和 React 是什么、FastAPI 是什么，最后问到「<b>AI 时代只懂优缺点和选择，行不行？</b>」。把这些问题合起来，需求可以整理成下表。</p>
+    <table class="tbl">
+      <tr><th>原话 / 问题</th><th>理解的需求</th><th>需要的结果</th><th>不需要的</th></tr>
+      <tr><td>「不想学技术细节了」</td><td>不想背 API、配置项、手写实现、逐行改报错</td><td>知道技术大概怎么用、为什么存在、代价是什么</td><td>死记语法、函数名、配置项</td></tr>
+      <tr><td>「想学不同语言、产品都用什么架构」</td><td>建立「语言—框架—分层—架构」的全景地图</td><td>听到 Vue、React、FastAPI、微服务时，知道它在地图的哪一层</td><td>读源码、学编译原理和底层实现</td></tr>
+      <tr><td>「不同架构有什么优缺点、有什么功能」</td><td>能比较单体、微服务、分层，以及前端、后端、数据层</td><td>能按场景做初步选择，不被名词吓住</td><td>亲手搭一套完整的微服务集群</td></tr>
+      <tr><td>「Vue、React 都是什么」</td><td>分清语言、框架、架构不是一回事</td><td>知道它们是前端 UI 框架 / 库，不是后端架构</td><td>精通组件生命周期、状态管理源码</td></tr>
+      <tr><td>「FastAPI 之类都是什么」</td><td>知道后端框架的位置和性格</td><td>知道 FastAPI 是 Python 的后端 API 框架，适合快速做接口和 AI 服务化</td><td>精通异步事件循环的底层实现</td></tr>
+      <tr><td>「AI 时代只懂优缺点和选择行不行」</td><td>想弄清学习深度的边界</td><td>掌握「概念级细节 + 选择判断 + 验证能力」</td><td>成为每项技术的实现专家</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>一句话目标：</b>不追求「会做」每个细节，但要<b>会问、会判、会验</b>：会问关键问题，能判断方案适不适合，能用最小成本验证。</p></div>
+  </section>
+
+  <section class="topic" id="two-kinds">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>操作性细节 vs 概念性细节<span class="pt">two kinds of details · 学习深度的分界线</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="goal::two-kinds"><span>已学会</span></label>
+    </div>
+    <p>「细节」其实有两种。<b>操作性细节</b>是「怎么写、怎么配」，AI 和文档几秒钟就能补上；<b>概念性细节</b>是「为什么这样、边界在哪、出错会怎样」，没有它就判断不了 AI 说得对不对。AI 时代要放下的是前一种，后一种反而更重要。</p>
+    <table class="tbl">
+      <tr><th>知识类型</th><th>例子</th><th>AI 时代要不要</th></tr>
+      <tr><td><b>操作性细节</b></td><td>某个函数怎么写、某个配置项叫什么、某行报错怎么改</td><td><span class="tg g">不必死记</span> AI 和文档能补</td></tr>
+      <tr><td><b>概念性细节</b></td><td>为什么需要异步？强一致和最终一致差在哪？接口契约是什么？微服务为什么会让运维变复杂？</td><td><span class="tg r">必须有</span> 否则无法判断 AI 说得对不对</td></tr>
+    </table>
+    <p>可以把它叫作<b>细节感</b>：懂关键概念、边界、失败模式和验证方法，但不背操作步骤。打个比方，你不需要知道每颗螺丝怎么拧，但要知道<b>承重墙在哪、哪里会漏水、出了问题该找哪一层</b>。</p>
+    <div class="callout warn"><span class="i">!</span><p><b>注意：</b>「不学操作细节」不等于「完全不碰代码」。能<b>读懂</b>一小段示例、能看出一条报错属于哪一层、能把最小示例跑起来，是「会验」的基础。本学习包里的代码都只要求「看得懂它在干什么」。</p></div>
+  </section>
+
+  <section class="topic" id="why-not-enough">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>为什么「只背优缺点表」不够<span class="pt">labels vs judgment · 四个理由</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="goal::why-not-enough"><span>已学会</span></label>
+    </div>
+    <p>优缺点表是一种<b>标签</b>，比如「FastAPI 快」「微服务好扩展」。标签能帮你入门，但真正做选择、看方案、排故障时，标签不够用，原因有四个：</p>
+    <ol>
+      <li><b>选择是权衡，不是查表。</b>要看团队熟不熟、要不要自带后台、数据关系复杂不复杂、并发多高、运维成本多少。</li>
+      <li><b>AI 会自信地给出错误方案。</b>AI 能生成代码，但不为线上故障负责。你要能追问：数据一致性怎么保证？重试会不会重复扣款？日志在哪？</li>
+      <li><b>架构的代价藏在细节里。</b>微服务的好处是隔离和独立扩展，代价是网络调用、分布式事务、链路追踪、部署复杂度。不知道代价，小团队就会盲目上微服务。</li>
+      <li><b>排障需要理解数据流。</b>出问题时要能判断：问题在前端状态、接口契约、后端逻辑、数据库查询，还是部署环境？</li>
+    </ol>
+    <table class="tbl">
+      <tr><th>标签式认知</th><th>有细节感的认知</th></tr>
+      <tr><td>FastAPI 很快</td><td>「快」主要指<b>开发快</b>和<b>异步 I/O 并发好</b>；遇到 CPU 密集的计算照样慢，要放进后台任务或单独的服务。</td></tr>
+      <tr><td>微服务好扩展</td><td>能<b>只给热点服务加机器</b>，代价是服务间网络调用、数据一致性、监控排障都变难，需要专人运维。</td></tr>
+      <tr><td>Redis 很快</td><td>数据放在<b>内存</b>里所以快；但要考虑缓存和数据库<b>不一致</b>、内存成本、宕机后数据还在不在。</td></tr>
+      <tr><td>NoSQL 很灵活</td><td>不强制表结构，所以改字段方便；代价是<b>数据质量要靠应用自己保证</b>，复杂关联查询不如 SQL。</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>易错：</b>把「某技术很流行」当成「它适合我」。流行说明生态好、好招人，但不说明它符合你<b>当前阶段</b>的约束。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 学到什么程度</div>
+    <h2><span class="num">02</span>能力目标与学习边界</h2>
+  </section>
+
+  <section class="topic" id="ask-judge-verify">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>目标能力：会问、会判、会验<span class="pt">ask · judge · verify</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="goal::ask-judge-verify"><span>已学会</span></label>
+    </div>
+    <p>把学习目标从「会做」改成「会问、会判、会验」。三者是递进的：先会提问题，才能判断；判断之后，用证据去验证。</p>
+    <div class="cards">
+      <div class="c"><h4>🗣 会问</h4>这个方案的<b>边界、代价、失败模式</b>是什么？权限边界在哪？密钥放哪？挂了会怎样？</div>
+      <div class="c"><h4>⚖ 会判</h4>方案是否符合<b>当前约束</b>：团队几个人、上线多快、流量多大、一致性要求多高、预算多少？</div>
+      <div class="c"><h4>🔬 会验</h4>用<b>最小原型、接口文档、测试、日志、压测</b>验证，而不是凭感觉或凭 AI 的语气。</div>
+    </div>
+    <table class="tbl">
+      <tr><th>能力</th><th>你在做什么</th><th>例子</th><th>对应模块</th></tr>
+      <tr><td>会问</td><td>找出方案没说清的地方</td><td>「支付失败自动重试，会不会扣两次钱？」</td><td>09 安全与失败模式、12 AI 协作</td></tr>
+      <tr><td>会判</td><td>拿方案对照约束</td><td>「3 个人的团队，上来就 20 个微服务 + K8s，不合适」</td><td>07 架构模式、10 选型判断</td></tr>
+      <tr><td>会验</td><td>用最小成本拿到证据</td><td>「用压测工具打 1000 并发，看错误率和响应时间」</td><td>11 最小闭环、12 AI 协作</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>AI 时代可以少学操作细节，但不能少学<b>系统常识和判断力</b>。</p></div>
+  </section>
+
+  <section class="topic" id="must-vs-skip">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>必须懂 / 交给 AI / 不必深入<span class="pt">learning boundary · 三类知识</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="goal::must-vs-skip"><span>已学会</span></label>
+    </div>
+    <p>遇到一条新知识，先给它分个类，再决定花多少时间。分类标准只有一个：<b>它会不会影响你的判断？</b>会影响判断的必须懂；只影响「怎么写出来」的交给 AI；离你的工作太远的，知道它存在就行。</p>
+    <table class="tbl">
+      <tr><th>类型</th><th>例子</th><th>要到什么程度</th></tr>
+      <tr><td><span class="tg r">必须懂</span> 概念细节</td><td>数据流、接口契约、强一致 / 最终一致、认证与授权、超时 / 重试 / 幂等、单体与微服务的代价、缓存变脏、部署环境</td><td>能用自己的话解释，能问出关键问题，能判断方案边界</td></tr>
+      <tr><td><span class="tg g">交给 AI</span> 操作细节</td><td>某函数怎么写、某配置项叫什么、某报错逐行怎么改、某框架的样板代码</td><td>知道让 AI 生成，再用文档和测试验证</td></tr>
+      <tr><td><span class="tg b">不必深入</span> 底层实现</td><td>编译器优化、JVM 调优、K8s 源码、数据库索引 B+ 树的实现</td><td>知道它存在、会影响什么即可，除非你专门做这一行</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>边界会移动：</b>如果以后你选择做数据库方向，B+ 树就从「不必深入」变成「必须懂」（本仓库的 SQL 学习包第 09 模块专门讲）。分类是相对于<b>你当前的目标</b>的。</p></div>
+    <div id="demo-sort"></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>用 5 句话向朋友解释你的学习目标，必须用上「会问、会判、会验」这三个词。</li>
+      <li>挑一个你最近听到的技术名词，写下三行：它在哪一层？解决什么问题？代价是什么？学完 02 模块后回来对照。</li>
+      <li>把你学过的一个知识点（比如 SQL 的 JOIN 或 Git 的 rebase）拆成「必须懂 / 交给 AI / 不必深入」三部分。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "goal",
+  title: "学习目标：会问、会判、会验",
+  eyebrow: "MODULE 01 · 技术全景",
+  lead: "先把「要学什么、不学什么」说清楚：放下操作细节，抓住概念细节，把学习目标从「会做」改成「会问、会判、会验」。",
+  points: ["need","two-kinds","why-not-enough","ask-judge-verify","must-vs-skip"],
+  prev: "", prevTitle: "",
+  next: "02-map.html", nextTitle: "全景地图：软件产品的分层",
+};
+
+const QUZ = [
+  { type:"quiz", q:"下面哪一项最准确地描述了本学习包的目标？",
+    opts:["精通每个主流框架的源码和配置","背熟各语言的常用 API","建立技术全景地图，并具备会问、会判、会验的能力","只记住每项技术的优缺点表格"],
+    ans:2, exp:"目标是「全景地图 + 判断力」。A、B 是操作或实现细节，正是要放下的部分；D 只有标签，没有判断和验证能力，本节知识点 3 讲了为什么不够。" },
+  { type:"quiz", q:"下列哪一项属于「概念性细节」？",
+    opts:["FastAPI 某个装饰器的完整参数列表","强一致和最终一致的区别，以及各自适合什么业务","nginx.conf 里某个配置项的名字","某行 ModuleNotFoundError 报错的修法"],
+    ans:1, exp:"一致性模型会直接影响「能不能接受短暂读到旧数据」这类判断，属于概念细节。其余三项都是「怎么写、怎么配、怎么修」，可以交给 AI 和文档。" },
+  { type:"quiz", q:"为什么说「选择不是查表，是权衡」？",
+    opts:["因为优缺点表经常写错","因为同一个技术在不同团队、流量、一致性要求、预算下，合适程度完全不同","因为技术选择只看流行度就够了","因为 AI 会替你做选择"],
+    ans:1, exp:"优缺点是固定的，场景约束是变化的，选择要把两者放在一起权衡。A 不是核心原因；C 是常见误区；D 错，AI 不承担后果，判断要你来做。" },
+  { type:"quiz", q:"「会验」最恰当的做法是？",
+    opts:["AI 说得很肯定，就相信它","找最资深的同事拍板","用最小原型、测试、日志或压测拿到证据","把官方文档从头背一遍"],
+    ans:2, exp:"「会验」就是用最小成本拿证据。A 把语气当证据；B 是转移判断而不是验证；D 成本太高，也不能证明你的方案在你的环境里成立。" },
+  { type:"quiz", q:"按本节的分类，「JVM 垃圾回收器的调优参数」对一个想建全景地图的初学者来说属于？",
+    opts:["不必深入：知道它存在、会影响 Java 服务的内存和停顿即可","必须懂：每个人都要会调","交给 AI：让 AI 写出参数就能上线","完全不用知道"],
+    ans:0, exp:"它是底层实现与调优细节，离当前目标较远，知道「存在 + 影响什么」就够。B 过度；C 危险，调优参数离开压测验证就上线很冒险；D 太绝对，至少要知道 Java 服务有 GC 停顿这回事。" },
+  { type:"quiz", q:"AI 帮你写了一个「支付失败自动重试 3 次」的接口，你最应该先追问哪一句？",
+    opts:["代码缩进是不是 4 个空格？","重试会不会导致重复扣款？有没有幂等保护？","变量名够不够优雅？","能不能换成更流行的框架？"],
+    ans:1, exp:"重试 + 扣钱，最大的风险是重复扣款，这是失败模式类的概念问题（09 模块细讲）。A、C 是风格问题；D 偏离了真正的风险点。" },
+  { type:"quiz", q:"下面哪一项适合直接交给 AI 生成，你再用文档和测试验证？",
+    opts:["决定订单数据要不要强一致","决定系统用单体还是微服务","某个框架的 CRUD 样板代码","决定谁有权限删除商品"],
+    ans:2, exp:"样板代码是典型的操作细节。A、B、D 都是判断：一致性、架构、权限边界，必须由你结合约束来定，AI 可以提供选项但不能替你拍板。" },
+  { type:"quiz", q:"「细节感」最接近下面哪种说法？",
+    opts:["知道每颗螺丝怎么拧","知道承重墙在哪、哪里会漏水、出了问题找哪一层","记得所有技术的发布时间","会背所有 HTTP 状态码"],
+    ans:1, exp:"细节感是对结构、边界和失败模式的理解。A 是操作细节；C、D 是零散记忆，对判断帮助有限（常用状态码要懂，但不必全背）。" },
+  { type:"quiz", q:"本学习包推荐的学习顺序是？",
+    opts:["练验证 → 建地图 → 学比较","学比较 → 练 AI 协作 → 建地图","建地图 → 学比较 → 练判断 → 练验证 → 练 AI 协作","先背所有框架文档，再决定学什么"],
+    ans:2, exp:"先知道每个名词在哪一层，再逐层比较，然后补判断力，用最小闭环验证，最后形成和 AI 协作的工作方式。其它顺序要么缺地基，要么方向反了。" },
+  { type:"interview", q:"面试或项目讨论中有人问：「你不手写每行代码，怎么判断 AI 给的方案靠不靠谱？」哪种回答最好？",
+    opts:["AI 的正确率很高，一般不用判断","我先对照场景约束（团队、流量、一致性、预算），再追问失败模式和权限边界，最后用最小原型、测试和日志验证关键假设","我会让 AI 自己检查一遍","我会挑一个最流行的方案，出了问题再说"],
+    ans:1, exp:"B 完整体现了「问、判、验」：有约束、有追问、有证据。A 回避问题；C 让同一个 AI 自检，可能重复同样的错误；D 没有判断过程，风险转嫁给线上。" },
+];
+</script>
+<script src="assets/learn.js"></script>
+<script>
+/* 演示：细节分拣器 */
+(function(){
+  const esc = ArchKit.esc;
+  const CAT = { must:"必须懂", ai:"交给 AI", skip:"不必深入" };
+  const ITEMS = [
+    { t:"FastAPI 路由装饰器 @app.get 的完整参数列表", a:"ai", why:"操作细节：需要时查文档或让 AI 写，写完用接口文档页面验证。" },
+    { t:"为什么支付接口失败重试可能导致重复扣款", a:"must", why:"失败模式 + 幂等，直接决定方案安不安全（09 模块）。" },
+    { t:"认证和授权的区别", a:"must", why:"权限边界是安全判断的地基（09 模块）。" },
+    { t:"Kubernetes 调度器的源码实现", a:"skip", why:"底层实现。知道 K8s 负责调度、扩缩容、故障恢复就够了。" },
+    { t:"Docker 解决了什么问题", a:"must", why:"「环境不一致」是部署问题的根源之一，排障时要能想到（08 模块）。" },
+    { t:"某条 ModuleNotFoundError 报错具体怎么修", a:"ai", why:"操作细节：能看出它是「依赖没装好」这一类问题就够，修法交给 AI。" },
+    { t:"缓存和数据库什么时候会不一致", a:"must", why:"缓存变脏会造成「改了价格页面还是旧的」这类线上问题（06 模块）。" },
+    { t:"B+ 树索引的节点分裂算法", a:"skip", why:"数据库内部实现。知道「索引让查询变快、写入变慢一点」就够。" },
+    { t:"Vue 组件里 v-for 的具体写法", a:"ai", why:"语法细节。知道 Vue 用组件 + 模板描述界面即可（04 模块）。" },
+    { t:"单体和微服务各自的代价", a:"must", why:"架构选择的核心权衡（07 模块）。" },
+    { t:"JVM 垃圾回收器的调优参数", a:"skip", why:"专项调优。知道 Java 服务有 GC 停顿、内存占用偏高即可。" },
+    { t:"nginx.conf 里某个配置项叫什么", a:"ai", why:"配置细节。知道 nginx 常用来做反向代理和静态资源服务就够。" },
+  ];
+  const host = document.getElementById("demo-sort");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：细节分拣器</span><span class="hint">给每条知识选一类</span></div>
+    <div class="db">
+      <div class="ctl"><span class="log" id="sortScore" style="margin:0;padding:4px 12px"></span><button class="b" id="sortReset">↺ 重来</button><button class="b" id="sortReveal">直接看答案</button></div>
+      <div id="sortList"></div>
+      <div class="foot">分不准的条目，回到上面的表格看「要到什么程度」那一列。</div>
+    </div></div>`;
+  const list = document.getElementById("sortList"), scoreEl = document.getElementById("sortScore");
+  let picked = {};
+  function render(){
+    list.innerHTML = ITEMS.map((it,i)=>{
+      const p = picked[i];
+      const cls = p ? (p===it.a ? "ok" : "bad") : "";
+      const res = p ? `<div class="res">${p===it.a?"✅":"❌ 应为「"+CAT[it.a]+"」。"} ${esc(it.why)}</div>` : "";
+      return `<div class="sortitem ${cls}"><span class="tx">${i+1}. ${esc(it.t)}</span><span class="ops">${
+        Object.keys(CAT).map(k=>`<button class="b ${p===k?"on":""}" data-i="${i}" data-k="${k}">${CAT[k]}</button>`).join("")
+      }</span>${res}</div>`;
+    }).join("");
+    const n = Object.keys(picked).length, ok = Object.keys(picked).filter(i=>picked[i]===ITEMS[i].a).length;
+    scoreEl.innerHTML = `已分拣 <b>${n}</b>/${ITEMS.length} · 正确 <b>${ok}</b>`;
+  }
+  list.addEventListener("click", e=>{
+    const b = e.target.closest("button[data-k]"); if(!b) return;
+    picked[b.dataset.i] = b.dataset.k; render();
+  });
+  document.getElementById("sortReset").addEventListener("click", ()=>{ picked = {}; render(); });
+  document.getElementById("sortReveal").addEventListener("click", ()=>{ ITEMS.forEach((it,i)=>picked[i]=it.a); render(); });
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>【模块标题】 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 【模块标题】：学习目标、知识点讲解、交互演示、考核与答题。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+</head>
+<!--
+  详解页模板（复制本文件 → 改名为 NN-slug.html → 只改「内容」与底部 CONFIG / QUZ / 演示脚本）
+  规则：
+  1. <section class="topic" id="..."> 的 id、数量、顺序 = index.html 里该模块 pts 的 id。
+  2. 每个知识点的勾选框 data-key="{moduleId}::{知识点id}"。
+  3. 每个知识点：一段讲解 + 至少一张 table.tbl + 至少一个 callout；概念级为主，代码只做「长什么样」的示意。
+  4. 每页至少 1 个交互演示（容器 id 以 demo 开头），默认就有内容、点击有反馈；不用 alert / eval。
+  5. QUZ 8–12 题，至少 1 道 type:"interview"，解析要说明干扰项为什么错。
+  6. 进度、翻页、考核引擎都在 assets/learn.js，不要在页面里重复实现。
+  写完运行：node content/_validate.js
+-->
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">模块标题</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 00 · 技术全景</span></span>
+    <h1 id="pageTitle">模块标题</h1>
+    <p class="lead" id="pageLead">一句话引言。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>学完本节，你能……（可验证的结果）</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>前置知识说明。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 分组标题</div>
+    <h2><span class="num">01</span>分组标题</h2>
+  </section>
+
+  <section class="topic" id="sample">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>知识点标题<span class="pt">slug · 一句话定位</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="sample::sample"><span>已学会</span></label>
+    </div>
+    <p>是什么 → 为什么 → 什么时候用 / 不该用。</p>
+    <table class="tbl">
+      <tr><th>对比项</th><th>A</th><th>B</th></tr>
+      <tr><td>…</td><td>…</td><td>…</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>……</p></div>
+    <div id="demo-sample"></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>一条需要独立思考的延伸任务。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "sample",
+  title: "模块标题",
+  eyebrow: "MODULE 00 · 技术全景",
+  lead: "一句话说明本模块学什么、为什么重要。",
+  points: ["sample"],
+  prev: "", prevTitle: "",
+  next: "", nextTitle: "",
+};
+
+const QUZ = [
+  { type:"quiz", q:"题干？", opts:["A","B","C","D"], ans:1, exp:"解析：为什么对，其它为什么错。" },
+];
+</script>
+<script src="assets/learn.js"></script>
+<script>
+/* 演示面板（可用 ArchKit.esc / ArchKit.choice / ArchKit.stepper / ArchKit.meter） */
+(function(){
+  const host = document.getElementById("demo-sample");
+  host.innerHTML = '<div class="demo"><div class="dh"><span class="t">🖥 演示</span></div><div class="db">内容</div></div>';
+})();
+</script>
+</body>
+</html>

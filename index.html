@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>学习地图 · 总入口</title>
+<meta name="description" content="个人学习地图总入口：先用「技术全景与架构选型」建立分层地图和判断力，再按方向进入 SQL、Python、Linux、Git、数据结构与算法等专项学习包深入。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f5f1e8; --paper-2:#fdfbf5; --ink:#231f18; --ink-soft:#514b3f; --muted:#857c6b;
+    --line:#e3dcc9; --line-2:#d3c9b0; --green:#1e5b4f; --green-soft:#e4efeb; --amber:#b7791f; --amber-soft:#f7eee0;
+    --blue:#3a6b8f; --blue-soft:#e8f0f6; --plum:#6b4f8a; --sienna:#a0522d;
+    --radius:14px; --maxw:1080px;
+    --shadow:0 1px 2px rgba(35,31,24,.04),0 12px 32px -20px rgba(35,31,24,.4);
+    --font-body:"PingFang SC","Microsoft YaHei","Noto Sans SC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    --font-display:"Fraunces","Songti SC","STSong",serif;
+    --font-mono:"JetBrains Mono","SFMono-Regular",Consolas,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:var(--font-body);color:var(--ink);background:var(--paper);line-height:1.7;-webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(1100px 560px at 88% -6%, rgba(30,91,79,.07), transparent 60%),radial-gradient(820px 480px at -8% 6%, rgba(183,121,31,.06), transparent 55%)}
+  a{color:var(--green);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px}
+
+  .topnav{position:sticky;top:0;z-index:50;background:rgba(245,241,232,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+  .topnav .wrap{display:flex;align-items:center;gap:12px;height:56px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:800;white-space:nowrap}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
+  .topnav .links{margin-left:auto;display:flex;gap:4px;flex-wrap:nowrap;overflow-x:auto}
+  .topnav .links a{padding:6px 12px;border-radius:999px;font-size:13.5px;color:var(--ink-soft);white-space:nowrap}
+  .topnav .links a:hover{background:var(--green-soft);color:var(--green);text-decoration:none}
+  @media (max-width:640px){ .topnav .links a.opt{display:none} }
+
+  .hero{padding:52px 0 10px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:12px;letter-spacing:.2em;color:var(--green);text-transform:uppercase;border:1px solid var(--line-2);border-radius:999px;padding:6px 14px;background:var(--paper-2)}
+  .hero h1{font-family:var(--font-display);font-weight:900;font-size:clamp(34px,5.6vw,58px);line-height:1.1;margin:18px 0 8px;letter-spacing:-.02em}
+  .hero h1 span{color:var(--green)}
+  .hero p.lead{font-size:clamp(15px,1.8vw,17.5px);color:var(--ink-soft);max-width:760px;margin:0 0 20px}
+  .stats{display:flex;flex-wrap:wrap;gap:12px}
+  .stat{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:12px 20px;min-width:120px;box-shadow:var(--shadow)}
+  .stat .num{font-family:var(--font-mono);font-size:26px;font-weight:700;color:var(--green);line-height:1.1}
+  .stat .lab{font-size:12.5px;color:var(--muted)}
+
+  section{margin:40px 0 0}
+  h2{font-family:var(--font-display);font-weight:900;font-size:clamp(22px,3vw,30px);margin:0 0 6px;letter-spacing:-.01em}
+  h2 .idx{font-family:var(--font-mono);font-size:.55em;color:var(--green);margin-right:8px;vertical-align:middle}
+  .desc{color:var(--ink-soft);margin:0 0 14px;max-width:820px;font-size:15px}
+
+  .method{display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:stretch}
+  .method .m{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow)}
+  .method .m .k{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--c)}
+  .method .m h3{margin:4px 0 6px;font-size:18px}
+  .method .m p{margin:0;font-size:14px;color:var(--ink-soft)}
+  .method .arrow{align-self:center;font-family:var(--font-mono);color:var(--muted);font-size:20px}
+  @media (max-width:720px){ .method{grid-template-columns:1fr} .method .arrow{transform:rotate(90deg);justify-self:center} }
+
+  .layers{display:flex;flex-direction:column;gap:10px}
+  .layer{display:grid;grid-template-columns:170px 1fr;gap:14px;background:#fff;border:1px solid var(--line);border-left:6px solid var(--c);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+  .layer .n{font-weight:800;color:var(--c);font-size:15.5px}
+  .layer .n small{display:block;font-family:var(--font-mono);font-size:10.5px;font-weight:500;color:var(--muted);letter-spacing:.06em}
+  .layer .d{font-size:13.5px;color:var(--ink-soft);margin-bottom:6px}
+  .layer .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;margin-top:4px}
+  .layer .row .lb{font-family:var(--font-mono);font-size:11px;color:var(--muted);width:64px;flex:none}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:3px 11px;border-radius:999px;border:1px solid var(--line-2);background:var(--paper-2);color:var(--ink-soft);font-size:12.5px;white-space:nowrap}
+  .pill:hover{border-color:var(--green);color:var(--green);text-decoration:none}
+  .pill.deep{background:var(--green-soft);border-color:#cfe0dc;color:var(--green);font-weight:700}
+  .pill.plan{border-style:dashed;color:var(--muted)}
+  @media (max-width:720px){ .layer{grid-template-columns:1fr;gap:4px} }
+
+  .packs{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .pack{background:var(--paper-2);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px;transition:transform .18s ease}
+  .pack:hover{transform:translateY(-3px)}
+  .pack.main{border-color:var(--green);box-shadow:0 0 0 3px var(--green-soft),var(--shadow)}
+  .pack .tag{align-self:flex-start;font-family:var(--font-mono);font-size:11px;padding:2px 9px;border-radius:999px;color:#fff;background:var(--c)}
+  .pack h3{margin:2px 0 0;font-size:18px}
+  .pack p{margin:0;font-size:13.5px;color:var(--ink-soft);flex:1}
+  .pack .bar{height:8px;background:var(--line);border-radius:999px;overflow:hidden;margin-top:6px}
+  .pack .bar span{display:block;height:100%;background:var(--c);border-radius:999px}
+  .pack .meta{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+  .pack .go{margin-top:6px;font-weight:700;font-size:14px}
+
+  table.route{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+  table.route th,table.route td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  table.route th{background:var(--green-soft);color:var(--green);white-space:nowrap}
+  @media (max-width:640px){ table.route{display:block;overflow-x:auto} }
+
+  .note{font-size:12.5px;color:var(--muted);margin-top:10px}
+  .footer{margin:48px 0 0;border-top:1px solid var(--line);padding:26px 0 50px;font-size:13.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <span class="brand"><span class="dot"></span>学习地图</span>
+    <div class="links">
+      <a href="#method" class="opt">学习方法</a>
+      <a href="#layers">分层地图</a>
+      <a href="#packs">学习包</a>
+      <a href="#route" class="opt">推荐路线</a>
+      <a href="职业规划网页.html">职业规划</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="hero">
+    <span class="eyebrow">LEARNING MAP · 总入口</span>
+    <h1>先建地图，<br><span>再按需深入</span></h1>
+    <p class="lead">AI 时代可以少背操作细节，但不能少了系统常识和判断力。先用「技术全景与架构选型」知道每个技术<b>在哪一层、解决什么、代价是什么</b>，学会<b>会问、会判、会验</b>；再根据职业方向，进入对应的专项学习包深入一层。</p>
+    <div class="stats">
+      <div class="stat"><div class="num" id="sPacks">—</div><div class="lab">学习包</div></div>
+      <div class="stat"><div class="num" id="sTotal">—</div><div class="lab">知识点 / 章节</div></div>
+      <div class="stat"><div class="num" id="sDone">—</div><div class="lab">已完成</div></div>
+    </div>
+  </div>
+
+  <section id="method">
+    <h2><span class="idx">01</span>学习方法：两层结构</h2>
+    <p class="desc">这个仓库的内容分成两层：上层负责<b>全景和判断</b>，下层负责<b>在某一层深入</b>。不确定先学什么时，从上层开始。</p>
+    <div class="method">
+      <div class="m" style="--c:var(--green)"><div class="k">Layer 1 · 全景层</div><h3>技术全景与架构选型</h3><p>分层地图、语言与框架的性格、架构取舍、安全与失败模式、选型五问、AI 协作。目标：会问、会判、会验。</p></div>
+      <div class="arrow">→</div>
+      <div class="m" style="--c:var(--amber)"><div class="k">Layer 2 · 专项层</div><h3>SQL · Python · Linux · Git · 算法</h3><p>选定方向后，在对应的那一层深入：能动手写、能排障、能应对面试。全景层里的「不必深入」在这里变成「必须懂」。</p></div>
+    </div>
+  </section>
+
+  <section id="layers">
+    <h2><span class="idx">02</span>分层地图</h2>
+    <p class="desc">每一层都对应「全景模块」（先理解它是什么、怎么选）和「专项学习包」（再深入怎么用）。虚线标签表示暂未建设的专项包。</p>
+    <div class="layers" id="layerBox"></div>
+  </section>
+
+  <section id="packs">
+    <h2><span class="idx">03</span>全部学习包</h2>
+    <p class="desc">进度来自各学习包在本机浏览器里保存的勾选记录（localStorage）。</p>
+    <div class="packs" id="packBox"></div>
+    <p class="note">提示：直接双击打开本地文件时，有的浏览器会把不同文件的本地存储隔离开，这里可能显示为 0；进入各学习包即可看到真实进度。通过同一个网站地址（例如 GitHub Pages）访问时会正常汇总。</p>
+  </section>
+
+  <section id="route">
+    <h2><span class="idx">04</span>推荐路线</h2>
+    <p class="desc">先走全景 01–03 建立地图，再去 <a href="职业规划网页.html">职业规划网页</a> 确定方向，然后按方向组合专项学习包。</p>
+    <table class="route">
+      <tr><th>方向</th><th>全景模块（先看）</th><th>专项深入（后学）</th></tr>
+      <tr><td>还没定方向</td><td>01 → 12 顺序学完</td><td>Git → 数据结构与算法（几乎所有方向都要）</td></tr>
+      <tr><td>后端开发</td><td>02、05、06、07、09</td><td>Python（含 FastAPI）→ SQL → Linux → Git</td></tr>
+      <tr><td>数据分析 / 数据开发</td><td>02、06、10</td><td>SQL → Python（NumPy / Pandas）</td></tr>
+      <tr><td>AI 应用 / 大模型</td><td>05、06（向量库）、10（AI 问答案例）、12</td><td>Python → SQL → 数据结构与算法</td></tr>
+      <tr><td>运维 / DevOps</td><td>08、09、07</td><td>Linux → Git</td></tr>
+      <tr><td>前端开发</td><td>04、02、11</td><td>（前端专项包规划中）先用全景 04 建立框架认知</td></tr>
+      <tr><td>面试冲刺</td><td>07、09、10 的「面试延伸」题</td><td>数据结构与算法 → SQL 第 15 模块</td></tr>
+    </table>
+  </section>
+
+  <div class="footer">
+    本仓库是纯静态的学习资料站，所有页面都可以直接用浏览器打开。目录说明与维护方式见 <a href="README.md">README.md</a>；就业方向、薪资与技能优先级见 <a href="职业规划网页.html">职业规划网页</a>。
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   PACKS —— 学习包数据（新增学习包时在这里加一项）
+   key：该学习包保存进度用的 localStorage 键；total：知识点 / 章节总数
+   ============================================================ */
+const PACKS = [
+  { id:"arch", name:"技术全景与架构选型", tag:"全景层 · 先学", c:"#1e5b4f", href:"学习/技术全景与架构选型/index.html", key:"arch_outline_progress_v1", total:69, unit:"知识点", main:true,
+    desc:"12 模块：分层地图、语言性格、前端 / 后端 / 数据 / 架构 / DevOps 的取舍、安全与失败模式、选型五问、最小闭环、AI 协作。" },
+  { id:"sql", name:"SQL / 数据库", tag:"数据层", c:"#b7791f", href:"学习/SQL/index.html", key:"sql_outline_progress_v1", total:113, unit:"知识点",
+    desc:"17 模块：查询、连接、窗口函数、事务、索引与执行计划、调优、建模、面试题型，含可运行的 SQL 练习台。" },
+  { id:"python", name:"Python", tag:"后端语言 · AI / 数据", c:"#3a6b8f", href:"学习/Python/index.html", key:"learn:python:done", total:21, unit:"章节",
+    desc:"21 节：语法、数据结构、面向对象、力扣专项、NumPy / Pandas，以及脚本、requests 与 FastAPI 入门。" },
+  { id:"linux", name:"Linux 与命令行", tag:"基础设施层", c:"#6b4f8a", href:"学习/Linux/index.html", key:"learn:linux:done", total:19, unit:"章节",
+    desc:"19 节：终端、权限、Shell 编程、文件系统、进程与信号、systemd、软件包、网络、防火墙、SSH、证书。" },
+  { id:"git", name:"Git 版本协作", tag:"基础设施层", c:"#6b4f8a", href:"学习/Git 版本协作/index.html", key:"learn:git-version-collab:done", total:10, unit:"章节",
+    desc:"10 节：三大区域、提交、分支、合并冲突、远程协作、撤销回退、标签、变基、团队工作流，含分支模拟器。" },
+  { id:"dsa", name:"数据结构与算法", tag:"通用底座", c:"#a0522d", href:"学习/数据结构与算法/index.html", key:"dsa_outline_progress_v1", total:105, unit:"知识点",
+    desc:"17 模块：数组链表、栈与队列、串、二分、树与堆、图、哈希、并查集、排序、递归分治、贪心、动态规划、回溯与解题技巧。面试必考。" },
+];
+
+/* LAYERS —— 分层地图：每层对应的全景模块与专项学习包 */
+const A = "学习/技术全景与架构选型/content/";
+const LAYERS = [
+  { n:"前端层", en:"FRONTEND", c:"#3a6b8f", d:"用户看到和操作的界面：HTML / CSS / JS、Vue、React、SPA / SSR / SSG。",
+    pano:[["04 前端层", A+"04-frontend.html"]], deep:[], plan:["前端框架专项（规划中）"] },
+  { n:"后端层", en:"BACKEND", c:"#1e5b4f", d:"业务规则、鉴权与 API：FastAPI、Django、Spring Boot、Go、同步与异步。",
+    pano:[["03 语言性格", A+"03-lang.html"],["05 后端与 API", A+"05-backend.html"]], deep:["python"], plan:[] },
+  { n:"数据层", en:"DATA", c:"#b7791f", d:"数据放在哪：关系型与事务、NoSQL、缓存、一致性、向量数据库。",
+    pano:[["06 数据层", A+"06-data.html"]], deep:["sql"], plan:[] },
+  { n:"基础设施层", en:"INFRA / DEVOPS", c:"#6b4f8a", d:"把代码送上线并保持运行：Git、Docker、CI/CD、Kubernetes、监控。",
+    pano:[["08 基础设施与 DevOps", A+"08-devops.html"]], deep:["linux","git"], plan:["Docker / 容器专项（规划中）"] },
+  { n:"贯穿各层", en:"ARCH · SAFETY · DECISION", c:"#a0522d", d:"怎么组织各层、出错时怎样、如何选型与和 AI 协作。",
+    pano:[["07 架构模式", A+"07-arch.html"],["09 安全与失败", A+"09-safety.html"],["10 选型判断", A+"10-decide.html"],["11 最小闭环", A+"11-capstone.html"],["12 AI 协作", A+"12-ai.html"]], deep:[], plan:[] },
+  { n:"通用底座", en:"FOUNDATION", c:"#514b3f", d:"不属于某一层，但几乎所有技术岗位面试都要考。",
+    pano:[["01 学习目标", A+"01-goal.html"],["02 全景地图", A+"02-map.html"]], deep:["dsa"], plan:[] },
+];
+
+(function(){
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  function doneOf(p){
+    try{ const a = JSON.parse(localStorage.getItem(p.key) || "[]"); return Math.min(Array.isArray(a) ? a.length : 0, p.total); }catch(e){ return 0; }
+  }
+  const byId = Object.fromEntries(PACKS.map(p=>[p.id, p]));
+
+  function render(){
+    let total = 0, done = 0;
+    document.getElementById("packBox").innerHTML = PACKS.map(p=>{
+      const d = doneOf(p), pct = Math.round(d / p.total * 100);
+      total += p.total; done += d;
+      return `<a class="pack ${p.main ? "main" : ""}" href="${p.href}" style="--c:${p.c};color:inherit;text-decoration:none">
+        <span class="tag">${esc(p.tag)}</span><h3>${esc(p.name)}</h3><p>${esc(p.desc)}</p>
+        <div class="bar"><span style="width:${pct}%"></span></div>
+        <div class="meta"><span>${d} / ${p.total} ${p.unit}</span><span>${pct}%</span></div>
+        <span class="go" style="color:${p.c}">进入学习包 →</span></a>`;
+    }).join("");
+    document.getElementById("layerBox").innerHTML = LAYERS.map(l=>`<div class="layer" style="--c:${l.c}">
+      <div class="n">${l.n}<small>${l.en}</small></div>
+      <div><div class="d">${esc(l.d)}</div>
+        <div class="row"><span class="lb">全景模块</span>${l.pano.map(([t,h])=>`<a class="pill" href="${h}">${esc(t)}</a>`).join("")}</div>
+        <div class="row"><span class="lb">专项深入</span>${l.deep.map(id=>{ const p = byId[id], d = doneOf(p); return `<a class="pill deep" href="${p.href}">${esc(p.name)} · ${d}/${p.total}</a>`; }).join("")}${l.plan.map(t=>`<span class="pill plan">${esc(t)}</span>`).join("")}${!l.deep.length && !l.plan.length ? '<span class="pill plan">以全景模块为主</span>' : ""}</div>
+      </div></div>`).join("");
+    document.getElementById("sPacks").textContent = PACKS.length;
+    document.getElementById("sTotal").textContent = total;
+    document.getElementById("sDone").textContent = done;
+  }
+  window.addEventListener("storage", render);
+  render();
+})();
+</script>
+</body>
+</html>

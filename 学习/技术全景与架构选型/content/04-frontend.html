@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>前端层：界面怎么搭 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— 前端层：HTML/CSS/JavaScript、为什么需要 Vue/React 这类框架、Vue/React/Svelte/Angular 对比、SPA/SSR/SSG 渲染方式、Next.js/Nuxt 与跨端方案。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">前端层</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 04 · 技术全景</span></span>
+    <h1 id="pageTitle">前端层：界面怎么搭</h1>
+    <p class="lead" id="pageLead">用户直接看到和操作的部分。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>说出 HTML、CSS、JavaScript 各自负责什么。</li>
+      <li>解释 Vue / React 这类框架解决的核心问题：<b>组件化、声明式、状态驱动</b>。</li>
+      <li>明确 <b>Vue 和 React 是前端 UI 框架 / 库，不是编程语言，也不是后端架构</b>，并能比较 Vue、React、Svelte、Angular。</li>
+      <li>在 SPA、SSR、SSG 三种渲染方式之间，按「要不要 SEO、首屏是否重要、内容多久变一次」做选择。</li>
+      <li>知道 Next.js / Nuxt、UI 组件库、跨端方案分别是什么。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完 <a href="02-map.html">02 全景地图</a>（前端在哪一层、和后端靠 API 连接）与 <a href="03-lang.html">03 编程语言的性格</a>（JavaScript / TypeScript 是什么）。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 前端的地基</div>
+    <h2><span class="num">01</span>三件套与框架</h2>
+  </section>
+
+  <section class="topic" id="fe-basics">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>HTML / CSS / JavaScript 三件套<span class="pt">fe basics · 结构、样式、交互</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="frontend::fe-basics"><span>已学会</span></label>
+    </div>
+    <p>前端层的工作是<b>把界面画出来，并让它能响应用户的操作</b>。不管用什么框架，浏览器最终只认三样东西：HTML 管结构，CSS 管样式，JavaScript 管交互。</p>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>一个按钮的三件套（看懂即可）</div>
+      <pre><code>&lt;button id="buy"&gt;加入购物车&lt;/button&gt;            ← HTML：页面上有一个按钮
+
+#buy { background: green; color: white; }      ← CSS：按钮是绿底白字
+
+document.querySelector("#buy")                  ← JavaScript：点击后做点什么
+  .addEventListener("click", () =&gt; { /* 调后端接口 */ });</code></pre>
+    </div>
+    <table class="tbl">
+      <tr><th>技术</th><th>负责</th><th>比喻</th><th>出问题时的表现</th></tr>
+      <tr><td>HTML</td><td>页面结构和内容</td><td>房子的骨架和房间</td><td>内容缺失、结构错乱</td></tr>
+      <tr><td>CSS</td><td>颜色、字体、布局、动画</td><td>装修和家具摆放</td><td>错位、手机上挤成一团</td></tr>
+      <tr><td>JavaScript</td><td>交互、调接口、更新页面</td><td>水电和开关</td><td>点了没反应、白屏、控制台报错</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>Vue、React、Tailwind 等工具最终都会产出 HTML / CSS / JavaScript。按 F12 打开浏览器开发者工具，Elements 看结构和样式，Console 看报错，Network 看接口请求，这是前端排障的三个入口。</p></div>
+  </section>
+
+  <section class="topic" id="why-framework">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>为什么需要框架：组件化、声明式、状态驱动<span class="pt">why framework · 数据变了界面自动变</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="frontend::why-framework"><span>已学会</span></label>
+    </div>
+    <p>以前写网页要<b>手动操作页面元素</b>：数量加 1，就去找到数量那个格子改掉，再找到总价改掉，再找到购物车角标改掉……页面一复杂，总有地方忘了改，界面和真实数据就对不上了。Vue / React 的核心思路是：</p>
+    <div class="callout key"><span class="i">★</span><p><b>你只描述「数据是这样时，界面应该长什么样」；数据变了，框架自动把界面更新到对应的样子。</b></p></div>
+    <table class="tbl">
+      <tr><th>概念</th><th>意思</th><th>带来的好处</th></tr>
+      <tr><td>组件化</td><td>把按钮、表单、导航栏拆成独立的小组件，像积木一样拼页面</td><td>复用、分工、单独测试</td></tr>
+      <tr><td>声明式渲染</td><td>写「长什么样」，而不是一步步命令浏览器「怎么改」</td><td>代码更短，更不容易漏改</td></tr>
+      <tr><td>状态驱动</td><td>界面 = 状态的函数；改状态，界面跟着变</td><td>界面和数据永远一致</td></tr>
+      <tr><td>生态配套</td><td>路由、状态管理、构建工具都有成熟方案</td><td>不用从零造轮子</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>同一个计数器：Vue 与 React 写法（看懂即可）</div>
+      <pre><code>&lt;!-- Vue：模板接近 HTML --&gt;
+&lt;button @click="count++"&gt;点了 {{ count }} 次&lt;/button&gt;
+
+// React：用 JSX 在 JavaScript 里写界面
+const [count, setCount] = useState(0);
+return &lt;button onClick={() =&gt; setCount(count + 1)}&gt;点了 {count} 次&lt;/button&gt;;</code></pre>
+    </div>
+    <div id="demo-state"></div>
+  </section>
+
+  <section class="topic" id="vue-react">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>Vue、React、Svelte、Angular 怎么比<span class="pt">framework comparison · 性格差异</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="frontend::vue-react"><span>已学会</span></label>
+    </div>
+    <p>先纠正一个常见误解：<b>Vue 和 React 不是编程语言，也不是后端架构</b>，它们是构建网页界面的工具。JavaScript 是砖头和水泥，Vue / React 是「盖界面的工具箱」，单体 / 微服务管的是后端怎么组织。四个主流选项的能力其实差不多，差别在<b>性格</b>：</p>
+    <table class="tbl">
+      <tr><th></th><th>Vue</th><th>React</th><th>Svelte</th><th>Angular</th></tr>
+      <tr><td>定位</td><td>渐进式框架，官方配套完整</td><td>UI 库，只管视图，其余靠生态组合</td><td>编译时框架，运行时代码极少</td><td>企业级「全家桶」</td></tr>
+      <tr><td>上手</td><td>模板接近 HTML，<b>最平缓</b></td><td>要理解 JSX 和函数式思路，中等</td><td>语法极简，平缓</td><td>强制 TypeScript、概念多，<b>最陡</b></td></tr>
+      <tr><td>灵活度</td><td>约定多，开箱即用</td><td>非常灵活，方案多但选择也多</td><td>简洁，约定适中</td><td>规范严格，统一性强</td></tr>
+      <tr><td>生态与招聘</td><td>国内使用极广，中文文档友好</td><td>全球生态最大，招聘面最广，可延伸到移动端</td><td>生态较小</td><td>大型企业、外企较多</td></tr>
+      <tr><td>适合</td><td>快速开发、中小型项目、希望官方方案统一</td><td>大型复杂应用、跨端、喜欢自由组合</td><td>小工具、对体积敏感的页面</td><td>大团队长期协作的企业应用</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>怎么选：</b>能力上它们都够用，真正的决定因素是<b>团队熟悉哪个、招人容易不容易、需不需要跨端</b>。已经用 Vue 跑得很好的项目，没有必要因为「React 更流行」而重写。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 页面怎么送到浏览器</div>
+    <h2><span class="num">02</span>渲染方式与生态</h2>
+  </section>
+
+  <section class="topic" id="render-modes">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>渲染方式：SPA / SSR / SSG<span class="pt">rendering · 谁来生成 HTML、什么时候生成</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="frontend::render-modes"><span>已学会</span></label>
+    </div>
+    <p>同样是 Vue / React 写的页面，<b>HTML 由谁、在什么时候生成</b>，会直接影响首屏速度、搜索引擎能不能抓到内容（SEO）、服务器压力。三种主流方式：</p>
+    <table class="tbl">
+      <tr><th>方式</th><th>怎么工作</th><th>优点</th><th>缺点</th><th>适合</th></tr>
+      <tr><td><b>SPA</b> 单页应用</td><td>浏览器先下载一个空壳和 JS，由 JS 在浏览器里生成页面；之后切换页面不刷新</td><td>切换流畅、服务器只需提供 API</td><td>首屏慢、搜索引擎抓取不友好</td><td>后台管理系统、登录后才能用的工具</td></tr>
+      <tr><td><b>SSR</b> 服务端渲染</td><td>每次请求，服务器先把页面渲染成完整 HTML 再发出，浏览器拿到就能看</td><td>首屏快、利于 SEO、内容实时</td><td>服务器压力大，部署更复杂</td><td>电商商品页、新闻、需要 SEO 的动态内容</td></tr>
+      <tr><td><b>SSG</b> 静态生成</td><td>构建时就把所有页面生成好 HTML，放到 CDN 上</td><td>最快、最便宜、最稳</td><td>内容变了要重新构建</td><td>博客、文档站、官网</td></tr>
+    </table>
+    <div id="demo-render"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>三者可以混用。Next.js、Nuxt 允许同一个网站里：首页 SSG、商品页 SSR、个人中心 SPA。还有一种折中叫 ISR（增量静态再生成）：静态页面过一段时间自动重新生成。</p></div>
+  </section>
+
+  <section class="topic" id="fe-ecosystem">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>Next.js / Nuxt、UI 库与跨端方案<span class="pt">ecosystem · 围绕框架的工具</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="frontend::fe-ecosystem"><span>已学会</span></label>
+    </div>
+    <p>框架之外，前端还有一圈配套工具。记住它们<b>各自解决什么问题</b>就够了：</p>
+    <table class="tbl">
+      <tr><th>需求</th><th>常见方案</th><th>一句话</th></tr>
+      <tr><td>需要 SSR / SSG、首屏和 SEO</td><td>Next.js（React）、Nuxt（Vue）、SvelteKit、Astro</td><td>基于 UI 框架的「全栈框架」，还能写简单的后端接口</td></tr>
+      <tr><td>快速美化页面</td><td>Tailwind CSS、Bootstrap</td><td>CSS 框架：用现成的样式类拼出界面</td></tr>
+      <tr><td>现成的按钮、表格、弹窗</td><td>Element Plus（Vue）、Ant Design（React）、shadcn/ui</td><td>UI 组件库：后台系统几小时就能搭出雏形</td></tr>
+      <tr><td>开发时实时预览、打包上线</td><td>Vite、webpack</td><td>构建工具：把源码打包成浏览器能高效加载的文件</td></tr>
+      <tr><td>一套代码做 iOS + Android</td><td>React Native、Flutter（Dart 语言）</td><td>跨端框架：省人力，复杂动画和原生能力略逊</td></tr>
+      <tr><td>微信等小程序</td><td>原生小程序、uni-app（Vue 写法）、Taro（React 写法）</td><td>国内特有的重要「前端」平台</td></tr>
+      <tr><td>桌面应用</td><td>Electron、Tauri</td><td>用网页技术做桌面软件，VS Code 就是 Electron 做的</td></tr>
+    </table>
+    <div class="callout warn"><span class="i">!</span><p><b>别追新：</b>前端工具更新极快，名字两三年就换一批。抓住不变的四个概念——<b>组件、状态、路由、请求接口</b>，换任何框架都能很快上手。</p></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>打开一个你常用的网站，用开发者工具「查看网页源代码」：如果源码里能看到正文内容，它大概率是 SSR 或 SSG；如果只有一个空的 div 和一堆 script，大概率是 SPA。</li>
+      <li>给三个页面选渲染方式并写理由：公司官网、在线文档、登录后的数据看板。</li>
+      <li>用一句话向朋友解释：为什么说「Vue 和 React 不是后端架构」？</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "frontend",
+  title: "前端层：界面怎么搭",
+  eyebrow: "MODULE 04 · 技术全景",
+  lead: "前端层把界面画出来并响应用户操作。HTML / CSS / JS 是地基，Vue、React 让「数据变了界面自动变」，SPA / SSR / SSG 决定页面怎么送到浏览器。",
+  points: ["fe-basics","why-framework","vue-react","render-modes","fe-ecosystem"],
+  prev: "03-lang.html", prevTitle: "编程语言的性格",
+  next: "05-backend.html", nextTitle: "后端与 API 框架",
+};
+
+const QUZ = [
+  { type:"quiz", q:"HTML、CSS、JavaScript 分别负责什么？",
+    opts:["数据库、服务器、网络","结构、样式、交互","样式、结构、数据库","交互、结构、部署"],
+    ans:1, exp:"HTML 是骨架和内容，CSS 是外观和布局，JavaScript 让页面能响应点击、调用接口、更新内容。其余选项把后端和部署的概念混了进来。" },
+  { type:"quiz", q:"Vue / React 这类框架最核心的思路是？",
+    opts:["让前端直接连接数据库","把后端代码搬到浏览器里","你描述「某个状态下界面长什么样」，数据变了框架自动更新界面","让网页不再需要 JavaScript"],
+    ans:2, exp:"声明式 + 状态驱动是它们的核心。A 不安全也不是框架的职责；B 混淆了前后端；D 错，它们本身就是 JavaScript 写的。" },
+  { type:"quiz", q:"手动操作页面元素的写法，页面一复杂最容易出现什么问题？",
+    opts:["界面和真实数据不同步：有的地方改了，有的地方忘了改","网速变慢","数据库被锁住","服务器 CPU 过高"],
+    ans:0, exp:"手动改需要记住所有依赖这份数据的地方，漏一个就不一致（本页「声明式 vs 手动」演示）。B、C、D 是其他层的问题。" },
+  { type:"quiz", q:"关于 Vue 和 React，哪种说法最准确？",
+    opts:["Vue 是后端框架，React 是前端框架","React 是一种编程语言","两者都是前端 UI 框架 / 库；Vue 模板接近 HTML、上手快，React 用 JSX、更灵活、生态更大","两者只能二选一，不能和任何后端配合"],
+    ans:2, exp:"两者都在前端层，都通过 API 和任意后端（FastAPI、Spring Boot……）配合。A、B 是常见误解；D 错，前后端靠接口契约解耦。" },
+  { type:"quiz", q:"一个技术博客 / 文档站，内容每周更新几次，希望打开最快、成本最低，最适合哪种渲染方式？",
+    opts:["SPA","SSR","每次请求都由数据库实时拼页面","SSG"],
+    ans:3, exp:"内容变化不频繁、要快要便宜、利于 SEO，正是 SSG 的场景：构建时生成好放到 CDN。SPA 首屏慢且不利于 SEO；SSR 能做但多付出服务器成本；C 就是更重的 SSR。" },
+  { type:"quiz", q:"电商的商品详情页：价格库存常变，又非常需要被搜索引擎收录。最合适的是？",
+    opts:["SSR（例如用 Next.js / Nuxt）","纯 SPA","纯 SSG，一年构建一次","不需要前端"],
+    ans:0, exp:"既要 SEO 又要内容实时，SSR 最合适（也可以 SSG + 定时再生成的 ISR）。纯 SPA 不利于 SEO；一年构建一次的 SSG 价格会严重过时。" },
+  { type:"quiz", q:"公司内部的后台管理系统（必须登录才能用，不需要 SEO），最常见的选择是？",
+    opts:["SSG 静态站","SPA，配合 UI 组件库（例如 Element Plus、Ant Design）","必须用 SSR","用纯 HTML 手写"],
+    ans:1, exp:"登录后才能用，搜索引擎本来就抓不到，首屏也不是关键，SPA + 组件库开发最快。SSG 不适合高度动态、按用户区分的页面；SSR 不是必须；纯手写成本太高。" },
+  { type:"quiz", q:"Next.js 是什么？",
+    opts:["一种新的编程语言","一个数据库","基于 React 的全栈框架，提供 SSR / SSG、路由等能力","一个部署工具"],
+    ans:2, exp:"Next.js 在 React 之上提供服务端渲染、静态生成、文件路由，也能写简单的后端接口。Vue 生态里对应的是 Nuxt。" },
+  { type:"quiz", q:"想用一套代码同时做 iOS 和 Android App，应该看哪类方案？",
+    opts:["跨端框架，例如 React Native、Flutter","Tailwind CSS","Nginx","Vite"],
+    ans:0, exp:"跨端框架用一套代码生成两端 App。Tailwind 是 CSS 框架，Nginx 是反向代理，Vite 是构建工具，都不解决跨端问题。" },
+  { type:"interview", q:"团队 3 人都熟悉 Vue，项目运行良好。老板听说「React 更流行」，要求全部重写成 React。你怎么回应最好？",
+    opts:["马上重写，流行的一定更好","拒绝讨论","先摆约束和成本：两者能力相当，重写要花数月且不产生新功能；如果真有 React 才能满足的需求（例如要用 React Native 做 App），再评估局部引入或新项目使用","让 AI 一晚上全部翻译完直接上线"],
+    ans:2, exp:"好的回应用「五问」思路：约束、团队、总成本、失败代价、演进路径。A 忽视成本；B 不沟通；D 没有验证，风险极高。" },
+];
+</script>
+<script src="assets/learn.js"></script>
+<script>
+/* 演示 1：声明式（框架）vs 手动改页面 */
+(function(){
+  const host = document.getElementById("demo-state");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：数据变了，界面一起变吗？</span><span class="hint">切换模式，再点 + / −</span></div>
+    <div class="db">
+      <div class="ctl" id="stMode"><label>模式</label><button class="b" data-v="decl">声明式（框架）</button><button class="b" data-v="manual">手动改页面</button><button class="b" id="stReset">↺ 重置</button></div>
+      <div class="cards" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+        <div class="c"><h4>界面（用户看到的）</h4><div id="stUI"></div></div>
+        <div class="c"><h4>状态（真实数据）</h4><pre id="stJSON" style="margin:0;font-family:var(--font-mono);font-size:12.5px;white-space:pre-wrap"></pre></div>
+      </div>
+      <div class="log" id="stLog"></div>
+      <div class="foot">「手动」模式模拟的是开发者只记得改数量那一格，忘了改角标和总价——页面越复杂越容易发生。</div>
+    </div></div>`;
+  const PRICE = { "键盘": 199, "鼠标": 89 };
+  let state, shown, mode = "decl";
+  function reset(){
+    state = { items: { "键盘": 1, "鼠标": 1 } };
+    shown = { qty: { "键盘": 1, "鼠标": 1 }, badge: 2, total: 288 };
+  }
+  const calc = () => ({ badge: Object.values(state.items).reduce((a,b)=>a+b,0), total: Object.keys(state.items).reduce((s,k)=>s+state.items[k]*PRICE[k],0) });
+  function render(){
+    const real = calc();
+    if(mode === "decl"){ shown = { qty: Object.assign({}, state.items), badge: real.badge, total: real.total }; }
+    const ui = document.getElementById("stUI");
+    ui.innerHTML = `<div style="margin-bottom:8px">🛒 购物车角标：<b>${shown.badge}</b></div>` +
+      Object.keys(PRICE).map(k=>`<div style="display:flex;align-items:center;gap:8px;margin:6px 0"><span style="flex:1">${k}（¥${PRICE[k]}）</span><button class="b" data-op="-" data-k="${k}">−</button><b>${shown.qty[k]}</b><button class="b" data-op="+" data-k="${k}">+</button></div>`).join("") +
+      `<div style="margin-top:8px">合计：<b>¥${shown.total}</b></div>`;
+    document.getElementById("stJSON").textContent = JSON.stringify({ items: state.items, 应有角标: real.badge, 应有合计: real.total }, null, 2);
+    const ok = shown.badge === real.badge && shown.total === real.total;
+    document.getElementById("stLog").innerHTML = ok
+      ? `<b>✓ 一致</b>：界面上的角标、数量、合计都和状态相符。` + (mode==="decl" ? " 框架根据状态重新算出了整块界面。" : "")
+      : `<span class="bad">✗ 不一致</span>：角标显示 ${shown.badge}（应为 ${real.badge}），合计显示 ¥${shown.total}（应为 ¥${real.total}）。手动改页面漏改了两处。`;
+  }
+  document.getElementById("stUI").addEventListener("click", e=>{
+    const b = e.target.closest("button[data-op]"); if(!b) return;
+    const k = b.dataset.k;
+    state.items[k] = Math.max(0, state.items[k] + (b.dataset.op === "+" ? 1 : -1));
+    if(mode === "manual") shown.qty[k] = state.items[k];   // 只改了数量这一格
+    render();
+  });
+  document.getElementById("stReset").addEventListener("click", ()=>{ reset(); render(); });
+  reset();
+  ArchKit.choice("stMode", v=>{ mode = v; reset(); render(); }, "decl");
+})();
+
+/* 演示 2：SPA / SSR / SSG 首次访问对比 */
+(function(){
+  const M = {
+    spa:{ n:"SPA 单页应用", steps:["浏览器请求页面","收到几乎空白的 HTML + 一个大的 JS 包","下载并执行 JS","JS 再调用 API 拿数据","浏览器里生成页面 → 用户终于看到内容"],
+      bars:{ "首屏可见":35, "SEO 友好":30, "服务器压力（低更好）":90, "内容实时":95 }, note:"首屏要等 JS 下载执行再请求数据，所以最慢；但之后切页面很流畅，服务器只提供 API。" },
+    ssr:{ n:"SSR 服务端渲染", steps:["浏览器请求页面","服务器查数据并渲染出完整 HTML","浏览器收到即可显示内容","JS 下载后接管交互（hydration，「注水」）"],
+      bars:{ "首屏可见":80, "SEO 友好":95, "服务器压力（低更好）":40, "内容实时":95 }, note:"每次请求服务器都要渲染，首屏快、SEO 好、内容实时；代价是服务器要承担渲染计算。" },
+    ssg:{ n:"SSG 静态生成", steps:["（构建时）提前生成所有页面的 HTML，上传到 CDN","浏览器请求页面","离用户最近的 CDN 节点直接返回现成 HTML → 立刻显示"],
+      bars:{ "首屏可见":95, "SEO 友好":95, "服务器压力（低更好）":98, "内容实时":30 }, note:"最快最便宜，几乎没有服务器压力；但内容是构建那一刻的，更新要重新构建。" }
+  };
+  const host = document.getElementById("demo-render");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：用户第一次打开页面时发生了什么</span><span class="hint">切换渲染方式</span></div>
+    <div class="db">
+      <div class="ctl" id="rmMode"><label>方式</label><button class="b" data-v="spa">SPA</button><button class="b" data-v="ssr">SSR</button><button class="b" data-v="ssg">SSG</button></div>
+      <div class="flow" id="rmFlow"></div>
+      <div class="bars" id="rmBars"></div>
+      <div class="log" id="rmLog"></div>
+      <div class="foot">条越长越好（相对比较，用来建立直觉）。「服务器压力」一栏条越长表示压力越小。</div>
+    </div></div>`;
+  ArchKit.choice("rmMode", v=>{
+    const m = M[v];
+    document.getElementById("rmFlow").innerHTML = m.steps.map((s,i)=>`<div class="node ${i===m.steps.length-1?"on":""}"><span class="ly">STEP ${i+1}</span>${s}</div>${i<m.steps.length-1?'<span class="arr">→</span>':""}`).join("");
+    document.getElementById("rmBars").innerHTML = Object.keys(m.bars).map(k=>`<div class="bar"><span class="nm" style="width:150px">${k}</span><span class="track"><span style="width:${m.bars[k]}%"></span></span><span class="val">${m.bars[k]}</span></div>`).join("");
+    document.getElementById("rmLog").innerHTML = `<b>${m.n}</b>：${m.note}`;
+  }, "spa");
+})();
+</script>
+</body>
+</html>

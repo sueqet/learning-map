@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 协作：生成、判断、验证 · 技术全景与架构选型</title>
+<meta name="description" content="技术全景与架构选型 —— AI 协作：AI 能做和不能做的事、拿到 AI 方案后的追问清单、方案审查、每种说法的验证方式、AI 生成→你判断→测试验证的闭环，以及终点状态与下一步。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/learn.css">
+</head>
+<body>
+<nav class="topnav">
+  <div class="wrap">
+    <a class="back" href="../index.html">← 返回学习大纲</a>
+    <span class="crumb">技术全景与架构选型 · <b id="navTitle">AI 协作</b></span>
+    <div class="pager">
+      <a id="prevLink" class="disabled" href="#">← 上一节</a>
+      <a id="nextLink" class="disabled" href="#">下一节 →</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow"><span class="dot"></span><span id="eyebrow">MODULE 12 · 技术全景</span></span>
+    <h1 id="pageTitle">AI 协作：生成、判断、验证</h1>
+    <p class="lead" id="pageLead">AI 生成，你来判断，测试来验证。</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <section class="goals card" id="goals">
+    <h2><span class="ic">✓</span>本节学习目标</h2>
+    <ul>
+      <li>说出 AI 适合替你做的事，以及<b>必须由你来做</b>的事。</li>
+      <li>拿到任何 AI 方案，能按清单追问场景、数据、契约、安全、失败、运维、演进、验证八类问题。</li>
+      <li>识别方案与约束的三种失配：过度设计、设计不足、选型不匹配。</li>
+      <li>为 AI 的每一种说法找到对应的验证方式，用证据而不是语气做判断。</li>
+      <li>形成「AI 生成 → 你判断 → 测试验证 → 记录」的工作闭环，并知道学完本包后去哪里深入。</li>
+    </ul>
+  </section>
+
+  <section class="prereq">
+    <div class="l">Pre-requisites · 前置知识</div>
+    <p>学完前 11 个模块。本节是整个学习包的收口：把「会问、会判、会验」变成和 AI 一起工作的日常习惯。</p>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 1 · 分工</div>
+    <h2><span class="num">01</span>AI 做什么，你做什么</h2>
+  </section>
+
+  <section class="topic" id="ai-limits">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 1</span>AI 能替你做什么、不能替你做什么<span class="pt">AI limits · 它不承担线上故障的责任</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ai::ai-limits"><span>已学会</span></label>
+    </div>
+    <p>AI 很擅长生成和解释，能把操作性细节的成本降到接近零，这正是你可以放下「背 API」的原因。但它不知道你的真实约束，会自信地说错，也不为线上故障负责。<b>判断和验证，必须留在你手里。</b></p>
+    <table class="tbl">
+      <tr><th>放心交给 AI</th><th>必须你来</th><th>原因</th></tr>
+      <tr><td>生成样板代码、配置文件、测试草稿</td><td>决定架构、数据模型、权限边界</td><td>AI 不知道你的团队、预算、流量和合规要求</td></tr>
+      <tr><td>解释报错、翻译陌生名词、总结文档</td><td>确认信息是否适用于你用的版本</td><td>AI 的知识有截止时间，框架 API 会变化</td></tr>
+      <tr><td>列出可选方案和各自的利弊</td><td>按五问框架做最终选择</td><td>选择是权衡，后果由你承担</td></tr>
+      <tr><td>帮你写验证脚本、压测脚本</td><td>运行它、看结果、下结论</td><td>证据要来自真实运行，而不是 AI 的描述</td></tr>
+    </table>
+    <div class="callout danger"><span class="i">!</span><p><b>典型风险：</b>① <b>幻觉</b>：编造不存在的函数、配置项、包名；② <b>包名陷阱</b>：AI 推荐了一个并不存在的依赖包，有人可能恰好抢注了同名恶意包——安装前要确认包在官方仓库存在、来源可信、维护活跃；③ <b>过时</b>：给出旧版本的写法；④ <b>语气误导</b>：回答越流畅越像真的，但流畅不等于正确。</p></div>
+  </section>
+
+  <section class="topic" id="ask-list">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 2</span>会问：拿到 AI 方案后的追问清单<span class="pt">ask · 八类关键问题</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ai::ask-list"><span>已学会</span></label>
+    </div>
+    <p>AI 给的方案通常只覆盖「正常流程」。你的价值在于追问它没说的部分。下面这张清单把前面所有模块的「要问的问题」汇总到了一起：</p>
+    <table class="tbl">
+      <tr><th>类别</th><th>追问</th><th>对应模块</th></tr>
+      <tr><td>场景与约束</td><td>这个方案假设了多少用户、多大流量？团队需要会什么？</td><td>10</td></tr>
+      <tr><td>数据与一致性</td><td>数据存哪？需要事务吗？缓存怎么失效？读到旧数据会怎样？</td><td>06</td></tr>
+      <tr><td>接口契约</td><td>请求和响应长什么样？错误码有哪些？以后怎么升级版本？</td><td>02、05、11</td></tr>
+      <tr><td>安全</td><td>认证和授权怎么做？检查数据归属了吗？密钥放哪？输入怎么校验？</td><td>09</td></tr>
+      <tr><td>失败模式</td><td>超时设多少？重试会不会重复执行？依赖挂了怎么降级？数据能恢复吗？</td><td>09</td></tr>
+      <tr><td>运维与成本</td><td>怎么部署？怎么监控和告警？每月大概花多少钱和人力？</td><td>08、10</td></tr>
+      <tr><td>演进</td><td>流量涨 10 倍怎么办？哪些决定以后很难改？</td><td>07、10</td></tr>
+      <tr><td>验证</td><td>怎么证明它是对的？测试在哪？我该看哪些日志和指标？</td><td>11、12</td></tr>
+    </table>
+    <div class="codewrap">
+      <div class="cl"><span class="d" style="background:#e0654b"></span><span class="d" style="background:#e8b34b"></span><span class="d" style="background:#57b05b"></span>可复用的追问模板（复制给 AI）</div>
+      <pre><code>背景：团队 3 人、都熟悉 Python，两个月上线，预计日活 2000，预算有限。
+请按下面清单检查你刚才的方案，每一项给出「做法 + 风险 + 怎么验证」：
+1. 数据一致性与缓存失效  2. 认证、授权与数据归属检查  3. 密钥管理
+4. 超时、重试与幂等      5. 依赖故障时的降级        6. 备份与恢复
+7. 部署、监控与月成本    8. 哪些决定以后难以修改
+如果某项你不确定，请直接说「不确定」，不要猜。</code></pre>
+    </div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>先给 AI <b>你的约束</b>，再让它<b>按清单逐项回答</b>，并明确允许它说「不确定」。这样得到的方案质量会高很多，也更容易发现漏洞。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 2 · 判断与验证</div>
+    <h2><span class="num">02</span>用约束判断，用证据验证</h2>
+  </section>
+
+  <section class="topic" id="judge-plan">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 3</span>会判：方案是否符合当前约束<span class="pt">judge · 三种失配</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ai::judge-plan"><span>已学会</span></label>
+    </div>
+    <p>判断一个方案，就是拿它<b>对照约束</b>。常见的问题可以归成三类：</p>
+    <table class="tbl">
+      <tr><th>失配类型</th><th>表现</th><th>例子</th></tr>
+      <tr><td><b>过度设计</b></td><td>方案比问题复杂得多</td><td>3 人团队上 12 个微服务 + 自建 Kubernetes</td></tr>
+      <tr><td><b>设计不足</b></td><td>漏掉了失败模式和安全底线</td><td>支付没有幂等、没有备份、接口不检查数据归属</td></tr>
+      <tr><td><b>选型不匹配</b></td><td>技术的性格和场景不符</td><td>用缓存当账本；在 async 接口里直接做 CPU 密集计算</td></tr>
+    </table>
+    <div id="demo-review"></div>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>AI 生成的方案最常见的问题，恰好是「正常流程很完整，失败流程几乎没有」。审查时把一半注意力放在<b>出错时会怎样</b>。</p></div>
+  </section>
+
+  <section class="topic" id="verify-claim">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 4</span>会验：每种说法对应一种验证方式<span class="pt">verify · 用证据，不用语气</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ai::verify-claim"><span>已学会</span></label>
+    </div>
+    <p>「会验」的关键，是为每一种说法找到<b>成本最低、又能拿到真实证据</b>的验证方式。下面这张表可以直接当工具用：</p>
+    <table class="tbl">
+      <tr><th>AI 的说法</th><th>验证方式</th><th>什么算证据</th></tr>
+      <tr><td>「这个接口能扛 1000 QPS」</td><td>在接近生产的环境压测（k6、Locust 等）</td><td>目标并发下的错误率和 P99 延迟</td></tr>
+      <tr><td>「这段 SQL 是对的」</td><td>用一小份数据跑一遍，和手算结果对比；看执行计划</td><td>结果行一致，执行计划没有全表扫描大表</td></tr>
+      <tr><td>「重试不会重复扣款」</td><td>写测试：同一个幂等键连续请求两次</td><td>断言只扣了一次款</td></tr>
+      <tr><td>「这个包能解决问题」</td><td>在官方仓库确认包存在、看维护状态和下载量、读官方文档</td><td>包真实存在且来源可信</td></tr>
+      <tr><td>「改了这个配置就好了」</td><td>先在测试环境复现问题，再改，再确认问题消失</td><td>改前能复现、改后不再出现</td></tr>
+      <tr><td>「迁移不会丢数据」</td><td>在备份副本上演练迁移</td><td>迁移前后行数、关键字段校验一致</td></tr>
+    </table>
+    <div id="demo-verify"></div>
+    <div class="callout warn"><span class="i">!</span><p><b>注意：</b>让 AI「再检查一遍」不是验证——它可能重复同样的错误。可以让 AI <b>帮你写</b>测试和压测脚本，但必须<b>真正运行</b>，用运行结果做判断。</p></div>
+  </section>
+
+  <section class="chap">
+    <div class="ch">Part 3 · 收口</div>
+    <h2><span class="num">03</span>闭环与终点</h2>
+  </section>
+
+  <section class="topic" id="ai-loop">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 5</span>闭环：AI 生成 → 你判断 → 测试验证<span class="pt">the loop · 日常工作方式</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ai::ai-loop"><span>已学会</span></label>
+    </div>
+    <p>把前面的内容串起来，就是和 AI 协作的日常工作循环：</p>
+    <div class="flow">
+      <div class="node on"><span class="ly">1 · 你</span><b>描述约束与目标</b>团队、时间、流量、预算</div><span class="arr">→</span>
+      <div class="node"><span class="ly">2 · AI</span><b>生成方案 / 代码</b>按清单逐项说明</div><span class="arr">→</span>
+      <div class="node on"><span class="ly">3 · 你</span><b>会问</b>追问没覆盖的部分</div><span class="arr">→</span>
+      <div class="node on"><span class="ly">4 · 你</span><b>会判</b>对照约束找失配</div><span class="arr">→</span>
+      <div class="node"><span class="ly">5 · 你 + AI</span><b>会验</b>写测试、跑原型、看日志</div><span class="arr">→</span>
+      <div class="node on"><span class="ly">6 · 你</span><b>记录</b>结论与理由写进 ADR / 笔记</div>
+    </div>
+    <table class="tbl">
+      <tr><th>步骤</th><th>你的产出</th><th>常见偷懒</th></tr>
+      <tr><td>描述约束</td><td>一段写清背景和限制的提示</td><td>只说「帮我做个电商系统」</td></tr>
+      <tr><td>会问</td><td>补全失败流程、安全、运维的问题列表</td><td>只看正常流程能不能跑</td></tr>
+      <tr><td>会判</td><td>标出过度设计、设计不足、选型不匹配</td><td>「看起来很专业」就接受</td></tr>
+      <tr><td>会验</td><td>测试、压测、日志截图等证据</td><td>让 AI 自己说「没问题」</td></tr>
+      <tr><td>记录</td><td>决定和理由，下次可复用</td><td>做完就忘，下次重新踩坑</td></tr>
+    </table>
+    <div class="callout key"><span class="i">★</span><p><b>核心要点：</b>这就是 01 模块的目标：<b>不必会「做」，但要会「问、判、验」</b>。AI 负责加速生成，你负责方向和质量。</p></div>
+  </section>
+
+  <section class="topic" id="finish-line">
+    <div class="topic-head">
+      <h3><span class="kno">知识点 6</span>终点状态与下一步<span class="pt">finish line · 学完后去哪</span></h3>
+      <label class="ptmark"><input type="checkbox" data-key="ai::finish-line"><span>已学会</span></label>
+    </div>
+    <p>学完整个学习包，你要达到的状态是：</p>
+    <div class="callout key"><span class="i">★</span><p><b>听到任何技术名词，能快速定位它在哪一层、解决什么问题、代价是什么、什么场景不该用；AI 给你方案时，能问出关键问题并用最小成本验证。</b>这样就不需要死抠技术细节，也不会被 AI 或名词带着走。</p></div>
+    <p>之后如果想在某一层深入，本仓库已经有对应的专项学习包。记住：一旦你选定了方向，那一层的「不必深入」就会变成「必须懂」。</p>
+    <table class="tbl">
+      <tr><th>想深入</th><th>去哪里</th><th>在全景地图中的位置</th></tr>
+      <tr><td>数据库与 SQL</td><td><a href="../../SQL/index.html">SQL / 数据库学习包</a></td><td>数据层</td></tr>
+      <tr><td>Python 与 FastAPI</td><td><a href="../../Python/index.html">Python 学习包</a>（第 21 节含 FastAPI 入门）</td><td>后端语言、AI / 数据</td></tr>
+      <tr><td>服务器与命令行</td><td><a href="../../Linux/index.html">Linux 学习包</a></td><td>基础设施层</td></tr>
+      <tr><td>版本控制与协作</td><td><a href="../../Git 版本协作/index.html">Git 学习包</a></td><td>基础设施层</td></tr>
+      <tr><td>算法与面试</td><td><a href="../../数据结构与算法/index.html">数据结构与算法学习包</a></td><td>通用底座</td></tr>
+      <tr><td>就业方向与技能优先级</td><td><a href="../../../职业规划网页.html">职业规划网页</a></td><td>决定先深入哪一层</td></tr>
+    </table>
+    <div id="demo-finish"></div>
+  </section>
+
+  <section class="quiz" id="quiz">
+    <div class="qhead"><span class="ic">⌕</span><h2>本节考核 · 自我检测</h2></div>
+    <p class="sub">选出你认为正确的答案，点「提交此题」查看对错与解析。全部答完可见得分。</p>
+    <div id="quizBox"></div>
+    <div class="qscore" id="qscore" style="display:none">
+      <div class="ring"><svg width="64" height="64"><circle cx="32" cy="32" r="27" stroke="#e3dcc9" stroke-width="7" fill="none"/><circle id="ringFg" cx="32" cy="32" r="27" stroke="#1e5b4f" stroke-width="7" fill="none" stroke-linecap="round"/></svg><span class="mid" id="ringPct">0%</span></div>
+      <div class="st" id="scoreText"></div>
+    </div>
+  </section>
+
+  <section class="challenge">
+    <h3>▲ 进阶挑战</h3>
+    <ul>
+      <li>挑一个真实想法（例如「社团活动报名系统」），让 AI 给出技术方案，然后用本页的追问模板逼它补全，再用审查器里的三类失配逐条检查。</li>
+      <li>从「说法 → 验证」表里挑两项，真正动手验证一次（例如用 11 模块的待办项目写一个幂等测试）。</li>
+      <li>一个月后回到 01 模块，重新做一遍「细节分拣器」，看看你的分类有没有变化。</li>
+    </ul>
+  </section>
+
+  <div class="master">
+    <button class="btn" id="masterBtn">标记：我已掌握本节</button>
+    <div class="tip">进度保存在本机浏览器（localStorage），与学习大纲双向同步。</div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="fn">
+      <a class="card" id="footPrev" href="#"><span class="d">上一节</span><span class="t">—</span></a>
+      <a class="card nxt" id="footNext" href="#"><span class="d">下一节</span><span class="t">—</span></a>
+    </div>
+    <div class="home"><a href="../index.html">← 返回「技术全景与架构选型」学习大纲</a></div>
+  </div>
+</footer>
+
+<script>
+const CONFIG = {
+  moduleId: "ai",
+  title: "AI 协作：生成、判断、验证",
+  eyebrow: "MODULE 12 · 技术全景",
+  lead: "AI 负责加速生成，你负责方向和质量：知道 AI 的边界，会追问、会对照约束审方案、会为每个说法找到验证方式，形成可持续的协作闭环。",
+  points: ["ai-limits","ask-list","judge-plan","verify-claim","ai-loop","finish-line"],
+  prev: "11-capstone.html", prevTitle: "最小闭环：一条线跑通",
+  next: "", nextTitle: "",
+};
+
+const QUZ = [
+  { type:"quiz", q:"下面哪件事最适合直接交给 AI？",
+    opts:["决定订单数据要不要强一致","决定哪些人能删除商品","为一个已定好契约的接口生成样板代码和测试草稿","决定团队用单体还是微服务"],
+    ans:2, exp:"样板代码属于操作细节，生成后用测试验证即可。A、B、D 都是需要结合约束的判断，AI 可以提供选项，但不能替你决定。" },
+  { type:"quiz", q:"AI 推荐你安装一个从没听说过的依赖包，你应该？",
+    opts:["直接安装，AI 推荐的肯定没问题","先在官方仓库确认包真实存在、来源可信、维护活跃，再读官方文档决定","让 AI 再推荐一个","把包名改短一点再装"],
+    ans:1, exp:"AI 可能编造包名，而不存在的包名可能已被人抢注为恶意包。A 有供应链风险；C 没有验证；D 毫无意义。" },
+  { type:"quiz", q:"AI 的回答语气非常肯定、条理清晰，这说明什么？",
+    opts:["说明一定正确","说明它查过最新文档","说明可以跳过测试","不说明它正确与否，仍然需要验证"],
+    ans:3, exp:"流畅和自信是生成模型的特点，与正确性无关。只有真实运行结果、官方文档等证据才能证明正确。" },
+  { type:"quiz", q:"下列哪个问题属于「失败模式」类追问？",
+    opts:["调用支付接口超时后会重试吗？重试会不会重复扣款？","界面用什么颜色？","代码用几个空格缩进？","项目叫什么名字？"],
+    ans:0, exp:"超时、重试、幂等正是失败模式的核心问题（09 模块）。其余都是风格或命名问题。" },
+  { type:"quiz", q:"AI 给 3 人初创团队推荐「12 个微服务 + 自建 Kubernetes」，这属于哪类失配？",
+    opts:["设计不足","过度设计","选型不匹配中的「缓存当账本」","没有任何问题"],
+    ans:1, exp:"方案的复杂度远超问题和团队的承受能力，运维成本会吞掉开发时间。" },
+  { type:"quiz", q:"要验证「这个接口能扛 1000 QPS」，最合适的做法是？",
+    opts:["问 AI 能不能扛","看代码行数","在接近生产的环境做压测，看错误率和 P99 延迟","换一个更快的语言"],
+    ans:2, exp:"性能结论只能来自测量。A 不是证据；B 与性能无直接关系；D 是没有测量就行动。" },
+  { type:"quiz", q:"要验证「重试不会重复扣款」，最直接的证据是？",
+    opts:["一个测试：用同一个幂等键连续请求两次，断言只扣了一次款","AI 说「我已经考虑了幂等」","代码里有 retry 这个单词","上线后等用户反馈"],
+    ans:0, exp:"自动化测试给出可重复的证据。B 是陈述不是证据；C 毫无意义；D 让用户当测试员，代价最高。" },
+  { type:"quiz", q:"「AI 协作闭环」的正确顺序是？",
+    opts:["AI 生成 → 直接上线 → 出问题再说","你描述约束 → AI 生成 → 你追问 → 你对照约束判断 → 测试验证 → 记录结论","你写完所有代码 → 让 AI 打分","AI 生成 → AI 检查 → AI 上线"],
+    ans:1, exp:"闭环里「问、判、验、记录」都由你主导，AI 负责加速生成。A、D 缺少人的判断和独立验证；C 浪费了 AI 的生成能力。" },
+  { type:"quiz", q:"学完本学习包后，想在「数据层」深入，最合适的下一步是？",
+    opts:["Linux 学习包","Git 学习包","前端框架源码","SQL / 数据库学习包"],
+    ans:3, exp:"SQL 学习包覆盖查询、事务、索引、优化、建模，正是数据层的专项深入。Linux 和 Git 属于基础设施层。" },
+  { type:"interview", q:"面试官：「你大量使用 AI 写代码，怎么保证质量？」最好的回答是？",
+    opts:["AI 写的代码质量很高，不需要保证","我会让 AI 多检查几遍","我先给 AI 明确的约束和契约，生成后按清单审查安全和失败模式，用自动化测试、日志和必要的压测验证关键行为，并把重要决定记录下来；AI 负责加速，我对方向和质量负责","我不用 AI"],
+    ans:2, exp:"C 展示了完整的「问、判、验」闭环和责任意识。A 回避问题；B 不是独立验证；D 回避了题目，也放弃了效率。" },
+];
+</script>
+<script src="assets/learn.js"></script>
+<script>
+/* 演示 1：AI 方案审查器 */
+(function(){
+  const PLAN = [
+    { t:"后端拆成 12 个微服务，部署在自建的 Kubernetes 集群上", bad:true, why:"过度设计：3 人团队两个月上线，运维会吞掉开发时间。建议模块化单体 + PaaS（07、10 模块）。" },
+    { t:"前端用 Vue + Element Plus 组件库", bad:false, why:"合理：上手快，后台和表单类页面开发效率高。" },
+    { t:"数据库密码直接写在 config.py 里并提交到 Git 仓库，方便部署", bad:true, why:"安全底线：密钥应放在环境变量或密钥管理服务，泄露后要立即轮换（09 模块）。" },
+    { t:"交易和支付记录存 PostgreSQL，相关操作放在同一个事务里", bad:false, why:"合理：钱相关的数据需要强一致和事务。" },
+    { t:"支付失败时客户端自动重试 3 次，支付接口没有做幂等处理", bad:true, why:"设计不足：超时 + 重试 + 不幂等 = 重复扣款（09 模块）。" },
+    { t:"所有接口只校验是否登录，修改商品接口直接按 URL 里的 id 更新", bad:true, why:"越权漏洞：没检查商品是否属于当前用户，任何登录用户都能改别人的商品。" },
+    { t:"商品列表加 Redis 缓存，TTL 10 分钟，修改商品时删除对应缓存", bad:false, why:"合理：热点读走缓存，改数据时删缓存，TTL 兜底（06 模块）。" },
+    { t:"暂时不做数据库备份，等用户多了再说", bad:true, why:"设计不足：数据丢失是不可逆的，第一天就该有自动备份，并做一次恢复演练。" },
+    { t:"用 GitHub Actions：测试通过后自动部署到测试环境", bad:false, why:"合理：CI/CD 让上线可重复、可回滚（08 模块）。" },
+    { t:"调用第三方短信接口时不设超时，免得发送被中断", bad:true, why:"失败模式：不设超时，短信服务一慢，所有请求都会被拖住（09 模块）。" },
+    { t:"引入 AI 推荐的依赖包 fastapi-auth-helper-pro 处理登录（没查过这个包）", bad:true, why:"供应链风险：先确认包真实存在、来源可信；登录这种关键功能优先用成熟、官方推荐的方案。" }
+  ];
+  const host = document.getElementById("demo-review");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：审查一份 AI 生成的方案</span><span class="hint">勾出你认为有问题的条目</span></div>
+    <div class="db">
+      <p style="margin:0 0 8px;font-size:13.5px;color:var(--ink-soft)">背景：<b>3 人团队、两个月上线的校园二手交易平台</b>，团队熟悉 Python 和 Vue，预算有限。下面是 AI 给出的方案：</p>
+      <div id="rvList">${PLAN.map((p,i)=>`<label class="chk" data-i="${i}"><input type="checkbox"><span>${i+1}. ${ArchKit.esc(p.t)}<span class="why">${p.why}</span></span></label>`).join("")}</div>
+      <div class="ctl" style="margin-top:10px"><button class="b" id="rvSubmit">提交审查</button><button class="b" id="rvReset">↺ 重来</button></div>
+      <div class="log" id="rvLog">勾选完后点「提交审查」。提示：一共有 7 处问题。</div>
+    </div></div>`;
+  const items = () => host.querySelectorAll("#rvList .chk");
+  document.getElementById("rvSubmit").addEventListener("click", ()=>{
+    let hit = 0, miss = 0, fa = 0;
+    items().forEach(el=>{
+      const p = PLAN[+el.dataset.i], on = el.querySelector("input").checked;
+      el.classList.add("reveal");
+      el.classList.remove("ok","miss","wrong");
+      if(p.bad && on){ hit++; el.classList.add("ok"); }
+      else if(p.bad && !on){ miss++; el.classList.add("miss"); }
+      else if(!p.bad && on){ fa++; el.classList.add("wrong"); }
+    });
+    const total = PLAN.filter(p=>p.bad).length;
+    document.getElementById("rvLog").innerHTML = `找出问题 <b>${hit}/${total}</b>，漏掉 <b>${miss}</b>（黄色），误判 <b>${fa}</b>（红色）。` +
+      (miss ? " 漏掉的多半是「失败流程」和「安全底线」——这正是 AI 方案最常缺的部分。" : " 全部找出，审查能力很扎实！");
+  });
+  document.getElementById("rvReset").addEventListener("click", ()=>{
+    items().forEach(el=>{ el.classList.remove("reveal","ok","miss","wrong"); el.querySelector("input").checked = false; });
+    document.getElementById("rvLog").textContent = "勾选完后点「提交审查」。提示：一共有 7 处问题。";
+  });
+})();
+
+/* 演示 2：说法 → 验证方式 */
+(function(){
+  const C = [
+    { c:"这个接口能扛 1000 QPS", opts:["问 AI 确认一遍","在接近生产的环境压测，看错误率和 P99","看代码写得是否优雅","换成 Go 重写"], a:1 },
+    { c:"这段 SQL 的结果是对的", opts:["用一小份数据跑一遍，和手算结果对比","SQL 能执行不报错就说明对","让 AI 解释一遍","看 SQL 有多长"], a:0 },
+    { c:"重试不会重复扣款", opts:["代码里写了 retry","AI 说考虑过了","上线后观察","写测试：同一个幂等键请求两次，断言只扣一次"], a:3 },
+    { c:"这个依赖包能解决问题", opts:["包名听起来很专业","在官方仓库确认存在、看维护状态，并读官方文档","AI 推荐的就行","下载后直接上生产"], a:1 },
+    { c:"改了这个配置，问题就解决了", opts:["改完直接上线","重启几次服务器","先在测试环境复现问题，再改，确认问题消失","让同事看一眼"], a:2 }
+  ];
+  const host = document.getElementById("demo-verify");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：给说法配验证方式</span><span class="hint">选一个说法，再选验证方式</span></div>
+    <div class="db">
+      <div class="ctl"><label>说法</label><select id="vcSel">${C.map((x,i)=>`<option value="${i}">「${x.c}」</option>`).join("")}</select></div>
+      <div class="ctl" id="vcOpts"></div>
+      <div class="log" id="vcLog"></div>
+    </div></div>`;
+  const sel = document.getElementById("vcSel"), opts = document.getElementById("vcOpts"), log = document.getElementById("vcLog");
+  function render(){
+    const x = C[+sel.value];
+    opts.innerHTML = x.opts.map((o,j)=>`<button class="b" data-j="${j}">${o}</button>`).join("");
+    log.textContent = "这句话要用什么证据来证明？选一个。";
+  }
+  opts.addEventListener("click", e=>{
+    const b = e.target.closest("button[data-j]"); if(!b) return;
+    const x = C[+sel.value], j = +b.dataset.j;
+    opts.querySelectorAll("button").forEach(btn=>btn.classList.toggle("on", btn === b));
+    log.innerHTML = j === x.a ? `<b>✓ 对</b>：这能拿到可重复的真实证据。` : `<span class="bad">✗ 不够</span>：这不是证据。更好的做法是「${x.opts[x.a]}」。`;
+  });
+  sel.addEventListener("change", render);
+  render();
+})();
+
+/* 演示 3：终点自检（与大纲的「掌握标志」一一对应） */
+(function(){
+  const MARKS = [
+    "能说清自己要学什么、不学什么，以及「问、判、验」分别指什么",
+    "能画出「用户 → 前端 → API → 业务 → 数据库 → 部署」的简图",
+    "能说出 3 种语言各自适合和不适合的场景",
+    "知道 Vue / React 是前端 UI 框架而不是后端架构，能在 SPA / SSR / SSG 之间选择",
+    "听到 FastAPI 知道它是 Python 后端 API 框架，适合 API 与 AI 服务化",
+    "能判断订单偏关系型、缓存 / 会话偏 Redis、文档型偏 MongoDB",
+    "能说出微服务的好处和代价，知道小团队别盲目上微服务",
+    "知道 Docker 解决环境不一致、CI/CD 解决人工上线易错",
+    "能问出「权限边界在哪、密钥怎么管」，能列出 3 个失败场景和应对方向",
+    "能用五问框架给博客、订单系统、AI 问答服务写出选型和理由",
+    "能讲清待办应用从点击到入库的每一步，出问题知道先查哪一层",
+    "AI 给方案时，能问出关键问题并用最小成本验证"
+  ];
+  const host = document.getElementById("demo-finish");
+  host.innerHTML = `<div class="demo">
+    <div class="dh"><span class="t">🖥 演示：终点自检</span><span class="hint">能用自己的话讲出来，才勾选</span></div>
+    <div class="db">
+      <div id="fnList">${MARKS.map((m,i)=>`<label class="chk"><input type="checkbox"><span>${String(i+1).padStart(2,"0")} · ${m}</span></label>`).join("")}</div>
+      <div class="bars"><div class="bar"><span class="nm">完成度</span><span class="track"><span id="fnBar" style="width:0%"></span></span><span class="val" id="fnVal"></span></div></div>
+      <div class="log" id="fnLog"></div>
+      <div class="foot">这里的勾选只用于当下自测，不会保存。正式的学习进度请在每个知识点旁勾选「已学会」。</div>
+    </div></div>`;
+  function render(){
+    const boxes = [...host.querySelectorAll("#fnList input")], n = boxes.filter(b=>b.checked).length;
+    boxes.forEach(b=>b.closest(".chk").classList.toggle("ok", b.checked));
+    document.getElementById("fnBar").style.width = (n / MARKS.length * 100) + "%";
+    document.getElementById("fnVal").textContent = n + "/" + MARKS.length;
+    const firstMiss = boxes.findIndex(b=>!b.checked);
+    document.getElementById("fnLog").innerHTML = n === MARKS.length
+      ? "<b>🎉 已到达终点状态。</b>下一步：挑一个方向，进入对应的专项学习包深入一层。"
+      : `还差 ${MARKS.length - n} 项。建议先回看第 <b>${String(firstMiss + 1).padStart(2,"0")}</b> 模块。`;
+  }
+  host.querySelectorAll("#fnList input").forEach(b=>b.addEventListener("change", render));
+  render();
+})();
+</script>
+</body>
+</html>
